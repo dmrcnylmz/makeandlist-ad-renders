@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F14 · Three-Step Tutorial</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F3EEE3; }
+.bgA { position: absolute; border-radius: 50%; pointer-events: none; }
+.tut { position: absolute; z-index: 40; display: flex; align-items: center; gap: 12px; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #6B645A; white-space: nowrap; }
+.tut i { display: block; width: 12px; height: 12px; border-radius: 50%; background: #1F1F1F; }
+.steps { position: absolute; z-index: 40; display: flex; gap: 12px; }
+.st { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px 22px 12px 12px; border-radius: 99px; background: #FFFDF8; color: #8A8378;
+  font: 800 30px 'Archivo'; white-space: nowrap; box-shadow: 0 0 0 2px #E2DBCE; overflow: hidden; }
+.st b { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #E9E4D8; color: #8A8378; font: 800 24px 'IBM Plex Mono', monospace; flex: none; }
+.st .fill { position: absolute; left: 0; top: 0; bottom: 0; background: #1F1F1F; z-index: 0; }
+.st b, .st span { position: relative; z-index: 1; }
+.cap { position: absolute; z-index: 40; font: 800 72px/1.0 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.cap em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.cap .w { display: inline-block; white-space: pre; }
+.hook { position: absolute; z-index: 45; text-align: center; font: 800 128px/0.95 'Playfair Display'; letter-spacing: -0.035em; color: #1F1F1F; }
+.hook em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.hook .w { display: inline-block; white-space: pre; }
+.big { position: absolute; z-index: 18; font: 900 620px/0.8 'Playfair Display'; color: #E9E2D2; letter-spacing: -0.05em; }
+.tap { position: absolute; z-index: 60; width: 104px; height: 104px; margin: -52px 0 0 -52px; border-radius: 50%; background: rgba(255,253,248,.5); border: 5px solid #FFFDF8; box-shadow: 0 10px 26px rgba(31,31,31,.4), inset 0 0 0 3px rgba(31,31,31,.15); }
+.ring { position: absolute; z-index: 59; width: 104px; height: 104px; margin: -52px 0 0 -52px; border-radius: 50%; border: 5px solid #DFFF5A; }
+.typ { position: absolute; font: 500 15px/1.35 'Archivo'; color: #1F1F1F; background: #FFFDF8; border-radius: 6px; padding: 6px 8px; }
+.typ i { display: inline-block; width: 2px; height: 16px; background: #1F1F1F; vertical-align: -3px; margin-left: 1px; }
+.hi { position: absolute; z-index: 4; border: 6px solid #DFFF5A; border-radius: 16px; box-shadow: 0 0 0 3px #1F1F1F; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F14 — a feed-native three-step tutorial, voiced by Marian: step chips fill one by one along the top, a giant step
+// numeral sits behind the real phone, and a finger taps through the real app — type one sentence and Plan it; the
+// quote in Credits before anything is made, then the finished product's files; choose the store and "Review what will
+// be sent" — it goes live only when the seller says.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 103.4, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const M = tall ? 65 : 60;
+
+// Voice (Marian) — measured with vo.mjs:
+//   take windows: L1 0.20–1.64 · L2 1.75–3.61 · L3 4.00–7.76 · L4 8.20–12.57 · L5 13.25–14.50 (impacts sit in the breaths)
+const VO = [[0.2, 'Three steps.'], [1.75, 'Describe it in a sentence.'], [4.0, 'See the price, then review the files.'], [8.2, 'Choose your stores. It goes live when you say.'], [13.25, 'Start free.']];
+const S1 = 1.55, S2 = 3.85, S3 = 8.05, END = 13.0;
+const T_TYPE = [1.95, 2.95], TAP1 = 3.3;          // step 1: type, tap "Plan it", plan opens
+const T_FILES = 6.0, TAP2 = 6.95;                              // step 2: quote → swipe to the finished product, tap "Listing images"
+const TAP3 = 8.9, T_SCR3 = [9.35, 10.2], TAP4 = 10.85;            // step 3: tap ikas, scroll, tap "Review what will be sent"
+
+const L = tall
+  ? { tutY: 284, stY: 330, capY: 440, capFs: 72, ph: { x: 250, y: 640, w: 580 }, bigX: -40, bigY: 560, hookY: 640, tagY: 596 }
+  : { tutY: 56, stY: 96, capY: 330, capFs: 62, ph: { x: 590, y: 200, w: 430 }, bigX: 20, bigY: 520, hookY: 420, tagY: 1270 };
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'bgA', style: { background: 'radial-gradient(circle, rgba(223,255,90,.3), rgba(223,255,90,0) 62%)' } });
+
+// ---------- top: tutorial label + step chips ----------
+const tut = K.box(M, L.tutY, null, null, { cls: 'tut', html: '<i></i>Tutorial · 3 steps', style: { width: 'auto', height: 'auto' } });
+const steps = K.box(M, L.stY, null, null, { cls: 'steps', style: { width: 'auto', height: 'auto' },
+  html: ['Describe', 'Review', 'Send'].map((t, i) => `<div class="st"><div class="fill"></div><b>${i + 1}</b><span>${t}</span></div>`).join('') });
+const stEls = [...steps.querySelectorAll('.st')];
+
+// ---------- captions (key words of each line) ----------
+function cap(html) {
+  const el = K.box(M, L.capY, tall ? W - 2 * M : 500, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  el.innerHTML = html.split(' ').map((w) => (w === '/' ? '<br>' : `<span class="w">${w.replace(/_/g, ' ')} </span>`)).join('');
+  return { el, ws: [...el.querySelectorAll('.w')] };
+}
+const CAPS = [
+  { c: cap(tall ? 'Describe it in <em>one_sentence.</em>' : 'Describe it / in <em>one_sentence.</em>'), a: S1 + 0.2, b: S2 },
+  { c: cap('See <em>the_price</em> first.'), a: S2 + 0.2, b: T_FILES - 0.1 },
+  { c: cap('Review <em>the_real_files.</em>'), a: T_FILES + 0.05, b: S3 },
+  { c: cap(tall ? 'Choose your stores.' : 'Choose / your stores.'), a: S3 + 0.2, b: 10.25 },
+  { c: cap(tall ? 'Live <em>when_you_say.</em>' : 'Live when / <em>you_say.</em>'), a: 10.3, b: END },
+];
+
+// ---------- hook ----------
+const hook = K.box(M, L.hookY, W - 2 * M, null, { cls: 'hook', style: { fontSize: (tall ? 128 : 112) + 'px' } });
+hook.innerHTML = ['Three', 'steps.', '<br>', '<em>Start</em>', '<em>to</em>', '<em>finish.</em>'].map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w} </span>`)).join('');
+const hookW = [...hook.querySelectorAll('.w')];
+
+// ---------- giant step numeral behind the phone ----------
+const big = K.box(L.bigX, L.bigY, null, null, { cls: 'big', style: { width: 'auto', height: 'auto' } });
+
+// ---------- the real phone ----------
+const SCR = [{ n: '22-phone-create', h: 3400 }, { n: '65-phone-configure', h: 3800 }, { n: '24-phone-product', h: 3800 }, { n: '72-phone-listing-send', h: 3800 }];
+const deck = K.phoneDeck(L.ph.x, L.ph.y, L.ph.w, SCR.map((s) => K.screen(s.n)));
+deck.root.style.zIndex = 20;
+const k = deck.sw / 780;
+const wraps = [...deck.root.querySelectorAll('.screen > div')];
+const maxOf = (i) => SCR[i].h * k - deck.sh;
+const scr = (i, y, at) => K.clamp((y * k - at) / maxOf(i));
+const typ = K.el('div', { parent: wraps[0], cls: 'typ', style: { left: 70 * k + 'px', top: 594 * k + 'px', width: 636 * k + 'px', height: 172 * k + 'px', fontSize: Math.round(26 * k) + 'px' } });
+const TYPED = 'A woodland sticker sheet for planners, twelve animals, print-ready.';
+const HI = [
+  { i: 1, x: 18, y: 2440, w: 744, h: 1000, a: S2 + 0.45, b: T_FILES - 0.2 },   // your quote … 100 Credits
+  { i: 2, x: 20, y: 975, w: 160, h: 80, a: T_FILES + 0.3, b: S3 - 0.2 },        // Ready
+  { i: 3, x: 40, y: 3205, w: 700, h: 250, a: T_SCR3[1], b: END },               // stays not for sale until you confirm
+].map((h) => ({ ...h, el: K.el('div', { cls: 'hi', parent: wraps[h.i], style: { left: h.x * k + 'px', width: h.w * k + 'px', height: h.h * k + 'px' } }) }));
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+
+const tap = K.box(0, 0, 104, 104, { cls: 'tap' });
+const ring = K.box(0, 0, 104, 104, { cls: 'ring' });
+// taps: [time, screen index, x780, y780]
+const TAPS = [[TAP1, 0, 136, 1627], [TAP2, 2, 300, 1212], [TAP3, 3, 390, 2150], [TAP4, 3, 254, 3398]];
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: K.F === '9x16' ? 160 : 0, line: 'Describe. Review.<br>Send when you say.' });
+
+const SW = [S2, T_FILES, S3];
+const posAt = (t) => SW.reduce((a, s) => a + K.p(t, s - 0.15, s + 0.3, E.inOutCubic), 0);
+// scroll of each screen at time t
+function scrolls(t) {
+  const s0 = scr(0, 380, 40);
+  const s1 = K.lerp(scr(1, 200, 0), scr(1, 2440, 60), K.p(t, S2 + 0.1, S2 + 0.65, E.inOutCubic));
+  const s2 = scr(2, 330, 30);
+  const s3 = K.lerp(scr(3, 1060, 40), scr(3, 3205, 260), K.p(t, T_SCR3[0], T_SCR3[1], E.inOutCubic));
+  return [s0, s1, s2, s3];
+}
+
+K.run({
+  id: 'F14', title: 'Three-Step Tutorial', dur: DUR, bpm: BPM, music: 'earth', mood: 'bright', key: 'G', intro: 0.0, cover: 6.0,
+  technique: 'A feed-native on-screen tutorial, voiced: three step chips fill along the top, a giant ghost step numeral sits behind the real phone app, and a finger-tap indicator with lime rings works through the real screens — a sentence typed and planned, the quote in Credits, the finished product, choosing a store and “Review what will be sent” — with captions carrying the key words of every line',
+  caption: 'How MakeAndList works in three steps: describe your product in one sentence, see the price before anything is made and review the real files, then choose your stores — it goes live only when you say. Start free at makeandlist.com',
+  short: 'Describe. Review. Send when you say.',
+  question: 'How does it work?', gain: 'Time: from one sentence to a listing, with control at every step',
+  vo: VO,
+  beats: ['0–2.1 s: “Three steps, start to finish.” — the tutorial opens', '2.1–4.8 s: step 1, Describe: a sentence typed on the real phone, tap Plan it', '4.8–6.6 s: step 2, Review: the quote in Credits before anything is made', '6.6–8.2 s: the finished product: ready, files and listing images to review', '8.2–13 s: step 3, Send: tap a store, then “Review what will be sent” — not for sale until you confirm', '13–15 s: end card, “Start free.”'],
+  cues: [[0.0, 'pop'], [B(1), 'swish'], [S1 - 0.1, 'whoosh'], [S1 + 0.05, 'pop'], [T_TYPE[0], 'type'], [TAP1, 'click'], [S2 - 0.12, 'swish'], [S2 + 0.05, 'pop'], [S2 + 0.55, 'coin'],
+    [T_FILES - 0.1, 'swish'], [TAP2, 'click'], [S3 - 0.12, 'whoosh'], [S3 + 0.05, 'pop'], [TAP3, 'click'], [T_SCR3[0], 'swish'], [TAP4, 'click'], [12.68, 'chime'], [END, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.65 - 550 + Math.sin(T * 0.5) * 160}px, ${H * 0.45 - 550 + Math.cos(T * 0.4) * 140}px)`;
+
+  // ---------- hook ----------
+  const hOut = K.p(T, S1 - 0.25, S1 + 0.05, E.inCubic);
+  hookW.forEach((w, i) => {
+    const p = K.p(T, 0.05 + i * 0.1, 0.5 + i * 0.1, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - hOut);
+    w.style.transform = `translateY(${(1 - p) * 70 - hOut * 50}px)`;
+  });
+  hook.style.visibility = T < S1 + 0.1 ? 'visible' : 'hidden';
+
+  // ---------- top chrome ----------
+  const cIn = K.p(T, 0.3, 0.8, E.outExpo);
+  tut.style.opacity = cIn;
+  const SA = [S1, S2, S3];
+  stEls.forEach((s, i) => {
+    const p = K.p(T, 0.45 + i * 0.1, 0.95 + i * 0.1, E.outBack);
+    const on = K.p(T, SA[i] - 0.05, SA[i] + 0.35, E.outCubic);
+    const done = T >= (SA[i + 1] || END);
+    s.style.opacity = Math.min(1, p * 2);
+    s.style.transform = `translateY(${(1 - p) * 30}px) scale(${(0.85 + 0.15 * p) * (1 + 0.06 * Math.sin(Math.PI * on))})`;
+    s.querySelector('.fill').style.width = on * 100 + '%';
+    s.style.color = on > 0.5 ? '#FAF7EE' : '#8A8378';
+    const b = s.querySelector('b');
+    b.style.background = on > 0.5 ? '#DFFF5A' : '#E9E4D8';
+    b.style.color = '#1F1F1F';
+    b.textContent = done ? '✓' : String(i + 1);
+  });
+
+  // ---------- big numeral ----------
+  const si = T < S2 ? 0 : T < S3 ? 1 : 2;
+  big.textContent = String(si + 1);
+  const bp = K.p(T, SA[si] - 0.05, SA[si] + 0.5, E.outExpo);
+  big.style.opacity = T >= S1 - 0.05 && T < END ? bp : 0;
+  big.style.transform = `translateY(${(1 - bp) * 80}px) scale(${0.9 + 0.1 * bp})`;
+
+  // ---------- captions ----------
+  CAPS.forEach(({ c, a, b }) => {
+    const o = K.p(T, b - 0.18, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.05, a + 0.4 + j * 0.05, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 40 - o * 20}px)`;
+    });
+    c.el.style.visibility = T >= a && T < b ? 'visible' : 'hidden';
+  });
+
+  // ---------- phone ----------
+  const phIn = K.p(T, S1 - 0.2, S1 + 0.45, E.outExpo);
+  const pos = posAt(T);
+  const sc = scrolls(T);
+  deck.draw(pos, sc, pos - posAt(T - 1 / 30));
+  deck.root.style.opacity = phIn;
+  deck.root.style.transform = `translateY(${(1 - phIn) * 600}px) rotate(${(1 - phIn) * 6 + Math.sin(T * 0.7) * 0.35}deg)`;
+  deck.root.style.visibility = T >= S1 - 0.2 && T < END + 0.4 ? 'visible' : 'hidden';
+  const n = Math.round(TYPED.length * K.p(T, T_TYPE[0], T_TYPE[1], E.linear));
+  typ.innerHTML = TYPED.slice(0, n) + (Math.floor(T * 4) % 2 === 0 || n < TYPED.length ? '<i></i>' : '');
+  const offs = sc.map((s, i) => s * maxOf(i));
+  typ.style.top = 594 * k - offs[0] + 'px';
+  HI.forEach((h) => {
+    const p = K.p(T, h.a, h.a + 0.35, E.outBack);
+    h.el.style.top = h.y * k - offs[h.i] + 'px';
+    h.el.style.opacity = Math.min(1, p * 2) * (1 - K.p(T, h.b - 0.12, h.b, E.linear));
+    h.el.style.transform = `scale(${1.1 - 0.1 * p})`;
+  });
+  realTag.style.left = (tall ? L.ph.x + 6 : M) + 'px'; realTag.style.top = L.tagY + 'px';
+  realTag.style.opacity = phIn;
+
+  // ---------- finger taps ----------
+  let shown = false;
+  TAPS.forEach(([t0, i, x, y]) => {
+    if (shown || T < t0 - 0.5 || T > t0 + 0.5) return;
+    shown = true;
+    const tx = L.ph.x + 14 + x * k, ty = L.ph.y + 14 + y * k - offs[i];
+    const pin = K.p(T, t0 - 0.45, t0 - 0.08, E.outCubic);
+    const press = T >= t0 - 0.05 && T < t0 + 0.14;
+    tap.style.left = tx + (1 - pin) * 140 + 'px'; tap.style.top = ty + (1 - pin) * 200 + 'px';
+    tap.style.opacity = pin * (1 - K.p(T, t0 + 0.25, t0 + 0.45, E.linear));
+    tap.style.transform = `scale(${press ? 0.76 : 1})`;
+    const rp = K.p(T, t0, t0 + 0.5, E.outCubic);
+    ring.style.left = tx + 'px'; ring.style.top = ty + 'px';
+    ring.style.opacity = T >= t0 ? 1 - rp : 0;
+    ring.style.transform = `scale(${0.5 + rp * 1.2})`;
+  });
+  tap.style.visibility = ring.style.visibility = shown ? 'visible' : 'hidden';
+
+  end(T);
+});
+</script></body></html>

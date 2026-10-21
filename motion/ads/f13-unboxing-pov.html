@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F13 · Unboxing POV</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1F1F1F; }
+.shot { position: absolute; inset: 0; overflow: hidden; }
+.shot img { position: absolute; left: 50%; top: 50%; display: block; transform-origin: 50% 50%; }
+.shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(20,16,10,.38) 0%, rgba(20,16,10,0) 34%, rgba(20,16,10,0) 62%, rgba(20,16,10,.35) 100%); }
+/* feed-native POV caption: white type, soft dark shadow, no box */
+.pov { position: absolute; z-index: 40; text-align: center; color: #FFFDF8; font: 800 64px/1.08 'Archivo'; letter-spacing: -0.015em;
+  text-shadow: 0 3px 0 rgba(0,0,0,.25), 0 8px 30px rgba(0,0,0,.45); }
+.pov .w { display: inline-block; white-space: pre; }
+.pov b { color: #DFFF5A; }
+.pov small { display: block; margin-bottom: 14px; font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #FFFDF8; opacity: .85; }
+.tag { position: absolute; z-index: 42; width: 380px; padding: 70px 34px 34px; background: #F4EBDA; border-radius: 18px 18px 26px 26px; transform-origin: 50% 0;
+  clip-path: polygon(22% 0, 78% 0, 100% 16%, 100% 100%, 0 100%, 0 16%); box-shadow: 0 30px 60px -20px rgba(0,0,0,.5);
+  font: 700 40px/1.12 'Playfair Display'; color: #1F1F1F; text-align: center; }
+.tag::before { content: ''; position: absolute; left: 50%; top: 26px; width: 26px; height: 26px; margin-left: -13px; border-radius: 50%; background: #3a3127; box-shadow: inset 0 0 0 5px #C9B48F; }
+.tag small { display: block; margin-top: 16px; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #6B645A; }
+.tag em { font-style: italic; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); }
+.string { position: absolute; z-index: 41; width: 4px; background: #E9DCC3; transform-origin: 50% 0; }
+.kraft { position: absolute; inset: 0; z-index: 30; background: #B98F5E;
+  background-image: repeating-linear-gradient(17deg, rgba(255,255,255,.05) 0 2px, transparent 2px 7px), repeating-linear-gradient(-31deg, rgba(60,40,20,.07) 0 1px, transparent 1px 9px); }
+.tape { position: absolute; z-index: 31; height: 150px; background: rgba(233,220,195,.92); box-shadow: 0 10px 24px rgba(0,0,0,.25); }
+.twist { position: absolute; z-index: 32; text-align: center; color: #1F1F1F; font: 800 120px/0.96 'Playfair Display'; letter-spacing: -0.03em; }
+.twist em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.twist small { display: block; margin-bottom: 26px; font: 600 26px 'IBM Plex Mono', monospace; letter-spacing: .18em; text-transform: uppercase; color: #3a3127; }
+.seller { position: absolute; inset: 0; z-index: 33; background: #F4F1EA; }
+.hi { position: absolute; z-index: 4; border: 6px solid #DFFF5A; border-radius: 16px; box-shadow: 0 0 0 3px #1F1F1F; }
+.scap { position: absolute; z-index: 36; font: 800 66px/1.05 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.scap em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.scap small { display: block; margin-top: 16px; font: 600 26px/1.3 'Archivo'; letter-spacing: 0; color: #45403A; }
+.lbl { position: absolute; z-index: 36; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #6B645A; white-space: nowrap; }
+.demo.dark { background: rgba(31,31,31,.6); color: #FAF7EE; border-color: rgba(250,247,238,.5); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F13 — a POV unboxing from the buyer's side, told with concept images: the parcel on the doorstep, a tear through the
+// kraft paper, a little tag ("made by a small shop · printed on demand"), the print up close and on the wall. Then the
+// twist on kraft: the shop has no stock. The seller's side in the real app: the order waited for the seller's
+// approval, and printing is paid from the seller's own partner account, never from Credits. Their partner packs it.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const M = tall ? 65 : 60;
+
+// shot windows [a, b] (b = the cut to the next shot)
+const SH = [
+  { id: 'r04/g20-parcel', a: 0, b: B(3), z0: 1.18, z1: 1.04, x0: 0, x1: -20, y0: 40, y1: 0 },
+  { id: 'r05/h11-gift-wrap', a: B(3), b: B(6), z0: 1.06, z1: 1.16, x0: 0, x1: 10, y0: 0, y1: -20 },
+  { id: 'r05/h12-print-macro', a: B(6), b: B(7.5), z0: 1.25, z1: 1.1, x0: -30, x1: 20, y0: 0, y1: 0 },
+  { id: 'r04/g01-botanical-print', a: B(7.5), b: B(9), z0: 1.0, z1: 1.1, x0: 0, x1: 0, y0: -10, y1: -40 },
+  { id: 'r04/g21-packing', a: B(14), b: 13.05, z0: 1.05, z1: 1.18, x0: 10, x1: -20, y0: 0, y1: -20 },
+];
+const T_TEAR = B(3), T_TWIST = B(9), T_SELL = B(10.6), T_PAY = B(12.6), T_PACK = B(14);
+
+const shots = SH.map((s, i) => {
+  const el = K.box(0, 0, W, H, { cls: 'shot', style: { zIndex: 2 + i } });
+  const img = K.el('img', { parent: el, src: K.pub(s.id + '.webp') });
+  // cover the frame: image 1024×1536
+  const sc = Math.max(W / 1024, H / 1536);
+  img.style.width = 1024 * sc + 'px'; img.style.height = 1536 * sc + 'px';
+  img.style.marginLeft = -512 * sc + 'px'; img.style.marginTop = -768 * sc + 'px';
+  K.el('div', { cls: 'shade', parent: el });
+  return { el, img };
+});
+
+// POV captions (top third, inside the safe zone)
+function pov(html, small) {
+  const el = K.box(M, tall ? 300 : 70, W - 2 * M, null, { cls: 'pov' });
+  el.innerHTML = (small ? `<small>${small}</small>` : '') + html.split(' ').map((w) => `<span class="w">${w} </span>`).join('');
+  return { el, ws: [...el.querySelectorAll('.w')] };
+}
+const POV = [
+  { c: pov('POV: your <b>print</b> just arrived.'), a: 0.05, b: B(3) - 0.1 },
+  { c: pov('it came with a little tag…'), a: B(3) + 0.25, b: B(6) - 0.1 },
+  { c: pov('printed after I ordered it.'), a: B(6) + 0.1, b: B(7.5) - 0.05 },
+  { c: pov('and on the wall by dinner.'), a: B(7.5) + 0.1, b: B(9) - 0.1 },
+  { c: pov('Their partner prints and packs <b>each order.</b>'), a: T_PACK + 0.15, b: 13.0 },
+];
+const storyTag = K.demoTag('Sample story · concept images, AI-generated', M, tall ? 1196 : 1270);
+storyTag.classList.add('dark');
+
+// the tag on the gift
+const string = K.box(W / 2 - 2, tall ? 560 : 330, 4, 140, { cls: 'string' });
+const tag = K.box(W / 2 - 190, tall ? 680 : 450, 380, null, { cls: 'tag', html: 'Made by a <em>small shop.</em><small>Printed on demand</small>' });
+
+// tear transition: kraft paper rips open over the cut
+const kraft = K.box(0, 0, W, H, { cls: 'kraft' });
+const tapeA = K.box(-200, H * 0.46, W + 400, 150, { cls: 'tape' });
+
+// the twist card (kraft)
+const twistBg = K.box(0, 0, W, H, { cls: 'kraft', style: { zIndex: 31 } });
+const twist = K.box(M, tall ? 640 : 420, W - 2 * M, null, { cls: 'twist', style: { fontSize: (tall ? 120 : 108) + 'px' },
+  html: '<small>the twist</small><span class="w1">The shop has</span><br><em class="w2">no stock.</em>' });
+const tw1 = twist.querySelector('.w1'), tw2 = twist.querySelector('.w2');
+
+// the seller's side: real order screen
+const seller = K.box(0, 0, W, H, { cls: 'seller' });
+const PH = tall ? { x: 300, y: 560, w: 480 } : { x: 600, y: 200, w: 420 };
+const deck = K.phoneDeck(PH.x, PH.y, PH.w, [K.screen('52-phone-order')]);
+deck.root.style.zIndex = 34;
+const k = deck.sw / 780, maxS = 3800 * k - deck.sh;
+const layer = deck.root.querySelector('.screen > div');
+const HI = [{ y: 2805, h: 290 }, { y: 2112, h: 96 }].map((h) => ({ ...h, el: K.el('div', { cls: 'hi', parent: layer, style: { left: 26 * k + 'px', width: 728 * k + 'px', height: h.h * k + 'px' } }) }));
+const lbl = K.box(M, tall ? 300 : 70, null, null, { cls: 'lbl', html: 'Meanwhile, the seller’s side', style: { width: 'auto', height: 'auto' } });
+const SC = [
+  { el: K.box(M, tall ? 360 : 140, W - 2 * M, null, { cls: 'scap', html: 'The order waited for<br><em>the seller’s yes.</em>' }), a: T_SELL + 0.15, b: T_PAY - 0.05 },
+  { el: K.box(M, tall ? 360 : 140, W - 2 * M, null, { cls: 'scap', html: 'Printing paid from<br><em>their own partner account.</em><small>Never from Credits.</small>' }), a: T_PAY + 0.1, b: T_PACK - 0.05 },
+];
+if (!tall) SC.forEach((s) => { s.el.style.width = '500px'; s.el.style.top = '420px'; s.el.style.fontSize = '50px'; });
+if (!tall) lbl.style.top = '360px';
+const realTag = K.demoTag('Real app · demo workspace', tall ? PH.x : M, tall ? PH.y - 50 : 1270);
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Printed per order.<br>No stock.' });
+
+K.run({
+  id: 'F13', title: 'Unboxing POV', dur: DUR, bpm: BPM, music: 'puppy-love', mood: 'warm', key: 'D', intro: 0.0, cover: 4.2,
+  technique: 'A feed-native POV unboxing from the buyer’s side in full-bleed concept photographs with Ken Burns and white POV captions — parcel, a kraft-paper tear on the cut, a swinging tag “made by a small shop · printed on demand”, the print up close and on the wall — then a kraft twist card (“the shop has no stock”) flips to the seller’s side in the real app with lime highlights (approval; printing paid from their own partner account) and the partner packing',
+  caption: 'POV: your print just arrived — from a small shop with no stock. With MakeAndList the order waits for the seller’s yes, their own print partner prints and ships it, and printing is paid from the seller’s partner account, never from Credits. Sample story with concept images. Start free at makeandlist.com',
+  short: 'A small shop. No stock. Printed per order.',
+  question: 'Can I sell physical products too?', gain: 'Physical products without stock, printed per order by your own partner',
+  beats: ['0–2.2 s: POV: your print just arrived (parcel on the doorstep)', '2.2–4.5 s: a kraft tear; a tag: made by a small shop, printed on demand', '4.5–6.7 s: the print up close, then on the wall', '6.7–7.9 s: the twist: the shop has no stock', '7.9–10.4 s: the seller’s side, real app: the order waited for their yes; printing paid from their own partner account', '10.4–13 s: their partner prints and packs each order', '13–15 s: end card'],
+  cues: [[0.0, 'notify'], [0.35, 'box'], [B(2.6), 'paper'], [T_TEAR, 'swish'], [B(3.8), 'pop'], [B(6) - 0.1, 'swish'], [B(7.5) - 0.1, 'swish'],
+    [B(8.5), 'riser'], [T_TWIST, 'hit'], [B(10.4), 'whoosh'], [B(11.2), 'pop'], [B(12.4), 'swish'], [B(13), 'pop'], [T_PACK - 0.1, 'whoosh'], [B(15), 'paper'], [B(16.5), 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // ---------- photo shots ----------
+  SH.forEach((s, i) => {
+    const on = T >= s.a - 0.01 && T < s.b + 0.6;
+    shots[i].el.style.visibility = on ? 'visible' : 'hidden';
+    const p = K.clamp((T - s.a) / (s.b - s.a + 0.6));
+    const z = K.lerp(s.z0, s.z1, E.inOutCubic(p)), x = K.lerp(s.x0, s.x1, p), y = K.lerp(s.y0, s.y1, p);
+    // the parcel lands: a small drop + settle
+    const drop = i === 0 ? (1 - K.p(T, 0.25, 0.7, E.outBack)) * -60 : 0;
+    shots[i].img.style.transform = `translate(${x}px, ${y + drop}px) scale(${z})`;
+    // entrances: shot 1 through the tear; 2 and 3 slide; 4 (packing) after the seller's side
+    if (i === 2 || i === 3) {
+      const e = K.p(T, s.a - 0.12, s.a + 0.22, E.outCubic);
+      shots[i].el.style.clipPath = `inset(0 0 0 ${(1 - e) * 100}%)`;
+    }
+    if (i === 4) shots[i].el.style.opacity = K.p(T, s.a - 0.1, s.a + 0.25, E.linear);
+  });
+  // tear: kraft covers 2.0→ cut, then splits open along a jagged line
+  const kIn = K.p(T, B(2.6), T_TEAR - 0.05, E.outCubic), tearP = K.p(T, T_TEAR, T_TEAR + 0.5, E.outExpo);
+  const pts = [];
+  for (let j = 0; j <= 24; j++) pts.push([j / 24 * 100, (seed(j + 3) - 0.5) * 4]);
+  const open = tearP * 60; // % of half height
+  const top = pts.map(([x, d]) => `${x}% ${50 - open + d}%`).join(','), bot = pts.slice().reverse().map(([x, d]) => `${x}% ${50 + open + d * 0.7}%`).join(',');
+  kraft.style.visibility = T > B(2.6) && T < T_TEAR + 0.55 ? 'visible' : 'hidden';
+  kraft.style.transform = `translateX(${(1 - kIn) * W}px)`;
+  kraft.style.clipPath = tearP > 0 ? `polygon(0 0, 100% 0, 100% ${50 - open}%, ${top.split(',').reverse().join(',')}, 0 ${50 - open}%, 0 0, 0 100%, 100% 100%, 100% ${50 + open}%, ${bot}, 0 ${50 + open}%, 0 100%)` : 'none';
+  const tp = K.p(T, B(2.6) + 0.15, T_TEAR, E.outCubic);
+  tapeA.style.visibility = kraft.style.visibility;
+  tapeA.style.transform = `translateX(${(1 - tp) * -W * 1.4 + tearP * W * 1.4}px) rotate(-4deg)`;
+
+  // ---------- POV captions ----------
+  POV.forEach(({ c, a, b }) => {
+    const o = K.p(T, b - 0.18, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.06, a + 0.35 + j * 0.06, E.outBack);
+      w.style.opacity = Math.min(1, p * 2) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 30}px) scale(${0.85 + 0.15 * p})`;
+    });
+    c.el.style.visibility = T >= a && T < b ? 'visible' : 'hidden';
+  });
+  storyTag.style.opacity = (T < T_TWIST || (T > T_PACK && T < 13)) ? K.p(T, 0.5, 0.8, E.linear) : 0;
+
+  // ---------- the tag swings in ----------
+  const tgIn = K.p(T, B(3.6), B(3.6) + 0.6, E.outBack), tgOut = K.p(T, B(6) - 0.2, B(6), E.inCubic);
+  const swing = Math.sin((T - B(3.6)) * 3.2) * 9 * Math.exp(-Math.max(0, T - B(3.6)) * 0.9);
+  tag.style.opacity = Math.min(1, tgIn * 2) * (1 - tgOut);
+  tag.style.transform = `translateY(${(1 - tgIn) * -260}px) rotate(${swing}deg)`;
+  string.style.opacity = tag.style.opacity;
+  string.style.transform = `translateY(${(1 - tgIn) * -260}px) rotate(${swing}deg)`;
+  tag.style.visibility = string.style.visibility = T > B(3.6) && T < B(6) ? 'visible' : 'hidden';
+
+  // ---------- the twist ----------
+  const twIn = K.p(T, T_TWIST - 0.25, T_TWIST + 0.05, E.outCubic), twOut = K.p(T, T_SELL - 0.25, T_SELL, E.inCubic);
+  twistBg.style.visibility = T > T_TWIST - 0.3 && T < T_SELL + 0.02 ? 'visible' : 'hidden';
+  twistBg.style.clipPath = `circle(${twIn * 120}% at 50% 50%)`;
+  twist.style.zIndex = 32;
+  twist.style.visibility = twistBg.style.visibility;
+  const p1 = K.p(T, T_TWIST - 0.05, T_TWIST + 0.4, E.outExpo), p2 = K.p(T, T_TWIST + 0.12, T_TWIST + 0.55, E.outBack);
+  tw1.style.display = tw2.style.display = 'inline-block';
+  tw1.style.opacity = p1 * (1 - twOut); tw1.style.transform = `translateY(${(1 - p1) * 50}px)`;
+  tw2.style.opacity = Math.min(1, p2 * 2) * (1 - twOut); tw2.style.transform = `scale(${0.6 + 0.4 * p2}) rotate(${(1 - p2) * -8}deg)`;
+  twist.querySelector('small').style.opacity = p1 * (1 - twOut);
+
+  // ---------- the seller's side ----------
+  const sIn = K.p(T, T_SELL - 0.2, T_SELL + 0.15, E.outCubic), sOut = K.p(T, T_PACK - 0.2, T_PACK + 0.1, E.inCubic);
+  seller.style.visibility = T > T_SELL - 0.2 && T < T_PACK + 0.15 ? 'visible' : 'hidden';
+  seller.style.clipPath = `inset(${(1 - sIn) * 100}% 0 0 0)`;
+  seller.style.opacity = 1 - sOut;
+  const phIn = K.p(T, T_SELL - 0.05, T_SELL + 0.55, E.outExpo);
+  const sc = K.lerp(1, K.clamp((2112 * k - (tall ? 260 : 200)) / maxS), K.p(T, T_PAY - 0.3, T_PAY + 0.25, E.inOutCubic));
+  deck.draw(0, [sc], 0);
+  deck.root.style.visibility = seller.style.visibility;
+  deck.root.style.opacity = phIn * (1 - sOut);
+  deck.root.style.transform = `translateY(${(1 - phIn) * 400}px) rotate(${-2 + Math.sin(T * 0.7) * 0.4}deg)`;
+  const off = sc * maxS;
+  const HW = [[T_SELL + 0.5, T_PAY - 0.1], [T_PAY + 0.35, T_PACK]];
+  HI.forEach((h, j) => {
+    const p = K.p(T, HW[j][0], HW[j][0] + 0.35, E.outBack);
+    h.el.style.top = h.y * k - off + 'px';
+    h.el.style.opacity = Math.min(1, p * 2) * (1 - K.p(T, HW[j][1] - 0.12, HW[j][1], E.linear));
+    h.el.style.transform = `scale(${1.1 - 0.1 * p})`;
+  });
+  lbl.style.opacity = K.p(T, T_SELL + 0.1, T_SELL + 0.4, E.linear) * (1 - sOut);
+  lbl.style.visibility = seller.style.visibility;
+  SC.forEach(({ el, a, b }) => {
+    const p = K.p(T, a, a + 0.45, E.outExpo), o = K.p(T, b - 0.18, b, E.inCubic);
+    el.style.opacity = p * (1 - o); el.style.transform = `translateY(${(1 - p) * 40 - o * 20}px)`;
+    el.style.visibility = T >= a && T < b ? 'visible' : 'hidden';
+  });
+  realTag.style.opacity = phIn * (1 - sOut);
+  realTag.style.visibility = seller.style.visibility;
+
+  end(T);
+});
+</script></body></html>

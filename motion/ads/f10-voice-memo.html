@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F10 · Memo to Self</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F6F1E7; }
+.memo { position: absolute; left: 0; top: 0; overflow: hidden; background: linear-gradient(180deg, #FBF8F1 0, #F4EEE2 100%); }
+.sbar { position: absolute; display: flex; justify-content: space-between; align-items: center; font: 700 30px 'Archivo'; color: #1F1F1F; }
+.sbar i { display: inline-block; background: #1F1F1F; border-radius: 3px; margin-left: 8px; }
+.nav { position: absolute; display: flex; justify-content: space-between; font: 600 28px 'Archivo'; color: #C4532F; }
+.mt { position: absolute; font: 800 66px/1.02 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; white-space: nowrap; }
+.ms { position: absolute; font: 500 21px 'IBM Plex Mono', monospace; letter-spacing: .08em; color: #8A8378; text-transform: uppercase; }
+.wave { position: absolute; overflow: hidden; }
+.wave i { position: absolute; top: 50%; width: 7px; border-radius: 4px; }
+.wave .mid { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #E2DBCE; }
+.ph { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: #C4532F; border-radius: 2px; }
+.ph::before { content: ''; position: absolute; left: -7px; top: -6px; width: 17px; height: 17px; border-radius: 50%; background: #C4532F; }
+.timer { position: absolute; text-align: center; font: 500 104px/1 'IBM Plex Mono', monospace; letter-spacing: -0.02em; color: #1F1F1F; }
+.timer small { font-size: .55em; color: #8A8378; }
+.tcard { position: absolute; border-radius: 30px; background: #FFFDF8; box-shadow: 0 30px 60px -36px rgba(31,31,31,.45), 0 0 0 1.5px #E7E0D3; padding: 26px 30px; }
+.tcard .hd { display: flex; justify-content: space-between; font: 600 18px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #8A8378; }
+.tcard .hd b { color: #C4532F; font-weight: 600; }
+.tx { margin-top: 14px; font: 700 50px/1.14 'Playfair Display'; letter-spacing: -0.015em; color: #1F1F1F; }
+.tx .w { display: inline-block; white-space: pre; }
+.tx .k { background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); }
+.tx .lead { color: #8A8378; font-style: italic; }
+.selhl { position: absolute; z-index: -1; background: rgba(223,255,90,.55); border-radius: 8px; transform-origin: 0 50%; }
+.bub { position: absolute; z-index: 30; background: #1F1F1F; color: #FAF7EE; font: 700 26px 'Archivo'; padding: 14px 24px; border-radius: 14px; white-space: nowrap; box-shadow: 0 20px 40px -20px rgba(31,31,31,.7); }
+.bub::after { content: ''; position: absolute; left: 50%; bottom: -10px; margin-left: -10px; border: 10px solid transparent; border-bottom: 0; border-top-color: #1F1F1F; }
+.bub span { color: rgba(250,247,238,.45); margin-left: 18px; }
+.rec { position: absolute; border-radius: 50%; border: 6px solid #D9D3C9; display: grid; place-items: center; background: #FFFDF8; }
+.rec b { display: block; background: #E8603C; }
+.list { position: absolute; }
+.list div { display: flex; justify-content: space-between; padding: 24px 0; border-top: 1.5px solid #E7E0D3; font: 700 30px 'Archivo'; color: #45403A; }
+.list div span { font: 500 24px 'IBM Plex Mono', monospace; color: #8A8378; }
+.cap { position: absolute; z-index: 40; font: 800 68px/1.03 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.cap .k { display: block; margin-bottom: 12px; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #8A8378; }
+.cap em { font-style: italic; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); }
+.crop { position: absolute; z-index: 20; overflow: hidden; border-radius: 28px; background: #FAF7EE; box-shadow: 0 50px 90px -40px rgba(31,31,31,.55), 0 0 0 1.5px #E2DBCE; }
+.crop img { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 780px; display: block; }
+.paste { position: absolute; background: #FFFFFF; font: 400 28px/1.42 'Archivo'; color: #1F1F1F; padding-top: 4px; }
+.paste .c { display: inline-block; width: 3px; height: 32px; vertical-align: -6px; background: #1F1F1F; margin-left: 2px; }
+.flash { position: absolute; border-radius: 30px; background: #DFFF5A; mix-blend-mode: multiply; pointer-events: none; }
+.ring { position: absolute; border: 5px solid #DFFF5A; border-radius: 16px; box-shadow: 0 0 0 2px #1F1F1F; }
+.hero { position: absolute; z-index: 22; overflow: hidden; border-radius: 30px; box-shadow: 0 60px 100px -40px rgba(31,31,31,.6), 0 0 0 8px #FFFDF8; }
+.hero img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 40%; }
+.draft { position: absolute; z-index: 26; display: flex; align-items: center; gap: 14px; background: #1F1F1F; color: #FAF7EE; border-radius: 22px; padding: 20px 26px; box-shadow: 0 30px 60px -24px rgba(31,31,31,.7); }
+.draft i { width: 16px; height: 16px; border-radius: 50%; background: #DFFF5A; flex: none; display: block; }
+.draft .a { font: 800 32px 'Archivo'; color: #DFFF5A; }
+.draft .b { font: 500 22px 'Archivo'; color: rgba(250,247,238,.75); margin-top: 2px; }
+.touch { position: absolute; z-index: 45; width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%; background: rgba(31,31,31,.18); border: 3px solid rgba(31,31,31,.5); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F10 — "Memo to self." A generic voice-memo app: the red button records, the waveform scrolls with Marian's voice and
+// the transcript writes her idea as she says it (key words marked). She stops, selects the transcript and copies it —
+// "I'll paste this in as the brief" — and it is pasted into the real Make screen (demo workspace). The app has no voice
+// input: the memo is the seller's own note and the text is pasted, as said and shown. Then the real making progress,
+// and a concept colouring book, marked Draft: "and review the draft before anything goes live."
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 89.1, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// voice: file t (vo.mjs) and the speech windows inside the takes (measured)
+const VO = [[0.3, 'Memo to self.'], [1.5, 'A forest friends colouring book. Twenty pages, ages four to eight.'], [6.75, "I'll paste this in as the brief,"], [8.8, 'and review the draft before anything goes live.']];
+const SPEECH = [[0.53, 1.23], [1.9, 2.82], [3.19, 3.62], [4.83, 6.38], [7.04, 8.44], [9.14, 10.24], [10.49, 10.83], [11.01, 12.08]];
+const talking = (T) => SPEECH.some(([a, b]) => T >= a && T < b);
+// transcript words with the time each is said
+const WORDS = [['Memo', 0.55, 'lead'], ['to', 0.78, 'lead'], ['self.', 0.95, 'lead'], ['A', 1.92], ['forest', 2.05, 'k'], ['friends', 2.25, 'k'], ['colouring', 2.42, 'k'], ['book.', 2.62, 'k'],
+  ['20', 3.2, 'k'], ['pages,', 3.38, 'k'], ['ages', 4.86, 'k'], ['4', 5.3, 'k'], ['to', 5.62, 'k'], ['8.', 5.95, 'k']];
+const T_REC = 0.15, T_STOP = 6.55, T_SEL = 6.75, T_COPY = 7.05, T_SWAP = 7.4, T_PASTE = 8.0, T_GO = 8.72, T_MAKE = 8.95, T_HERO = 10.35, T_OUT = 12.7;
+const BRIEF = 'A forest friends colouring book. 20 pages, ages 4 to 8.';
+
+const L = tall
+  ? { nav: 150, tY: 290, sY: 372, wY: 432, wH: 200, tmY: 668, tcY: 820, tcH: 280, recY: 1172, recR: 72, listY: 1300,
+      capY: 290, capFs: 66, c1Y: 470, c2Y: 852, cW: 950, hY: 450, hH: 790 }
+  : { nav: -1, tY: 60, sY: 140, wY: 196, wH: 170, tmY: 392, tcY: 520, tcH: 300, recY: 950, recR: 66, listY: 1060,
+      capY: 60, capFs: 60, c1Y: 270, c2Y: 650, cW: 960, hY: 240, hH: 1050 };
+const GX = 65;
+
+// ======================= the memo app =======================
+const memo = K.box(0, 0, W, H, { cls: 'memo' });
+if (tall) {
+  K.box(70, 34, W - 140, 50, { cls: 'sbar', parent: memo, html: '<span>9:41</span><span><i style="width:30px;height:18px"></i><i style="width:46px;height:22px;border-radius:6px"></i></span>' });
+  K.box(GX, L.nav, W - 2 * GX, 50, { cls: 'nav', parent: memo, html: '<span>‹ All memos</span><span>Edit</span>' });
+}
+const mt = K.box(GX, L.tY, W - 2 * GX, null, { cls: 'mt', parent: memo, html: 'New recording' });
+const ms = K.box(GX, L.sY, W - 2 * GX, null, { cls: 'ms', parent: memo, html: 'Today · 09:41 · Memos' });
+const tagM = K.demoTag('Dramatised · sample memo', 0, 0);
+const wave = K.box(GX, L.wY, W - 2 * GX, L.wH, { cls: 'wave', parent: memo, html: '<div class="mid"></div>' });
+const NB = 64, WW = W - 2 * GX, BW = WW / NB;
+const bars = Array.from({ length: NB }, (_, i) => { const b = K.el('i', { parent: wave }); b.style.left = i * BW + BW / 2 - 3.5 + 'px'; return b; });
+const ph = K.el('div', { parent: wave, cls: 'ph' });
+const timer = K.box(0, L.tmY, W, null, { cls: 'timer', parent: memo });
+const tcard = K.box(GX, L.tcY, W - 2 * GX, L.tcH, { cls: 'tcard', parent: memo, html: '<div class="hd"><span>Transcript</span><b>● Live</b></div><div class="tx"></div>' });
+const tcHd = tcard.querySelector('.hd b');
+const tx = tcard.querySelector('.tx');
+const selhl = K.el('div', { parent: tx, cls: 'selhl' });
+tx.style.position = 'relative';
+const wEls = WORDS.map(([w, t, k]) => { const s = K.el('span', { parent: tx, cls: 'w' + (k === 'k' ? ' k' : k === 'lead' ? ' lead' : ''), html: w }); tx.appendChild(document.createTextNode(' ')); return { s, t }; });
+const bub = K.box(0, 0, null, null, { cls: 'bub', html: 'Copy<span>Select all · Share</span>', style: { width: 'auto', height: 'auto' } });
+const rec = K.box(W / 2 - L.recR, L.recY - L.recR, L.recR * 2, L.recR * 2, { cls: 'rec', parent: memo, html: '<b></b>' });
+const recB = rec.firstChild;
+K.box(GX, L.listY, W - 2 * GX, null, { cls: 'list', parent: memo, html: [['Shop ideas', '0:42'], ['Halloween pack?', '0:18'], ['Planner colours', '0:09'], ['Market stall list', '1:05']].slice(0, tall ? 4 : 2).map(([a, b]) => `<div>${a}<span>${b}</span></div>`).join('') });
+
+// ======================= MakeAndList (real screens) =======================
+function crop(src, sy, sh, x, y, w) {
+  const k = w / 780;
+  const c = K.box(x, y, w, sh * k, { cls: 'crop', html: `<img src="${K.screen(src)}">` });
+  c.querySelector('img').style.transform = `translate(0, ${-sy * k}px) scale(${k})`;
+  return c;
+}
+const kC = L.cW / 780;
+const c1 = crop('68-phone-copilot', 296, 240, GX, L.c1Y, L.cW);
+const c2 = crop('68-phone-copilot', 1180, 250, GX, L.c2Y, L.cW);
+const paste = K.el('div', { parent: c2, cls: 'paste', style: { left: 56 * kC + 'px', top: (1214 - 1180) * kC + 'px', width: 560 * kC + 'px', height: 128 * kC + 'px', fontSize: 28 * kC + 'px' } });
+const flash = K.el('div', { parent: c2, cls: 'flash', style: { left: 36 * kC + 'px', top: (1196 - 1180) * kC + 'px', width: 708 * kC + 'px', height: 166 * kC + 'px' } });
+const goRing = K.el('div', { parent: c2, cls: 'ring', style: { left: 624 * kC + 'px', top: (1224 - 1180) * kC + 'px', width: 110 * kC + 'px', height: 108 * kC + 'px', borderRadius: 26 * kC + 'px' } });
+const mkH = 650;
+const MKY = tall ? 568 : 290, MKW = tall ? 800 : L.cW - 120;
+const mk = crop('69-phone-making', 1640, mkH, (W - MKW) / 2, MKY, MKW);
+const kM = MKW / 780;
+const mkRing = K.el('div', { parent: mk, cls: 'ring', style: { left: 20 * kM + 'px', top: (2110 - 1640) * kM + 'px', width: 740 * kM + 'px', height: 84 * kM + 'px' } });
+const tagR = K.demoTag('Real app · demo workspace', 0, 0);
+const hero = K.box(GX, L.hY, L.cW, L.hH, { cls: 'hero', html: `<img src="${K.pub('r04/g24-colouring-book.webp')}">` });
+const heroImg = hero.querySelector('img');
+const tagC = K.demoTag('Concept image · AI-generated', 0, 0);
+const draft = K.box(0, 0, null, null, { cls: 'draft', html: '<i></i><div><div class="a">Draft · waiting for you</div><div class="b">Nothing goes live without your yes</div></div>', style: { width: 'auto', height: 'auto' } });
+const CAPS = [
+  [T_SWAP, T_GO + 0.2, 'Your memo', 'Paste it in. <em>That’s the brief.</em>'],
+  [T_GO + 0.2, T_HERO - 0.05, 'Then MakeAndList', 'Plans it, makes the pages, <em>writes the listing.</em>'],
+  [T_HERO - 0.05, T_OUT + 0.3, 'Before anything goes live', 'You review <em>the draft.</em>'],
+].map(([a, b, k, t]) => ({ a, b, el: K.box(GX, L.capY, W - 2 * GX, null, { cls: 'cap', html: `<span class="k">${k}</span>${t}`, style: { fontSize: L.capFs + 'px' } }) }));
+
+const touch = K.box(0, 0, 0, 0, { cls: 'touch' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'Say it. Paste it.<br>Review it.' });
+
+function thumb(T, t, x, y) {
+  if (T < t - 0.5 || T > t + 0.35) return false;
+  const tp = K.p(T, t - 0.5, t - 0.02, E.inOutCubic);
+  touch.style.left = x + 120 * (1 - tp) + 'px'; touch.style.top = y + 150 * (1 - tp) + 'px';
+  touch.style.opacity = Math.min(1, tp * 2) * (1 - K.p(T, t + 0.1, t + 0.35, E.linear));
+  touch.style.transform = `scale(${T >= t - 0.04 && T < t + 0.12 ? 0.8 : 1})`;
+  return true;
+}
+
+K.run({
+  id: 'F10', title: 'Memo to Self', dur: DUR, bpm: BPM, music: 'happy-but-a-little-off', mood: 'calm', key: 'E', intro: 0.0, cover: 4.4,
+  technique: 'A drawn, generic voice-memo app records the narrator: a scrolling waveform that answers her voice, a running timer and a live transcript that writes each word as she says it with the key words marked; she stops, the transcript is selected and copied, and pasted into the real Make screen (demo workspace), then the real making progress and a concept colouring book with a Draft badge',
+  caption: 'Got an idea on the go? Say it into a memo, paste it into MakeAndList as your brief, and it plans the product, makes the pages and writes the listing — then you review the draft before anything goes live. The colouring book is a concept image; the memo is a sample. Start free at makeandlist.com',
+  short: 'Say it. Paste it. Review it.',
+  question: 'How does it work?', gain: 'No design skills needed: describe it in your own words, review before anything is sold',
+  vo: VO,
+  beats: ['0–1.4 s: a memo app starts recording — “Memo to self.”', '1.4–6.5 s: the idea, transcribed live: forest friends colouring book, 20 pages, ages 4 to 8', '6.5–7.4 s: stop; the transcript is selected and copied', '7.4–8.7 s: “I’ll paste this in as the brief” — pasted into the real Make screen', '8.7–10.3 s: the real making progress: planning, artwork, pages, listing', '10.3–13 s: “and review the draft before anything goes live” — the concept colouring book, Draft', '13–15 s: end card'],
+  cues: [[T_REC - 0.1, 'click'], [T_STOP, 'click'], [T_SEL, 'swish'], [T_COPY, 'pop'], [T_SWAP - 0.1, 'whoosh'], [T_PASTE, 'pop'], [T_GO, 'click'], [T_MAKE, 'swish'], [T_MAKE + 0.5, 'pop'],
+    [T_HERO - 0.05, 'swish'], [T_HERO + 0.4, 'paper'], [12.15, 'chime'], [T_OUT, 'swish'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const recording = T >= T_REC && T < T_STOP;
+  const swap = K.p(T, T_SWAP, T_SWAP + 0.5, E.inOutCubic);
+
+  // ---------- memo app ----------
+  memo.style.transform = `translateY(${-swap * H * 0.12}px) scale(${1 - swap * 0.06})`;
+  memo.style.opacity = 1 - K.p(T, T_SWAP + 0.1, T_SWAP + 0.45, E.linear);
+  memo.style.visibility = T < T_SWAP + 0.5 ? 'visible' : 'hidden';
+  mt.innerHTML = T < T_STOP + 0.15 ? 'New recording' : 'Forest friends idea';
+  ms.innerHTML = T < T_STOP + 0.15 ? 'Today · 09:41 · recording' : 'Today · 09:41 · 0:06';
+  tagM.style.left = W - GX - 330 + 'px'; tagM.style.top = (tall ? L.sY - 6 : L.sY - 4) + 'px';
+  tagM.style.opacity = (1 - K.p(T, T_SWAP, T_SWAP + 0.3, E.linear)) * K.p(T, 0.2, 0.5, E.linear);
+  // waveform: bars scroll left while recording; the newest answer her voice
+  const el = Math.min(T, T_STOP) - T_REC;
+  const speed = 9; // bars per second
+  bars.forEach((b, i) => {
+    const age = (NB * 0.62 - i) / speed;                   // seconds ago this bar was recorded (right of the playhead = future)
+    const tb = Math.min(T, T_STOP) - age;
+    let h;
+    if (i > NB * 0.62 || tb < T_REC) h = 4;
+    else {
+      const k = Math.floor((tb - T_REC) * speed);
+      h = talking(tb) ? 18 + 82 * Math.pow(seed(k * 1.7 + 3), 1.2) * (0.6 + 0.4 * Math.abs(Math.sin(k * 0.9))) : 4 + 8 * seed(k + 9);
+    }
+    const hp = h / 100 * (L.wH - 20);
+    b.style.height = hp + 'px'; b.style.marginTop = -hp / 2 + 'px';
+    b.style.background = i <= NB * 0.62 ? '#1F1F1F' : '#D9D3C9';
+    b.style.opacity = i <= NB * 0.62 ? 0.35 + 0.65 * (i / (NB * 0.62)) : 1;
+  });
+  ph.style.left = NB * 0.62 * BW + BW / 2 + 'px';
+  const secs = Math.max(0, el);
+  timer.innerHTML = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(Math.floor(secs % 60)).padStart(2, '0')}<small>.${String(Math.floor((secs % 1) * 100)).padStart(2, '0')}</small>`;
+  timer.style.color = recording ? '#1F1F1F' : '#6B645A';
+  tcHd.innerHTML = recording ? '● Live' : 'Saved';
+  tcHd.style.opacity = recording ? 0.55 + 0.45 * Math.abs(Math.sin(T * 3)) : 1;
+  // transcript words, as said
+  wEls.forEach(({ s, t }) => {
+    const p = K.p(T, t - 0.05, t + 0.25, E.outExpo);
+    s.style.opacity = p; s.style.transform = `translateY(${(1 - p) * 20}px)`;
+    s.style.filter = p < 1 ? `blur(${(1 - p) * 5}px)` : 'none';
+  });
+  // the record button: circle → square while recording, back after
+  const rp = recording ? K.p(T, T_REC, T_REC + 0.25, E.outBack) : 1 - K.p(T, T_STOP, T_STOP + 0.25, E.outCubic);
+  const rs = K.lerp(L.recR * 1.55, L.recR * 0.8, rp);
+  Object.assign(recB.style, { width: rs + 'px', height: rs + 'px', borderRadius: K.lerp(rs / 2, 12, rp) + 'px' });
+  rec.style.boxShadow = recording ? `0 0 0 ${10 + 10 * Math.abs(Math.sin(T * 3.2))}px rgba(232,96,60,.15)` : 'none';
+  // select + copy
+  const sp = K.p(T, T_SEL, T_SEL + 0.35, E.inOutCubic);
+  const first = wEls[3].s, last = wEls[wEls.length - 1].s;
+  if (first.offsetParent) {
+    const x0 = first.offsetLeft - 6, y0 = first.offsetTop - 2, y1 = last.offsetTop + last.offsetHeight + 2;
+    Object.assign(selhl.style, { left: '-6px', top: y0 + 'px', width: tx.offsetWidth + 12 + 'px', height: y1 - y0 + 'px' });
+    selhl.style.transform = `scaleX(${sp})`; selhl.style.opacity = sp > 0 ? 1 : 0;
+  }
+  const bp = K.p(T, T_COPY - 0.1, T_COPY + 0.25, E.outBack);
+  bub.style.opacity = Math.min(1, bp * 2) * (1 - K.p(T, T_SWAP, T_SWAP + 0.2, E.linear));
+  bub.style.left = W / 2 - 200 + 'px'; bub.style.top = L.tcY - 50 + 'px';
+  bub.style.transform = `scale(${0.7 + 0.3 * bp})`;
+
+  // ---------- the brief, pasted ----------
+  const ci = K.p(T, T_SWAP + 0.05, T_SWAP + 0.6, E.outExpo), co = K.p(T, T_MAKE - 0.25, T_MAKE + 0.05, E.inCubic);
+  [c1, c2].forEach((c, i) => {
+    const p = K.p(T, T_SWAP + 0.05 + i * 0.1, T_SWAP + 0.65 + i * 0.1, E.outExpo);
+    c.style.visibility = T >= T_SWAP && T < T_MAKE + 0.05 ? 'visible' : 'hidden';
+    c.style.opacity = p * (1 - co);
+    c.style.transform = `translateY(${(1 - p) * (H * 0.25) - co * 60}px) rotate(${(1 - p) * (i ? 3 : -2)}deg)`;
+  });
+  const pp = T >= T_PASTE;
+  paste.innerHTML = (pp ? BRIEF : '') + (T >= T_SWAP + 0.4 && (pp || Math.floor(T * 4) % 2 === 0) ? '<span class="c"></span>' : '');
+  flash.style.opacity = 0.5 * (1 - K.p(T, T_PASTE, T_PASTE + 0.5, E.outCubic)) * (pp ? 1 : 0);
+  const gr = K.p(T, T_PASTE + 0.3, T_PASTE + 0.6, E.outBack);
+  goRing.style.opacity = K.p(T, T_PASTE + 0.3, T_PASTE + 0.4, E.linear); goRing.style.transform = `scale(${(1.2 - 0.2 * gr) * (T >= T_GO - 0.04 && T < T_GO + 0.12 ? 0.9 : 1)})`;
+  // ---------- making ----------
+  const mi = K.p(T, T_MAKE, T_MAKE + 0.55, E.outExpo), mo = K.p(T, T_HERO - 0.3, T_HERO, E.inCubic);
+  mk.style.visibility = T >= T_MAKE && T < T_HERO ? 'visible' : 'hidden';
+  mk.style.opacity = mi * (1 - mo);
+  mk.style.transform = `translateY(${(1 - mi) * 90 - mo * 50}px) scale(${1 + 0.02 * K.p(T, T_MAKE, T_HERO, E.linear)})`;
+  const mr = K.p(T, T_MAKE + 0.5, T_MAKE + 0.85, E.outBack);
+  mkRing.style.opacity = K.p(T, T_MAKE + 0.5, T_MAKE + 0.6, E.linear); mkRing.style.transform = `scale(${1.1 - 0.1 * mr})`;
+  // real tag follows the real crop on screen
+  const realOn = T < T_MAKE ? ci * (1 - co) * (T >= T_SWAP ? 1 : 0) : mi * (1 - mo) * (T < T_HERO ? 1 : 0);
+  tagR.style.opacity = realOn; tagR.style.left = (T < T_MAKE ? GX : (W - MKW) / 2) + 'px';
+  tagR.style.top = (T < T_MAKE ? L.c2Y + 250 * kC + 20 : MKY + mkH * kM + 20) + 'px';
+  // ---------- the draft ----------
+  const hi = K.p(T, T_HERO, T_HERO + 0.7, E.outExpo), ho = K.p(T, T_OUT, 13.0, E.inCubic);
+  hero.style.visibility = T >= T_HERO ? 'visible' : 'hidden';
+  hero.style.opacity = Math.min(1, hi * 1.5) * (1 - ho);
+  hero.style.transform = `translateY(${(1 - hi) * 140}px) rotate(${(1 - hi) * 4 - 1}deg) scale(${0.96 + 0.04 * hi})`;
+  heroImg.style.objectPosition = `50% ${tall ? 46 : 50}%`;
+  heroImg.style.transform = `scale(${1.14 - 0.08 * K.p(T, T_HERO, 13, E.outCubic)})`;
+  tagC.style.opacity = hero.style.opacity; tagC.style.left = GX + 26 + 'px'; tagC.style.top = L.hY + 24 + 'px';
+  const dp = K.p(T, 11.0, 11.5, E.outBack);
+  draft.style.opacity = Math.min(1, dp * 2) * (1 - ho);
+  draft.style.left = GX + 30 + 'px'; draft.style.top = L.hY + L.hH - 150 + 'px';
+  draft.style.transform = `translateY(${(1 - dp) * 40}px) scale(${0.85 + 0.15 * dp})`;
+  // captions
+  CAPS.forEach((c, i) => {
+    const pi = K.p(T, c.a, c.a + 0.45, E.outExpo), po = i === CAPS.length - 1 ? ho : K.p(T, c.b - 0.2, c.b, E.inCubic);
+    c.el.style.visibility = T >= c.a && T < c.b ? 'visible' : 'hidden';
+    c.el.style.opacity = pi * (1 - po);
+    c.el.style.transform = `translateY(${(1 - pi) * 40 - po * 30}px)`;
+  });
+  // thumb
+  touch.style.opacity = 0;
+  const r2 = c2.getBoundingClientRect();
+  thumb(T, T_REC, W / 2, L.recY) || thumb(T, T_STOP, W / 2, L.recY) || thumb(T, T_GO, r2.left + 680 * kC, r2.top + (1278 - 1180) * kC);
+  end(T);
+});
+</script></body></html>

@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F09 · The Folder</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #2A2621; }
+.wp { position: absolute; left: 0; top: 0; object-fit: cover; transform-origin: 50% 50%; }
+.shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(25,22,18,.55) 0, rgba(25,22,18,.25) 30%, rgba(25,22,18,.2) 70%, rgba(25,22,18,.5) 100%); }
+.mbar { position: absolute; left: 0; right: 0; top: 0; height: 52px; background: rgba(250,247,238,.22); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; font: 600 22px 'Archivo'; color: #FAF7EE; }
+.mbar span b { margin-right: 26px; font-weight: 700; }
+.dock { position: absolute; display: flex; gap: 18px; padding: 16px 20px; border-radius: 30px; background: rgba(250,247,238,.22); backdrop-filter: blur(20px); box-shadow: inset 0 0 0 1px rgba(250,247,238,.25); }
+.dock i { display: block; width: 84px; height: 84px; border-radius: 22px; }
+.win { position: absolute; z-index: 10; border-radius: 26px; background: #FBF9F4; overflow: hidden; box-shadow: 0 70px 120px -50px rgba(0,0,0,.85), 0 0 0 1px rgba(31,31,31,.15); transform-origin: 50% 50%; }
+.tb { position: absolute; left: 0; right: 0; top: 0; height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 22px; background: #F1ECE2; border-bottom: 1px solid #E2DBCE; }
+.tb i { width: 16px; height: 16px; border-radius: 50%; background: #D3CBBE; display: block; }
+.tb span { flex: 1; text-align: center; margin-right: 70px; font: 700 22px 'Archivo'; color: #45403A; }
+.path { position: absolute; left: 0; right: 0; top: 58px; height: 62px; display: flex; align-items: center; gap: 14px; padding: 0 24px; border-bottom: 1px solid #ECE6DB; font: 500 21px 'IBM Plex Mono', monospace; color: #6B645A; white-space: nowrap; }
+.path b { color: #1F1F1F; font-weight: 600; }
+.path .cnt { margin-left: auto; color: #8A8378; }
+.fold { position: absolute; text-align: center; transform-origin: 50% 70%; }
+.fold .ic { position: relative; margin: 0 auto; border-radius: 18px; }
+.fold .nm { margin-top: 10px; font: 600 23px 'IBM Plex Mono', monospace; color: #1F1F1F; display: inline-block; padding: 2px 10px; border-radius: 8px; }
+.fold .ct { margin-top: 2px; font: 500 17px 'Archivo'; color: #8A8378; }
+.fold .bdg { position: absolute; right: -8px; top: -10px; min-width: 40px; height: 40px; padding: 0 10px; border-radius: 20px; background: #1F1F1F; color: #DFFF5A; font: 800 20px 'Archivo'; display: grid; place-items: center; }
+.fold .dr { position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%); font: 700 13px 'IBM Plex Mono', monospace; letter-spacing: .08em; color: #1F1F1F; background: #DFFF5A; padding: 2px 8px; border-radius: 5px; white-space: nowrap; }
+.sel { position: absolute; z-index: 0; border-radius: 20px; background: rgba(223,255,90,.35); box-shadow: inset 0 0 0 2.5px #1F1F1F; }
+.pane { position: absolute; left: 0; right: 0; border-top: 1px solid #ECE6DB; background: #F6F2EA; overflow: hidden; }
+.pl { position: absolute; left: 24px; top: 18px; font: 600 17px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #8A8378; }
+.grp { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.pg { position: absolute; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 18px 30px -16px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; }
+.pg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fchip { position: absolute; display: flex; align-items: center; gap: 12px; font: 500 20px 'IBM Plex Mono', monospace; color: #1F1F1F; background: #FFFDF8; border-radius: 12px; padding: 10px 14px; white-space: nowrap; box-shadow: 0 0 0 1.5px #E2DBCE; }
+.fchip u { text-decoration: none; font: 800 13px 'Archivo'; color: #FFFDF8; background: #E8603C; border-radius: 4px; padding: 3px 6px; }
+.fchip u.t { background: #7E9A7E; } .fchip u.v { background: #1F1F1F; }
+.fchip s { text-decoration: none; color: #8A8378; }
+.doc { position: absolute; background: #FFFDF8; border-radius: 14px; box-shadow: 0 0 0 1.5px #E2DBCE; padding: 20px 22px; }
+.doc .dt { font: 600 16px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #8A8378; text-transform: uppercase; }
+.doc .tt { margin-top: 10px; font: 700 34px/1.12 'Playfair Display'; color: #1F1F1F; min-height: 80px; }
+.caret { display: inline-block; width: 3px; height: 30px; margin-left: 3px; vertical-align: -4px; background: #1F1F1F; }
+.doc .ln { height: 12px; border-radius: 6px; background: #E8E2D6; margin-top: 14px; }
+.vid { position: absolute; border-radius: 18px; overflow: hidden; background: #1F1F1F; box-shadow: 0 30px 50px -26px rgba(31,31,31,.7); }
+.vid img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 50%; }
+.vid .bar { position: absolute; left: 18px; right: 18px; bottom: 18px; height: 8px; border-radius: 4px; background: rgba(250,247,238,.35); overflow: hidden; z-index: 3; }
+.vid .bar b { display: block; height: 100%; background: #DFFF5A; }
+.vid .pl2 { position: absolute; left: 18px; top: 16px; z-index: 3; font: 600 17px 'IBM Plex Mono', monospace; color: #FAF7EE; background: rgba(31,31,31,.6); padding: 4px 10px; border-radius: 6px; }
+.book { position: absolute; transform-style: preserve-3d; }
+.book .fc, .book .sp, .book .pp { position: absolute; left: 0; top: 0; }
+.book .fc { overflow: hidden; border-radius: 3px 8px 8px 3px; box-shadow: inset 6px 0 10px -4px rgba(0,0,0,.35); }
+.book .fc img { width: 100%; height: 100%; object-fit: cover; }
+.book .sp { background: #C9504A; transform-origin: 0 50%; }
+.book .pp { background: repeating-linear-gradient(90deg, #FFFDF8 0 3px, #ECE6DB 3px 4px); transform-origin: 100% 50%; }
+.pnote { position: absolute; font: 800 38px/1.08 'Playfair Display'; color: #1F1F1F; }
+.pnote small { display: block; margin-top: 12px; font: 500 22px/1.35 'Archivo'; color: #45403A; }
+.pnote small b { color: #1F1F1F; background: linear-gradient(transparent 60%, #DFFF5A 60%); }
+.status { position: absolute; left: 0; right: 0; bottom: 0; height: 92px; display: flex; align-items: center; gap: 16px; padding: 0 22px; background: #1F1F1F; color: #FAF7EE; font: 600 22px 'Archivo'; }
+.status i { width: 14px; height: 14px; border-radius: 50%; background: #DFFF5A; display: block; flex: none; }
+.status .bt { margin-left: auto; background: #DFFF5A; color: #1F1F1F; font: 800 22px 'Archivo'; padding: 14px 22px; border-radius: 99px; white-space: nowrap; }
+.cap { position: absolute; z-index: 30; font: 800 70px/1.02 'Playfair Display'; letter-spacing: -0.02em; color: #FAF7EE; text-shadow: 0 6px 30px rgba(0,0,0,.45); }
+.cap em { font-style: italic; color: #DFFF5A; }
+.cap .w { display: inline-block; white-space: pre; }
+.demo.dk { background: rgba(21,20,18,.78); color: rgba(250,247,238,.8); border-color: rgba(250,247,238,.35); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .06; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F09 — a desktop file window (generic, drawn). One file: idea.txt, one sentence. Then the folder fills by itself on
+// the beat — files / listing / images / video / print — and as Marian names each part the pane below shows it: the real
+// pages, the title, the real listing images, a video, and an optional printed edition. The pack is a real product its
+// owner made with MakeAndList (Christmas Preschool Learning Pack, 37 pages). It ends on the status line: a draft.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const PK = (f) => K.pub('showcase/christmas-preschool-pack/' + f + '.webp');
+
+// voice: file t and the speech inside each take (measured from the takes)
+const VO = [[0.15, 'One sentence went in.'], [1.95, "Here's what came back."], [3.3, 'The pages, the listing copy, the images, a video.'], [7.95, 'Even a printed edition.'], [10.0, 'It all stays a draft until you say yes.']];
+const T_FOLD = 2.35;                                  // folders pop in on "Here's what came back"
+const SEL = [3.3, 4.5, 5.85, 7.05, 8.3];              // the pane follows her words: pages, copy, images, video, print
+const T_DRAFT = 10.35, T_OUT = 12.7;
+const CAPS = [[0.35, 1.9, 'One sentence <em>went in.</em>'], [2.3, 3.25, 'Here’s what <em>came back:</em>'], [3.3, 7.85, '<span class="w">Pages.</span> <span class="w">Copy.</span> <span class="w">Images.</span> <em class="w">Video.</em>'],
+  [8.25, 9.95, 'Even a <em>printed edition.</em>'], [10.35, T_OUT + 0.3, 'All a draft — <em>until you say yes.</em>']];
+
+const L = tall
+  ? { capY: 286, capFs: 66, wx: 65, wy: 440, ww: 950, wh: 808, fy: 140, fw: 182, icW: 120, paneY: 330, dockY: 1640 }
+  : { capY: 70, capFs: 60, wx: 60, wy: 230, ww: 960, wh: 1060, fy: 140, fw: 184, icW: 124, paneY: 360, dockY: -999 };
+
+// ---------- desktop ----------
+const wpW = Math.max(W, H / 1.5) * 1.08;
+const wp = K.el('img', { src: K.pub('r05/h06-craft-studio.webp'), cls: 'wp', style: { width: wpW + 'px', height: wpW * 1.5 + 'px' } });
+wp.style.position = 'absolute';
+K.box(0, 0, W, H, { cls: 'shade' });
+if (tall) K.box(0, 0, W, 52, { cls: 'mbar', html: '<span><b>Files</b>File&nbsp;&nbsp;&nbsp;Edit&nbsp;&nbsp;&nbsp;View</span><span>Tue 9:41</span>' });
+const dock = tall ? K.box(0, L.dockY, null, null, { cls: 'dock', html: ['#E8603C', '#7E9A7E', '#FAF7EE', '#DFFF5A', '#45403A', '#C9B79C'].map((c) => `<i style="background:${c}"></i>`).join('') }) : null;
+const tagWp = K.demoTag('Wallpaper: concept image · AI-generated', 0, 0); tagWp.classList.add('dk');
+
+// ---------- the window ----------
+const win = K.box(L.wx, L.wy, L.ww, L.wh, { cls: 'win' });
+K.el('div', { parent: win, cls: 'tb', html: '<i></i><i></i><i></i><span>christmas-preschool-pack</span>' });
+const path = K.el('div', { parent: win, cls: 'path', html: '<span>Products</span>›<b>christmas-preschool-pack</b><span class="cnt">1 item</span>' });
+const cnt = path.querySelector('.cnt');
+// idea.txt and its quick look
+const idea = K.el('div', { parent: win, cls: 'fold', style: { left: '24px', top: L.fy + 'px', width: L.fw + 'px' },
+  html: `<div class="ic" style="width:${L.icW * 0.8}px;height:${L.icW}px;background:#FFFDF8;box-shadow:0 0 0 2px #D9D3C9;border-radius:10px">${[26, 40, 54, 68, 82].map((t, j) => `<b style="position:absolute;left:14px;right:${14 + (j % 2) * 18}px;top:${t}px;height:6px;border-radius:3px;background:#E4DDD0"></b>`).join('')}</div><div class="nm">idea.txt</div>` });
+const SENT = 'A Christmas learning pack for ages 3–5: counting, tracing, patterns and colouring.';
+const ql = K.el('div', { parent: win, cls: 'doc', style: { left: L.fw + 50 + 'px', top: L.fy - 6 + 'px', right: '24px' }, html: '<div class="dt">idea.txt · one sentence</div><div class="tt" style="font-size:' + (tall ? 36 : 40) + 'px"></div>' });
+const qlT = ql.querySelector('.tt');
+// five folders
+const FOLD = [['files', 2, '#E8603C'], ['listing', 3, '#7E9A7E'], ['images', 10, '#C9A86A'], ['video', 1, '#45403A'], ['print', 1, '#B7D12F']];
+const sel = K.el('div', { parent: win, cls: 'sel' });
+const folders = FOLD.map(([n, c, col], i) => {
+  const x = 24 + i * (L.ww - 48) / 5 + ((L.ww - 48) / 5 - L.fw) / 2;
+  const el = K.el('div', { parent: win, cls: 'fold', style: { left: x + 'px', top: L.fy + 'px', width: L.fw + 'px' },
+    html: `<div class="ic" style="width:${L.icW}px;height:${L.icW * 0.8}px"><svg width="${L.icW}" height="${L.icW * 0.8}" viewBox="0 0 120 96"><path d="M6 14a8 8 0 0 1 8-8h30l10 10h52a8 8 0 0 1 8 8v58a8 8 0 0 1-8 8H14a8 8 0 0 1-8-8z" fill="${col}"/><path d="M6 30a8 8 0 0 1 8-8h92a8 8 0 0 1 8 8v52a8 8 0 0 1-8 8H14a8 8 0 0 1-8-8z" fill="${col}" opacity=".78"/><path d="M6 30a8 8 0 0 1 8-8h92a8 8 0 0 1 8 8v4H6z" fill="#FFFDF8" opacity=".25"/></svg><div class="bdg">${c}</div><div class="dr">DRAFT</div></div><div class="nm">${n}</div>` });
+  return { el, x, bdg: el.querySelector('.bdg'), dr: el.querySelector('.dr'), nm: el.querySelector('.nm') };
+});
+
+// ---------- the pane ----------
+const paneH = L.wh - L.paneY - 92;
+const pane = K.el('div', { parent: win, cls: 'pane', style: { top: L.paneY + 'px', height: paneH + 'px' } });
+const pl = K.el('div', { parent: pane, cls: 'pl' });
+const G = FOLD.map(() => K.el('div', { parent: pane, cls: 'grp' }));
+const PW = L.ww, PH = paneH;
+// 1 · files: real pages, two PDFs
+const pgW = tall ? 150 : 210, pgH = pgW * 1164 / 900;
+const pages = ['cover', 'interior-01', 'interior-02', 'interior-03', 'interior-04'].map((f, i) => {
+  const e = K.el('div', { parent: G[0], cls: 'pg', html: `<img src="${PK(f)}">`, style: { width: pgW + 'px', height: pgH + 'px' } });
+  return e;
+});
+const pdfs = [['pages-letter.pdf', '37 pp'], ['pages-a4.pdf', '37 pp']].map(([n, s], i) => K.el('div', { parent: G[0], cls: 'fchip', html: `<u>PDF</u>${n} <s>· ${s}</s>`, style: { left: 24 + i * 390 + 'px', top: PH - 70 + 'px' } }));
+// 2 · listing copy
+const TITLE = 'Christmas Preschool Learning Pack — counting, tracing, patterns, colouring · ages 3–5';
+const docT = K.el('div', { parent: G[1], cls: 'doc', style: { left: '24px', top: '54px', right: tall ? '24px' : '330px' }, html: '<div class="dt">title.txt</div><div class="tt"></div>' });
+const docTT = docT.querySelector('.tt');
+const docD = K.el('div', { parent: G[1], cls: 'doc', style: { left: '24px', top: (tall ? 220 : 270) + 'px', width: tall ? '440px' : '560px', height: (tall ? 140 : 300) + 'px' },
+  html: '<div class="dt">description.txt</div>' + [0, 1, 2, 3, 4, 5, 6].slice(0, tall ? 4 : 7).map((j) => `<div class="ln" style="width:${[96, 88, 92, 70, 94, 84, 60][j]}%"></div>`).join('') });
+const docG = K.el('div', { parent: G[1], cls: 'doc', style: { left: (tall ? 490 : 610) + 'px', top: (tall ? 220 : 270) + 'px', right: '24px', height: (tall ? 140 : 300) + 'px' },
+  html: '<div class="dt">tags.txt</div>' + [0, 1, 2, 3, 4].slice(0, tall ? 3 : 5).map((j) => `<div class="ln" style="display:inline-block;margin-right:10px;width:${[38, 52, 30, 44, 36][j]}%;height:28px;border-radius:14px;background:#E3EBDF"></div>`).join('') });
+// 3 · images: real listing images
+const thW = tall ? 168 : 172;
+const thumbs = ['listing-hero', 'listing-01', 'listing-02', 'listing-03', 'photo'].map((f) => K.el('div', { parent: G[2], cls: 'pg', html: `<img src="${PK(f)}">`, style: { width: thW + 'px', height: thW + 'px', borderRadius: '12px' } }));
+const imgChip = K.el('div', { parent: G[2], cls: 'fchip', html: '<u class="t">IMG</u>10 listing images', style: { left: '24px', top: PH - 70 + 'px' } });
+// 4 · video
+const vW = tall ? 500 : 780, vH = vW * 9 / 16;
+const vid = K.el('div', { parent: G[3], cls: 'vid', style: { width: vW + 'px', height: vH + 'px' }, html: `<img src="${PK('photo')}"><img src="${PK('listing-02')}"><div class="pl2">listing-video.mp4</div><div class="bar"><b></b></div>` });
+const vImgs = vid.querySelectorAll('img'), vBar = vid.querySelector('.bar b');
+// 5 · print: a printed edition (drawn book)
+const bkW = tall ? 210 : 300, bkH = bkW * 1164 / 900, bkD = 26;
+const book = K.el('div', { parent: G[4], cls: 'book', style: { width: bkW + 'px', height: bkH + 'px' } });
+K.el('div', { parent: book, cls: 'pp', style: { width: bkD + 'px', height: bkH - 8 + 'px', top: '4px', left: bkW - bkD + 'px', transform: `rotateY(90deg) translateX(${bkD}px)` } });
+K.el('div', { parent: book, cls: 'sp', style: { width: bkD + 'px', height: bkH + 'px', transform: 'rotateY(-90deg)' } });
+K.el('div', { parent: book, cls: 'fc', html: `<img src="${PK('cover')}">`, style: { width: bkW + 'px', height: bkH + 'px' } });
+const pnote = K.el('div', { parent: G[4], cls: 'pnote', html: 'Printed edition<small>Optional. Printed per order by <b>your own print partner</b>, paid from your partner account.</small>', style: { width: (tall ? 420 : 520) + 'px' } });
+const tagEx = K.demoTag('Example made with MakeAndList by its owner', 0, 0);
+
+// 6 · everything, as drafts
+const GS = K.el('div', { parent: pane, cls: 'grp' });
+const smW = tall ? 160 : 168, smH = smW * 1.25;
+const SUM = [
+  `<img src="${PK('cover')}">`,
+  `<div style="padding:14px;font:700 19px/1.15 'Playfair Display';color:#1F1F1F">Christmas Preschool Learning Pack</div><div style="margin:0 14px;height:8px;border-radius:4px;background:#E8E2D6"></div><div style="margin:8px 14px;height:8px;width:60%;border-radius:4px;background:#E8E2D6"></div>`,
+  `<img src="${PK('listing-hero')}">`,
+  `<img src="${PK('photo')}"><div style="position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:rgba(250,247,238,.92)"><div style="margin:13px 0 0 18px;border-left:15px solid #1F1F1F;border-top:10px solid transparent;border-bottom:10px solid transparent;width:0"></div></div>`,
+  `<div style="position:absolute;inset:12px 22px;transform:perspective(500px) rotateY(-24deg);box-shadow:-8px 0 0 #C9504A,0 14px 20px -10px rgba(0,0,0,.5)"><img src="${PK('cover')}"></div>`,
+].map((h, i) => {
+  const e = K.el('div', { parent: GS, cls: 'pg', html: h + '<div style="position:absolute;right:8px;bottom:8px;font:700 13px IBM Plex Mono,monospace;letter-spacing:.08em;background:#DFFF5A;color:#1F1F1F;padding:2px 8px;border-radius:5px">DRAFT</div>', style: { width: smW + 'px', height: smH + 'px', background: '#FFFDF8' } });
+  e.style.left = 24 + i * (L.ww - 48 - smW) / 4 + 'px'; e.style.top = (tall ? 70 : 170) + 'px';
+  return e;
+});
+
+// status bar
+const status = K.el('div', { parent: win, cls: 'status', html: '<i></i><span>Draft · not listed in any store yet</span><span class="bt">Review &amp; approve</span>' });
+
+// ---------- captions ----------
+const caps = CAPS.map(([a, b, t]) => {
+  const el = K.box(L.wx, L.capY, L.ww, null, { cls: 'cap', html: t, style: { fontSize: L.capFs + 'px' } });
+  return { a, b, el };
+});
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'One sentence in.<br>The whole kit out.' });
+
+K.run({
+  id: 'F09', title: 'The Folder', dur: DUR, bpm: BPM, music: 'new-shoes', mood: 'calm', key: 'A', intro: 0.0, cover: 6.2,
+  technique: 'A drawn, generic desktop file window over a blurred studio wallpaper: idea.txt types one sentence, then five folders pop in on the beat with counting badges and a selection that walks folder to folder in step with the narrator, while the preview pane below shows each part — the real pages fanning, a title typing, the real listing images, a playing video tile and a 3D printed book — and a status bar ends on “Draft”',
+  caption: 'One sentence in, the whole kit out: print-ready pages, the listing copy, listing images, a video — and, if you want one, a printed edition your own partner prints per order. It all stays a draft until you say yes. The pack shown was made with MakeAndList by its owner. Start free at makeandlist.com',
+  short: 'One sentence in. The whole kit out.',
+  question: 'What do I get?', gain: 'What you get: files, listing copy, images, video and a printed edition, from one sentence',
+  vo: VO,
+  beats: ['0–2 s: a desktop file window — idea.txt, one sentence — “One sentence went in.”', '2–3.3 s: five folders pop in: files, listing, images, video, print — “Here’s what came back.”', '3.3–4.5 s: files — the real pages and two PDFs, 37 pages', '4.5–5.9 s: listing — the title types, description, tags', '5.9–7.1 s: images — the real listing images', '7.1–8.3 s: video — a listing video plays', '8.3–10 s: print — a printed edition, optional, printed per order by your own partner', '10–13 s: every folder marked Draft — “It all stays a draft until you say yes.”', '13–15 s: end card'],
+  cues: [[0.0, 'swish'], [0.45, 'type'], [T_FOLD - 0.05, 'whoosh'], ...FOLD.map((_, i) => [+(T_FOLD + i * 0.14).toFixed(2), 'pop']), [SEL[0] - 0.05, 'paper'], [SEL[1] - 0.05, 'click'], [SEL[1] + 0.1, 'type'],
+    [SEL[2] - 0.05, 'click'], [SEL[2] + 0.15, 'shutter'], [SEL[3] - 0.05, 'click'], [7.9, 'pop'], [SEL[4] - 0.05, 'click'], [SEL[4] + 0.2, 'printer'], [10.1, 'stamp'], [T_OUT - 0.05, 'swish'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  wp.style.transform = `translate(${(W - wpW) / 2}px, ${(H - wpW * 1.5) / 2 - T * 3}px) scale(${1.04 + T * 0.003})`;
+  wp.style.filter = 'blur(3px) saturate(.9)';
+  tagWp.style.left = (tall ? (W - 470) / 2 : W - 60 - 470) + 'px'; tagWp.style.top = (tall ? 1540 : 180) + 'px';
+  tagWp.style.opacity = tall ? 1 : K.p(T, 0.2, 0.5, E.linear) * (1 - K.p(T, 2.1, 2.4, E.linear));
+  if (dock) dock.style.left = (W - dock.offsetWidth) / 2 + 'px';
+
+  // window: arrives, breathes, pushes in a touch while the pane works
+  const wi = K.p(T, 0, 0.7, E.outExpo), wo = K.p(T, T_OUT, 13.0, E.inCubic);
+  win.style.opacity = wi;
+  win.style.transform = `translateY(${(1 - wi) * 80 + wo * -30}px) scale(${0.95 + 0.05 * wi + K.p(T, 3, 12, E.inOutCubic) * 0.015 - wo * 0.03})`;
+
+  // idea.txt types its sentence, then makes room
+  const ty = K.p(T, 0.45, 1.85, E.linear);
+  const n = Math.round(SENT.length * ty);
+  qlT.innerHTML = SENT.slice(0, n) + (T < 2.2 && (Math.floor(T * 4) % 2 === 0 || ty < 1) ? '<span class="caret"></span>' : '');
+  const gone = K.p(T, T_FOLD - 0.25, T_FOLD + 0.1, E.inCubic);
+  ql.style.opacity = 1 - gone; ql.style.transform = `translateY(${-gone * 20}px)`;
+  ql.style.visibility = gone < 1 ? 'visible' : 'hidden';
+  idea.style.opacity = 1 - gone; idea.style.transform = `scale(${1 - gone * 0.4})`;
+  idea.style.visibility = gone < 1 ? 'visible' : 'hidden';
+
+  // folders pop in, badges count
+  let items = 1;
+  folders.forEach((F, i) => {
+    const t = T_FOLD + i * 0.14;
+    const p = K.p(T, t, t + 0.45, E.outBack);
+    F.el.style.opacity = Math.min(1, p * 2.5); F.el.style.transform = `translateY(${(1 - p) * 40}px) scale(${0.5 + 0.5 * p})`;
+    F.el.style.visibility = T >= t ? 'visible' : 'hidden';
+    const cp = K.p(T, t + 0.15, t + 0.9, E.outCubic);
+    const v = Math.max(1, Math.round(FOLD[i][1] * cp));
+    F.bdg.textContent = v; if (T >= t) items += v;
+    F.bdg.style.transform = `scale(${0.6 + 0.4 * K.p(T, t + 0.15, t + 0.4, E.outBack)})`;
+    const dp = K.p(T, T_DRAFT + i * 0.12, T_DRAFT + i * 0.12 + 0.35, E.outBack);
+    F.dr.style.opacity = Math.min(1, dp * 2); F.dr.style.transform = `translateX(-50%) scale(${0.4 + 0.6 * dp}) rotate(${(1 - dp) * -12}deg)`;
+  });
+  cnt.textContent = T < T_FOLD ? '1 item' : `${items - 1} items · 5 folders`;
+
+  // the selection walks with her words
+  let s = -1; SEL.forEach((t, i) => { if (T >= t - 0.1) s = i; });
+  if (T >= T_DRAFT - 0.1) s = -1;
+  const prevS = Math.max(0, s - 1);
+  const mv = s <= 0 ? 1 : K.p(T, SEL[s] - 0.1, SEL[s] + 0.2, E.inOutCubic);
+  const sx = K.lerp(folders[prevS].x, folders[Math.max(0, s)].x, mv);
+  Object.assign(sel.style, { left: sx - 10 + 'px', top: L.fy - 14 + 'px', width: L.fw + 20 + 'px', height: L.icW * 0.8 + 66 + 'px' });
+  sel.style.opacity = s >= 0 ? K.p(T, SEL[0] - 0.1, SEL[0] + 0.1, E.linear) : 1 - K.p(T, T_DRAFT - 0.1, T_DRAFT + 0.15, E.linear);
+  folders.forEach((F, i) => { F.nm.style.background = i === s ? '#1F1F1F' : 'transparent'; F.nm.style.color = i === s ? '#DFFF5A' : '#1F1F1F'; });
+
+  // pane: one group at a time
+  const pIn = K.p(T, SEL[0] - 0.2, SEL[0] + 0.3, E.outExpo);
+  const pOut = K.p(T, T_DRAFT - 0.2, T_DRAFT + 0.2, E.inCubic);
+  pane.style.opacity = pIn;
+  GS.style.visibility = T >= T_DRAFT - 0.1 ? 'visible' : 'hidden';
+  SUM.forEach((e, i) => { const p = K.p(T, T_DRAFT - 0.05 + i * 0.1, T_DRAFT + 0.4 + i * 0.1, E.outBack); e.style.opacity = Math.min(1, p * 2); e.style.transform = `translateY(${(1 - p) * 50}px) rotate(${(i - 2) * 1.5 * p}deg)`; });
+  pl.innerHTML = s >= 0 ? `${FOLD[s][0]}/ · preview` : (T >= T_DRAFT - 0.1 ? 'all 5 folders · status: draft' : '');
+  G.forEach((g, i) => {
+    const a = SEL[i] - 0.1, b = i < 4 ? SEL[i + 1] - 0.1 : T_DRAFT;
+    const gi = K.p(T, a, a + 0.45, E.outExpo), go = K.p(T, b - 0.15, b, E.inCubic);
+    g.style.visibility = T >= a && T < b ? 'visible' : 'hidden';
+    g.style.opacity = gi * (1 - go);
+    g.style.transform = `translateX(${(1 - gi) * 70 - go * 50}px)`;
+  });
+  // 1 · pages fan out
+  pages.forEach((e, i) => {
+    const p = K.p(T, SEL[0] + i * 0.08, SEL[0] + i * 0.08 + 0.5, E.outBack);
+    const gap = (PW - 48 - pgW) / 4;
+    e.style.left = 24 + i * gap * p + 'px'; e.style.top = (tall ? 60 : 110) + 'px';
+    e.style.transform = `rotate(${(i - 2) * 3 * p}deg) translateY(${Math.abs(i - 2) * 8 * p}px)`;
+    e.style.zIndex = 10 - Math.abs(i - 2);
+  });
+  pdfs.forEach((c, i) => { const p = K.p(T, SEL[0] + 0.5 + i * 0.12, SEL[0] + 0.9 + i * 0.12, E.outBack); c.style.opacity = Math.min(1, p * 2); c.style.transform = `scale(${0.7 + 0.3 * p})`; });
+  // 2 · the title types
+  const tp = K.p(T, SEL[1] + 0.1, SEL[1] + 1.1, E.linear);
+  docTT.innerHTML = TITLE.slice(0, Math.round(TITLE.length * tp)) + (tp < 1 || Math.floor(T * 4) % 2 ? '<span class="caret"></span>' : '');
+  docTT.style.fontSize = (tall ? 30 : 34) + 'px';
+  [docD, docG].forEach((d, i) => { const p = K.p(T, SEL[1] + 0.35 + i * 0.15, SEL[1] + 0.85 + i * 0.15, E.outExpo); d.style.opacity = p; d.style.transform = `translateY(${(1 - p) * 30}px)`; });
+  // 3 · images land in a row
+  thumbs.forEach((e, i) => {
+    const p = K.p(T, SEL[2] + i * 0.09, SEL[2] + i * 0.09 + 0.5, E.outBack);
+    const gap = (PW - 48 - thW) / 4;
+    e.style.left = 24 + i * gap + 'px'; e.style.top = (tall ? 64 : 180) + 'px';
+    e.style.opacity = Math.min(1, p * 2); e.style.transform = `translateY(${(1 - p) * 60}px) scale(${0.8 + 0.2 * p})`;
+    e.style.boxShadow = i === 0 ? '0 0 0 3px #1F1F1F' : '';
+  });
+  imgChip.style.opacity = K.p(T, SEL[2] + 0.5, SEL[2] + 0.8, E.linear);
+  // 4 · the video plays
+  vid.style.left = (PW - vW) / 2 + 'px'; vid.style.top = (tall ? 56 : 90) + 'px';
+  const vp = K.p(T, SEL[3], SEL[4], E.linear);
+  vImgs[0].style.transform = `scale(${1.08 + vp * 0.12}) translateX(${-vp * 20}px)`;
+  vImgs[1].style.opacity = K.p(T, SEL[3] + 0.6, SEL[3] + 0.8, E.linear);
+  vImgs[1].style.transform = `scale(${1.15 - vp * 0.08})`;
+  vBar.style.width = vp * 100 + '%';
+  // 5 · the printed book turns
+  const bp = K.p(T, SEL[4], SEL[4] + 0.7, E.outBack);
+  book.style.left = (tall ? 60 : 90) + 'px'; book.style.top = (tall ? 50 : 100) + 'px';
+  book.style.transform = `perspective(1400px) rotateY(${-38 + 10 * Math.sin(T * 1.2) + (1 - bp) * -40}deg) rotateX(6deg) translateY(${(1 - bp) * 60}px)`;
+  pnote.style.left = (tall ? 340 : 470) + 'px'; pnote.style.top = (tall ? 70 : 170) + 'px';
+  const np = K.p(T, SEL[4] + 0.25, SEL[4] + 0.75, E.outExpo);
+  pnote.style.opacity = np; pnote.style.transform = `translateX(${(1 - np) * 40}px)`;
+  const r = win.getBoundingClientRect();
+  tagEx.style.left = L.wx + 'px'; tagEx.style.top = L.wy + L.wh + 18 + 'px';
+  if (tall) tagEx.style.top = L.wy - 46 + 'px', tagEx.style.left = L.wx + L.ww - 520 + 'px';
+  else tagEx.style.top = L.wy - 44 + 'px', tagEx.style.left = L.wx + L.ww - 520 + 'px';
+  tagEx.style.opacity = K.p(T, SEL[0], SEL[0] + 0.3, E.linear) * (1 - wo);
+  const stp = K.p(T, T_DRAFT, T_DRAFT + 0.5, E.outExpo);
+  status.style.transform = `translateY(${(1 - stp) * 92}px)`;
+  status.querySelector('.bt').style.boxShadow = `0 0 0 ${8 + 6 * Math.sin(T * 6)}px rgba(223,255,90,${0.25 * stp})`;
+
+  // captions: word by word
+  caps.forEach((c, i) => {
+    const pi = K.p(T, c.a, c.a + 0.45, E.outExpo), po = i === caps.length - 1 ? wo : K.p(T, c.b - 0.2, c.b, E.inCubic);
+    c.el.style.visibility = T >= c.a && T < c.b ? 'visible' : 'hidden';
+    c.el.style.opacity = pi * (1 - po);
+    c.el.style.transform = `translateY(${(1 - pi) * 40 - po * 30}px)`;
+    c.el.querySelectorAll('.w').forEach((w, j) => {
+      const at = SEL[j] - 0.05, p = K.p(T, at, at + 0.35, E.outExpo);
+      w.style.opacity = 0.25 + 0.75 * p; w.style.transform = `translateY(${(1 - p) * 14}px)`;
+    });
+  });
+  end(T);
+});
+</script></body></html>

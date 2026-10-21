@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F08 · Add to Cart</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1A1916; perspective: 2400px; }
+.side { position: absolute; left: 0; top: 0; overflow: hidden; backface-visibility: hidden; transform-style: preserve-3d; }
+.shop { background: #FFFDF8; color: #1F1F1F; }
+.hdr { position: absolute; display: flex; align-items: center; justify-content: space-between; }
+.hdr .nm { font: 700 44px/1 'Playfair Display'; letter-spacing: -0.01em; }
+.hdr .nm small { display: block; text-align: center; margin-top: 6px; font: 500 15px 'IBM Plex Mono', monospace; letter-spacing: .22em; color: #7E9A7E; text-transform: uppercase; }
+.bag { position: relative; width: 64px; height: 64px; display: grid; place-items: center; }
+.badge { position: absolute; right: -2px; top: -2px; width: 34px; height: 34px; border-radius: 50%; background: #E8603C; color: #FFFDF8; font: 800 20px 'Archivo'; display: grid; place-items: center; }
+.pimg { position: absolute; overflow: hidden; border-radius: 28px; background: #EEE8DC; }
+.pimg img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 40%; }
+.dots { position: absolute; left: 50%; bottom: 22px; display: flex; gap: 10px; transform: translateX(-50%); }
+.dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,253,248,.6); }
+.dots i:first-child { background: #FFFDF8; width: 30px; border-radius: 6px; }
+.heart { position: absolute; right: 22px; top: 22px; width: 70px; height: 70px; border-radius: 50%; background: rgba(255,253,248,.9); display: grid; place-items: center; }
+.ptitle { position: absolute; font: 800 54px/1.02 'Playfair Display'; letter-spacing: -0.02em; }
+.psub { position: absolute; font: 500 26px 'Archivo'; color: #6B645A; }
+.price { position: absolute; font: 700 44px 'Archivo'; text-align: right; }
+.price small { display: block; font: 500 16px 'IBM Plex Mono', monospace; color: #8A8378; letter-spacing: .08em; }
+.sizes { position: absolute; display: flex; gap: 14px; }
+.sizes span { padding: 10px 20px; border-radius: 14px; border: 2px solid #E2DBCE; font: 600 24px 'Archivo'; color: #45403A; }
+.sizes span.on { border-color: #1F1F1F; color: #1F1F1F; box-shadow: inset 0 0 0 1px #1F1F1F; }
+.btn { position: absolute; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; display: flex; align-items: center; justify-content: center; gap: 14px; font: 800 34px 'Archivo'; }
+.desc { position: absolute; font: 500 24px/1.5 'Archivo'; color: #8A8378; }
+.sheet { position: absolute; z-index: 20; background: #FFFDF8; border-radius: 40px 40px 0 0; box-shadow: 0 -40px 80px -30px rgba(31,31,31,.45); padding: 26px 40px; }
+.sheet .handle { width: 80px; height: 8px; border-radius: 4px; background: #D9D3C9; margin: 0 auto 22px; }
+.sheet .st { font: 800 44px/1.05 'Playfair Display'; display: flex; justify-content: space-between; align-items: baseline; }
+.sheet .st span { font: 500 20px 'IBM Plex Mono', monospace; color: #8A8378; }
+.body { position: absolute; left: 40px; right: 40px; }
+.item { display: flex; gap: 22px; align-items: center; padding: 22px 0; border-bottom: 1.5px solid #EEE8DC; }
+.item .th { width: 120px; height: 120px; border-radius: 16px; overflow: hidden; flex: none; }
+.item .th img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; }
+.item .n { font: 700 28px/1.2 'Archivo'; }
+.item .s { font: 500 22px 'Archivo'; color: #6B645A; margin-top: 4px; }
+.item .p { margin-left: auto; font: 700 28px 'Archivo'; }
+.row { display: flex; justify-content: space-between; padding: 14px 0; font: 500 26px 'Archivo'; color: #45403A; }
+.row.tot { font: 800 32px 'Archivo'; color: #1F1F1F; border-top: 1.5px solid #EEE8DC; padding-top: 20px; margin-top: 6px; }
+.row b { font-weight: 600; color: #1F1F1F; }
+.fld { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; margin-top: 14px; border-radius: 16px; border: 2px solid #E2DBCE; font: 500 25px 'Archivo'; color: #45403A; }
+.fld b { font: 600 25px 'Archivo'; color: #1F1F1F; }
+.fld .ml { font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #1F1F1F; }
+.okc { width: 120px; height: 120px; border-radius: 50%; background: #DFFF5A; display: grid; place-items: center; margin: 10px auto 0; box-shadow: 0 0 0 4px #1F1F1F; }
+.okt { margin-top: 24px; text-align: center; font: 800 54px/1.05 'Playfair Display'; }
+.oks { margin-top: 12px; text-align: center; font: 500 26px/1.35 'Archivo'; color: #6B645A; }
+.spin { width: 36px; height: 36px; border-radius: 50%; border: 5px solid rgba(250,247,238,.3); border-top-color: #DFFF5A; }
+.bcap { position: absolute; z-index: 30; font: 800 64px/1.02 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.bcap span { display: inline; background: #FFFDF8; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding: 2px 18px 6px; border-radius: 10px; line-height: 1.32; }
+.bcap em { font-style: italic; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); }
+.sell { background: radial-gradient(120% 80% at 50% 30%, #2A2823 0, #1A1916 70%); color: #FAF7EE; }
+.scap { position: absolute; z-index: 30; font: 800 64px/1.04 'Playfair Display'; letter-spacing: -0.02em; color: #FAF7EE; }
+.scap .k { display: block; margin-bottom: 12px; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,247,238,.55); }
+.scap em { font-style: italic; color: #DFFF5A; }
+.notif { position: absolute; z-index: 25; border-radius: 34px; background: rgba(250,247,238,.12); backdrop-filter: blur(16px); box-shadow: inset 0 0 0 1px rgba(250,247,238,.14), 0 30px 60px -30px rgba(0,0,0,.8); padding: 22px 26px; display: flex; gap: 20px; align-items: center; }
+.notif .ic { flex: none; width: 76px; height: 76px; border-radius: 18px; background: #FAF7EE; display: grid; place-items: center; }
+.notif .ic img { width: 52px; }
+.notif .t1 { font: 600 21px 'Archivo'; color: rgba(250,247,238,.6); display: flex; justify-content: space-between; }
+.notif .t2 { margin-top: 4px; font: 700 31px/1.2 'Archivo'; color: #FAF7EE; }
+.crop { position: absolute; z-index: 22; overflow: hidden; border-radius: 26px; background: #FAF7EE; box-shadow: 0 50px 90px -40px rgba(0,0,0,.9); }
+.crop img { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 780px; display: block; }
+.ring { position: absolute; border: 5px solid #DFFF5A; border-radius: 16px; box-shadow: 0 0 0 2px #1F1F1F; }
+.mcard { position: absolute; z-index: 23; border-radius: 28px; background: #FAF7EE; color: #1F1F1F; padding: 30px 34px; box-shadow: 0 50px 90px -40px rgba(0,0,0,.9); }
+.mcard .hd { font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #6B645A; display: flex; justify-content: space-between; }
+.mcard .hd b { background: #DFFF5A; color: #1F1F1F; padding: 2px 10px; border-radius: 6px; font-weight: 600; }
+.mrow { margin-top: 20px; }
+.mrow .l { display: flex; justify-content: space-between; font: 700 30px 'Archivo'; }
+.mrow .l span:last-child { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+.mrow .bar { margin-top: 10px; height: 14px; border-radius: 7px; background: #E8E2D6; overflow: hidden; }
+.mrow .bar b { display: block; height: 100%; border-radius: 7px; }
+.mrow.big .l { font-size: 36px; }
+.mnote { margin-top: 18px; font: 500 22px/1.3 'Archivo'; color: #45403A; }
+.approve { position: absolute; z-index: 26; display: flex; align-items: center; justify-content: center; gap: 16px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 46px 'Archivo'; white-space: nowrap; }
+.full { position: absolute; z-index: 27; overflow: hidden; border-radius: 30px; box-shadow: 0 50px 90px -40px rgba(0,0,0,.9), 0 0 0 6px #FAF7EE; }
+.full img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 60%; }
+.demo.dk { background: rgba(21,20,18,.8); color: rgba(250,247,238,.78); border-color: rgba(250,247,238,.35); }
+.touch { position: absolute; z-index: 45; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; background: rgba(31,31,31,.2); border: 3px solid rgba(31,31,31,.5); }
+.touch.lt { background: rgba(250,247,238,.4); border-color: rgba(250,247,238,.8); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .06; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F08 — the cart, from the buyer's side. A generic, drawn shop (a fictional "Paper & Pines", labelled sample) shows the
+// seller's printed botanical poster (a concept image). The buyer adds it to the cart, checks out and pays the store.
+// Then the screen flips to the seller's side: a notification, and the real order in the app (demo workspace, simulated)
+// waits for approval with the partner's cost and the margin (sample figures). The seller approves; the partner prints
+// and ships, paid from the seller's own partner account.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const IMG = K.pub('r04/g01-botanical-print.webp');
+
+const T_ADD = B(2), T_CART = B(2.6), T_CHK = B(4.4), T_PAY0 = B(5), T_PAY = B(5.9), T_DONE = B(6.4), T_FLIP = B(7.2);
+const T_NOTE = B(7.6), T_ORD = B(8.6), T_MARG = B(10), T_STAND = B(12.4), T_APV = B(13.6), T_TAP = B(14.4), T_SHIP = B(15.1), T_OUT = 12.7;
+
+const L = tall
+  ? { hdrY: 280, tagY: 372, imgY: 420, imgH: 500, tY: 946, sY: 1012, prY: 948, szY: 1290, btnY: 1146, btnH: 98, descY: 1400, sheetY: 620,
+      capX: 90, capY: 452, capFs: 64, scY: 290, scFs: 64, zY: 600, zH: 640, ntY: 620 }
+  : { hdrY: 60, tagY: 1252, imgY: 150, imgH: 560, tY: 744, sY: 812, prY: 746, szY: 870, btnY: 960, btnH: 96, descY: 1100, sheetY: 470,
+      capX: 90, capY: 180, capFs: 58, scY: 60, scFs: 58, zY: 400, zH: 880, ntY: 420 };
+const GX = 65;
+
+// ======================= the buyer's side: a drawn, generic shop =======================
+const shop = K.box(0, 0, W, H, { cls: 'side shop' });
+const bagSvg = '<svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="1.8" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>';
+if (tall) {
+  K.box(70, 34, W - 140, 50, { parent: shop, html: '<div style="display:flex;justify-content:space-between;font:700 30px Archivo"><span>9:41</span><span style="display:flex;gap:8px"><i style="width:30px;height:18px;background:#1F1F1F;border-radius:3px;display:block"></i><i style="width:46px;height:22px;background:#1F1F1F;border-radius:6px;display:block"></i></span></div>' });
+  K.box(0, 150, W, 84, { parent: shop, style: { background: '#E3EBDF', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "600 24px 'IBM Plex Mono', monospace", letterSpacing: '.1em', color: '#45403A' }, html: 'EVERY PRINT IS MADE TO ORDER' });
+}
+const hdr = K.box(GX, L.hdrY, W - 2 * GX, 80, { cls: 'hdr', parent: shop,
+  html: `<svg width="44" height="44" viewBox="0 0 24 24" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg><div class="nm">Paper &amp; Pines<small>prints · cards · paper goods</small></div><div class="bag">${bagSvg}<div class="badge">1</div></div>` });
+const badge = hdr.querySelector('.badge');
+const tagShop = K.demoTag('Sample store · drawn for this ad', 0, 0);
+const pimg = K.box(GX, L.imgY, W - 2 * GX, L.imgH, { cls: 'pimg', parent: shop,
+  html: `<img src="${IMG}" style="object-position:50% 34%"><div class="dots"><i></i><i></i><i></i><i></i></div><div class="heart"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></div>` });
+const pImgEl = pimg.querySelector('img');
+const tagC1 = K.demoTag('Concept image · AI-generated', 0, 0);
+K.box(GX, L.tY, 700, null, { cls: 'ptitle', parent: shop, html: 'Quiet Botanicals N°01' });
+K.box(GX, L.sY, 760, null, { cls: 'psub', parent: shop, html: 'Art print · 40 × 50 cm · printed to order' });
+K.box(W - GX - 240, L.prY, 240, null, { cls: 'price', parent: shop, html: '€40.00<small>SAMPLE PRICE</small>' });
+K.box(GX, tall ? 1062 : L.szY, W - 2 * GX, null, { cls: 'sizes', parent: shop, html: '<span>30 × 40</span><span class="on">40 × 50</span><span>50 × 70</span>' });
+const addBtn = K.box(GX, L.btnY, W - 2 * GX, L.btnH, { cls: 'btn', parent: shop, html: `<span>Add to cart</span>` });
+K.box(GX, L.descY, W - 2 * GX, null, { cls: 'desc', parent: shop, html: 'A quiet protea in graphite line with a terracotta sun. Printed on matte archival paper when you order, then shipped to you.' });
+
+// the cart sheet (cart → checkout → done)
+const sheet = K.box(0, L.sheetY, W, H - L.sheetY + 40, { cls: 'sheet', parent: shop, html: '<div class="handle"></div>' });
+const sh1 = K.el('div', { parent: sheet, cls: 'body', style: { top: '56px' }, html:
+  `<div class="st">Your cart<span>1 item</span></div>
+   <div class="item"><div class="th"><img src="${IMG}"></div><div><div class="n">Quiet Botanicals N°01</div><div class="s">Art print · 40 × 50 cm · qty 1</div></div><div class="p">€40.00</div></div>
+   <div class="row"><span>Shipping</span><b>€5.00</b></div><div class="row tot"><span>Total</span><span>€45.00</span></div>
+   <div class="row" style="font:500 18px 'IBM Plex Mono',monospace;color:#8A8378;padding-top:2px">SAMPLE PRICES</div>` });
+const sh2 = K.el('div', { parent: sheet, cls: 'body', style: { top: '56px' }, html:
+  `<div class="st">Checkout<span>€45.00</span></div>
+   <div class="fld"><span>Contact</span><b>Sample buyer</b></div>
+   <div class="fld"><span>Ship to</span><b>Germany</b></div>
+   <div class="fld"><span>Payment</span><span class="ml">CARD ●●●● · SAMPLE</span></div>` });
+const sh3 = K.el('div', { parent: sheet, cls: 'body', style: { top: '70px' }, html:
+  `<div class="okc"><svg width="64" height="64" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5L19.5 7" fill="none" stroke="#1F1F1F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+   <div class="okt">Order placed.</div><div class="oks">Thank you! Your print is made to order<br>and paid to Paper &amp; Pines.</div>` });
+const sBtnY = tall ? 1248 - L.sheetY - 120 : 1290 - L.sheetY - 160;
+const sBtn = K.el('div', { parent: sheet, cls: 'btn', style: { left: '40px', right: '40px', top: sBtnY + 'px', height: '100px' } });
+const bcaps = [
+  [0.05, T_ADD + 0.1, 'A buyer finds<br><em>your print.</em>'],
+  [T_ADD + 0.15, T_CHK - 0.05, 'Adds it<br>to the cart…'],
+  [T_CHK, T_FLIP, '…and pays<br><em>your store.</em>'],
+].map(([a, b, t]) => ({ a, b, el: K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'bcap', parent: shop, html: `<span>${t}</span>`, style: { fontSize: (tall ? 64 : 58) + 'px' } }) }));
+bcaps.forEach((c) => { c.el.querySelector('span').innerHTML = c.el.querySelector('span').innerHTML; });
+
+// ======================= the seller's side =======================
+const sell = K.box(0, 0, W, H, { cls: 'side sell' });
+const glow = K.box(0, 0, 1200, 1200, { parent: sell, style: { borderRadius: '50%', background: 'radial-gradient(circle, rgba(223,255,90,.10), rgba(223,255,90,0) 62%)' } });
+const glow2 = K.box(0, 0, 1300, 1300, { parent: sell, style: { borderRadius: '50%', background: 'radial-gradient(circle, rgba(232,96,60,.16), rgba(232,96,60,0) 62%)' } });
+const note = K.box(GX, L.ntY, W - 2 * GX, null, { cls: 'notif', parent: sell,
+  html: `<div class="ic"><img src="${K.brand('makeandlist-monogram.svg')}"></div><div style="flex:1"><div class="t1"><span>MAKEANDLIST · ORDERS</span><span>now</span></div><div class="t2">New print order from your store — waiting for you</div></div>` });
+function crop(src, sy, sh, x, y, w) {
+  const k = w / 780;
+  const c = K.box(x, y, w, sh * k, { cls: 'crop', parent: sell, html: `<img src="${K.screen(src)}">` });
+  c.querySelector('img').style.transform = `translate(0, ${-sy * k}px) scale(${k})`;
+  return c;
+}
+const cW = W - 2 * GX;
+const ord = crop('52-phone-order', 890, 372, GX, L.zY, cW);
+const kS = cW / 780;
+const mW = cW;
+const mcard = K.box(GX, L.zY, mW, null, { cls: 'mcard', parent: sell,
+  html: `<div class="hd"><span>Before you approve</span><b>Sample figures</b></div>
+  ${[['Buyer paid your store', '€45.00', 1, '#7E9A7E'], ['Partner cost', '−€18.40', 0.41, '#E8603C'], ['Shipping', '−€4.99', 0.11, '#E8603C'], ['Your margin', '€21.61', 0.48, '#DFFF5A']]
+    .map(([l, v, w, c], i) => `<div class="mrow${i === 3 ? ' big' : ''}"><div class="l"><span>${l}</span><span>${v}</span></div><div class="bar"><b style="background:${c}" data-w="${w}"></b></div></div>`).join('')}
+  <div class="mnote">The partner charges your own partner account — never Credits.</div>` });
+const mrows = [...mcard.querySelectorAll('.mrow')], mbars = [...mcard.querySelectorAll('.bar b')];
+const stY0 = 2760, stH = 340;
+const stand = crop('52-phone-order', stY0, stH, GX, L.zY, cW);
+const ring1 = K.el('div', { parent: stand, cls: 'ring', style: { left: 22 * kS + 'px', top: (2772 - stY0) * kS + 'px', width: 400 * kS + 'px', height: 150 * kS + 'px' } });
+const ring2 = K.el('div', { parent: stand, cls: 'ring', style: { left: 22 * kS + 'px', top: (2938 - stY0) * kS + 'px', width: 400 * kS + 'px', height: 150 * kS + 'px' } });
+const apW = tall ? 820 : 860, apH = 128;
+const approve = K.box((W - apW) / 2, L.zY + stH * kS + 50, apW, apH, { cls: 'approve', parent: sell,
+  html: '<svg width="46" height="46" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#1F1F1F" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Approve production</span>' });
+const fullH = tall ? 680 : 860;
+const full = K.box(GX, L.zY, cW, fullH, { cls: 'full', parent: sell, html: `<img src="${K.pub('r04/g20-parcel.webp')}">` });
+const fullImg = full.querySelector('img');
+const tagR = K.demoTag('Real app · demo workspace · simulated order', 0, 0); tagR.classList.add('dk');
+const tagC2 = K.demoTag('Concept image · AI-generated', 0, 0); tagC2.classList.add('dk');
+const scaps = [
+  [T_NOTE - 0.1, T_MARG - 0.05, 'Meanwhile, on your phone', 'The order <em>waits for you.</em>'],
+  [T_MARG - 0.05, T_STAND - 0.05, 'Before you say yes', 'The partner’s cost and <em>your margin.</em>'],
+  [T_STAND - 0.05, T_TAP + 0.05, 'Your call', 'Nothing is sent <em>until you approve.</em>'],
+  [T_SHIP - 0.1, T_OUT + 0.3, 'Printed per order', 'Your partner prints and ships it — <em>paid from your partner account.</em>'],
+].map(([a, b, k, t]) => ({ a, b, el: K.box(GX, L.scY, W - 2 * GX, null, { cls: 'scap', parent: sell, html: `<span class="k">${k}</span>${t}`, style: { fontSize: L.scFs + 'px' } }) }));
+
+const touch = K.box(0, 0, 0, 0, { cls: 'touch' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'They buy. You approve.<br>Your partner prints.' });
+
+function thumb(T, t, x, y, light) {
+  if (T < t - 0.5 || T > t + 0.35) return false;
+  const tp = K.p(T, t - 0.5, t - 0.02, E.inOutCubic);
+  touch.className = 'touch' + (light ? ' lt' : '');
+  touch.style.left = x + 130 * (1 - tp) + 'px'; touch.style.top = y + 150 * (1 - tp) + 'px';
+  touch.style.opacity = Math.min(1, tp * 2) * (1 - K.p(T, t + 0.1, t + 0.35, E.linear));
+  touch.style.transform = `scale(${T >= t - 0.04 && T < t + 0.12 ? 0.8 : 1})`;
+  return true;
+}
+
+K.run({
+  id: 'F08', title: 'Add to Cart', dur: DUR, bpm: BPM, music: 'bouncing', mood: 'bright', key: 'G', intro: 0.0, cover: 2.6,
+  technique: 'A drawn, generic shop app seen from the buyer’s thumb — product page, add to cart (badge pops), a bottom sheet that becomes checkout and “Order placed” — then the whole screen flips in 3D to the seller’s dark side, where a notification opens the real order (demo, simulated), a sample margin card fills, the real “where it stands” rows are ringed and an Approve button is pressed; a doorstep parcel closes the loop',
+  caption: 'A buyer adds your printed poster to the cart and pays your store. The order waits for you in MakeAndList with the partner’s cost and your margin; nothing goes to print until you approve, and your own print partner prints and ships it, paid from your partner account. Shop, poster and prices are samples. Start free at makeandlist.com',
+  short: 'They buy. You approve. Your partner prints.',
+  question: 'Can I sell physical products too?', gain: 'Physical products without stock, with your yes before anything is printed',
+  beats: ['0–1.6 s: “A buyer finds your print.” — a drawn sample shop, the concept botanical poster', '1.6–3.3 s: Add to cart — the badge pops, the cart sheet slides up (sample prices)', '3.3–5.4 s: checkout, pay, “Order placed” — the buyer pays your store', '5.4–7.4 s: flip to the seller: a notification, the real order waits for you', '7.4–9.2 s: the partner’s cost and your margin (sample figures)', '9.2–11.2 s: nothing is sent until you approve — Approve production is pressed', '11.2–13 s: your partner prints and ships, paid from your partner account', '13–15 s: end card'],
+  cues: [[0.0, 'pop'], [T_ADD, 'click'], [T_ADD + 0.12, 'pop'], [T_CART, 'swish'], [T_CHK, 'click'], [T_PAY0, 'swish'], [T_PAY, 'click'], [T_DONE, 'chime'],
+    [T_FLIP - 0.25, 'whoosh'], [T_NOTE, 'notify'], [T_ORD - 0.1, 'swish'], [T_ORD + 0.1, 'pop'], [T_MARG, 'swish'], [T_MARG + 0.6, 'coin'], [T_STAND, 'swish'], [T_STAND + 0.7, 'pop'],
+    [T_APV, 'pop'], [T_TAP, 'click'], [T_TAP + 0.16, 'chime'], [T_SHIP - 0.12, 'whoosh'], [T_SHIP + 0.3, 'box'], [T_OUT, 'swish'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // ---------- the flip between the two sides ----------
+  const fl = K.p(T, T_FLIP - 0.35, T_FLIP + 0.25, E.inOutCubic);
+  shop.style.transform = `rotateY(${-fl * 180}deg) scale(${1 - Math.sin(fl * Math.PI) * 0.12})`;
+  sell.style.transform = `rotateY(${180 - fl * 180}deg) scale(${1 - Math.sin(fl * Math.PI) * 0.12})`;
+  shop.style.visibility = fl < 0.5 ? 'visible' : 'hidden';
+  sell.style.visibility = fl >= 0.5 ? 'visible' : 'hidden';
+
+  // ---------- the shop ----------
+  const inP = K.p(T, 0, 0.6, E.outExpo);
+  pImgEl.style.transform = `scale(${1.12 - 0.06 * inP + T * 0.006})`;
+  pimg.style.transform = `translateY(${(1 - inP) * 30}px)`;
+  tagShop.style.left = (tall ? (W - 380) / 2 : GX) + 'px'; tagShop.style.top = L.tagY + 'px';
+  tagShop.style.opacity = (1 - fl) * K.p(T, 0.2, 0.5, E.linear);
+  tagC1.style.left = GX + 20 + 'px'; tagC1.style.top = L.imgY + L.imgH - 56 + 'px';
+  tagC1.style.opacity = (1 - fl) * (1 - K.p(T, T_CART, T_CART + 0.2, E.linear)) * K.p(T, 0.2, 0.5, E.linear);
+  const bp = K.p(T, T_ADD + 0.1, T_ADD + 0.5, E.outBack);
+  badge.style.transform = `scale(${bp})`; badge.style.opacity = Math.min(1, bp * 3);
+  addBtn.style.transform = `scale(${T >= T_ADD - 0.04 && T < T_ADD + 0.12 ? 0.96 : 1})`;
+  addBtn.firstChild.textContent = T >= T_ADD + 0.05 ? 'Added ✓' : 'Add to cart';
+  addBtn.style.background = T >= T_ADD + 0.05 ? '#DFFF5A' : '#1F1F1F';
+  addBtn.style.color = T >= T_ADD + 0.05 ? '#1F1F1F' : '#FAF7EE';
+  // sheet
+  const sp = K.p(T, T_CART, T_CART + 0.55, E.outExpo);
+  sheet.style.transform = `translateY(${(1 - sp) * (H - L.sheetY + 60)}px)`;
+  sheet.style.visibility = T >= T_CART ? 'visible' : 'hidden';
+  const c2 = K.p(T, T_PAY0 - 0.05, T_PAY0 + 0.3, E.inOutCubic), c3 = K.p(T, T_DONE, T_DONE + 0.3, E.inOutCubic);
+  sh1.style.opacity = 1 - c2; sh1.style.transform = `translateX(${-c2 * 80}px)`;
+  sh2.style.opacity = c2 * (1 - c3); sh2.style.transform = `translateX(${(1 - c2) * 80 - c3 * 80}px)`;
+  const okp = K.p(T, T_DONE, T_DONE + 0.5, E.outBack);
+  sh3.style.opacity = c3; sh3.style.transform = `translateX(${(1 - c3) * 80}px)`;
+  sh3.querySelector('.okc').style.transform = `scale(${0.4 + 0.6 * okp})`;
+  const paying = T >= T_PAY + 0.05 && T < T_DONE;
+  sBtn.innerHTML = T < T_PAY0 ? 'Checkout · €45.00' : paying ? '<div class="spin"></div>' : 'Pay €45.00';
+  if (paying) sBtn.querySelector('.spin').style.transform = `rotate(${T * 720}deg)`;
+  sBtn.style.opacity = 1 - c3;
+  sBtn.style.transform = `scale(${(T >= T_CHK - 0.04 && T < T_CHK + 0.12) || (T >= T_PAY - 0.04 && T < T_PAY + 0.12) ? 0.96 : 1})`;
+  // captions over the photo
+  bcaps.forEach((c, i) => {
+    const pi = K.p(T, c.a, c.a + 0.45, E.outExpo), po = K.p(T, c.b - 0.2, c.b, E.inCubic);
+    c.el.style.visibility = T >= c.a && T < c.b ? 'visible' : 'hidden';
+    c.el.style.opacity = pi * (1 - po);
+    c.el.style.transform = `translateY(${(1 - pi) * 36 - po * 24}px) rotate(${-1.5 + (1 - pi) * -2}deg)`;
+    // once the sheet is up, the caption sits above it
+    c.el.style.top = (i === 0 ? L.capY : (tall ? L.capY : L.capY - 20)) + 'px';
+  });
+
+  // ---------- the seller ----------
+  glow.style.transform = `translate(${W * 0.8 - 600 + Math.cos(T * 0.4) * 120}px, ${H * 0.7 - 600 + Math.sin(T * 0.5) * 90}px)`;
+  glow2.style.transform = `translate(${W * 0.15 - 650 + Math.sin(T * 0.35) * 120}px, ${H * 0.25 - 650 + Math.cos(T * 0.3) * 90}px)`;
+  const win = (a, b) => [K.p(T, a, a + 0.55, E.outExpo), K.p(T, b - 0.3, b, E.inCubic)];
+  const np = K.p(T, T_NOTE, T_NOTE + 0.45, E.outBack);
+  const no = K.p(T, T_ORD - 0.25, T_ORD + 0.1, E.inCubic);
+  note.style.opacity = Math.min(1, np * 2) * (1 - no);
+  note.style.transform = `translateY(${(1 - np) * -140 - no * 80}px) scale(${0.92 + 0.08 * np})`;
+  const [i1, o1] = win(T_ORD, T_MARG);
+  ord.style.visibility = T >= T_ORD && T < T_MARG ? 'visible' : 'hidden';
+  ord.style.opacity = i1 * (1 - o1);
+  ord.style.transform = `translateY(${(1 - i1) * 90 - o1 * 50}px) rotate(${(1 - i1) * 3}deg)`;
+  const [i2, o2] = win(T_MARG, T_STAND);
+  mcard.style.visibility = T >= T_MARG && T < T_STAND ? 'visible' : 'hidden';
+  mcard.style.opacity = i2 * (1 - o2);
+  mcard.style.transform = `translateY(${(1 - i2) * 90 - o2 * 50}px) rotate(${(1 - i2) * -3}deg)`;
+  mbars.forEach((b, i) => {
+    const at = T_MARG + 0.3 + i * 0.32;
+    b.style.width = K.p(T, at, at + 0.55, E.outCubic) * 100 * Number(b.dataset.w) + '%';
+    mrows[i].style.opacity = 0.35 + 0.65 * K.p(T, at - 0.1, at + 0.2, E.linear);
+  });
+  const [i3, o3] = win(T_STAND, T_SHIP);
+  stand.style.visibility = T >= T_STAND && T < T_SHIP ? 'visible' : 'hidden';
+  stand.style.opacity = i3 * (1 - o3);
+  stand.style.transform = `translateY(${(1 - i3) * 90 - o3 * 50}px)`;
+  [ring1, ring2].forEach((r, i) => {
+    const at = T_STAND + 0.6 + i * 0.35;
+    const p = K.p(T, at, at + 0.35, E.outBack);
+    r.style.opacity = K.p(T, at, at + 0.1, E.linear); r.style.transform = `scale(${1.15 - 0.15 * p})`;
+  });
+  const ia = K.p(T, T_APV, T_APV + 0.45, E.outBack);
+  const press = T >= T_TAP - 0.04 && T < T_TAP + 0.12;
+  const tapped = K.p(T, T_TAP, T_TAP + 0.3, E.outCubic);
+  approve.style.visibility = T >= T_APV && T < T_SHIP ? 'visible' : 'hidden';
+  approve.style.opacity = Math.min(1, ia * 2) * (1 - o3);
+  approve.style.transform = `translateY(${(1 - ia) * 60 - o3 * 50}px) scale(${(0.85 + 0.15 * ia) * (press ? 0.94 : 1)})`;
+  approve.style.background = tapped > 0.5 ? '#FAF7EE' : '#DFFF5A';
+  approve.lastChild.textContent = tapped > 0.5 ? 'Approved by you' : 'Approve production';
+  approve.style.boxShadow = `0 0 0 ${(1 - tapped) * 40 * (T >= T_TAP ? 1 : 0)}px rgba(223,255,90,${0.4 * (1 - tapped)}), 0 30px 60px -24px rgba(223,255,90,.45)`;
+  const fp = K.p(T, T_SHIP, T_SHIP + 0.6, E.outExpo), fo = K.p(T, T_OUT, 13.0, E.inCubic);
+  full.style.visibility = T >= T_SHIP ? 'visible' : 'hidden';
+  full.style.opacity = Math.min(1, fp * 1.5) * (1 - fo);
+  full.style.transform = `translateY(${(1 - fp) * 120}px) rotate(${(1 - fp) * 3 - 1}deg)`;
+  fullImg.style.objectPosition = `50% ${tall ? 62 : 55}%`;
+  fullImg.style.transform = `scale(${1.15 - 0.08 * K.p(T, T_SHIP, 13, E.outCubic)})`;
+  // tags
+  const realOn = (T >= T_ORD && T < T_MARG ? i1 * (1 - o1) : 0) + (T >= T_STAND && T < T_SHIP ? i3 * (1 - o3) : 0);
+  tagR.style.opacity = realOn;
+  tagR.style.left = GX + 'px';
+  tagR.style.top = (T < T_MARG ? L.zY + 372 * kS + 24 : T_APV <= T ? L.zY + stH * kS + 50 + apH + 26 : L.zY + stH * kS + 22) + 'px';
+  tagC2.style.opacity = full.style.opacity; tagC2.style.left = GX + 24 + 'px'; tagC2.style.top = L.zY + fullH - 60 + 'px';
+  scaps.forEach((c, i) => {
+    const pi = K.p(T, c.a, c.a + 0.45, E.outExpo), po = i === scaps.length - 1 ? fo : K.p(T, c.b - 0.2, c.b, E.inCubic);
+    c.el.style.visibility = T >= c.a && T < c.b ? 'visible' : 'hidden';
+    c.el.style.opacity = pi * (1 - po);
+    c.el.style.transform = `translateY(${(1 - pi) * 36 - po * 24}px)`;
+  });
+
+  // ---------- thumb ----------
+  touch.style.opacity = 0;
+  const sTop = L.sheetY + sBtnY + 50;
+  thumb(T, T_ADD, W * 0.62, L.btnY + L.btnH / 2) || thumb(T, T_CHK, W * 0.62, sTop) || thumb(T, T_PAY, W * 0.62, sTop) ||
+    thumb(T, T_TAP, W / 2 + 120, L.zY + stH * kS + 50 + apH / 2, true);
+  end(T);
+});
+</script></body></html>

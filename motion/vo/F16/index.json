@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.2,
+  "text": "Meet MakeAndList, made for small sellers.",
+  "file": "01-2f30bf9e9a.wav",
+  "dur": 2.51
+ },
+ {
+  "t": 3,
+  "text": "Describe a product, and see the price first.",
+  "file": "02-5cb6716088.wav",
+  "dur": 3.11
+ },
+ {
+  "t": 6.4,
+  "text": "Then review the real files.",
+  "file": "03-b7f40a4cec.wav",
+  "dur": 2.09
+ },
+ {
+  "t": 8.8,
+  "text": "Send it to your own stores, when you say.",
+  "file": "04-bf21db7b59.wav",
+  "dur": 2.93
+ },
+ {
+  "t": 13.25,
+  "text": "Start free.",
+  "file": "05-356d92936e.wav",
+  "dur": 0.84
+ }
+]

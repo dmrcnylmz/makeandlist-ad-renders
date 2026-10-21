@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F02 · Messages</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F7F3EA; }
+.bg { position: absolute; inset: 0; background: linear-gradient(180deg, #FBF8F1 0, #F7F3EA 100%); }
+.status { position: absolute; z-index: 30; display: flex; justify-content: space-between; align-items: center; font: 700 34px 'Archivo'; color: #1F1F1F; }
+.status .bt { display: flex; gap: 12px; align-items: center; }
+.status .bt i { display: block; border-radius: 4px; background: #1F1F1F; }
+.hdr { position: absolute; z-index: 30; display: flex; align-items: center; gap: 24px; }
+.hdr .bk { font: 400 64px 'Archivo'; color: #45403A; margin-right: 6px; }
+.hdr .av { width: 92px; height: 92px; border-radius: 50%; background: #7E9A7E; color: #FFFDF8; display: grid; place-items: center; font: 800 44px 'Playfair Display'; }
+.hdr .nm { font: 700 40px 'Archivo'; color: #1F1F1F; }
+.hdr .sb { margin-top: 4px; font: 500 21px 'IBM Plex Mono', monospace; color: #8A8378; letter-spacing: .03em; }
+.hline { position: absolute; z-index: 30; left: 0; right: 0; height: 1px; background: #E2DBCE; }
+.view { position: absolute; z-index: 10; overflow: hidden; }
+.thread { position: absolute; left: 0; right: 0; top: 0; }
+.msg { position: absolute; max-width: 76%; padding: 22px 30px; border-radius: 40px; font: 500 44px/1.2 'Archivo'; letter-spacing: -0.01em; transform-origin: 0 100%; }
+.msg.them { left: 0; background: #E9E4D9; color: #1F1F1F; border-bottom-left-radius: 12px; }
+.msg.me { right: 0; background: #1F1F1F; color: #FAF7EE; border-bottom-right-radius: 12px; transform-origin: 100% 100%; }
+.msg.me.lime { background: #DFFF5A; color: #1F1F1F; font-weight: 700; }
+.msg.link { padding: 0; overflow: hidden; background: #FFFDF8; color: #1F1F1F; box-shadow: 0 0 0 2px #1F1F1F; }
+.msg.link .lt { padding: 22px 28px 6px; font: 800 40px 'Archivo'; }
+.msg.link .lu { padding: 0 28px 22px; font: 500 24px 'IBM Plex Mono', monospace; color: #6B645A; }
+.msg.link .lb { height: 14px; background: #DFFF5A; }
+.clip { position: absolute; right: 0; border-radius: 34px; overflow: hidden; background: #1F1F1F; padding: 10px; transform-origin: 100% 100%; }
+.clip .scr { position: relative; overflow: hidden; border-radius: 26px; background: #FAF7EE; }
+.clip .scr img { position: absolute; display: block; }
+.clip .pl { position: absolute; z-index: 3; right: 22px; bottom: 36px; display: flex; align-items: center; gap: 10px; padding: 8px 16px 8px 12px; border-radius: 99px; background: rgba(31,31,31,.82); color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; }
+.clip .pl i { width: 0; height: 0; border-left: 16px solid #DFFF5A; border-top: 10px solid transparent; border-bottom: 10px solid transparent; display: block; }
+.clip .bar { position: absolute; z-index: 3; left: 26px; right: 26px; height: 6px; border-radius: 3px; background: rgba(31,31,31,.18); }
+.clip .bar b { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: #1F1F1F; }
+.clip .cap { padding: 12px 10px 4px; font: 500 20px 'IBM Plex Mono', monospace; color: #CFC8BB; letter-spacing: .02em; white-space: nowrap; }
+.typ { position: absolute; font: 400 15px/1.35 'Archivo'; color: #1F1F1F; background: #FFFDF8; }
+.typ i { display: inline-block; width: 2px; height: 1.1em; background: #1F1F1F; vertical-align: -3px; margin-left: 1px; }
+.dots { position: absolute; left: 0; padding: 26px 30px; border-radius: 40px; border-bottom-left-radius: 12px; background: #E9E4D9; display: flex; gap: 12px; }
+.dots i { width: 16px; height: 16px; border-radius: 50%; background: #8A8378; display: block; }
+.read { position: absolute; right: 8px; font: 500 22px 'Archivo'; color: #8A8378; white-space: nowrap; }
+.comp { position: absolute; z-index: 30; display: flex; align-items: center; gap: 18px; }
+.comp .in { flex: 1; min-height: 88px; border-radius: 44px; border: 2px solid #D9D3C9; background: #FFFDF8; display: flex; align-items: center; padding: 0 32px; font: 400 38px 'Archivo'; color: #1F1F1F; white-space: nowrap; overflow: hidden; }
+.comp .in.ph { color: #A39B8E; }
+.comp .in i { display: inline-block; width: 3px; height: 1em; background: #1F1F1F; margin-left: 2px; }
+.comp .sd { width: 88px; height: 88px; border-radius: 50%; background: #1F1F1F; display: grid; place-items: center; flex: none; }
+.kb { position: absolute; z-index: 25; left: 0; right: 0; bottom: 0; background: #E4DFD4; border-top: 1px solid #D3CCBF; }
+.kb .r { position: absolute; left: 0; right: 0; display: flex; justify-content: center; gap: 12px; }
+.kb .k { height: 108px; border-radius: 14px; background: #FFFDF8; box-shadow: 0 3px 0 #BDB5A7; display: grid; place-items: center; font: 400 44px 'Archivo'; color: #1F1F1F; }
+.kb .k.on { background: #1F1F1F; color: #FAF7EE; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F02 — a message thread with a friend (a sample, dramatized). "ok how do you make so many products??" She answers
+// the way people do: short texts and screen-recording clips of the real app — one sentence typed into Create, the
+// finished product with its pages, images and video, then the Send step that keeps it not for sale until she confirms.
+// "does it post them for you" → "nope. it waits for my yes". The last bubble is a link card: makeandlist.com.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 103.4, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const L = tall
+  ? { stY: 52, hdrY: 132, hlineY: 262, tagY: 282, vX: 50, vY: 330, vW: 980, vH: 900, fs: 50, compY: 1262, kbH: 560, clipW: 600 }
+  : { stY: 20, hdrY: 72, hlineY: 190, tagY: 206, vX: 60, vY: 250, vW: 960, vH: 950, fs: 44, compY: 1224, kbH: 0, clipW: 560 };
+
+// [who, kind, time, text | clip]
+const T0 = 0.15;
+const MSGS = [
+  ['them', 'text', T0, 'ok how do you make so many products??'],
+  ['me', 'text', B(2.6), 'honestly? I describe one'],
+  ['me', 'clip', B(3.6), { scr: '22-phone-create', sx: 30, sy: 430, sw: 720, sh: 400, dur: '0:04', cap: 'Real app · demo workspace' }],
+  ['them', 'text', B(7.4), 'and it just… makes it?'],
+  ['me', 'clip', B(9), { scr: '24-phone-product', sx: 30, sy: 1150, sw: 720, sh: 420, dur: '0:06', cap: 'Real app · demo workspace' }],
+  ['me', 'text', B(11.4), 'pages, listing, images. I check every file'],
+  ['them', 'text', B(13.6), 'wait does it post them for you'],
+  ['me', 'lime', B(15.2), 'nope. it waits for my yes'],
+  ['me', 'clip', B(16.4), { scr: '72-phone-listing-send', sx: 30, sy: 3196, sw: 720, sh: 300, dur: '0:03', cap: 'Real app · demo workspace' }],
+  ['them', 'text', B(19.2), 'ok send me the link'],
+  ['me', 'link', B(20.6), ''],
+];
+const GAP = 18, GROUP = 34;
+
+K.box(0, 0, W, H, { cls: 'bg' });
+K.box(64, L.stY, W - 128, 50, { cls: 'status', html: '<span>9:41</span><span class="bt"><i style="width:8px;height:16px"></i><i style="width:8px;height:22px"></i><i style="width:8px;height:28px"></i><i style="width:52px;height:26px;border-radius:8px;margin-left:10px"></i></span>' });
+K.box(40, L.hdrY, W - 80, 100, { cls: 'hdr', html: '<span class="bk">‹</span><span class="av">M</span><span><div class="nm">Maya</div><div class="sb">sample chat · dramatized</div></span>' });
+K.box(0, L.hlineY, W, 1, { cls: 'hline' });
+const tag = K.demoTag('Sample conversation · not a real customer', L.vX, L.tagY); tag.style.zIndex = 31;
+
+const view = K.box(L.vX, L.vY, L.vW, L.vH, { cls: 'view' });
+const thread = K.el('div', { parent: view, cls: 'thread' });
+const els = MSGS.map(([who, kind, , c]) => {
+  if (kind === 'clip') {
+    const s = L.clipW / c.sw, h = c.sh * s;
+    const el = K.el('div', { parent: thread, cls: 'clip', style: { width: L.clipW + 20 + 'px' } });
+    const scr = K.el('div', { parent: el, cls: 'scr', style: { width: L.clipW + 'px', height: h + 'px' } });
+    const img = K.el('img', { parent: scr, src: K.screen(c.scr), style: { width: 780 * s + 'px', left: -c.sx * s + 'px', top: -c.sy * s + 'px' } });
+    const pl = K.el('div', { parent: scr, cls: 'pl', html: '<i></i>' + c.dur });
+    const bar = K.el('div', { parent: scr, cls: 'bar', html: '<b></b>', style: { bottom: '18px' } });
+    K.el('div', { parent: el, cls: 'cap', html: c.cap });
+    return { el, img, bar: bar.firstChild, s, c };
+  }
+  if (kind === 'link') return { el: K.el('div', { parent: thread, cls: 'msg me link', html: '<div class="lb"></div><div class="lt">MakeAndList · start free</div><div class="lu">makeandlist.com</div>' }) };
+  return { el: K.el('div', { parent: thread, cls: 'msg ' + (who === 'me' ? 'me' : 'them') + (kind === 'lime' ? ' lime' : ''), html: c, style: { fontSize: L.fs + 'px' } }) };
+});
+// the sentence typed inside the first clip (the real Create textarea sits at y 588 of the shot)
+const c0 = els[2];
+const typ = K.el('div', { parent: c0.el.querySelector('.scr'), cls: 'typ', style: { left: (66 - 30) * c0.s + 'px', top: (590 - 430) * c0.s + 'px', width: 640 * c0.s + 'px', height: 180 * c0.s + 'px', fontSize: 27 * c0.s + 'px', padding: 8 * c0.s + 'px' } });
+const SENT = 'A botanical wedding planner, 36 printable pages, A4 and US Letter';
+const dots = K.el('div', { parent: thread, cls: 'dots', html: '<i></i><i></i><i></i>' });
+const read = K.el('div', { parent: thread, cls: 'read', html: 'Read 9:42' });
+
+const comp = K.box(50, L.compY, W - 100, 88, { cls: 'comp', html: '<div class="in"></div><div class="sd"><svg width="40" height="40" viewBox="0 0 24 24"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5" fill="none" stroke="#DFFF5A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' });
+const inp = comp.firstChild;
+let kb = null; const keyEls = {};
+if (tall) {
+  kb = K.box(0, H - L.kbH, W, L.kbH, { cls: 'kb' });
+  const kw = (W - 24 - 9 * 12) / 10;
+  ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'].forEach((r, ri) => {
+    const row = K.el('div', { parent: kb, cls: 'r', style: { top: 30 + ri * 128 + 'px' } });
+    r.split('').forEach((ch) => { keyEls[ch] = K.el('div', { parent: row, cls: 'k', html: ch, style: { width: kw + 'px' } }); });
+  });
+  const r4 = K.el('div', { parent: kb, cls: 'r', style: { top: 30 + 3 * 128 + 'px' } });
+  keyEls[' '] = K.el('div', { parent: r4, cls: 'k', style: { width: kw * 6 + 'px' } });
+}
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Make more.<br>It waits for your yes.' });
+
+// layout is measured once (fonts are loaded before the first draw)
+let Y = null, HT = null;
+function measure() {
+  Y = []; HT = []; let y = 0;
+  els.forEach((e, i) => {
+    if (i > 0) y += MSGS[i][0] === MSGS[i - 1][0] ? GAP : GROUP;
+    Y.push(y); HT.push(e.el.offsetHeight); e.el.style.top = y + 'px'; y += e.el.offsetHeight;
+  });
+}
+
+K.run({
+  id: 'F02', title: 'Messages', dur: DUR, bpm: BPM, music: 'earth', mood: 'bright', key: 'D', intro: 0.0, cover: 6.4,
+  technique: 'A hand-drawn, unbranded message thread (sample, dramatized): the friend’s question is the hook, typing dots and a composer that types before each send, the thread scrolling as bubbles pop on the beat; the answers are screen-recording clips of the real app (a sentence typed into Create, the finished product, the Send step), the key reply in lime, a link card last',
+  caption: '“How do you make so many products?” Describe one, check every file, and it waits for your yes before anything goes to a store. The chat is a dramatized sample; the clips are the real app in a demo workspace. Start free at makeandlist.com',
+  short: 'It waits for my yes.',
+  question: 'How does it work?', gain: 'Time, with control: drafts first',
+  beats: ['0–1.5 s: “ok how do you make so many products??”', '1.5–4.2 s: “honestly? I describe one” + a clip: a sentence typed into the real Create box', '4.2–6.6 s: “and it just… makes it?” + a clip of the finished product (pages, images, video)', '6.6–8.8 s: “I check every file” · “wait does it post them for you”', '8.8–11 s: “nope. it waits for my yes” + a clip of the real Send step', '11–13 s: “ok send me the link” → makeandlist.com; 13–15 s end card'],
+  cues: [[T0, 'notify'], ...MSGS.slice(1).map(([who, kind, t]) => [+(t - 0.02).toFixed(3), who === 'them' ? 'notify' : kind === 'clip' ? 'swish' : kind === 'lime' ? 'chime' : 'pop']),
+    [+(B(2.6) - 0.62).toFixed(3), 'type'], [+(B(4.3)).toFixed(3), 'type'], [+(B(11.4) - 0.62).toFixed(3), 'type'], [+(B(15.2) - 0.62).toFixed(3), 'type'], [+(B(20.6) - 0.5).toFixed(3), 'click'], [13.0, 'hit']],
+}, (T) => {
+  if (!Y) measure();
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // scroll: each new bubble pushes the thread up so it sits at the bottom of the view
+  let S = 0;
+  MSGS.forEach(([, , t], i) => { const target = Math.max(0, Y[i] + HT[i] - L.vH + 10); S = K.lerp(S, Math.max(S, target), K.p(T, t - 0.05, t + 0.35, E.outCubic)); });
+  thread.style.transform = `translateY(${-S}px)`;
+
+  els.forEach((e, i) => {
+    const [who, kind, t] = MSGS[i];
+    const p = K.p(T, t, t + 0.4, E.outBack);
+    e.el.style.opacity = T >= t ? Math.min(1, p * 3) : 0;
+    e.el.style.transform = `translateY(${(1 - p) * 40}px) scale(${0.7 + 0.3 * p})`;
+    if (kind === 'clip') {
+      // the clip "plays": progress bar runs, the screen drifts
+      const pr = K.clamp((T - t) / 2.2);
+      e.bar.style.width = pr * 100 + '%';
+      if (i !== 2) e.img.style.transform = `translateY(${-pr * 30 * e.s}px) scale(${1 + 0.02 * pr})`;
+    }
+  });
+  // typing inside the first clip
+  const ta = MSGS[2][2] + 0.25;
+  const n = Math.round(K.p(T, ta, ta + 1.4, E.linear) * SENT.length);
+  typ.innerHTML = SENT.slice(0, n) + (f % 16 < 9 ? '<i></i>' : '');
+
+  // typing dots before each of the friend's messages (after the first)
+  let dOn = 0, dY = 0;
+  MSGS.forEach(([who, , t], i) => {
+    if (who !== 'them' || i === 0) return;
+    const a = t - 0.75;
+    if (T >= a && T < t) { dOn = K.p(T, a, a + 0.2, E.outCubic); dY = Y[i]; }
+  });
+  dots.style.opacity = dOn; dots.style.top = dY + 'px';
+  [...dots.children].forEach((d, k) => { d.style.transform = `translateY(${Math.sin(T * 12 - k * 0.9) * 5}px)`; });
+  // read receipt under the last text of mine before the friend answers
+  const rIdx = 7;
+  read.style.top = Y[rIdx] + HT[rIdx] + 8 + 'px';
+  read.style.opacity = K.win(T, MSGS[rIdx][2] + 0.5, MSGS[9][2] - 0.6, 0.2);
+
+  // composer: my texts are typed before they are sent
+  let txt = '', key = null;
+  MSGS.forEach(([who, kind, t, c]) => {
+    if (who !== 'me' || (kind !== 'text' && kind !== 'lime')) return;
+    const a = t - 0.62;
+    if (T >= a && T < t) { const k = Math.round(K.p(T, a, t - 0.06, E.linear) * c.length); txt = c.slice(0, k); key = c[Math.max(0, k - 1)]; }
+  });
+  if (txt) { inp.className = 'in'; inp.innerHTML = txt + '<i></i>'; } else { inp.className = 'in ph'; inp.innerHTML = 'Message'; }
+  comp.style.opacity = K.p(T, 0, 0.3, E.linear);
+  Object.entries(keyEls).forEach(([ch, el]) => el.classList.toggle('on', key !== null && key.toLowerCase() === ch));
+
+  end(T);
+});
+</script></body></html>

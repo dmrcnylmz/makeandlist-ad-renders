@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.3,
+  "text": "Quick poll: poster, tee or mug?",
+  "file": "01-c2d44aa284.wav",
+  "dur": 2.32
+ },
+ {
+  "t": 2.95,
+  "text": "Trick question. All three.",
+  "file": "02-63d916f548.wav",
+  "dur": 2.42
+ },
+ {
+  "t": 5.6,
+  "text": "Each printed per order by your own print partner.",
+  "file": "03-bb3ca99707.wav",
+  "dur": 3.34
+ },
+ {
+  "t": 9.2,
+  "text": "No stock. Orders wait for your yes.",
+  "file": "04-f853d70844.wav",
+  "dur": 2.51
+ }
+]

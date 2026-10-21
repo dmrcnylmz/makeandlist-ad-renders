@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.15,
+  "text": "One sentence went in.",
+  "file": "01-d3f95d3643.wav",
+  "dur": 1.72
+ },
+ {
+  "t": 1.95,
+  "text": "Here's what came back.",
+  "file": "02-da31c1329d.wav",
+  "dur": 1.25
+ },
+ {
+  "t": 3.3,
+  "text": "The pages, the listing copy, the images, a video.",
+  "file": "03-f7cb95141a.wav",
+  "dur": 4.51
+ },
+ {
+  "t": 7.95,
+  "text": "Even a printed edition.",
+  "file": "04-f2cc24b0f3.wav",
+  "dur": 2.04
+ },
+ {
+  "t": 10,
+  "text": "It all stays a draft until you say yes.",
+  "file": "05-9a8e989ea5.wav",
+  "dur": 2.37
+ }
+]

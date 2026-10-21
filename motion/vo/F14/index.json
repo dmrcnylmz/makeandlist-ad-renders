@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.2,
+  "text": "Three steps.",
+  "file": "01-0d2a0d66ce.wav",
+  "dur": 1.44
+ },
+ {
+  "t": 1.75,
+  "text": "Describe it in a sentence.",
+  "file": "02-799023f296.wav",
+  "dur": 1.86
+ },
+ {
+  "t": 4,
+  "text": "See the price, then review the files.",
+  "file": "03-150f5c6b61.wav",
+  "dur": 3.76
+ },
+ {
+  "t": 8.2,
+  "text": "Choose your stores. It goes live when you say.",
+  "file": "04-5c7d049a09.wav",
+  "dur": 4.37
+ },
+ {
+  "t": 13.25,
+  "text": "Start free.",
+  "file": "05-356d92936e.wav",
+  "dur": 1.25
+ }
+]

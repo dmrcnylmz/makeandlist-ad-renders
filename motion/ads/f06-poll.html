@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F06 · Poll</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EFE7D8; }
+.amb { position: absolute; inset: -80px; object-fit: cover; width: calc(100% + 160px); height: calc(100% + 160px); filter: blur(40px) saturate(1.15); opacity: .7; }
+.wash { position: absolute; inset: 0; background: radial-gradient(100% 70% at 50% 45%, rgba(250,247,238,.35), rgba(250,247,238,.82)); }
+.segs { position: absolute; z-index: 80; display: flex; gap: 10px; }
+.segs i { flex: 1; height: 7px; border-radius: 4px; background: rgba(31,31,31,.18); overflow: hidden; display: block; position: relative; }
+.segs i b { position: absolute; left: 0; top: 0; bottom: 0; background: #1F1F1F; display: block; }
+.who { position: absolute; z-index: 80; display: flex; align-items: center; gap: 16px; font: 700 28px 'Archivo'; color: #1F1F1F; }
+.who img { width: 56px; height: 56px; border-radius: 50%; background: #FAF7EE; padding: 8px; box-shadow: 0 0 0 2px #1F1F1F; }
+.who span { font: 500 22px 'IBM Plex Mono', monospace; color: #6B645A; }
+.poll { position: absolute; z-index: 30; border-radius: 40px; background: #FFFDF8; box-shadow: 0 50px 90px -40px rgba(31,31,31,.6); padding: 40px 40px 34px; }
+.poll .q { font: 800 66px/1.02 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; text-align: center; }
+.poll .k { margin-top: 10px; text-align: center; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #8A8378; }
+.opt { position: relative; margin-top: 22px; height: 150px; border-radius: 28px; background: #F1ECE1; overflow: hidden; display: flex; align-items: center; gap: 26px; padding: 0 26px; }
+.opt .fill { position: absolute; left: 0; top: 0; bottom: 0; background: #DFFF5A; }
+.opt .th { position: relative; width: 104px; height: 104px; border-radius: 20px; overflow: hidden; flex: none; }
+.opt .th img { width: 100%; height: 100%; object-fit: cover; }
+.opt .nm { position: relative; font: 800 50px 'Archivo'; color: #1F1F1F; letter-spacing: -0.015em; }
+.opt .rs { position: relative; margin-left: auto; font: 800 34px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.big { position: absolute; z-index: 40; padding: 18px 40px; border-radius: 26px; background: #1F1F1F; color: #DFFF5A; font: 800 92px/1 'Playfair Display'; font-style: italic; letter-spacing: -0.02em; white-space: nowrap; box-shadow: 0 30px 60px -30px rgba(31,31,31,.8); }
+.touch { position: absolute; z-index: 45; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; background: rgba(255,253,248,.6); border: 3px solid rgba(31,31,31,.6); }
+.hd { position: absolute; z-index: 30; font: 800 70px/1.02 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.hd em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.hk { position: absolute; z-index: 30; font: 600 23px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #45403A; }
+.pc { position: absolute; z-index: 30; border-radius: 28px; overflow: hidden; background: #FFFDF8; box-shadow: 0 40px 70px -34px rgba(31,31,31,.6), 0 0 0 6px #FFFDF8; }
+.pc img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pc .lb { position: absolute; left: 12px; bottom: 12px; padding: 8px 14px; border-radius: 99px; background: #FFFDF8; font: 700 24px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.pc .pp { position: absolute; right: 12px; top: 12px; padding: 7px 12px; border-radius: 99px; background: #1F1F1F; color: #DFFF5A; font: 600 18px 'IBM Plex Mono', monospace; white-space: nowrap; }
+.crop { position: absolute; z-index: 30; border-radius: 26px; overflow: hidden; background: #FFFDF8; box-shadow: 0 34px 60px -30px rgba(31,31,31,.55), 0 0 0 1px rgba(31,31,31,.08); }
+.crop img { position: absolute; display: block; }
+.crop .bar { position: absolute; left: 0; right: 0; top: 0; height: 54px; background: #1F1F1F; color: #FAF7EE; font: 700 24px 'Archivo'; display: flex; align-items: center; gap: 12px; padding: 0 22px; z-index: 2; white-space: nowrap; }
+.crop .bar b { width: 14px; height: 14px; border-radius: 50%; background: #DFFF5A; display: block; }
+.quiz { position: absolute; z-index: 30; border-radius: 36px; background: #1F1F1F; color: #FAF7EE; padding: 34px 36px; box-shadow: 0 40px 80px -40px rgba(31,31,31,.8); }
+.quiz .k { font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #DFFF5A; }
+.quiz .q { margin-top: 10px; font: 800 56px/1.04 'Playfair Display'; letter-spacing: -0.02em; }
+.qa { position: relative; margin-top: 18px; padding: 22px 26px; border-radius: 22px; background: rgba(250,247,238,.1); font: 700 36px 'Archivo'; display: flex; align-items: center; gap: 18px; }
+.qa i { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font: 800 26px 'Archivo'; font-style: normal; flex: none; background: rgba(250,247,238,.16); }
+.qa.ok { background: #DFFF5A; color: #1F1F1F; }
+.qa.ok i { background: #1F1F1F; color: #DFFF5A; }
+.qa .x { position: absolute; left: 20px; right: 20px; top: 50%; height: 5px; background: #E8603C; border-radius: 3px; transform-origin: 0 50%; }
+.ring { position: absolute; z-index: 3; border-radius: 14px; border: 5px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F06 — a story poll, drawn by hand (no real app's sticker). "Which would you sell?" Poster / Tee / Mug, each with a
+// concept image. A thumb taps Tee — and every bar fills: "All three." Marian: "Trick question. All three." The three
+// concept products step out as cards, "printed per order", proved on the real try-on screen (Printed as: art print,
+// tote, tee, mug). Then a quiz sticker: "Who holds the stock?" — "You" is struck out, "Nobody: printed per order" lights,
+// and the real order screen: approve production; printing is paid from your partner account, never from Credits.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 117.5, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// voice (Marian), speech windows from vo.mjs: L1 0.30–2.54 · L2 2.95–5.21 · L3 5.60–8.80 · L4 9.20–11.66
+const VO = [[0.3, 'Quick poll: poster, tee or mug?', 1.08], [2.95, 'Trick question. All three.'], [5.6, 'Each printed per order by your own print partner.', 1.08], [9.2, 'No stock. Orders wait for your yes.', 1.08]];
+const OPTS = [['Poster', 'r04/g08-gallery-wall'], ['Tee', 'r04/g02-sunset-tee'], ['Mug', 'r04/g03-slow-mornings-mug']];
+const T_TAP = 2.62, T_ALL = 3.0, T_BIG = 4.12, T_B = 5.42, T_TRY = 7.1, T_C = 9.02, T_X = 9.6, T_OK = 10.0, T_ORD = 10.5, T_WRAP = 11.8;
+
+const L = tall
+  ? { segY: 40, whoY: 72, pX: 115, pY: 330, pW: 850, bigY: 1110, hkY: 296, hdY: 330, cY: 560, cW: 290, cH: 400, tryY: 1010, tryH: 220, qY: 300, qW: 950, ordY: 796, ordH: 440, wrapY: 520 }
+  : { segY: 22, whoY: 46, pX: 160, pY: 130, pW: 760, bigY: 930, hkY: 130, hdY: 166, cY: 360, cW: 300, cH: 410, tryY: 830, tryH: 240, qY: 120, qW: 960, ordY: 760, ordH: 470, wrapY: 460 };
+
+const amb = K.el('img', { src: K.pub('r04/g08-gallery-wall.webp'), cls: 'amb' });
+K.box(0, 0, W, H, { cls: 'wash' });
+const segs = K.box(40, L.segY, W - 80, 8, { cls: 'segs', html: '<i><b></b></i>'.repeat(3) });
+const segB = [...segs.querySelectorAll('b')];
+K.box(40, L.whoY, 900, 60, { cls: 'who', html: `<img src="${K.brand('makeandlist-monogram.svg')}">makeandlist <span>· sample story</span>` });
+
+// ---- A: the poll ----
+const poll = K.box(L.pX, L.pY, L.pW, null, { cls: 'poll', html: `<div class="q">Which would<br>you sell?</div><div class="k">Poll · tap one</div>` });
+const opts = OPTS.map(([nm, src]) => {
+  const o = K.el('div', { parent: poll, cls: 'opt', html: `<div class="fill"></div><div class="th"><img src="${K.pub(src + '.webp')}"></div><div class="nm">${nm}</div><div class="rs"></div>` });
+  return { o, fill: o.querySelector('.fill'), rs: o.querySelector('.rs') };
+});
+const touch = K.box(0, 0, 96, 96, { cls: 'touch' });
+const big = K.box(0, L.bigY, null, null, { cls: 'big', html: 'All three.', style: { width: 'auto', height: 'auto' } });
+const tagA = K.demoTag('Concept images · AI-generated', L.pX, 0); tagA.style.zIndex = 60;
+
+// ---- B: three products, printed per order ----
+const hkB = K.box(65, L.hkY, W - 130, null, { cls: 'hk', html: 'Make it physical' });
+const hdB = K.box(65, L.hdY, W - 130, null, { cls: 'hd', html: tall ? 'Each printed <em>per order.</em>' : 'Each printed <em>per order.</em>', style: { fontSize: (tall ? 70 : 66) + 'px' } });
+const hdB2 = K.box(65, L.hdY + (tall ? 84 : 80), W - 130, null, { cls: 'hk', html: 'by your own print partner', style: { fontSize: '26px', color: '#1F1F1F' } });
+const gapC = (W - 130 - 3 * L.cW) / 2;
+const pcs = OPTS.map(([nm, src], i) => K.box(65 + i * (L.cW + gapC), L.cY, L.cW, L.cH, { cls: 'pc', html: `<img src="${K.pub(src + '.webp')}"><div class="lb">${nm}</div><div class="pp">per order</div>` }));
+function crop(scr, sx, sy, sw, w, h, label) {
+  const s = w / sw;
+  const el = K.box(0, 0, w, h, { cls: 'crop', html: `<div class="bar"><b></b>${label}</div>` });
+  const img = K.el('img', { parent: el, src: K.screen(scr), style: { width: 780 * s + 'px', left: -sx * s + 'px', top: 54 - sy * s + 'px' } });
+  return { el, img, s };
+}
+const tryW = W - 130;
+const tryC = crop('54-phone-try-on', 30, 1770, 720, tryW, L.tryH, 'Real app · Try-on — printed as');
+// "Printed as" chips sit at y 1820–1880 of the shot: ring the row
+const ringT = K.el('div', { parent: tryC.el, cls: 'ring', style: { left: (60 - 30) * tryC.s + 'px', top: 54 + (1818 - 1770) * tryC.s + 'px', width: 590 * tryC.s + 'px', height: 80 * tryC.s + 'px' } });
+
+// ---- C: the quiz and the real order ----
+const quiz = K.box(65, L.qY, L.qW, null, { cls: 'quiz', html: `<div class="k">Quiz</div><div class="q">Who holds the stock?</div>
+  <div class="qa"><i>A</i>You, in boxes at home<span class="x"></span></div><div class="qa" id="ok"><i>B</i>Nobody — printed per order</div>` });
+quiz.style.width = L.qW + 'px';
+const qx = quiz.querySelector('.x'), qok = quiz.querySelector('#ok');
+const ord = crop('52-phone-order', 30, 1904, 720, W - 130, L.ordH, 'Real app · an order waits for your yes');
+const realTag = K.demoTag('Real app · demo workspace', 65, 0); realTag.style.zIndex = 60;
+
+// ---- wrap ----
+const wrap = K.box(65, L.wrapY, W - 130, null, { cls: 'hd', style: { fontSize: (tall ? 96 : 88) + 'px', textAlign: 'center', zIndex: 50 } });
+const wrapW = K.words(wrap, 'Poster. Tee. Mug.\nNo stock.');
+wrapW[wrapW.length - 1].innerHTML = '<em>stock.</em>';
+const wrapBg = K.box(0, 0, W, H, { style: { zIndex: 48, background: '#FAF7EE' } });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Sell all three.<br>Hold no stock.' });
+
+const win = (T, a, b, fi = 0.4, fo = 0.25) => ({ p: K.p(T, a, a + fi, E.outExpo), o: K.p(T, b - fo, b, E.inCubic), on: T >= a && T < b });
+
+K.run({
+  id: 'F06', title: 'Poll', dur: DUR, bpm: BPM, music: 'back-in-the-80s', mood: 'bright', key: 'E', intro: 0.0, cover: 3.6,
+  technique: 'A hand-drawn, unbranded story poll over a blurred concept backdrop: a thumb taps “Tee” and every bar fills to “All three ✓”; the three concept products step out as cards proved on the real try-on screen (printed as art print, tote, tee, mug), then a quiz sticker strikes “You, in boxes at home” and lights “Nobody — printed per order”, proved on the real order screen; a white wrap “Poster. Tee. Mug. No stock.”',
+  caption: 'Poster, tee or mug? Trick question: sell all three. Each is printed per order by your own print partner — no stock — and every order waits for your yes; printing is paid from your partner account, never Credits. Products shown are concept images. Start free at makeandlist.com',
+  short: 'Poster, tee or mug? All three.',
+  question: 'Can I sell physical products too?', gain: 'Physical products without stock',
+  vo: VO,
+  beats: ['0–2.6 s: poll “Which would you sell?” — Poster / Tee / Mug', '2.6–5.4 s: tap Tee → every bar fills: “All three.”', '5.4–7.1 s: three concept products, each printed per order by your own partner', '7.1–9 s: the real try-on: printed as art print, tote, tee, mug', '9–11.8 s: quiz “Who holds the stock?” → nobody; the real order waits for your yes, printing paid from your partner account', '11.8–13 s: “Poster. Tee. Mug. No stock.”; 13–15 s end card'],
+  cues: [[0.0, 'pop'], [0.2, 'swish'], [T_TAP, 'click'], [T_ALL - 0.05, 'riser'], [T_BIG - 0.05, 'hit'], [T_B - 0.12, 'whoosh'], [T_B + 0.2, 'pop'], [T_B + 0.4, 'pop'], [T_B + 0.6, 'pop'],
+    [T_TRY - 0.1, 'swish'], [T_C - 0.12, 'whoosh'], [T_X, 'marker'], [T_OK, 'chime'], [T_ORD - 0.05, 'swish'], [T_WRAP - 0.1, 'whoosh'], [12.3, 'box'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  amb.style.transform = `scale(${1.05 + 0.05 * Math.sin(T * 0.3)}) translateX(${Math.sin(T * 0.4) * 30}px)`;
+  const SEG = [0, T_B, T_C, 13];
+  segB.forEach((b, i) => { b.style.width = K.clamp((T - SEG[i]) / (SEG[i + 1] - SEG[i])) * 100 + '%'; });
+
+  // ---- A ----
+  const A = win(T, 0, T_B, 0.5, 0.3);
+  poll.style.visibility = A.on ? 'visible' : 'hidden';
+  poll.style.opacity = A.p * (1 - A.o);
+  poll.style.transform = `translateY(${(1 - A.p) * 80 - A.o * 60}px) rotate(${-1.5 + Math.sin(T * 1.1) * 0.5}deg) scale(${0.92 + 0.08 * A.p})`;
+  opts.forEach((o, i) => {
+    const pi = K.p(T, 0.25 + i * 0.12, 0.7 + i * 0.12, E.outBack);
+    o.o.style.transform = `scale(${0.85 + 0.15 * pi})`; o.o.style.opacity = Math.min(1, pi * 2);
+    const fl = K.p(T, T_ALL + i * 0.12, T_ALL + 0.7 + i * 0.12, E.outExpo);
+    const tapped = i === 1 ? K.p(T, T_TAP, T_TAP + 0.3, E.outExpo) : 0;
+    o.fill.style.width = Math.max(fl, tapped * 0.0) * 100 + '%';
+    o.o.style.boxShadow = i === 1 && T >= T_TAP ? `0 0 0 ${4 * tapped}px #1F1F1F` : 'none';
+    o.rs.textContent = fl > 0.5 ? 'All three ✓' : '';
+    o.rs.style.opacity = K.p(T, T_ALL + 0.3 + i * 0.12, T_ALL + 0.6 + i * 0.12, E.linear);
+  });
+  // the thumb
+  const tv = K.p(T, T_TAP - 0.45, T_TAP - 0.2, E.outCubic) * (1 - K.p(T, T_TAP + 0.15, T_TAP + 0.35, E.linear));
+  const r1 = opts[1].o.getBoundingClientRect();
+  touch.style.left = r1.left + r1.width * 0.55 + 'px'; touch.style.top = r1.top + r1.height / 2 + (1 - K.p(T, T_TAP - 0.45, T_TAP, E.outCubic)) * 160 + 'px';
+  touch.style.opacity = tv; touch.style.transform = `scale(${T > T_TAP && T < T_TAP + 0.15 ? 0.85 : 1})`;
+  const bp = K.p(T, T_BIG, T_BIG + 0.45, E.outBack);
+  big.style.opacity = A.on && T >= T_BIG ? Math.min(1, bp * 2) * (1 - A.o) : 0;
+  big.style.left = W / 2 + 'px';
+  big.style.transform = `translateX(-50%) scale(${0.5 + 0.5 * bp}) rotate(${-4 + (1 - bp) * -8}deg)`;
+  const pr = poll.getBoundingClientRect();
+  tagA.style.top = (tall ? L.pY - 50 : 1272) + 'px'; tagA.style.left = L.pX + 'px';
+
+  // ---- B ----
+  const Bw = win(T, T_B, T_C, 0.45, 0.3);
+  [hkB, hdB, hdB2].forEach((el, k) => {
+    const p = K.p(T, T_B + k * 0.1, T_B + 0.5 + k * 0.1, E.outExpo);
+    el.style.visibility = Bw.on ? 'visible' : 'hidden'; el.style.opacity = p * (1 - Bw.o); el.style.transform = `translateY(${(1 - p) * 30}px)`;
+  });
+  pcs.forEach((c, i) => {
+    const p = K.p(T, T_B + 0.15 + i * 0.2, T_B + 0.7 + i * 0.2, E.outBack);
+    c.style.visibility = Bw.on ? 'visible' : 'hidden';
+    c.style.opacity = Math.min(1, p * 2) * (1 - Bw.o);
+    const lift = K.p(T, T_TRY - 0.1, T_TRY + 0.4, E.inOutCubic);
+    c.style.transform = `translateY(${(1 - p) * 140 - lift * (tall ? 70 : 60)}px) rotate(${(i - 1) * 4 * p + Math.sin(T * 1.3 + i) * 0.7}deg) scale(${(0.7 + 0.3 * p) * (1 - 0.1 * lift)})`;
+    c.querySelector('img').style.transform = `scale(${1.05 + 0.03 * Math.sin(T * 0.6 + i)})`;
+  });
+  const tp = K.p(T, T_TRY, T_TRY + 0.5, E.outExpo);
+  tryC.el.style.left = '65px'; tryC.el.style.top = L.tryY + 'px';
+  tryC.el.style.visibility = Bw.on && T >= T_TRY ? 'visible' : 'hidden';
+  tryC.el.style.opacity = tp * (1 - Bw.o); tryC.el.style.transform = `translateY(${(1 - tp) * 80}px) rotate(-0.8deg)`;
+  const rg = K.p(T, T_TRY + 0.45, T_TRY + 0.8, E.outBack);
+  ringT.style.opacity = rg > 0 ? 1 : 0; ringT.style.transform = `scale(${1.1 - 0.1 * rg})`;
+
+  // ---- C ----
+  const Cw = win(T, T_C, T_WRAP + 0.3, 0.45, 0.25);
+  const qp = K.p(T, T_C, T_C + 0.5, E.outBack);
+  quiz.style.visibility = Cw.on ? 'visible' : 'hidden';
+  quiz.style.opacity = Math.min(1, qp * 2) * (1 - Cw.o);
+  quiz.style.transform = `scale(${0.85 + 0.15 * qp}) rotate(${1 - qp + Math.sin(T * 1.1) * 0.4}deg)`;
+  qx.style.transform = `scaleX(${K.p(T, T_X, T_X + 0.25, E.inOutCubic)})`;
+  qok.className = T >= T_OK ? 'qa ok' : 'qa';
+  qok.style.transform = `scale(${1 + 0.05 * K.p(T, T_OK, T_OK + 0.15, E.outCubic) * (1 - K.p(T, T_OK + 0.15, T_OK + 0.45, E.outCubic))})`;
+  const op = K.p(T, T_ORD, T_ORD + 0.5, E.outExpo);
+  ord.el.style.left = '65px'; ord.el.style.top = L.ordY + 'px';
+  ord.el.style.visibility = Cw.on && T >= T_ORD ? 'visible' : 'hidden';
+  ord.el.style.opacity = op * (1 - Cw.o); ord.el.style.transform = `translateY(${(1 - op) * 80}px) rotate(0.6deg)`;
+  ord.img.style.transform = `translateY(${-Math.max(0, T - T_ORD) * 10}px)`;
+  // the real-app tag rides under whichever real screen is up
+  const showTry = Bw.on && T >= T_TRY, showOrd = Cw.on && T >= T_ORD;
+  realTag.style.opacity = showTry ? tp * (1 - Bw.o) : showOrd ? op * (1 - Cw.o) : 0;
+  realTag.style.top = (showTry ? L.tryY : L.ordY) - 46 + 'px';
+  realTag.style.left = (showTry ? 65 : W - 65 - 330) + 'px';
+  tagA.style.opacity = A.on ? A.p * (1 - A.o) : Bw.on ? Math.min(1, K.p(T, T_B + 0.3, T_B + 0.6, E.linear)) * (1 - Bw.o) * (T < T_TRY ? 1 : 0) : 0;
+  if (Bw.on) { tagA.style.top = L.cY + L.cH + 20 + 'px'; tagA.style.left = '65px'; }
+
+  // ---- wrap ----
+  const wp = K.p(T, T_WRAP, T_WRAP + 0.35, E.outCubic);
+  wrapBg.style.opacity = wp; wrapBg.style.visibility = wp > 0 ? 'visible' : 'hidden';
+  wrap.style.visibility = T >= T_WRAP ? 'visible' : 'hidden';
+  K.reveal(wrapW, T, T_WRAP + 0.1, { kind: 'up', stagger: 0.08, dur: 0.5 });
+
+  end(T);
+});
+</script></body></html>

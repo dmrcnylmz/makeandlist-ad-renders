@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F15 · Sketch vs Result</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1F1F1F; }
+.pane { position: absolute; overflow: hidden; }
+.paper { background: #F7F2E7; background-image: repeating-linear-gradient(0deg, rgba(126,154,126,.13) 0 2px, transparent 2px 46px); }
+.paper::before { content: ''; position: absolute; top: 0; bottom: 0; left: 96px; width: 2px; background: rgba(232,96,60,.35); }
+.res img { position: absolute; display: block; transform-origin: 50% 50%; }
+.lab { position: absolute; z-index: 30; display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border-radius: 99px; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+.lab.ink { background: #1F1F1F; color: #FAF7EE; }
+.lab.ivory { background: rgba(250,247,238,.92); color: #1F1F1F; }
+.lab i { width: 12px; height: 12px; border-radius: 50%; background: #E8603C; display: block; }
+.sk { position: absolute; z-index: 10; overflow: visible; }
+.sk path, .sk ellipse, .sk line { fill: none; stroke: #3a352f; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
+.sk text { font: italic 700 46px 'Playfair Display'; fill: #3a352f; }
+.typed { position: absolute; z-index: 20; padding: 14px 20px; border-radius: 16px; background: #FFFDF8; box-shadow: 0 0 0 2px #E2DBCE; font: 600 30px/1.2 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.typed small { font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #8A8378; margin-right: 12px; }
+.typed i { display: inline-block; width: 3px; height: 28px; background: #1F1F1F; vertical-align: -5px; margin-left: 2px; }
+.div { position: absolute; z-index: 40; background: #1F1F1F; }
+.rnd { position: absolute; z-index: 45; display: flex; align-items: center; gap: 12px; padding: 14px 26px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 30px 'Archivo'; white-space: nowrap; box-shadow: 0 0 0 4px #1F1F1F, 0 18px 30px -16px rgba(0,0,0,.6); }
+.rnd b { font: 700 22px 'IBM Plex Mono', monospace; background: #1F1F1F; color: #DFFF5A; padding: 4px 10px; border-radius: 8px; }
+.chips { position: absolute; z-index: 30; display: flex; flex-wrap: wrap; gap: 10px; }
+.chips span { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 99px; background: #FFFDF8; color: #1F1F1F; font: 700 24px 'Archivo'; white-space: nowrap; box-shadow: 0 10px 20px -12px rgba(0,0,0,.6); }
+.chips span.d { background: #1F1F1F; color: #DFFF5A; }
+.flash { position: absolute; z-index: 35; background: #FFFDF8; pointer-events: none; }
+.hook { position: absolute; z-index: 60; text-align: center; font: 800 112px/0.95 'Playfair Display'; letter-spacing: -0.035em; color: #1F1F1F; }
+.hook em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.hook .w { display: inline-block; white-space: pre; }
+.hook.lt { color: #FFFDF8; text-shadow: 0 6px 30px rgba(0,0,0,.5); }
+.hook.lt em { color: #1F1F1F; }
+.rc { position: absolute; z-index: 50; }
+.tile { position: absolute; z-index: 50; overflow: hidden; border-radius: 22px; box-shadow: 0 30px 50px -24px rgba(0,0,0,.7), 0 0 0 5px #FFFDF8; }
+.tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.crop { position: absolute; z-index: 50; overflow: hidden; border-radius: 24px; background: #FAF7EE; box-shadow: 0 40px 70px -34px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.crop img { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 780px; display: block; }
+.rtxt { position: absolute; z-index: 50; font: 800 64px/1.0 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.rtxt em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.demo.dark { background: rgba(31,31,31,.6); color: #FAF7EE; border-color: rgba(250,247,238,.5); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F15 — the split-screen "react" layout without faces: the seller's sketch draws itself on notebook paper in one half
+// (with the one line they typed), the result lands in the other half (concept images, tagged). Three rounds, each
+// faster — lemons → a lemon notebook, a sunset → a sunset tee, a mug → the "slow mornings" mug — then all three come
+// back as drafts beside the real product screen: every one waits for the seller's review.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 117.5, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const M = tall ? 65 : 60;
+
+// panes: 9:16 stacks sketch over result; 4:5 puts them side by side
+const PA = tall ? { x: 0, y: 0, w: W, h: H / 2 } : { x: 0, y: 0, w: W / 2, h: H };
+const PB = tall ? { x: 0, y: H / 2, w: W, h: H / 2 } : { x: W / 2, y: 0, w: W / 2, h: H };
+
+// rounds: [start, sketch end, typed end, reveal, end]
+const R = [
+  { a: B(2), sk: B(5.6), ty: B(6.6), rv: B(7.4), b: B(11), speed: '×1', img: 'r04/g11-lemon-notebook', line: 'lemon pattern notebook', kind: 'lemon' },
+  { a: B(11), sk: B(13.2), ty: B(13.9), rv: B(14.4), b: B(17.5), speed: '×2', img: 'r04/g02-sunset-tee', line: 'retro sunset tee', kind: 'sun' },
+  { a: B(17.5), sk: B(19), ty: B(19.5), rv: B(19.8), b: B(22), speed: '×3', img: 'r04/g03-slow-mornings-mug', line: '“slow mornings” mug', kind: 'mug' },
+];
+const T_RC = B(22);
+
+const paneA = K.box(PA.x, PA.y, PA.w, PA.h, { cls: 'pane paper' });
+const paneB = K.box(PB.x, PB.y, PB.w, PB.h, { cls: 'pane res', style: { background: '#2a2622' } });
+
+// ---------- sketches (inline SVG line drawings, drawn for this ad) ----------
+const SKW = tall ? 900 : 540, SKH = SKW * 0.62;
+const SKX = PA.x + (PA.w - SKW) / 2 + (tall ? 30 : 10), SKY = tall ? 330 : 280;
+function lemon(cx, cy, r, rot) {
+  return `<g transform="rotate(${rot} ${cx} ${cy})"><path d="M${cx - r} ${cy} C${cx - r} ${cy - 0.75 * r} ${cx + r} ${cy - 0.75 * r} ${cx + r} ${cy} C${cx + r} ${cy + 0.75 * r} ${cx - r} ${cy + 0.75 * r} ${cx - r} ${cy} Z"/>` +
+    `<path d="M${cx + r} ${cy} l14 -3"/><path d="M${cx - r} ${cy} l-12 3"/><path d="M${cx - r * 0.2} ${cy - r * 0.62} q${r * 0.5} -${r * 0.7} ${r * 1.0} -${r * 0.4} q-${r * 0.4} ${r * 0.45} -${r * 1.0} ${r * 0.4}"/></g>`;
+}
+const SK = {
+  lemon: lemon(170, 150, 80, -18) + lemon(400, 120, 62, 22) + lemon(330, 300, 72, -6) + `<path d="M80 320 q60 -40 120 -10"/><path d="M500 260 q40 -50 90 -30"/><path d="M520 340 q30 10 50 -10"/>`,
+  sun: `<path d="M120 300 A180 180 0 0 1 480 300"/><line x1="40" y1="300" x2="560" y2="300"/><path d="M140 250 L460 250"/><path d="M170 205 L430 205"/><path d="M215 160 L385 160"/>` +
+    `<path d="M40 360 Q170 300 300 350 T560 330"/><path d="M60 390 Q220 350 360 385 T560 380"/>`,
+  mug: `<path d="M170 90 L170 330 Q170 370 210 370 L390 370 Q430 370 430 330 L430 90 Z"/><path d="M430 150 Q520 150 520 220 Q520 290 430 290"/><path d="M430 180 Q485 185 485 220 Q485 255 430 260"/>` +
+    `<path d="M240 70 q-20 -30 0 -50 q20 -20 0 -45"/><path d="M300 70 q-20 -30 0 -50 q20 -20 0 -45"/><path d="M360 70 q-20 -30 0 -50 q20 -20 0 -45"/>` +
+    `<text x="300" y="230" text-anchor="middle">slow</text><text x="300" y="285" text-anchor="middle">mornings</text>`,
+};
+const sks = R.map((r) => {
+  const el = K.box(SKX, SKY, SKW, SKH, { tag: 'div', style: { zIndex: 10 } });
+  el.innerHTML = `<svg class="sk" viewBox="0 -40 600 460" width="${SKW}" height="${SKH}">${SK[r.kind]}</svg>`;
+  const paths = [...el.querySelectorAll('path, line, ellipse')];
+  paths.forEach((p) => { p.setAttribute('pathLength', '1'); p.style.strokeDasharray = '1 1'; });
+  return { el, paths, texts: [...el.querySelectorAll('text')] };
+});
+const skTag = K.box(0, 0, null, null, { cls: 'demo', html: 'The idea, sketched · drawn for this ad', style: { width: 'auto', height: 'auto' } });
+
+// pencil tip
+const pencil = K.box(0, 0, 18, 18, { style: { zIndex: 12, borderRadius: '50%', background: '#1F1F1F', boxShadow: '0 0 0 6px rgba(31,31,31,.12)' } });
+
+const labA = K.box(M, tall ? 290 : 60, null, null, { cls: 'lab ink', html: '<i></i>My idea', style: { width: 'auto', height: 'auto' } });
+const typed = K.box(M + (tall ? 0 : 0), tall ? 832 : 780, null, null, { cls: 'typed', style: { width: 'auto', height: 'auto' } });
+
+// ---------- results ----------
+const res = R.map((r) => {
+  const img = K.el('img', { parent: paneB, src: K.pub(r.img + '.webp') });
+  const sc = Math.max(PB.w / 1024, PB.h / 1536);
+  img.style.width = 1024 * sc + 'px'; img.style.height = 1536 * sc + 'px';
+  img.style.left = (PB.w - 1024 * sc) / 2 + 'px'; img.style.top = (PB.h - 1536 * sc) / 2 + 'px';
+  return img;
+});
+const flash = K.box(PB.x, PB.y, PB.w, PB.h, { cls: 'flash' });
+const labB = K.box(PB.x + M, tall ? PB.y + 30 : 60, null, null, { cls: 'lab ivory', html: 'What came back', style: { width: 'auto', height: 'auto' } });
+const conTag = K.demoTag('Concept image · AI-generated', PB.x + M, tall ? PB.y + 96 : 124);
+conTag.classList.add('dark');
+const chips = K.box(PB.x + M, tall ? PB.y + 190 : 1010, tall ? W - 2 * M : PB.w - 2 * M, null, { cls: 'chips',
+  html: ['Files', 'Listing images', 'Listing copy'].map((t) => `<span>✓ ${t}</span>`).join('') + '<span class="d">Draft · for your review</span>' });
+const chipEls = [...chips.children];
+
+// ---------- divider + round badge ----------
+const div = tall ? K.box(0, H / 2 - 4, W, 8, { cls: 'div' }) : K.box(W / 2 - 4, 0, 8, H, { cls: 'div' });
+const rnd = K.box(0, 0, null, null, { cls: 'rnd', style: { width: 'auto', height: 'auto' } });
+
+// ---------- hook ----------
+const hook = K.box(M, tall ? 440 : 470, W - 2 * M, null, { cls: 'hook', style: { fontSize: (tall ? 112 : 104) + 'px' } });
+hook.innerHTML = ['My', 'idea', '<br>', 'vs.', 'what', '<br>', '<em>came</em>', '<em>back.</em>'].map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w} </span>`)).join('');
+const hookW = [...hook.querySelectorAll('.w')];
+const hookBg = K.box(0, 0, W, H, { style: { zIndex: 55, background: '#F7F2E7' } });
+
+// ---------- recap: three drafts + the real product screen ----------
+const rcBg = K.box(0, 0, W, H, { style: { zIndex: 48, background: '#F3EEE3' } });
+const rtxt = K.box(M, tall ? 290 : 60, W - 2 * M, null, { cls: 'rtxt', style: { fontSize: (tall ? 72 : 60) + 'px' }, html: 'Three ideas.<br><em>Three drafts</em> for your review.' });
+const TW = tall ? 296 : 300, TH = TW * 1.3, TY = tall ? 560 : 300;
+const tiles = R.map((r, i) => K.box(M + i * (TW + (tall ? 21 : 18)), TY, TW, TH, { cls: 'tile', html: `<img src="${K.pub(r.img + '.webp')}">` }));
+const tTag = K.demoTag('Concept images · AI-generated', M, tall ? TY + TH + 18 : 920);
+const CW = tall ? 560 : 460, CY = tall ? 1020 : 300, CX = tall ? M : W - M - 460;
+if (!tall) tiles.forEach((t, i) => { t.style.left = M + 'px'; t.style.top = 300 + i * 0; });
+const crop = K.box(CX, CY, CW, tall ? 580 : 600, { cls: 'crop', html: `<img src="${K.screen('24-phone-product')}">` });
+const cropK = CW / 780;
+crop.querySelector('img').style.transform = `translate(0px, ${-450 * cropK}px) scale(${cropK})`;
+const realTag = K.demoTag('Real app · demo workspace', tall ? CX + CW + 24 : CX, tall ? CY + 10 : CY + 620);
+const note = K.box(tall ? CX + CW + 24 : M, tall ? CY + 70 : 1000, tall ? W - M - CX - CW - 24 : 440, null, { cls: 'rtxt', style: { fontSize: (tall ? 44 : 40) + 'px' }, html: 'Nothing is listed<br><em>until you say.</em>' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your idea.<br>Your review. Your shop.' });
+
+const roundAt = (T) => (T < R[1].a ? 0 : T < R[2].a ? 1 : 2);
+
+K.run({
+  id: 'F15', title: 'Sketch vs Result', dur: DUR, bpm: BPM, music: 'back-in-the-80s', mood: 'drive', key: 'E', intro: 0.0, cover: 4.4,
+  technique: 'A feed-native split-screen “react” layout without faces: a pencil line drawing draws itself on notebook paper with the one line the seller typed, a lime round badge on the divider speeds up ×1 ×2 ×3, and the result lands in the other half with a flash and a punch-in (concept images, tagged); three rounds, each faster, then the three drafts beside the real product screen',
+  caption: 'My sketch vs. what came back — three ideas, each faster. Describe a product in one line and MakeAndList makes the files, listing images and listing copy as a draft for your review; nothing is listed until you say. Concept images. Start free at makeandlist.com',
+  short: 'My sketch vs. what came back.',
+  question: 'Is it for me?', gain: 'No design skills needed: describe it, review real files',
+  beats: ['0–1 s: “My sketch vs. what came back.”', '1–5.6 s: round 1 (×1): lemons sketched, “lemon pattern notebook” typed → a lemon notebook (concept)', '5.6–8.9 s: round 2 (×2): a sunset → a sunset tee', '8.9–11.2 s: round 3 (×3): a mug → the “slow mornings” mug', '11.2–13 s: three drafts for your review, beside the real product screen', '13–15 s: end card'],
+  cues: [[0.0, 'pop'], [B(1.6), 'whoosh'], [R[0].a, 'pop'], [R[0].a + 0.1, 'marker'], [R[0].sk, 'type'], [R[0].rv - 0.1, 'swish'], [R[0].rv, 'hit'], [B(8), 'pop'],
+    [R[1].a - 0.1, 'whoosh'], [R[1].a + 0.05, 'marker'], [R[1].sk, 'type'], [R[1].rv, 'hit'], [B(15.2), 'pop'],
+    [R[2].a - 0.1, 'whoosh'], [R[2].a + 0.05, 'marker'], [R[2].sk, 'type'], [R[2].rv, 'hit'], [B(20.6), 'pop'],
+    [T_RC - 0.12, 'whoosh'], [B(22.6), 'pop'], [B(23.4), 'pop'], [B(24.2), 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const ri = roundAt(T), r = R[ri];
+
+  // ---------- hook ----------
+  const hOut = K.p(T, B(1.6), B(2.05), E.inCubic);
+  hookW.forEach((w, i) => {
+    const p = K.p(T, 0.02 + i * 0.07, 0.4 + i * 0.07, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - hOut);
+    w.style.transform = `translateY(${(1 - p) * 60 - hOut * 60}px)`;
+  });
+  hook.style.visibility = T < B(2.1) ? 'visible' : 'hidden';
+  hookBg.style.visibility = hook.style.visibility;
+  hookBg.style.clipPath = tall ? `inset(${hOut * 50}% 0 ${hOut * 50}% 0)` : `inset(0 ${hOut * 50}% 0 ${hOut * 50}%)`;
+
+  // ---------- sketch pane ----------
+  sks.forEach((s, i) => {
+    const R0 = R[i];
+    const on = i === ri && T < T_RC;
+    s.el.style.visibility = on ? 'visible' : 'hidden';
+    const n = s.paths.length;
+    s.paths.forEach((p, j) => {
+      const a = R0.a + 0.05 + (R0.sk - R0.a - 0.1) * (j / n), b = R0.a + 0.05 + (R0.sk - R0.a - 0.1) * ((j + 1) / n);
+      p.style.strokeDashoffset = 1 - K.p(T, a, b, E.inOutCubic);
+    });
+    s.texts.forEach((t, j) => { t.style.opacity = K.p(T, R0.sk - 0.3 + j * 0.1, R0.sk - 0.05 + j * 0.1, E.linear); });
+    // the sketch drifts and shrinks a touch once the result lands
+    const lp = K.p(T, R0.rv, R0.rv + 0.4, E.outCubic);
+    s.el.style.transform = `rotate(${-1.5 + Math.sin(T * 0.8 + i) * 0.4}deg) scale(${1 - 0.04 * lp})`;
+  });
+  // pencil follows the current stroke's progress roughly across the drawing
+  const pp = K.clamp((T - r.a) / (r.sk - r.a));
+  const drawing = T > r.a && T < r.sk && T < T_RC && T > B(2);
+  pencil.style.visibility = drawing ? 'visible' : 'hidden';
+  pencil.style.left = SKX + SKW * (0.15 + 0.7 * ((pp * 5) % 1)) + 'px';
+  pencil.style.top = SKY + SKH * (0.2 + 0.6 * pp) + Math.sin(T * 30) * 8 + 'px';
+  skTag.style.visibility = T > B(2) && T < T_RC ? 'visible' : 'hidden';
+  skTag.style.left = (tall ? W - M - 290 : 60) + 'px'; skTag.style.top = (tall ? 296 : 1270) + 'px';
+  const nT = Math.round(r.line.length * K.p(T, r.sk, r.ty, E.linear));
+  typed.innerHTML = `<small>I typed</small>${r.line.slice(0, nT)}${Math.floor(T * 4) % 2 === 0 || nT < r.line.length ? '<i></i>' : ''}`;
+  const tyIn = K.p(T, r.sk - 0.15, r.sk + 0.1, E.outBack);
+  typed.style.opacity = T < T_RC ? Math.min(1, tyIn * 2) : 0;
+  typed.style.transform = `translateY(${(1 - tyIn) * 20}px) scale(${0.9 + 0.1 * tyIn})`;
+  typed.style.left = (tall ? M : M) + 'px';
+  if (!tall) { typed.style.fontSize = '24px'; typed.style.whiteSpace = 'normal'; typed.style.width = (W / 2 - 2 * M) + 'px'; }
+
+  // ---------- result pane ----------
+  res.forEach((img, i) => {
+    const R0 = R[i];
+    const shown = T >= R0.rv && (i === 2 || T < R[i + 1].rv);
+    img.style.visibility = shown ? 'visible' : 'hidden';
+    const p = K.p(T, R0.rv, R0.rv + 0.45, E.outExpo);
+    img.style.clipPath = tall ? `inset(0 0 ${(1 - p) * 100}% 0)` : `inset(0 0 ${(1 - p) * 100}% 0)`;
+    img.style.transform = `scale(${1.18 - 0.12 * p + 0.03 * K.clamp((T - R0.rv) / 3)})`;
+  });
+  // before a reveal: the empty pane waits with a slow pulse
+  paneB.style.background = `hsl(30, 8%, ${15 + 3 * Math.sin(T * 6)}%)`;
+  const fl = Math.max(...R.map((R0) => 1 - K.p(T, R0.rv, R0.rv + 0.25, E.linear) * (T >= R0.rv ? 1 : 0) - (T < R0.rv ? 1 : 0)));
+  flash.style.opacity = Math.max(0, fl) * 0.85;
+  const revealed = T >= r.rv;
+  labB.style.opacity = conTag.style.opacity = revealed && T < T_RC ? K.p(T, r.rv + 0.15, r.rv + 0.35, E.linear) : 0;
+  labB.innerHTML = revealed ? 'What came back' : 'Making it…';
+  labB.style.opacity = T < T_RC && T > B(2) ? (revealed ? 1 : 0.85) : 0;
+  chipEls.forEach((c, j) => {
+    const at = r.rv + 0.2 + j * (ri === 0 ? 0.12 : ri === 1 ? 0.08 : 0.06);
+    const p = K.p(T, at, at + 0.35, E.outBack);
+    c.style.opacity = T < T_RC ? Math.min(1, p * 2) : 0;
+    c.style.transform = `translateY(${(1 - p) * 20}px) scale(${0.8 + 0.2 * p})`;
+  });
+
+  // ---------- divider + round badge ----------
+  rnd.innerHTML = `Round ${ri + 1} <b>${r.speed}</b>`;
+  const rp = K.p(T, r.a - 0.05, r.a + 0.3, E.outBack);
+  const rw = rnd.offsetWidth, rh = rnd.offsetHeight;
+  rnd.style.left = (tall ? W / 2 : W / 2) - rw / 2 + 'px';
+  rnd.style.top = (tall ? H / 2 : H / 2) - rh / 2 + 'px';
+  rnd.style.transform = `scale(${0.6 + 0.4 * rp}) rotate(${(1 - rp) * -10 + Math.sin(T * 2) * 1.5}deg)`;
+  rnd.style.opacity = T > B(2) - 0.05 && T < T_RC ? 1 : 0;
+
+  // ---------- recap ----------
+  const cIn = K.p(T, T_RC - 0.1, T_RC + 0.3, E.outCubic);
+  rcBg.style.visibility = T >= T_RC - 0.1 ? 'visible' : 'hidden';
+  rcBg.style.clipPath = `circle(${cIn * 130}% at 50% 50%)`;
+  [rtxt, crop, tTag, realTag, note].forEach((el) => { el.style.visibility = rcBg.style.visibility; });
+  const tp = K.p(T, T_RC + 0.05, T_RC + 0.5, E.outExpo);
+  rtxt.style.opacity = tp; rtxt.style.transform = `translateY(${(1 - tp) * 40}px)`;
+  tiles.forEach((t, i) => {
+    const p = K.p(T, T_RC + 0.15 + i * 0.12, T_RC + 0.7 + i * 0.12, E.outBack);
+    t.style.visibility = rcBg.style.visibility;
+    t.style.opacity = Math.min(1, p * 2);
+    if (tall) t.style.transform = `translateY(${(1 - p) * 120}px) rotate(${(i - 1) * 3 + Math.sin(T + i) * 0.6}deg)`;
+    else { t.style.left = M + i * 40 + 'px'; t.style.top = 300 + i * 70 + 'px'; t.style.transform = `translateY(${(1 - p) * 120}px) rotate(${(i - 1) * 6}deg)`; }
+  });
+  const cp = K.p(T, T_RC + 0.5, T_RC + 1.0, E.outExpo);
+  crop.style.opacity = cp; crop.style.transform = `translateY(${(1 - cp) * 60}px)`;
+  tTag.style.opacity = K.p(T, T_RC + 0.6, T_RC + 0.9, E.linear);
+  realTag.style.opacity = K.p(T, T_RC + 0.8, T_RC + 1.1, E.linear);
+  const np = K.p(T, T_RC + 0.8, T_RC + 1.3, E.outExpo);
+  note.style.opacity = np; note.style.transform = `translateY(${(1 - np) * 30}px)`;
+
+  end(T);
+});
+</script></body></html>

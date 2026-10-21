@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F05 · Your Year</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1F1F1F; }
+.card { position: absolute; inset: 0; overflow: hidden; }
+.segs { position: absolute; z-index: 80; display: flex; gap: 10px; }
+.segs i { flex: 1; height: 7px; border-radius: 4px; background: rgba(250,247,238,.3); overflow: hidden; display: block; position: relative; }
+.segs i b { position: absolute; left: 0; top: 0; bottom: 0; background: #FAF7EE; display: block; }
+.who { position: absolute; z-index: 80; display: flex; align-items: center; gap: 16px; font: 700 28px 'Archivo'; }
+.who img { width: 56px; height: 56px; border-radius: 50%; background: #FAF7EE; padding: 8px; }
+.kk { position: absolute; font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; }
+.big { position: absolute; font: 800 300px/0.9 'Playfair Display'; letter-spacing: -0.04em; white-space: nowrap; }
+.big sup { font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; vertical-align: top; margin-left: 14px; position: relative; top: 30px; padding: 6px 12px; border-radius: 8px; border: 1.5px dashed currentColor; }
+.lab { position: absolute; font: 800 66px/1.02 'Playfair Display'; letter-spacing: -0.02em; }
+.lab em { font-style: italic; }
+.hook { position: absolute; font: 800 112px/0.96 'Playfair Display'; letter-spacing: -0.035em; color: #FAF7EE; }
+.hook em { font-style: italic; color: #1F1F1F; background: #DFFF5A; padding: 0 .1em; border-radius: .12em; }
+.col { position: absolute; border-radius: 26px; overflow: hidden; box-shadow: 0 40px 70px -36px rgba(0,0,0,.8); }
+.col img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sent { position: absolute; white-space: nowrap; font: 600 32px 'Archivo'; color: #1F1F1F; background: #FFFDF8; padding: 18px 26px; border-radius: 22px; box-shadow: 0 20px 40px -24px rgba(31,31,31,.6); }
+.sent i { display: inline-block; width: 3px; height: 1em; background: #1F1F1F; vertical-align: -0.12em; margin-left: 2px; }
+.tile { position: absolute; border-radius: 20px; background: #FFFDF8; box-shadow: 0 24px 40px -26px rgba(31,31,31,.6); padding: 20px 22px; }
+.tile .d { font: 500 19px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #8A8378; }
+.tile .n { margin-top: 8px; font: 700 30px/1.1 'Archivo'; color: #1F1F1F; }
+.tile .s { position: absolute; right: 14px; bottom: 14px; padding: 8px 14px; border: 4px solid #1F1F1F; border-radius: 12px; font: 800 24px 'Archivo'; color: #1F1F1F; background: #DFFF5A; transform-origin: 50% 50%; white-space: nowrap; }
+.logo { position: absolute; border-radius: 26px; background: #FFFDF8; display: grid; place-items: center; box-shadow: 0 24px 40px -26px rgba(0,0,0,.6); }
+.logo img { max-width: 64%; max-height: 46%; }
+.hub { position: absolute; display: flex; align-items: center; gap: 14px; padding: 18px 30px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 800 34px 'Archivo'; white-space: nowrap; }
+.hub img { width: 40px; height: 40px; background: #FAF7EE; border-radius: 50%; padding: 5px; }
+.chipX { position: absolute; padding: 16px 24px; border-radius: 18px; font: 700 28px/1.25 'Archivo'; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F05 — "your year" recap cards, the story look drawn by hand (no real app's UI): segmented progress bar, a bold colour
+// per card, one giant number per card. Every number is a labelled sample: an illustrative year in a small shop, not a
+// result. Marian reads the cards: 24 ideas, each a sentence (the sentences type themselves) · every draft waited for your
+// yes (six drafts stamped one by one) · three stores, one place (ikas, WooCommerce, Shopware wired into one hub) · zero boxes
+// of stock (printed per order by your own partner, paid from your partner account).
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 129.2, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// voice (Marian), speech windows from vo.mjs: L1 0.30–3.02 · L2 3.40–5.84 · L3 6.25–8.11 · L4 8.50–10.84 · L5 11.20–12.60
+const VO = [[0.3, 'Your year, in four cards.', 1.08], [3.4, 'Twenty-four ideas, each a sentence.', 1.08], [6.25, 'Every draft waited for your yes.', 1.08], [8.5, 'Three stores, one place.', 1.08], [11.2, 'Zero boxes of stock.', 1.08]];
+const S = [0, 3.2, 6.05, 8.32, 11.0, 13.0]; // card starts (cuts in the breaths)
+const BG = ['#1F1F1F', '#DFFF5A', '#FAF7EE', '#7E9A7E', '#E9DFCC'];
+const FG = ['#FAF7EE', '#1F1F1F', '#1F1F1F', '#FFFDF8', '#1F1F1F'];
+const L = tall
+  ? { segY: 40, whoY: 72, kkY: 300, bigY: 350, bigFs: 300, labY: 640, labFs: 66, visY: 820, tagY: 1200, hookY: 330, hookFs: 112 }
+  : { segY: 22, whoY: 46, kkY: 140, bigY: 180, bigFs: 250, labY: 420, labFs: 60, visY: 600, tagY: 1270, hookY: 170, hookFs: 104 };
+
+const cards = BG.map((bg, i) => K.box(0, 0, W, H, { cls: 'card', style: { background: bg, color: FG[i], zIndex: 10 + i } }));
+const segs = K.box(40, L.segY, W - 80, 8, { cls: 'segs', html: '<i><b></b></i>'.repeat(5) });
+const segB = [...segs.querySelectorAll('b')];
+const who = K.box(40, L.whoY, 700, 60, { cls: 'who', html: `<img src="${K.brand('makeandlist-monogram.svg')}"><span>Your year · sample recap</span>` });
+who.style.zIndex = 80;
+
+// ---- card 0: the hook over a slow collage ----
+const C0 = cards[0];
+const collage = [['r05/h06-craft-studio', 0.56, 0.62, 520, 640, -6], ['r04/g18-creator-desk', 0.08, 0.7, 440, 520, 5], ['r04/g06-wedding-planner', 0.62, 0.95, 380, 420, 8]]
+  .map(([src, x, y, w, h, r]) => ({ el: K.box(W * x, H * y - (tall ? 380 : 290), w, h, { cls: 'col', parent: C0, html: `<img src="${K.pub(src + '.webp')}">` }), r }));
+K.box(65, L.kkY, W - 130, null, { cls: 'kk', parent: C0, html: 'Sample recap · illustrative', style: { color: '#DFFF5A' } });
+const hook = K.box(65, L.kkY + 50, W - 130, null, { cls: 'hook', parent: C0, style: { fontSize: L.hookFs + 'px' } });
+const hookW = K.words(hook, 'Your year,\nin four\ncards.');
+hookW[hookW.length - 1].innerHTML = '<em>cards.</em>';
+const t0 = K.demoTag('Concept images · AI-generated', 65, L.tagY); t0.remove(); C0.appendChild(t0);
+
+// ---- shared per-card head: kicker, giant number, label ----
+function head(c, kk, num, lab, col) {
+  K.box(65, L.kkY, W - 130, null, { cls: 'kk', parent: c, html: kk, style: { color: col } });
+  const big = K.box(55, L.bigY, W - 120, null, { cls: 'big', parent: c, style: { fontSize: L.bigFs + 'px' }, html: `<span class="nv">${num}</span><sup>sample</sup>` });
+  const lb = K.box(65, L.labY, W - 130, null, { cls: 'lab', parent: c, html: lab, style: { fontSize: L.labFs + 'px' } });
+  return { big, nv: big.querySelector('.nv'), lb };
+}
+const h1 = head(cards[1], 'Ideas described', '0', 'ideas, <em>each a sentence.</em>', '#45403A');
+const h2 = head(cards[2], 'Drafts you approved', '0', 'Every draft <em>waited for your yes.</em>', '#6B645A');
+const h3 = head(cards[3], 'Stores connected', '3', 'stores, <em>one place.</em>', '#EFEADF');
+const h4 = head(cards[4], 'Stock you held', '0', 'boxes of stock. <em>Printed per order.</em>', '#6B645A');
+
+// card 1: sentences type themselves
+const SENTS = ['a botanical wedding planner, 36 pages', 'a lemon notebook, printed per order', 'a Halloween maze pack for 5-year-olds', 'a woodland sticker sheet'];
+const sents = SENTS.map((s, i) => K.box(65 + (i % 2) * (tall ? 30 : 60), L.visY + i * (tall ? 96 : 104), null, null, { cls: 'sent', parent: cards[1], style: { width: 'auto', height: 'auto' } }));
+// card 2: six drafts stamped
+const DR = ['Wedding planner', 'Lemon notebook', 'Sticker sheet', 'Recipe cards', 'Nursery prints', 'Maze pack'];
+const tw = (W - 130 - 2 * 20) / 3, th = tall ? 170 : 190;
+const tiles = DR.map((n, i) => {
+  const t = K.box(65 + (i % 3) * (tw + 20), L.visY + Math.floor(i / 3) * (th + 20), tw, th, { cls: 'tile', parent: cards[2], html: `<div class="d">Draft</div><div class="n">${n}</div><div class="s">Yes ✓</div>` });
+  return { t, s: t.querySelector('.s'), d: t.querySelector('.d') };
+});
+// card 3: three stores into one hub
+const LG = ['ikas', 'woocommerce', 'shopware'];
+const lw = (W - 130 - 2 * 24) / 3, lh = tall ? 150 : 170;
+const svgL = K.box(0, 0, W, H, { parent: cards[3], html: `<svg width="${W}" height="${H}" style="position:absolute;left:0;top:0">${LG.map(() => '<path fill="none" stroke="#1F1F1F" stroke-width="5" stroke-linecap="round"/>').join('')}</svg>` });
+const paths = [...svgL.querySelectorAll('path')];
+const logos = LG.map((n, i) => K.box(65 + i * (lw + 24), L.visY, lw, lh, { cls: 'logo', parent: cards[3], html: `<img src="${K.pub('platforms/' + n + '.svg')}">` }));
+const hubY = L.visY + lh + (tall ? 150 : 200);
+const hub = K.box(0, hubY, null, null, { cls: 'hub', parent: cards[3], html: `<img src="${K.brand('makeandlist-monogram.svg')}">MakeAndList`, style: { width: 'auto', height: 'auto' } });
+// card 4: printed per order, the parcel
+const pic = K.box(65, L.visY, tall ? 520 : 480, tall ? 380 : 560, { cls: 'col', parent: cards[4], html: `<img src="${K.pub('r04/g21-packing.webp')}">` });
+const chipA = K.box(tall ? 610 : 570, L.visY + 10, tall ? 405 : 450, null, { cls: 'chipX', parent: cards[4], html: 'Printed per order by <b>your own print partner</b>', style: { background: '#1F1F1F', color: '#FAF7EE' } });
+const chipB = K.box(tall ? 610 : 570, L.visY + (tall ? 190 : 210), tall ? 405 : 450, null, { cls: 'chipX', parent: cards[4], html: 'Paid from your partner account — never Credits', style: { background: '#DFFF5A', color: '#1F1F1F' } });
+const t4 = K.demoTag('Concept image · AI-generated', 65, L.visY + (tall ? 380 : 560) + 14); t4.remove(); cards[4].appendChild(t4);
+// the sample label on every number card
+[1, 2, 3, 4].forEach((i) => { const t = K.demoTag('Sample recap · illustrative numbers, not results', 65, i === 4 ? L.tagY + 6 : L.tagY); t.remove(); cards[i].appendChild(t); });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Make your year.<br>Keep the final say.' });
+
+K.run({
+  id: 'F05', title: 'Your Year', dur: DUR, bpm: BPM, music: 'transcendental-earth-people', mood: 'drive', key: 'A', intro: 0.0, cover: 7.2,
+  technique: 'Year-in-review story cards drawn by hand (segmented progress bar, one bold colour and one giant counting number per card, every number labelled sample), cut in the narrator’s breaths: sentences typing themselves, six drafts stamped “Yes” one by one, three store logos wired into one hub, zero stock beside a concept packing shot',
+  caption: 'A sample year in a small shop: ideas described in a sentence, every draft waiting for your yes, your stores in one place, and no stock — printed per order by your own print partner. Illustrative numbers, not results. Start free at makeandlist.com',
+  short: 'Your year, in four cards.',
+  question: 'What do I get?', gain: 'Ideas, control, one place, no stock',
+  vo: VO,
+  beats: ['0–3.2 s: “Your year, in four cards.” — sample recap, collage', '3.2–6 s: 24 ideas, each a sentence — four sentences type themselves', '6–8.3 s: every draft waited for your yes — six drafts stamped', '8.3–11 s: 3 stores, one place — ikas, WooCommerce, Shopware into one hub', '11–13 s: 0 boxes of stock — printed per order by your own partner', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [0.15, 'pop'], [S[1] - 0.15, 'whoosh'], [S[1] + 0.2, 'pop'], [S[2] - 0.15, 'whoosh'], ...DR.map((_, i) => [+(S[2] + 0.45 + i * 0.27).toFixed(3), 'stamp']).filter((_, i) => i % 2 === 0),
+    [S[3] - 0.15, 'whoosh'], [S[3] + 0.6, 'pop'], [S[4] - 0.15, 'whoosh'], [S[4] + 0.15, 'box'], [12.75, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // story cuts: the next card slides in over the last, which recedes
+  let cur = 0; for (let i = 1; i < 5; i++) if (T >= S[i] - 0.2) cur = i;
+  cards.forEach((c, i) => {
+    const pin = i === 0 ? 1 : K.p(T, S[i] - 0.2, S[i] + 0.2, E.inOutCubic);
+    const pout = i < 4 ? K.p(T, S[i + 1] - 0.2, S[i + 1] + 0.2, E.inOutCubic) : 0;
+    c.style.visibility = (i === cur || i === cur - 1) && pin > 0 && pout < 1 ? 'visible' : 'hidden';
+    c.style.transform = `translateX(${(1 - pin) * W - pout * W * 0.3}px) scale(${1 - 0.06 * pout})`;
+    c.style.filter = pout > 0 ? `brightness(${1 - 0.4 * pout})` : 'none';
+  });
+  // progress segments
+  segB.forEach((b, i) => { b.style.width = K.clamp((T - S[i]) / (S[i + 1] - S[i])) * 100 + '%'; });
+  const dark = cur === 0 || cur === 3;
+  segs.querySelectorAll('i').forEach((x) => (x.style.background = dark ? 'rgba(250,247,238,.3)' : 'rgba(31,31,31,.18)'));
+  segB.forEach((b) => (b.style.background = dark ? '#FAF7EE' : '#1F1F1F'));
+  who.style.color = dark ? '#FAF7EE' : '#1F1F1F';
+
+  // card 0
+  K.reveal(hookW, T, 0.1, { kind: 'up', stagger: 0.09, dur: 0.6 });
+  collage.forEach((c, i) => {
+    const p = K.p(T, 0.2 + i * 0.12, 0.9 + i * 0.12, E.outExpo);
+    c.el.style.opacity = 0.9 * p;
+    c.el.style.transform = `translateY(${(1 - p) * 120 - T * 14}px) rotate(${c.r + Math.sin(T * 0.6 + i) * 1.2}deg) scale(${0.9 + 0.1 * p})`;
+  });
+
+  // number heads: count up and land
+  const land = (h, i, to) => {
+    const p = K.p(T, S[i] + 0.05, S[i] + 0.6, E.outBack);
+    h.big.style.transform = `translateY(${(1 - p) * 60}px) scale(${0.85 + 0.15 * p})`; h.big.style.transformOrigin = '0 80%';
+    if (to !== null) h.nv.textContent = K.count(T, S[i] + 0.1, S[i] + 1.2, 0, to);
+    const lp = K.p(T, S[i] + 0.3, S[i] + 0.8, E.outExpo);
+    h.lb.style.opacity = lp; h.lb.style.transform = `translateY(${(1 - lp) * 30}px)`;
+  };
+  land(h1, 1, 24); land(h2, 2, 18); land(h3, 3, 3); land(h4, 4, null);
+  h4.nv.textContent = '0';
+
+  // card 1: sentences
+  sents.forEach((el, i) => {
+    const a = S[1] + 0.5 + i * 0.5, txt = SENTS[i];
+    const n = Math.round(K.p(T, a, a + 0.42, E.linear) * txt.length);
+    el.innerHTML = '“' + txt.slice(0, n) + (n < txt.length ? '<i></i>' : '”');
+    const p = K.p(T, a - 0.05, a + 0.3, E.outBack);
+    el.style.opacity = T >= a - 0.05 ? 1 : 0;
+    el.style.transform = `scale(${0.8 + 0.2 * p}) rotate(${(i % 2 ? 1 : -1) * 1.2}deg) translateY(${Math.sin(T * 1.4 + i) * 4}px)`;
+  });
+  // card 2: stamps
+  tiles.forEach((tl, i) => {
+    const a = S[2] + 0.45 + i * 0.27;
+    const ti = K.p(T, S[2] + 0.1 + i * 0.05, S[2] + 0.5 + i * 0.05, E.outExpo);
+    tl.t.style.opacity = ti; tl.t.style.transform = `translateY(${(1 - ti) * 40}px)`;
+    const sp = K.p(T, a, a + 0.22, E.outBack);
+    tl.s.style.opacity = T >= a ? 1 : 0;
+    tl.s.style.transform = `scale(${1.8 - 0.8 * sp}) rotate(${-8 + (1 - sp) * -6}deg)`;
+    tl.d.textContent = T >= a + 0.1 ? 'Approved by you' : 'Draft · waiting';
+  });
+  // card 3: wires
+  const hx = W / 2;
+  const hp = K.p(T, S[3] + 0.5, S[3] + 0.9, E.outBack);
+  hub.style.left = hx + 'px'; hub.style.transform = `translateX(-50%) scale(${0.6 + 0.4 * hp})`; hub.style.opacity = Math.min(1, hp * 2);
+  logos.forEach((lg, i) => {
+    const p = K.p(T, S[3] + 0.1 + i * 0.08, S[3] + 0.5 + i * 0.08, E.outBack);
+    lg.style.opacity = Math.min(1, p * 2); lg.style.transform = `scale(${0.7 + 0.3 * p}) translateY(${Math.sin(T * 1.2 + i) * 4}px)`;
+    const x0 = 65 + i * (lw + 24) + lw / 2, y0 = L.visY + lh, x1 = hx, y1 = hubY;
+    paths[i].setAttribute('d', `M${x0} ${y0} C ${x0} ${y0 + 90}, ${x1} ${y1 - 90}, ${x1} ${y1}`);
+    const len = 600, dp = K.p(T, S[3] + 0.45 + i * 0.1, S[3] + 0.95 + i * 0.1, E.inOutCubic);
+    paths[i].style.strokeDasharray = len; paths[i].style.strokeDashoffset = len * (1 - dp);
+  });
+  // card 4
+  const pp = K.p(T, S[4] + 0.1, S[4] + 0.7, E.outExpo);
+  pic.style.opacity = pp; pic.style.transform = `translateY(${(1 - pp) * 60}px) rotate(${-2 + Math.sin(T) * 0.5}deg)`;
+  pic.firstChild.style.transform = `scale(${1.05 + 0.04 * (T - S[4])})`;
+  [chipA, chipB].forEach((c, i) => {
+    const p = K.p(T, S[4] + 0.4 + i * 0.3, S[4] + 0.85 + i * 0.3, E.outBack);
+    c.style.opacity = Math.min(1, p * 2); c.style.transform = `translateX(${(1 - p) * 60}px) scale(${0.85 + 0.15 * p})`;
+  });
+
+  end(T);
+});
+</script></body></html>

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F03 · Search</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FBF9F4; }
+.bg { position: absolute; inset: 0; background: #FBF9F4; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.status { position: absolute; z-index: 30; display: flex; justify-content: space-between; align-items: center; font: 700 34px 'Archivo'; color: #1F1F1F; }
+.status .bt { display: flex; gap: 12px; align-items: center; }
+.status .bt i { display: block; border-radius: 4px; background: #1F1F1F; }
+.page { position: absolute; left: 0; right: 0; top: 0; z-index: 10; }
+.brand { position: absolute; font: 800 44px 'Archivo'; letter-spacing: -0.02em; color: #1F1F1F; }
+.brand span { color: #8A8378; font-weight: 500; }
+.field { position: absolute; display: flex; align-items: flex-start; gap: 22px; padding: 24px 30px; border-radius: 40px; background: #FFFFFF; box-shadow: 0 10px 30px -14px rgba(31,31,31,.35), 0 0 0 2px #E2DBCE; }
+.field svg { flex: none; margin-top: 4px; }
+.field .q { font: 500 44px/1.25 'Archivo'; color: #1F1F1F; letter-spacing: -0.01em; }
+.field .q i { display: inline-block; width: 3px; height: 1em; background: #1F1F1F; vertical-align: -0.12em; margin-left: 2px; }
+.tabs { position: absolute; display: flex; gap: 34px; font: 600 28px 'Archivo'; color: #8A8378; }
+.tabs b { color: #1F1F1F; border-bottom: 4px solid #1F1F1F; padding-bottom: 10px; }
+.skel { position: absolute; border-radius: 28px; background: #FFFFFF; box-shadow: 0 0 0 2px #EEE8DD; overflow: hidden; }
+.skel i { position: absolute; left: 34px; height: 26px; border-radius: 13px; background: #EFEADF; }
+.ans { position: absolute; border-radius: 32px; background: #FFFFFF; box-shadow: 0 40px 80px -46px rgba(31,31,31,.55), 0 0 0 2px #E7E0D3; overflow: hidden; }
+.ans .kk { position: absolute; left: 34px; top: 28px; display: flex; align-items: center; gap: 12px; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #6B645A; }
+.ans .kk b { width: 14px; height: 14px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; display: block; }
+.ans .src { position: absolute; left: 34px; display: flex; align-items: center; gap: 16px; }
+.ans .src .fv { width: 54px; height: 54px; border-radius: 50%; background: #FAF7EE; box-shadow: 0 0 0 1.5px #E2DBCE; display: grid; place-items: center; }
+.ans .src .fv img { width: 34px; }
+.ans .src .sn { font: 700 26px 'Archivo'; color: #1F1F1F; }
+.ans .src .su { font: 500 21px 'IBM Plex Mono', monospace; color: #6B645A; }
+.ans .h { position: absolute; left: 34px; right: 34px; font: 800 50px/1.08 'Playfair Display'; letter-spacing: -0.015em; color: #1F1F1F; }
+.step { position: absolute; left: 34px; right: 34px; display: flex; gap: 24px; align-items: center; }
+.step .n { flex: none; width: 60px; height: 60px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; display: grid; place-items: center; font: 800 30px 'IBM Plex Mono', monospace; }
+.step .tx { flex: 1; min-width: 0; }
+.step .tt { font: 800 44px/1.1 'Archivo'; letter-spacing: -0.015em; color: #1F1F1F; display: inline; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 94%, transparent 94%) no-repeat 0 0 / 0% 100%; }
+.step .ts { margin-top: 6px; font: 500 26px/1.3 'Archivo'; color: #6B645A; }
+.step .th { flex: none; position: relative; overflow: hidden; border-radius: 16px; background: #FAF7EE; box-shadow: 0 0 0 1.5px #E2DBCE; }
+.step .th img { position: absolute; display: block; }
+.sep { position: absolute; left: 34px; right: 34px; height: 1.5px; background: #EFEADF; }
+.paa { position: absolute; }
+.paa .t { font: 700 34px 'Archivo'; color: #1F1F1F; margin-bottom: 16px; }
+.paa .r { position: relative; border-top: 1.5px solid #E7E0D3; padding: 24px 6px; font: 600 32px 'Archivo'; color: #1F1F1F; }
+.paa .r u { position: absolute; right: 10px; top: 24px; text-decoration: none; font: 400 34px 'Archivo'; color: #6B645A; }
+.paa .r .a { overflow: hidden; font: 500 28px/1.35 'Archivo'; color: #45403A; }
+.paa .r .a div { padding-top: 14px; }
+.paa .r .a b { background: #DFFF5A; font-weight: 700; color: #1F1F1F; padding: 0 .1em; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F03 — a search page, hand-drawn and unbranded. The question is typed while Marian asks it: "how to sell printables
+// without design skills". Enter; the results load; the top card is MakeAndList's answer in three steps, each landing as
+// she says it (describe it in a sentence → the real Create box; review every file → the real file list; list it in
+// your stores → the real stores, drafts first), each step highlighted on its word. The page scrolls to "People also
+// ask" and opens "Does it post without asking?" — "No. Drafts first." Labelled throughout as an illustration.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 89.1, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// voice (Marian), speech windows from vo.mjs: L1 0.30–3.90 · L2 4.25–5.13 · L3 5.50–6.86 · L4 7.25–8.91 · L5 9.20–12.80
+const VO = [[0.3, 'How to sell printables without design skills?', 1.08], [4.25, 'Here’s the answer.'], [5.5, 'Describe it in a sentence.', 1.08], [7.25, 'Review every file.', 1.08], [9.2, 'List it in your stores when you say yes.', 1.08]];
+const Q = 'how to sell printables without design skills';
+const T_TYPE = [0.35, 3.45], T_ENTER = 3.75, T_LOAD = 4.15, T_STEP = [5.42, 7.17, 9.12], T_HL = [5.55, 7.3, 9.3], T_SCROLL = 10.75, T_OPEN = 11.35;
+
+const L = tall
+  ? { brandY: 140, fX: 65, fY: 286, fW: 950, tabsY: 440, tagY: 506, aY: 552, aH: 694, kkY: 24, srcY: 70, hY: 140, s0: 268, sH: 138, thW: 250, thH: 120, paaY: 1290, scroll: 600 }
+  : { brandY: 30, fX: 60, fY: 100, fW: 960, tabsY: 254, tagY: 314, aY: 360, aH: 930, kkY: 28, srcY: 80, hY: 156, s0: 330, sH: 200, thW: 300, thH: 160, paaY: 1310, scroll: 470 };
+
+K.box(0, 0, W, H, { cls: 'bg' });
+const blobA = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.22), rgba(223,255,90,0) 62%)' } });
+if (tall) K.box(0, 0, W, 124, { style: { zIndex: 29, background: '#FBF9F4' } });
+if (tall) K.box(64, 52, W - 128, 50, { cls: 'status', html: '<span>9:41</span><span class="bt"><i style="width:8px;height:16px"></i><i style="width:8px;height:22px"></i><i style="width:8px;height:28px"></i><i style="width:52px;height:26px;border-radius:8px;margin-left:10px"></i></span>' });
+const page = K.box(0, 0, W, H, { cls: 'page' });
+K.box(L.fX + 6, L.brandY, 600, null, { cls: 'brand', parent: page, html: 'Search<span> · web</span>', style: { opacity: tall ? 1 : 0 } });
+const field = K.box(L.fX, L.fY, L.fW, null, { cls: 'field', parent: page, html: `<svg width="44" height="44" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#1F1F1F" stroke-width="2.4"/><path d="M15.5 15.5L21 21" stroke="#1F1F1F" stroke-width="2.6" stroke-linecap="round"/></svg><div class="q"></div>` });
+const qEl = field.querySelector('.q');
+const tabs = K.box(L.fX + 10, L.tabsY, L.fW, null, { cls: 'tabs', parent: page, html: '<b>All</b><span>Images</span><span>Videos</span><span>Shopping</span><span>News</span>' });
+const tag = K.demoTag('Recreated search page · illustration, not a real result', L.fX, L.tagY); tag.style.zIndex = 60;
+
+const skel = K.box(L.fX, L.aY, L.fW, L.aH, { cls: 'skel', parent: page, html: [80, 150, 200, 300, 350, 450, 500, 600].map((y, i) => `<i style="top:${y}px;width:${[30, 80, 60, 70, 45, 75, 55, 40][i]}%"></i>`).join('') });
+const ans = K.box(L.fX, L.aY, L.fW, L.aH, { cls: 'ans', parent: page });
+K.el('div', { parent: ans, cls: 'kk', html: '<b></b>Top answer', style: { top: L.kkY + 'px' } });
+K.el('div', { parent: ans, cls: 'src', style: { top: L.srcY + 'px' }, html: `<span class="fv"><img src="${K.brand('makeandlist-monogram.svg')}"></span><span><div class="sn">MakeAndList</div><div class="su">makeandlist.com › how-it-works</div></span>` });
+K.el('div', { parent: ans, cls: 'h', html: tall ? 'Sell printables without<br>design skills — in 3 steps' : 'Sell printables without design<br>skills — in 3 steps', style: { top: L.hY + 'px', fontSize: (tall ? 48 : 46) + 'px' } });
+// steps: [title, sub, screen, x, y, w (src px)]
+const STEPS = [
+  ['Describe it in a sentence', 'A planner, a print, a colouring book…', '22-phone-create', 30, 450, 720],
+  ['Review every file', 'Pages, listing copy and images, before it’s sold', '24-phone-product', 30, 2560, 720],
+  ['List it in your stores', 'Drafts first · live only when you say yes', '25-phone-stores', 30, 892, 720],
+];
+const steps = STEPS.map(([tt, ts, scr, sx, sy, sw], i) => {
+  const st = K.el('div', { parent: ans, cls: 'step', style: { top: L.s0 + i * L.sH + 'px', height: L.sH - 16 + 'px' } });
+  K.el('div', { parent: st, cls: 'n', html: String(i + 1) });
+  const tx = K.el('div', { parent: st, cls: 'tx', html: `<div class="tt">${tt}</div><div class="ts">${ts}</div>` });
+  const th = K.el('div', { parent: st, cls: 'th', style: { width: L.thW + 'px', height: L.thH + 'px' } });
+  const s = L.thW / sw;
+  const img = K.el('img', { parent: th, src: K.screen(scr), style: { width: 780 * s + 'px', left: -sx * s + 'px', top: -sy * s + 'px' } });
+  if (i < 2) K.el('div', { parent: ans, cls: 'sep', style: { top: L.s0 + (i + 1) * L.sH - 12 + 'px' } });
+  return { st, tt: tx.querySelector('.tt'), th, img };
+});
+const realTag = K.demoTag('Screens: real app · demo workspace', 0, 0); realTag.style.zIndex = 61;
+page.appendChild(realTag);
+realTag.style.left = L.fX + L.fW - 420 + 'px'; realTag.style.top = L.aY + L.aH - 56 + 'px';
+
+const paa = K.box(L.fX, L.paaY, L.fW, null, { cls: 'paa', parent: page, html: `<div class="t">People also ask</div>
+  <div class="r">Do I need to know design?<u>⌄</u></div>
+  <div class="r" id="open">Does it post without asking?<u>⌄</u><div class="a"><div><b>No. Drafts first.</b> A listing goes live in your store only when you say yes.</div></div></div>
+  <div class="r">Who prints the physical ones?<u>⌄</u></div>` });
+const openA = paa.querySelector('#open .a'), openU = paa.querySelector('#open u');
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Describe it. Review it.<br>List it.' });
+
+K.run({
+  id: 'F03', title: 'Search', dur: DUR, bpm: BPM, music: 'happy-but-a-little-off', mood: 'calm', key: 'F', intro: 0.0, cover: 9.9,
+  technique: 'A hand-drawn, unbranded search page: the question typed in time with the narrator, enter, skeleton results, then a top-answer card whose three steps land on her lines with a highlighter sweep on each key phrase and a real-screen thumbnail each; the page scrolls to “People also ask” and opens “Does it post without asking?” — labelled an illustration, not a real result',
+  caption: 'How do you sell printables without design skills? Describe it in a sentence, review every file, and list it in your own stores when you say yes. (The search page is an illustration; the screens are the real app.) Start free at makeandlist.com',
+  short: 'Printables without design skills, in 3 steps.',
+  question: 'Is it for me?', gain: 'No design skills needed',
+  vo: VO,
+  beats: ['0–3.8 s: “how to sell printables without design skills” typed as she asks it', '3.8–5.4 s: enter, results load: the top answer — 3 steps', '5.4–7.2 s: 1 · Describe it in a sentence (real Create box)', '7.2–9.2 s: 2 · Review every file (real file list)', '9.2–10.8 s: 3 · List it in your stores (real stores) — drafts first', '10.8–13 s: People also ask → “Does it post without asking? No. Drafts first.”; 13–15 s end card'],
+  cues: [[0.0, 'pop'], [0.35, 'type'], [1.15, 'type'], [1.95, 'type'], [2.75, 'type'], [T_ENTER, 'click'], [T_LOAD - 0.1, 'swish'], [4.6, 'pop'],
+    [T_STEP[0] - 0.1, 'pop'], [T_STEP[1] - 0.1, 'pop'], [T_STEP[2] - 0.1, 'pop'], [T_SCROLL, 'swish'], [T_OPEN, 'click'], [12.95, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.7 - 450 + Math.sin(T * 0.5) * 140}px, ${H * 0.55 - 450 + Math.cos(T * 0.4) * 120}px)`;
+
+  // typing, word-paced
+  const n = Math.round(K.p(T, T_TYPE[0], T_TYPE[1], E.linear) * Q.length);
+  qEl.innerHTML = Q.slice(0, n) + (T < T_ENTER + 0.2 && f % 16 < 9 ? '<i></i>' : '');
+  const press = K.p(T, T_ENTER, T_ENTER + 0.08, E.outCubic) * (1 - K.p(T, T_ENTER + 0.08, T_ENTER + 0.3, E.outCubic));
+  field.style.transform = `scale(${1 - 0.02 * press})`;
+  field.style.boxShadow = T < T_ENTER ? '0 10px 30px -14px rgba(31,31,31,.35), 0 0 0 3px #1F1F1F' : '0 10px 30px -14px rgba(31,31,31,.35), 0 0 0 2px #E2DBCE';
+  const fin = K.p(T, 0, 0.35, E.outExpo);
+  page.style.opacity = fin;
+
+  // results: skeleton shimmer, then the answer card
+  const sk = K.p(T, T_ENTER + 0.05, T_ENTER + 0.25, E.linear) * (1 - K.p(T, T_LOAD + 0.2, T_LOAD + 0.4, E.linear));
+  skel.style.opacity = sk; skel.style.visibility = sk > 0 ? 'visible' : 'hidden';
+  [...skel.children].forEach((b, i) => { b.style.opacity = 0.5 + 0.5 * Math.sin(T * 10 - i * 0.6); });
+  const ap = K.p(T, T_LOAD + 0.15, T_LOAD + 0.75, E.outExpo);
+  ans.style.opacity = ap; ans.style.visibility = ap > 0 ? 'visible' : 'hidden';
+  ans.style.transform = `translateY(${(1 - ap) * 60}px)`;
+  const tabsIn = K.p(T, T_ENTER, T_ENTER + 0.4, E.outCubic);
+  tabs.style.opacity = tabsIn;
+
+  steps.forEach((s, i) => {
+    const p = K.p(T, T_STEP[i], T_STEP[i] + 0.5, E.outExpo);
+    s.st.style.opacity = Math.min(1, p * 1.5); s.st.style.transform = `translateX(${(1 - p) * 60}px)`;
+    const h = K.p(T, T_HL[i], T_HL[i] + 0.55, E.inOutCubic);
+    s.tt.style.backgroundSize = h * 100 + '% 100%';
+    const tp = K.p(T, T_STEP[i] + 0.1, T_STEP[i] + 0.6, E.outBack);
+    s.th.style.transform = `scale(${0.7 + 0.3 * tp}) rotate(${(1 - tp) * 4}deg)`;
+    s.img.style.transform = `translateY(${-Math.max(0, T - T_STEP[i]) * 3}px)`;
+  });
+  // scroll to People also ask
+  const sc = K.p(T, T_SCROLL, T_SCROLL + 0.6, E.inOutCubic);
+  page.style.transform = `translateY(${-sc * L.scroll}px)`;
+  realTag.style.opacity = K.p(T, T_STEP[0], T_STEP[0] + 0.3, E.linear);
+  paa.style.opacity = 0.45 * K.p(T, T_LOAD + 0.3, T_LOAD + 0.8, E.linear) + 0.55 * K.p(T, T_SCROLL + 0.1, T_SCROLL + 0.5, E.linear);
+  tag.style.top = K.lerp(L.tagY, tall ? L.paaY - L.scroll - 40 : 24, sc) + 'px';
+  const op = K.p(T, T_OPEN, T_OPEN + 0.45, E.outExpo);
+  openA.style.maxHeight = op * 200 + 'px';
+  openU.style.transform = `rotate(${op * 180}deg)`;
+
+  end(T);
+});
+</script></body></html>

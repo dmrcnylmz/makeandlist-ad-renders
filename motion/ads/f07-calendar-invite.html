@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F07 · The Launch Week</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FBF9F4; }
+.app { position: absolute; left: 0; top: 0; transform-origin: 50% 40%; }
+.sbar { position: absolute; display: flex; justify-content: space-between; align-items: center; font: 700 30px 'Archivo'; color: #1F1F1F; }
+.sbar i { display: inline-block; background: #1F1F1F; border-radius: 3px; margin-left: 8px; }
+.nav { position: absolute; display: flex; justify-content: space-between; align-items: center; font: 600 28px 'Archivo'; color: #45403A; }
+.nav b { font: 700 30px 'Archivo'; color: #1F1F1F; }
+.nav .pl { width: 54px; height: 54px; border-radius: 50%; background: #1F1F1F; color: #FAF7EE; display: grid; place-items: center; font: 500 38px/1 'Archivo'; }
+.month { position: absolute; font: 800 64px/1 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; white-space: nowrap; }
+.month span { font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #6B645A; margin-left: 18px; vertical-align: 12px; text-transform: uppercase; }
+.seg { position: absolute; display: flex; background: #EFEADF; border-radius: 14px; padding: 5px; font: 600 21px 'Archivo'; color: #6B645A; }
+.seg span { padding: 8px 16px; border-radius: 10px; }
+.seg span.on { background: #FFFDF8; color: #1F1F1F; box-shadow: 0 2px 6px rgba(31,31,31,.12); }
+.dh { position: absolute; text-align: center; }
+.dh .n { font: 600 18px 'IBM Plex Mono', monospace; letter-spacing: .12em; color: #6B645A; text-transform: uppercase; }
+.dh .d { margin: 6px auto 0; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font: 700 30px 'Archivo'; color: #1F1F1F; }
+.hr { position: absolute; height: 1px; background: #E6E0D4; }
+.hl { position: absolute; font: 500 17px 'IBM Plex Mono', monospace; color: #8A8378; text-align: right; }
+.vl { position: absolute; width: 1px; background: #EEE9DF; }
+.colhi { position: absolute; background: rgba(223,255,90,.16); }
+.now { position: absolute; height: 3px; background: #E8603C; border-radius: 2px; }
+.now::before { content: ''; position: absolute; left: -7px; top: -5px; width: 13px; height: 13px; border-radius: 50%; background: #E8603C; }
+.ev { position: absolute; border-radius: 12px; padding: 10px 12px 10px 16px; overflow: hidden; transform-origin: 50% 0; box-shadow: 0 10px 22px -14px rgba(31,31,31,.55); }
+.ev::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--acc); }
+.ev .tm { font: 600 15px 'IBM Plex Mono', monospace; color: rgba(31,31,31,.6); }
+.ev .tt { margin-top: 3px; font: 700 21px/1.12 'Archivo'; color: #1F1F1F; }
+.ev .ss { margin-top: 4px; font: 500 15px/1.2 'Archivo'; color: rgba(31,31,31,.65); }
+.ev.dash { background: rgba(255,253,248,.7) !important; box-shadow: none; outline: 2.5px dashed #8A8378; outline-offset: -2.5px; }
+.ev .strike { position: absolute; left: 10px; right: 10px; top: 50%; height: 4px; background: #1F1F1F; transform-origin: 0 50%; border-radius: 2px; }
+.ev .ok { position: absolute; right: 10px; top: 10px; width: 30px; height: 30px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; display: grid; place-items: center; font: 800 17px 'Archivo'; }
+.stampD { position: absolute; z-index: 20; font: 800 30px 'Archivo'; letter-spacing: .08em; color: #C4532F; border: 4px solid #C4532F; border-radius: 10px; padding: 6px 16px; white-space: nowrap; background: rgba(255,253,248,.9); }
+.pop { position: absolute; z-index: 30; border-radius: 26px; background: #FFFDF8; box-shadow: 0 50px 90px -40px rgba(31,31,31,.6), 0 0 0 1.5px #E2DBCE; padding: 22px 22px 22px; }
+.pop .h1 { display: flex; align-items: center; gap: 12px; font: 800 30px/1.1 'Archivo'; color: #1F1F1F; }
+.pop .h1 i { flex: none; width: 18px; height: 18px; border-radius: 5px; background: var(--acc); }
+.pop .h2 { margin-top: 8px; font: 500 21px 'Archivo'; color: #6B645A; }
+.pop .h3 { margin: 16px 0 10px; font: 600 16px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #8A8378; display: flex; justify-content: space-between; }
+.pop .h3 b { font-weight: 600; color: #45403A; background: #EFEADF; border-radius: 6px; padding: 2px 8px; letter-spacing: .04em; text-transform: none; }
+.crop { position: relative; overflow: hidden; border-radius: 16px; background: #FAF7EE; box-shadow: 0 0 0 1.5px #E2DBCE; }
+.crop img { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 780px; display: block; }
+.ring { position: absolute; border: 4px solid #DFFF5A; border-radius: 14px; box-shadow: 0 0 0 2px #1F1F1F; }
+.apv { margin-top: 14px; height: 76px; border-radius: 99px; background: #DFFF5A; display: flex; align-items: center; justify-content: center; gap: 12px; font: 800 28px 'Archivo'; color: #1F1F1F; }
+.cap { position: absolute; z-index: 40; font: 800 60px/1.04 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.cap .k { font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #6B645A; display: block; margin-bottom: 10px; }
+.cap em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.capbg { position: absolute; z-index: 39; background: linear-gradient(180deg, rgba(251,249,244,0) 0, rgba(251,249,244,.95) 70px, rgba(251,249,244,.95) calc(100% - 70px), rgba(251,249,244,0) 100%); }
+.touch { position: absolute; z-index: 45; width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%; background: rgba(31,31,31,.18); border: 3px solid rgba(31,31,31,.5); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F07 — a calendar week, the native way: a generic, unbranded week view. Monday holds a two-hour "Meeting with a
+// designer"; it gets declined (the joke), and the week fills with the real flow instead — Mon describe it, Tue review
+// the draft, Wed listed after your yes, Thu approve a print order, then the partner prints it. Each event opens a
+// detail popover whose attachment is a crop of the real app (demo workspace). The week is a sample, said on screen.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 117.5, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const T_TAPD = B(2.2), T_DECL = B(3), T_GONE = B(3.6);
+const PH = [B(4), B(8), B(12), B(16)];      // Mon, Tue, Wed, Thu
+const T_TAP = B(18.6), T_PRINT = B(20), T_FRI = B(22), T_OUT = 12.7;
+
+const L = tall
+  ? { sbY: 34, navY: 150, monY: 290, segY: 292, dhY: 384, g0: 470, ph: 84, x0: 140, cw: 175, gx: 65, capY: 1072, capH: 176, capFs: 56, popW: 600, popY: 486 }
+  : { sbY: -1, navY: -1, monY: 56, segY: 58, dhY: 140, g0: 226, ph: 92, x0: 150, cw: 172, gx: 60, capY: 1000, capH: 290, capFs: 60, popW: 600, popY: 236 };
+const yAt = (h) => L.g0 + (h - 9) * L.ph;
+const xAt = (d) => L.x0 + d * L.cw;
+
+const app = K.box(0, 0, W, H, { cls: 'app' });
+// ---------- chrome ----------
+if (tall) {
+  K.box(70, L.sbY, W - 140, 50, { cls: 'sbar', parent: app, html: '<span>9:41</span><span><i style="width:30px;height:18px"></i><i style="width:24px;height:18px;border-radius:50%"></i><i style="width:46px;height:22px;border-radius:6px"></i></span>' });
+  K.box(65, L.navY, W - 130, 60, { cls: 'nav', parent: app, html: '<span>‹ 2026</span><b>Calendar</b><span class="pl">+</span>' });
+}
+K.box(L.gx, L.monY, 700, 70, { cls: 'month', parent: app, html: 'October<span>Week 43</span>' });
+K.box(W - L.gx - 300, L.segY, 300, 54, { cls: 'seg', parent: app, html: '<span>Day</span><span class="on">Week</span><span>Month</span>', style: { justifyContent: 'space-between' } });
+const DAYS = [['Mon', 19], ['Tue', 20], ['Wed', 21], ['Thu', 22], ['Fri', 23]];
+const colhi = K.box(0, L.dhY - 8, L.cw, 0, { cls: 'colhi', parent: app });
+colhi.style.height = yAt(17) - L.dhY + 8 + 'px';
+const dhs = DAYS.map(([n, d], i) => K.box(xAt(i), L.dhY, L.cw, 80, { cls: 'dh', parent: app, html: `<div class="n">${n}</div><div class="d">${d}</div>` }));
+for (let h = 9; yAt(h) < H - 20; h++) {
+  K.box(L.x0 - 6, yAt(h), W - L.gx - L.x0 + 6, 1, { cls: 'hr', parent: app });
+  if (h <= 23) K.box(L.gx - 20, yAt(h) - 11, L.x0 - L.gx - 10, 20, { cls: 'hl', parent: app, html: String(h).padStart(2, '0') + ':00' });
+}
+for (let d = 0; d <= 5; d++) K.box(xAt(d), L.dhY + 86, 1, H - L.dhY - 86, { cls: 'vl', parent: app });
+const now = K.box(0, 0, L.cw, 3, { cls: 'now', parent: app });
+const tagS = K.demoTag('Sample week · illustrative', 0, 0);
+
+// ---------- events ----------
+function ev(d, h0, h1, acc, bg, tm, tt, ss, dash) {
+  const e = K.box(xAt(d) + 5, yAt(h0) + 3, L.cw - 10, Math.max(92, (h1 - h0) * L.ph - 6), { cls: 'ev' + (dash ? ' dash' : ''), parent: app,
+    html: `<div class="tm">${tm}</div><div class="tt">${tt}</div>${ss ? `<div class="ss">${ss}</div>` : ''}`, style: { background: bg } });
+  e.style.setProperty('--acc', acc);
+  return e;
+}
+const evD = ev(0, 9, 11, '#E8603C', '#FBE3D9', '09:00 – 11:00', 'Meeting with a designer', 'Brief · mood board · quote');
+const strike = K.el('div', { parent: evD, cls: 'strike' });
+const stampD = K.box(0, 0, null, null, { cls: 'stampD', html: 'DECLINED', style: { width: 'auto', height: 'auto' } });
+const EV = [
+  ev(0, 9, 9.75, '#7E9A7E', '#E3EBDF', '09:00', 'Describe the idea', '10 min'),
+  ev(1, 10, 10.75, '#7E9A7E', '#E3EBDF', '10:00', 'Review the draft', 'files · copy · images'),
+  ev(2, 11.5, 12.5, '#1F1F1F', '#ECE8E0', '11:30', 'Listed — after your yes', 'ikas · WooCommerce'),
+  ev(3, 13, 14, '#B7D12F', '#F3FBCF', '13:00', 'Approve print order', '#1088 · art print'),
+];
+const okT = K.el('div', { parent: EV[3], cls: 'ok', html: '✓' });
+const evP = ev(3, 14.25, 16, '#7E9A7E', '#FFFDF8', '14:15', 'Partner prints & ships', 'paid from your partner account', true);
+const evF = ev(4, 15, 16.5, '#8A8378', '#FFFDF8', '15:00', 'Free.', 'Next idea?', true);
+
+// ---------- popovers with real attachments ----------
+function crop(src, sy, sh, w) {
+  const k = w / 780;
+  const c = K.el('div', { cls: 'crop', html: `<img src="${K.screen(src)}">`, style: { width: w + 'px', height: sh * k + 'px' } });
+  c.querySelector('img').style.transform = `translate(0, ${-sy * k}px) scale(${k})`;
+  return c;
+}
+const CW = L.popW - 44;
+const POPS = [
+  { d: 0, acc: '#7E9A7E', t: 'Describe the idea', s: 'Mon 19 Oct · 09:00 · you, in one sentence', src: '68-phone-copilot', sy: 960, sh: 455 },
+  { d: 1, acc: '#7E9A7E', t: 'Review the draft', s: 'Tue 20 Oct · 10:00 · nothing is live yet', src: '24-phone-product', sy: 150, sh: 500 },
+  { d: 2, acc: '#1F1F1F', t: 'Listed in your stores', s: 'Wed 21 Oct · 11:30 · only when you say', src: '72-phone-listing-send', sy: 1076, sh: 440 },
+  { d: 3, acc: '#B7D12F', t: 'Approve print order', s: 'Thu 22 Oct · 13:00 · a buyer ordered', src: '52-phone-order', sy: 900, sh: 370, apv: true },
+].map((p) => {
+  const x = p.d < 2 ? W - L.gx - L.popW : L.gx;
+  const root = K.box(x, L.popY, L.popW, null, { cls: 'pop' });
+  root.style.setProperty('--acc', p.acc);
+  root.innerHTML = `<div class="h1"><i></i>${p.t}</div><div class="h2">${p.s}</div><div class="h3"><span>Attachment</span><b>Real app · demo workspace</b></div>`;
+  root.appendChild(crop(p.src, p.sy, p.sh, CW));
+  let btn = null;
+  if (p.apv) btn = K.el('div', { parent: root, cls: 'apv', html: '<svg width="34" height="34" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#1F1F1F" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve production' });
+  return { ...p, root, btn };
+});
+// rings on the real crops: Tue's "Review" step, Wed's "drafts first" line
+const k0 = CW / 780;
+const ringT = K.el('div', { parent: POPS[1].root.querySelector('.crop'), cls: 'ring', style: { left: 272 * k0 + 'px', top: (178 - 150) * k0 + 'px', width: 124 * k0 + 'px', height: 122 * k0 + 'px' } });
+const ringW = K.el('div', { parent: POPS[2].root.querySelector('.crop'), cls: 'ring', style: { left: 14 * k0 + 'px', top: (1080 - 1080) * k0 + 'px', width: 752 * k0 + 'px', height: 52 * k0 + 'px' } });
+
+// ---------- captions ----------
+const capbg = K.box(0, L.capY - 70, W, L.capH + 150, { cls: 'capbg' });
+const CAPS = [
+  [0.0, T_GONE + 0.15, 'This week', 'Launch a product.<br><em>Skip one meeting.</em>'],
+  [PH[0] - 0.05, PH[1] - 0.1, 'Monday', 'Describe it in <em>one sentence.</em>'],
+  [PH[1] - 0.05, PH[2] - 0.1, 'Tuesday', 'Review the draft.<br><em>Nothing is live.</em>'],
+  [PH[2] - 0.05, PH[3] - 0.1, 'Wednesday', 'Listed in your stores,<br><em>after your yes.</em>'],
+  [PH[3] - 0.05, T_PRINT - 0.1, 'Thursday', 'An order. <em>You approve it.</em>'],
+  [T_PRINT - 0.05, T_FRI - 0.1, 'Thursday, 14:15', 'Your partner prints it, <em>paid from your account.</em>'],
+  [T_FRI - 0.05, T_OUT + 0.2, 'Friday', 'Free. <em>No designer meeting.</em>'],
+].map(([a, b, k, t]) => ({ a, b, el: K.box(L.gx, L.capY, W - 2 * L.gx, null, { cls: 'cap', html: `<span class="k">${k}</span>${t}`, style: { fontSize: L.capFs + 'px' } }) }));
+
+const touch = K.box(0, 0, 0, 0, { cls: 'touch' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'Your launch week,<br>without the meeting.' });
+
+K.run({
+  id: 'F07', title: 'The Launch Week', dur: DUR, bpm: BPM, music: 'love-love-love', mood: 'bright', key: 'D', intro: 0.0, cover: 9.0,
+  technique: 'A hand-drawn, unbranded calendar week view: a two-hour “Meeting with a designer” is declined and struck out, then the week fills on the beat with the real flow — each event pops in and opens a detail popover whose attachment is a crop of the real app — while a now-line walks from day to day and a lower-third names the day',
+  caption: 'A sample launch week: Monday you describe it in one sentence, Tuesday you review the draft, Wednesday it’s listed in your stores after your yes, Thursday you approve a print order your own partner prints — paid from your partner account. No meeting with a designer. Start free at makeandlist.com',
+  short: 'Your launch week, without the meeting.',
+  question: 'How does it work?', gain: 'Time: from a sentence to a listed product, with your yes at every step',
+  beats: ['0–1.8 s: a calendar week — “Launch a product. Skip one meeting.” — the designer meeting is declined and struck out', '2–4 s: Mon · describe it in one sentence (real Make screen)', '4–6 s: Tue · review the draft, nothing is live (real product page, Review step)', '6–8 s: Wed · listed in your stores after your yes (real Send step: drafts first)', '8–9.8 s: Thu · an order — Approve production is tapped (real order, simulated)', '9.8–11.2 s: Thu · your partner prints and ships, paid from your partner account', '11.2–13 s: Fri · free, no designer meeting', '13–15 s: end card'],
+  cues: [[0.0, 'pop'], [T_TAPD, 'click'], [T_DECL, 'stamp'], [T_GONE, 'swish'],
+    ...PH.flatMap((t) => [[t, 'pop'], [t + 0.18, 'swish']]), [PH[0] + 0.5, 'type'],
+    [T_TAP, 'click'], [T_TAP + 0.16, 'chime'], [T_PRINT, 'pop'], [T_PRINT + 0.3, 'printer'], [T_FRI, 'pop'], [T_OUT - 0.1, 'whoosh'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  // camera: settle in, drift, small lean toward the open popover, push out at the end
+  const inP = K.p(T, 0, 0.6, E.outExpo);
+  const act = PH.reduce((a, t, i) => (T >= t ? i : a), -1);
+  const lean = act < 0 ? 0 : (act < 2 ? -1 : 1) * 8 * K.p(T, PH[act], PH[act] + 0.5, E.inOutCubic) * (1 - K.p(T, T_FRI - 0.3, T_FRI + 0.2, E.inOutCubic));
+  const outP = K.p(T, T_OUT, 13.0, E.inCubic);
+  app.style.transform = `translate(${lean}px, ${(1 - inP) * 40}px) scale(${1.03 - 0.03 * inP + T * 0.0012 - outP * 0.04})`;
+  app.style.opacity = inP;
+
+  // the day the week is on
+  const day = T < PH[0] ? 0 : T < PH[1] ? 0 : T < PH[2] ? 1 : T < PH[3] ? 2 : T < T_FRI ? 3 : 4;
+  const dayT = [0, PH[1], PH[2], PH[3], T_FRI][day];
+  const prevX = xAt(Math.max(0, day - 1)), curX = xAt(day);
+  const dm = day === 0 ? 1 : K.p(T, dayT, dayT + 0.35, E.inOutCubic);
+  colhi.style.left = K.lerp(prevX, curX, dm) + 'px';
+  dhs.forEach((d, i) => {
+    const on = i === day;
+    const c = d.querySelector('.d');
+    c.style.background = on ? '#1F1F1F' : 'transparent'; c.style.color = on ? '#DFFF5A' : '#1F1F1F';
+  });
+  const nowH = [9.05, 9.05, 10.1, 11.6, 13.1, 15.1][day + (day === 0 && T >= PH[0] ? 1 : 0)] + K.p(T, 0, DUR, E.linear) * 0.15;
+  now.style.left = K.lerp(prevX, curX, dm) + 'px'; now.style.top = yAt(nowH) + 'px';
+  now.style.opacity = 0.9;
+  tagS.style.left = (tall ? W - L.gx - 340 : W - L.gx - 340) + 'px'; tagS.style.top = (tall ? 236 : 1250) + 'px';
+  tagS.style.opacity = K.p(T, 0.3, 0.7, E.linear) * (1 - outP);
+
+  // ---------- the designer meeting: tapped, declined, struck, gone ----------
+  const dp = K.p(T, T_DECL, T_DECL + 0.3, E.outCubic);
+  strike.style.transform = `scaleX(${dp})`;
+  evD.style.filter = `grayscale(${dp})`;
+  const gone = K.p(T, T_GONE, T_GONE + 0.35, E.inCubic);
+  evD.style.transform = `scaleY(${1 - gone}) scale(${T >= T_TAPD - 0.04 && T < T_TAPD + 0.12 ? 0.96 : 1})`;
+  evD.style.opacity = (1 - gone) * K.p(T, 0.15, 0.45, E.linear);
+  const sp = K.p(T, T_DECL, T_DECL + 0.25, E.outBack);
+  stampD.style.left = xAt(0) + 30 + 'px'; stampD.style.top = yAt(10) - 30 + 'px';
+  stampD.style.opacity = Math.min(1, sp * 2) * (1 - gone);
+  stampD.style.transform = `rotate(-8deg) scale(${1.6 - 0.6 * sp})`;
+
+  // ---------- events pop in, on the beat ----------
+  EV.forEach((e, i) => {
+    const p = K.p(T, PH[i], PH[i] + 0.45, E.outBack);
+    e.style.opacity = Math.min(1, p * 2.5);
+    e.style.transform = `scale(${0.6 + 0.4 * p})`;
+    e.style.visibility = T >= PH[i] ? 'visible' : 'hidden';
+  });
+  const ap = K.p(T, T_TAP + 0.05, T_TAP + 0.4, E.outBack);
+  EV[3].style.background = ap > 0.5 ? '#DFFF5A' : '#F3FBCF';
+  EV[3].querySelector('.tt').innerHTML = ap > 0.5 ? 'Approved by you' : 'Approve print order';
+  okT.style.opacity = ap; okT.style.transform = `scale(${ap})`;
+  [[evP, T_PRINT], [evF, T_FRI]].forEach(([e, t]) => {
+    const p = K.p(T, t, t + 0.45, E.outBack);
+    e.style.opacity = Math.min(1, p * 2.5); e.style.transform = `scale(${0.6 + 0.4 * p})`;
+    e.style.visibility = T >= t ? 'visible' : 'hidden';
+  });
+
+  // ---------- popovers ----------
+  POPS.forEach((p, i) => {
+    const a = PH[i] + 0.15, b = i < 3 ? PH[i + 1] - 0.05 : T_PRINT - 0.05;
+    const pi = K.p(T, a, a + 0.5, E.outExpo), po = K.p(T, b - 0.28, b, E.inCubic);
+    p.root.style.visibility = T >= a && T < b ? 'visible' : 'hidden';
+    p.root.style.opacity = Math.min(1, pi * 1.6) * (1 - po);
+    const dir = p.d < 2 ? 1 : -1;
+    p.root.style.transform = `translate(${(1 - pi) * 60 * dir}px, ${(1 - pi) * 30 - po * 24}px) scale(${0.94 + 0.06 * pi}) rotate(${(1 - pi) * 1.5 * dir}deg)`;
+  });
+  [[ringT, PH[1] + 0.9], [ringW, PH[2] + 0.9]].forEach(([r, t]) => {
+    const p = K.p(T, t, t + 0.35, E.outBack);
+    r.style.opacity = K.p(T, t, t + 0.1, E.linear); r.style.transform = `scale(${1.15 - 0.15 * p})`;
+  });
+  const btn = POPS[3].btn;
+  const press = T >= T_TAP - 0.04 && T < T_TAP + 0.12;
+  const done = K.p(T, T_TAP + 0.05, T_TAP + 0.3, E.outCubic);
+  btn.style.transform = `scale(${press ? 0.95 : 1})`;
+  btn.style.background = done > 0.5 ? '#1F1F1F' : '#DFFF5A';
+  btn.style.color = done > 0.5 ? '#DFFF5A' : '#1F1F1F';
+  btn.lastChild.textContent = done > 0.5 ? 'Approved by you' : 'Approve production';
+  btn.querySelector('path').setAttribute('stroke', done > 0.5 ? '#DFFF5A' : '#1F1F1F');
+
+  // ---------- the thumb ----------
+  touch.style.opacity = 0;
+  if (T > T_TAPD - 0.5 && T < T_TAPD + 0.35) {
+    const tp = K.p(T, T_TAPD - 0.5, T_TAPD - 0.02, E.inOutCubic);
+    touch.style.left = xAt(0) + L.cw / 2 + 140 * (1 - tp) + 'px'; touch.style.top = yAt(9.9) + 120 * (1 - tp) + 'px';
+    touch.style.opacity = Math.min(1, tp * 2) * (1 - K.p(T, T_TAPD + 0.1, T_TAPD + 0.35, E.linear));
+    touch.style.transform = `scale(${T >= T_TAPD - 0.04 && T < T_TAPD + 0.12 ? 0.8 : 1})`;
+  }
+  if (T > T_TAP - 0.5 && T < T_TAP + 0.35) {
+    const r = btn.getBoundingClientRect();
+    const tp = K.p(T, T_TAP - 0.5, T_TAP - 0.02, E.inOutCubic);
+    touch.style.left = r.left + r.width * 0.62 + 140 * (1 - tp) + 'px'; touch.style.top = r.top + r.height / 2 + 140 * (1 - tp) + 'px';
+    touch.style.opacity = Math.min(1, tp * 2) * (1 - K.p(T, T_TAP + 0.1, T_TAP + 0.35, E.linear));
+    touch.style.transform = `scale(${press ? 0.8 : 1})`;
+  }
+
+  // ---------- captions ----------
+  capbg.style.opacity = inP * (1 - outP);
+  CAPS.forEach((c, i) => {
+    const pi = K.p(T, c.a, c.a + 0.45, E.outExpo), po = i === CAPS.length - 1 ? K.p(T, T_OUT, 13.0, E.inCubic) : K.p(T, c.b - 0.2, c.b, E.inCubic);
+    c.el.style.visibility = T >= c.a && T < c.b ? 'visible' : 'hidden';
+    c.el.style.opacity = pi * (1 - po);
+    c.el.style.transform = `translateY(${(1 - pi) * 40 - po * 30}px)`;
+    if (i === 0) c.el.style.fontSize = L.capFs * 1.25 + 'px';
+  });
+  end(T);
+});
+</script></body></html>

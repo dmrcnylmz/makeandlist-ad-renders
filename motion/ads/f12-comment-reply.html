@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F12 · Answering a Comment</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #E9E4D8; }
+.bgA { position: absolute; border-radius: 50%; pointer-events: none; }
+/* the reply sticker: a generic "replying to a comment" card, drawn by hand (no platform's look or name) */
+.stk { position: absolute; z-index: 60; transform-origin: 0 0; width: 900px; padding: 30px 36px 34px; border-radius: 30px; background: #FFFDF8;
+  box-shadow: 0 40px 80px -36px rgba(31,31,31,.55), 0 0 0 1px rgba(31,31,31,.06); }
+.stk::after { content: ''; position: absolute; left: 70px; bottom: -22px; width: 44px; height: 44px; background: #FFFDF8; transform: rotate(45deg); border-radius: 0 0 10px 0; }
+.stk .hd { display: flex; align-items: center; gap: 16px; font: 600 27px 'Archivo'; color: #6B645A; }
+.stk .av { width: 58px; height: 58px; border-radius: 50%; background: #7E9A7E; color: #FFFDF8; display: grid; place-items: center; font: 800 28px 'Archivo'; flex: none; }
+.stk .hd b { color: #1F1F1F; font-weight: 800; }
+.stk .tx { margin-top: 20px; font: 800 64px/1.06 'Archivo'; letter-spacing: -0.02em; color: #1F1F1F; }
+.stk .tx .w { display: inline-block; white-space: pre; }
+.stk .rp { display: none; margin-top: 26px; padding: 22px 26px; border-radius: 22px; background: #1F1F1F; color: #FAF7EE; font: 700 40px/1.15 'Archivo'; }
+.stk .rp b { color: #DFFF5A; }
+.stk .rp small { display: block; margin-bottom: 10px; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #B9B1A3; }
+.sample { position: absolute; z-index: 61; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .04em; color: #45403A; background: #DFFF5A; padding: 7px 14px; border-radius: 8px; white-space: nowrap; }
+/* native-style caption boxes (generic) */
+.cap { position: absolute; z-index: 55; text-align: center; }
+.cap span { display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone; background: #FFFDF8; color: #1F1F1F; padding: 6px 18px; border-radius: 14px;
+  font: 800 54px/1.42 'Archivo'; letter-spacing: -0.01em; }
+.cap span b { background: #DFFF5A; border-radius: 8px; padding: 0 6px; }
+.no { position: absolute; z-index: 58; font: 900 380px/0.8 'Playfair Display'; letter-spacing: -0.05em; color: #1F1F1F; text-align: center; white-space: nowrap; }
+.no em { font-style: italic; color: #1F1F1F; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 90%, transparent 90%); }
+.hi { position: absolute; z-index: 4; border: 6px solid #DFFF5A; border-radius: 16px; box-shadow: 0 0 0 3px #1F1F1F, 0 0 0 4000px rgba(31,31,31,.0); }
+.tap { position: absolute; z-index: 70; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; background: rgba(255,253,248,.55); border: 4px solid #FFFDF8; box-shadow: 0 8px 24px rgba(31,31,31,.35); }
+.ticks { position: absolute; z-index: 61; display: flex; gap: 14px; flex-wrap: wrap; }
+.ticks div { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 99px; background: #FFFDF8; font: 700 28px 'Archivo'; color: #1F1F1F; box-shadow: 0 14px 28px -18px rgba(31,31,31,.6); white-space: nowrap; }
+.ticks i { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; font: 800 18px 'Archivo'; font-style: normal; }
+.rec { position: absolute; z-index: 61; display: flex; align-items: center; gap: 10px; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #45403A; white-space: nowrap; }
+.rec i { width: 14px; height: 14px; border-radius: 50%; background: #E8603C; display: block; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F12 — answering a comment, the way people do in the feed: a sample question pinned as a reply sticker
+// ("does it post things without asking?"), a giant "No." and a screen-recorded walk through the real app that proves
+// it — every listing starts as a draft buyers cannot see, sending is "public only when you say", and a print order
+// waits for the seller's approval and is not sent to the partner. The sticker comes back with the reply.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const T_NO = B(2), T_PH = B(2.9), T_SW1 = B(7), T_TAP = B(10), T_SW2 = B(11), T_RC = B(14.3);
+
+const L = tall
+  ? { stk: { x: 90, y: 560, s: 1 }, dock: { x: 65, y: 282, s: 0.56 }, rc: { x: 90, y: 420, s: 1 }, noY: 640,
+      ph: { x: 280, y: 600, w: 520 }, capY: 1060, capW: W - 130, capX: 65, tagX: 65, tagY: 1196, tickY: 1010, recY: 300 }
+  : { stk: { x: 90, y: 360, s: 1 }, dock: { x: 60, y: 60, s: 0.5 }, rc: { x: 90, y: 340, s: 1 }, noY: 480,
+      ph: { x: 600, y: 230, w: 420 }, capY: 640, capW: 500, capX: 60, tagX: 60, tagY: 1270, tickY: 860, recY: 1196 };
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'bgA', style: { background: 'radial-gradient(circle, rgba(223,255,90,.32), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'bgA', style: { background: 'radial-gradient(circle, rgba(126,154,126,.22), rgba(126,154,126,0) 62%)' } });
+
+// ---------- the phone: a screen recording of the real app ----------
+const SCR = [{ n: '71-phone-listings', h: 2488 }, { n: '72-phone-listing-send', h: 3800 }, { n: '52-phone-order', h: 3800 }];
+const deck = K.phoneDeck(L.ph.x, L.ph.y, L.ph.w, SCR.map((s) => K.screen(s.n)));
+deck.root.style.zIndex = 20;
+const k = deck.sw / 780;
+const wraps = [...deck.root.querySelectorAll('.screen > div')];
+const maxOf = (i) => SCR[i].h * k - deck.sh;
+// scroll so that y (in the 780-wide shot) sits `at` px from the top of the screen
+const scr = (i, y, at) => K.clamp((y * k - at) / maxOf(i));
+// highlights live inside each screen layer and scroll with it
+const HI = [
+  { i: 0, x: 22, y: 1150, w: 736, h: 372 },   // Draft — still being put together; buyers cannot see it
+  { i: 1, x: 18, y: 1080, w: 700, h: 64 },    // SEND · DRAFTS FIRST, PUBLIC ONLY WHEN YOU SAY
+  { i: 1, x: 40, y: 3205, w: 700, h: 250 },   // It stays not for sale until you confirm + Review what will be sent
+  { i: 2, x: 28, y: 2805, w: 724, h: 290 },   // Your approval — waiting · Sent to the partner — not sent
+].map((h) => ({ ...h, el: K.el('div', { cls: 'hi', parent: wraps[h.i], style: { left: h.x * k + 'px', width: h.w * k + 'px', height: h.h * k + 'px' } }) }));
+const tap = K.box(0, 0, 96, 96, { cls: 'tap' });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+const rec = K.box(0, L.recY, null, null, { cls: 'rec', html: '<i></i>Screen recording · reply', style: { width: 'auto', height: 'auto' } });
+
+// ---------- the sticker ----------
+const Q = 'does it post things without asking?';
+const stk = K.box(0, 0, 900, null, { cls: 'stk', html:
+  `<div class="hd"><div class="av">S</div><span>Replying to <b>sample_seller</b></span></div>` +
+  `<div class="tx">${Q.split(' ').map((w) => `<span class="w">${w} </span>`).join('')}</div>` +
+  `<div class="rp"><small>Reply</small>No. <b>Drafts first.</b> Nothing goes live — and no print order is sent — without your yes.</div>` });
+const qW = [...stk.querySelectorAll('.tx .w')];
+const rp = stk.querySelector('.rp');
+const sample = K.box(0, 0, null, null, { cls: 'sample', html: 'Sample question · not a real user', style: { width: 'auto', height: 'auto' } });
+
+// ---------- big "No." ----------
+const no = K.box(0, L.noY, W, null, { cls: 'no', html: '<em>No.</em>' });
+
+// ---------- captions ----------
+function cap(html) { return K.box(L.capX, L.capY, L.capW, null, { cls: 'cap', html: html.split('|').map((s) => `<span>${s}</span>`).join('<br>') }); }
+const CAPS = tall
+  ? [cap('Everything starts|as a <b>draft</b>.'), cap('Public only|when <b>you say</b>.'), cap('Print orders wait|for <b>your yes</b> too.')]
+  : [cap('Everything|starts as|a <b>draft</b>.'), cap('Public only|when <b>you say</b>.'), cap('Print orders|wait for|<b>your yes</b> too.')];
+if (tall) CAPS[2].style.top = '700px'; // the approval block sits low on this screen: the caption goes above it
+const CW = [[T_PH + 0.35, T_SW1 - 0.05], [T_SW1 + 0.15, T_SW2 - 0.05], [T_SW2 + 0.15, T_RC - 0.05]];
+
+const ticks = K.box(0, 0, null, null, { cls: 'ticks', style: { width: tall ? '950px' : '960px', height: 'auto' },
+  html: ['Drafts first', 'You review', 'You say yes'].map((t) => `<div><i>✓</i>${t}</div>`).join('') });
+const tickEls = [...ticks.children];
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Drafts first.<br>Live on your yes.' });
+
+const posAt = (t) => K.p(t, T_SW1 - 0.18, T_SW1 + 0.3, E.inOutCubic) + K.p(t, T_SW2 - 0.18, T_SW2 + 0.3, E.inOutCubic);
+
+K.run({
+  id: 'F12', title: 'Answering a Comment', dur: DUR, bpm: BPM, music: 'bouncing', mood: 'bright', key: 'F', intro: 0.0, cover: 4.0,
+  technique: 'A feed-native “reply to a comment” video: a hand-drawn reply sticker carries a sample question, a giant serif “No.” answers on the beat, then a screen recording of the real phone app proves it with lime highlight boxes and a finger tap — drafts buyers cannot see, sending “public only when you say”, a print order waiting for approval and not sent — before the sticker returns holding the reply',
+  caption: 'Does MakeAndList post things without asking? No. Everything starts as a draft, sending is public only when you say, and a print order waits for your approval before anything goes to your print partner. Start free at makeandlist.com',
+  short: 'No. Drafts first, your yes.',
+  question: 'Can I trust it?', gain: 'Control: drafts first; nothing goes live without your yes',
+  beats: ['0–1.5 s: a reply sticker with a sample question: “does it post things without asking?”', '1.5–2.2 s: “No.”', '2.2–5.2 s: the real app: every listing starts as a draft buyers cannot see', '5.2–8.2 s: Send: “drafts first, public only when you say” → it stays not for sale until you confirm (tap)', '8.2–10.6 s: a print order waits for your approval — not sent to the partner', '10.6–13 s: the sticker returns with the reply; drafts first · you review · you say yes', '13–15 s: end card'],
+  cues: [[0.05, 'notify'], [0.3, 'type'], [B(1.6), 'swish'], [T_NO, 'hit'], [B(2.7), 'whoosh'], [B(4), 'pop'], [B(6.6), 'swish'], [T_SW1, 'pop'],
+    [B(8.3), 'swish'], [B(9.3), 'pop'], [T_TAP, 'click'], [B(10.7), 'swish'], [B(12), 'pop'], [B(13.9), 'whoosh'], [B(14.6), 'pop'], [B(15.2), 'chime'], [B(16), 'pop'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.7 - 550 + Math.sin(T * 0.5) * 160}px, ${H * 0.28 - 550 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.15 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.8 - 450 + Math.sin(T * 0.6) * 100}px)`;
+
+  // ---------- sticker: big (hook) → docked (reply) → big again with the reply ----------
+  const sIn = K.p(T, 0.02, 0.5, E.outBack);
+  const dk = K.p(T, B(1.6), B(2.4), E.inOutCubic);
+  const back = K.p(T, T_RC, T_RC + 0.55, E.outExpo);
+  const pA = dk * (1 - back);
+  const P0 = back > 0 ? L.rc : L.stk;
+  const sx = K.lerp(P0.x, L.dock.x, pA), sy = K.lerp(P0.y, L.dock.y, pA), ss = K.lerp(1, L.dock.s, pA);
+  stk.style.left = sx + 'px'; stk.style.top = sy + 'px';
+  stk.style.opacity = Math.min(1, sIn * 2);
+  stk.style.transform = `translateY(${(1 - sIn) * 120}px) scale(${ss * (0.85 + 0.15 * sIn)}) rotate(${-1.5 + pA * -1 + Math.sin(T * 0.9) * 0.4}deg)`;
+  qW.forEach((w, i) => {
+    const p = K.p(T, 0.28 + i * 0.07, 0.6 + i * 0.07, E.outExpo);
+    w.style.opacity = p; w.style.transform = `translateY(${(1 - p) * 26}px)`;
+  });
+  const rpP = K.p(T, T_RC + 0.3, T_RC + 0.8, E.outBack);
+  rp.style.display = T >= T_RC + 0.3 ? 'block' : 'none';
+  rp.style.opacity = Math.min(1, rpP * 2); rp.style.transform = `translateY(${(1 - rpP) * 30}px) scale(${0.92 + 0.08 * rpP})`;
+  const stH = stk.offsetHeight;
+  sample.style.left = sx + 'px';
+  sample.style.top = sy + stH * ss + 34 * ss + 'px';
+  sample.style.transform = `scale(${Math.max(0.8, ss)})`; sample.style.transformOrigin = '0 0';
+  sample.style.opacity = K.p(T, 0.7, 0.95, E.linear);
+
+  // ---------- "No." ----------
+  const nIn = K.p(T, T_NO - 0.04, T_NO + 0.2, E.outCubic), nOut = K.p(T, B(2.75), B(3.2), E.inCubic);
+  no.style.opacity = Math.min(1, nIn * 2) * (1 - nOut);
+  no.style.transform = `scale(${1.5 - 0.5 * nIn + nOut * 0.1}) rotate(${-3 + nIn * 3}deg)`;
+  no.style.visibility = T > T_NO - 0.1 && T < B(3.3) ? 'visible' : 'hidden';
+
+  // ---------- phone ----------
+  const phIn = K.p(T, T_PH - 0.05, T_PH + 0.55, E.outExpo), phOut = K.p(T, T_RC - 0.15, T_RC + 0.35, E.inCubic);
+  const pos = posAt(T);
+  const AT = tall ? 150 : 170;
+  const s0 = scr(0, 1150, AT);
+  const s1 = K.lerp(scr(1, 1080, AT + 40), scr(1, 3205, AT), K.p(T, B(8.6), B(9.6), E.inOutCubic));
+  const s2 = scr(2, 2805, AT);
+  deck.draw(pos, [s0, s1, s2], pos - posAt(T - 1 / 30));
+  deck.root.style.opacity = phIn * (1 - phOut);
+  deck.root.style.transform = `translateY(${(1 - phIn) * 500 + phOut * 300}px) rotate(${(tall ? 2.2 : 2) + Math.sin(T * 0.7) * 0.4}deg) scale(${1 + 0.02 * Math.sin(T * 0.5)})`;
+  deck.root.style.visibility = T >= T_PH - 0.1 && T < T_RC + 0.4 ? 'visible' : 'hidden';
+  const offs = [s0 * maxOf(0), s1 * maxOf(1), s2 * maxOf(2)];
+  const HW = [[B(4), T_SW1], [T_SW1 + 0.2, B(8.6)], [B(9.4), T_SW2], [B(12), T_RC]];
+  HI.forEach((h, j) => {
+    const p = K.p(T, HW[j][0], HW[j][0] + 0.35, E.outBack);
+    h.el.style.top = h.y * k - offs[h.i] + 'px';
+    h.el.style.opacity = Math.min(1, p * 2) * (1 - K.p(T, HW[j][1] - 0.15, HW[j][1], E.linear));
+    h.el.style.transform = `scale(${1.12 - 0.12 * p})`;
+  });
+  // finger tap on "Review what will be sent"
+  const btnX = L.ph.x + 14 + 254 * k, btnY = L.ph.y + 14 + 3398 * k - offs[1];
+  const tpIn = K.p(T, T_TAP - 0.45, T_TAP - 0.1, E.outCubic);
+  const press = T >= T_TAP - 0.06 && T < T_TAP + 0.14;
+  tap.style.left = btnX + (1 - tpIn) * 120 + 'px'; tap.style.top = btnY + (1 - tpIn) * 160 + 'px';
+  tap.style.opacity = tpIn * (1 - K.p(T, T_TAP + 0.25, T_TAP + 0.45, E.linear));
+  tap.style.transform = `scale(${press ? 0.78 : 1})`;
+  tap.style.visibility = T > T_TAP - 0.5 && T < T_TAP + 0.5 ? 'visible' : 'hidden';
+  realTag.style.left = (tall ? L.ph.x + 10 : L.ph.x) + 'px';
+  realTag.style.top = (tall ? L.ph.y - 48 : L.tagY) + 'px';
+  realTag.style.opacity = phIn * (1 - phOut);
+  rec.style.left = (tall ? W - 65 - 360 : L.ph.x) + 'px';
+  if (!tall) rec.style.top = L.ph.y - 46 + 'px';
+  rec.style.opacity = phIn * (1 - phOut) * (0.6 + 0.4 * (Math.floor(T * 2) % 2));
+  if (tall) { realTag.style.top = L.ph.y - 50 + 'px'; rec.style.top = L.ph.y - 44 + 'px'; rec.style.left = L.ph.x + 360 + 'px'; }
+
+  // ---------- captions ----------
+  CAPS.forEach((c, i) => {
+    const [a, b] = CW[i];
+    const p = K.p(T, a, a + 0.4, E.outBack), o = K.p(T, b - 0.2, b, E.inCubic);
+    c.style.opacity = Math.min(1, p * 2) * (1 - o);
+    c.style.transform = `translateY(${(1 - p) * 40 - o * 20}px) scale(${0.9 + 0.1 * p}) rotate(${(i % 2 ? 1.5 : -1.5)}deg)`;
+    c.style.visibility = T >= a && T < b ? 'visible' : 'hidden';
+  });
+
+  // ---------- recap ticks ----------
+  ticks.style.left = (tall ? 90 : 90) + 'px';
+  ticks.style.top = sy + stH * ss + 100 + 'px';
+  tickEls.forEach((t, i) => {
+    const p = K.p(T, B(15.2) + i * 0.16, B(15.2) + 0.5 + i * 0.16, E.outBack);
+    t.style.opacity = Math.min(1, p * 2); t.style.transform = `translateY(${(1 - p) * 30}px) scale(${0.8 + 0.2 * p})`;
+  });
+  ticks.style.visibility = T > T_RC ? 'visible' : 'hidden';
+
+  end(T);
+});
+</script></body></html>

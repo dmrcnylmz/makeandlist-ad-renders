@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>F16 · The App Card</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+.page { position: absolute; left: 0; top: 0; width: 100%; z-index: 10; }
+.nav { position: absolute; display: flex; align-items: center; justify-content: space-between; font: 600 30px 'Archivo'; color: #45403A; }
+.nav span:last-child { display: flex; gap: 8px; }
+.nav span:last-child i { width: 10px; height: 10px; border-radius: 50%; background: #8A8378; display: block; }
+.icon { position: absolute; overflow: hidden; background: #FFFDF8; box-shadow: 0 24px 40px -22px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; display: grid; place-items: center; }
+.icon img { width: 74%; }
+.name { position: absolute; font: 800 66px/1 'Archivo'; letter-spacing: -0.02em; color: #1F1F1F; white-space: nowrap; }
+.sub { position: absolute; font: 500 30px/1.25 'Archivo'; color: #6B645A; }
+.get { position: absolute; display: flex; align-items: center; gap: 18px; white-space: nowrap; }
+.get b { display: inline-flex; padding: 16px 36px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 32px 'Archivo'; box-shadow: 0 0 0 3px #1F1F1F; }
+.get span { font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .06em; color: #6B645A; }
+.facts { position: absolute; display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 2px solid #E2DBCE; border-bottom: 2px solid #E2DBCE; }
+.facts div { padding: 22px 10px; text-align: center; border-left: 2px solid #E2DBCE; }
+.facts div:first-child { border-left: 0; }
+.facts small { display: block; font: 600 19px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #8A8378; }
+.facts b { display: block; margin-top: 8px; font: 800 32px 'Archivo'; color: #1F1F1F; }
+.sec { position: absolute; font: 800 44px 'Archivo'; letter-spacing: -0.01em; color: #1F1F1F; white-space: nowrap; }
+.sec small { margin-left: 14px; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #8A8378; }
+.rail { position: absolute; overflow: visible; }
+.shot { position: absolute; top: 0; overflow: hidden; border-radius: 30px; background: #1F1F1F; box-shadow: 0 30px 50px -28px rgba(31,31,31,.6); }
+.shot .hd { position: absolute; left: 0; right: 0; top: 0; padding: 24px 24px 0; color: #FAF7EE; font: 800 36px/1.08 'Playfair Display'; letter-spacing: -0.015em; }
+.shot .hd em { font-style: italic; color: #DFFF5A; }
+.shot .hd small { display: block; margin-bottom: 10px; font: 600 18px 'IBM Plex Mono', monospace; letter-spacing: .14em; color: #B9B1A3; }
+.shot .sc { position: absolute; left: 22px; right: 22px; bottom: 0; overflow: hidden; border-radius: 22px 22px 0 0; background: #FAF7EE; }
+.shot .sc img { position: absolute; left: 0; top: 0; width: 780px; transform-origin: 0 0; display: block; }
+.shot.lime { background: #DFFF5A; } .shot.lime .hd { color: #1F1F1F; } .shot.lime .hd em { color: #1F1F1F; background: rgba(255,255,255,.55); border-radius: 6px; padding: 0 4px; } .shot.lime .hd small { color: #45403A; }
+.dots { position: absolute; display: flex; gap: 10px; }
+.dots i { width: 12px; height: 12px; border-radius: 50%; background: #D9D3C9; display: block; }
+.get-list { position: absolute; }
+.get-list .r { display: flex; gap: 22px; align-items: center; padding: 18px 0; border-bottom: 2px solid #EFEADF; }
+.get-list .r i { flex: none; display: grid; place-items: center; width: 54px; height: 54px; border-radius: 16px; background: #1F1F1F; color: #DFFF5A; font: 800 26px 'Archivo'; font-style: normal; }
+.get-list .r b { display: block; font: 800 36px 'Archivo'; color: #1F1F1F; }
+.get-list .r span { display: block; margin-top: 4px; font: 500 25px 'Archivo'; color: #6B645A; }
+.for { position: absolute; display: flex; flex-wrap: wrap; gap: 12px; }
+.for span { padding: 12px 22px; border-radius: 99px; background: #FFFDF8; box-shadow: 0 0 0 2px #E2DBCE; font: 700 28px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.yes { position: absolute; display: flex; gap: 20px; align-items: center; padding: 24px 28px; border-radius: 26px; background: #1F1F1F; color: #FAF7EE; font: 700 34px/1.15 'Archivo'; }
+.yes b { color: #DFFF5A; }
+.yes i { flex: none; display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; background: #DFFF5A; color: #1F1F1F; font: 800 30px 'Archivo'; font-style: normal; }
+.cap { position: absolute; z-index: 40; text-align: center; }
+.cap span { display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone; background: #1F1F1F; color: #FAF7EE; padding: 6px 18px; border-radius: 14px; font: 800 40px/1.45 'Archivo'; }
+.cap b { color: #DFFF5A; }
+.sample { position: absolute; z-index: 41; font: 600 19px 'IBM Plex Mono', monospace; color: #45403A; background: rgba(250,247,238,.9); border: 1px dashed #8A8378; padding: 6px 12px; border-radius: 8px; white-space: nowrap; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .045; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// F16 — an app-listing card, recreated generically (no store's look, name or badges, and no ratings or review counts):
+// the icon and name build, three plain facts instead of stars, a screenshot carousel of the real phone app swipes card
+// by card as Marian names each step (describe, the price first, the real files, your own stores), then the page scrolls
+// to "What you get", "Made for small sellers" and the yes that keeps the seller in control.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 89.1, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const M = tall ? 65 : 60;
+
+// Voice (Marian) — takes: L1 0.20–2.71 · L2 3.00–6.11 · L3 6.40–8.49 · L4 8.80–11.73 · L5 13.25–14.09 (vo.mjs).
+const VO = [[0.2, 'Meet MakeAndList, made for small sellers.'], [3.0, 'Describe a product, and see the price first.'], [6.4, 'Then review the real files.'], [8.8, 'Send it to your own stores, when you say.'], [13.25, 'Start free.']];
+// carousel stops (card index shown first) and the page scroll
+const STOP = [[2.75, 0], [4.55, 1], [6.35, 2], [8.75, 3], [9.85, 4]];
+const T_SCROLL = [10.4, 11.0], END = 13.0;
+
+const L = tall
+  ? { navY: 282, icX: M, icY: 350, icS: 196, nameX: M + 226, nameY: 362, subW: 700, getY: 520, factsY: 650, secY: 790, railY: 860, cardW: 360, cardH: 700, capH: 170, dotsY: 1580,
+      listY: 1640, forY: 2160, yesY: 2330, scroll: 1290 }
+  : { navY: 50, icX: M, icY: 110, icS: 170, nameX: M + 200, nameY: 116, subW: 760, getY: 250, factsY: 350, secY: 470, railY: 530, cardW: 300, cardH: 700, capH: 150, dotsY: 1250,
+      listY: 1300, forY: 1850, yesY: 2050, scroll: 1250 };
+
+const page = K.box(0, 0, W, 3000, { cls: 'page' });
+const P = (x, y, w, h, o) => K.box(x, y, w, h, { ...o, parent: page });
+
+const nav = P(M, L.navY, W - 2 * M, null, { cls: 'nav', html: '<span>‹ Search</span><span><i></i><i></i><i></i></span>' });
+const icon = P(L.icX, L.icY, L.icS, L.icS, { cls: 'icon', style: { borderRadius: L.icS * 0.23 + 'px' }, html: `<img src="${K.brand('makeandlist-icon.svg')}">` });
+const name = P(L.nameX, L.nameY, null, null, { cls: 'name', html: 'MakeAndList', style: { width: 'auto', height: 'auto' } });
+const sub = P(L.nameX, L.nameY + 82, W - M - L.nameX, null, { cls: 'sub', html: 'Make and list products —<br>for small sellers' });
+const get = P(L.nameX, L.getY, null, null, { cls: 'get', html: '<b>Start free</b><span>Web app · in your browser</span>', style: { width: 'auto', height: 'auto' } });
+const facts = P(M, L.factsY, W - 2 * M, null, { cls: 'facts', html: '<div><small>Made for</small><b>Small sellers</b></div><div><small>Works in</small><b>Your browser</b></div><div><small>You keep</small><b>The final say</b></div>' });
+const factEls = [...facts.children];
+const sec1 = P(M, L.secY, null, null, { cls: 'sec', html: 'Preview<small>real app · demo workspace</small>', style: { width: 'auto', height: 'auto' } });
+
+// ---------- screenshot carousel (the real phone app) ----------
+const SHOTS = [
+  { n: '22-phone-create', y: 300, k: 'Step 1', h: 'Describe it in<br><em>one sentence.</em>' },
+  { n: '65-phone-configure', y: 2440, k: 'Step 2', h: 'See <em>the price</em><br>before it’s made.', lime: 1 },
+  { n: '24-phone-product', y: 380, k: 'Step 3', h: 'Review the<br><em>real files.</em>' },
+  { n: '72-phone-listing-send', y: 1060, k: 'Step 4', h: 'Send it to<br><em>your own stores.</em>', lime: 1 },
+  { n: '33-phone-sell-physical', y: 0, k: 'Optional', h: 'Printed per order<br><em>by your partner.</em>' },
+];
+const rail = P(M, L.railY, W, L.cardH, { cls: 'rail' });
+const GAP = 24, STEP = L.cardW + GAP;
+const shots = SHOTS.map((s, i) => {
+  const c = K.box(i * STEP, 0, L.cardW, L.cardH, { parent: rail, cls: 'shot' + (s.lime ? ' lime' : ''),
+    html: `<div class="hd"><small>${s.k}</small>${s.h}</div><div class="sc" style="top:${L.capH}px"><img src="${K.screen(s.n)}"></div>` });
+  if (!tall) c.querySelector('.hd').style.fontSize = '29px';
+  const kk = (L.cardW - 44) / 780;
+  c.querySelector('.sc img').style.transform = `translate(0px, ${-s.y * kk}px) scale(${kk})`;
+  return c;
+});
+const dots = P(M, L.dotsY - (tall ? 0 : 0), null, null, { cls: 'dots', html: SHOTS.map(() => '<i></i>').join(''), style: { width: 'auto', height: 'auto' } });
+const dotEls = [...dots.children];
+dots.style.top = L.railY + L.cardH + 26 + 'px';
+
+// ---------- what you get / made for / your yes ----------
+const sec2 = P(M, L.listY, null, null, { cls: 'sec', html: 'What you get', style: { width: 'auto', height: 'auto' } });
+const list = P(M, L.listY + 70, W - 2 * M, null, { cls: 'get-list', html: [
+  ['↓', 'Print-ready files', 'checked before you see them'], ['▦', 'Listing images', 'made from the real pages'], ['✎', 'Title, description, tags', 'written for the stores you choose'], ['◎', 'Printed editions', 'optional · your own print partner prints each order']]
+  .map(([i, b, s]) => `<div class="r"><i>${i}</i><div><b>${b}</b><span>${s}</span></div></div>`).join('') });
+const rows = [...list.children];
+const sec3 = P(M, L.forY, null, null, { cls: 'sec', html: 'Made for small sellers', style: { width: 'auto', height: 'auto' } });
+const forEl = P(M, L.forY + 70, W - 2 * M, null, { cls: 'for', html: ['Printables', 'Art prints', 'Planners', 'Cards', 'Tees & mugs'].map((t) => `<span>${t}</span>`).join('') });
+const forEls = [...forEl.children];
+const yes = P(M, L.yesY + (tall ? 0 : -40), W - 2 * M, null, { cls: 'yes', html: '<i>✓</i><div>Drafts first. <b>Nothing goes live without your yes.</b></div>' });
+
+const listTag = K.box(0, 0, null, null, { cls: 'sample', html: 'Generic card · drawn for this ad', style: { width: 'auto', height: 'auto' } });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: K.F === '9x16' ? 160 : 0, line: 'Made for<br>small sellers.' });
+
+// carousel position (in cards) over time
+const railAt = (t) => STOP.reduce((a, [ts, i], j) => (j === 0 ? i : a + (i - STOP[j - 1][1]) * K.p(t, ts - 0.2, ts + 0.35, E.inOutCubic)), 0);
+const maxRail = SHOTS.length - (W - 2 * M + GAP) / STEP;
+
+K.run({
+  id: 'F16', title: 'The App Card', dur: DUR, bpm: BPM, music: 'poor-but-happy', mood: 'calm', key: 'A', intro: 0.0, cover: 4.6,
+  technique: 'A generic, unbranded app-listing page drawn by hand — icon and name build, three plain facts in place of ratings, a screenshot carousel of the real phone app that swipes card by card on each spoken step with motion blur, then the page scrolls to “What you get”, “Made for small sellers” and the yes that keeps the seller in control',
+  caption: 'MakeAndList, made for small sellers: describe a product and see the price in Credits first, review the files, images and listing, then send it to your own stores — only when you say. A web app, free to start. Start free at makeandlist.com',
+  short: 'Made for small sellers.',
+  question: 'What is it?', gain: 'What you get: files, listing images, listing copy and optional printed editions, on your yes',
+  vo: VO,
+  beats: ['0–2.7 s: “Meet MakeAndList, made for small sellers.” — the app card builds', '2.7–6.2 s: screenshots: describe it in one sentence, see the price before it’s made', '6.2–8.6 s: review the real files', '8.6–10.4 s: send it to your own stores; printed per order by your partner', '10.4–13 s: the page scrolls: what you get, made for small sellers, nothing goes live without your yes', '13–15 s: end card, “Start free.”'],
+  cues: [[0.0, 'pop'], [0.35, 'pop'], [0.6, 'type'], [1.2, 'pop'], [2.1, 'swish'], [2.8, 'pop'], [STOP[1][0] - 0.2, 'swish'], [STOP[2][0] - 0.2, 'swish'], [STOP[3][0] - 0.2, 'swish'],
+    [STOP[4][0] - 0.2, 'swish'], [T_SCROLL[0] - 0.1, 'whoosh'], [11.1, 'pop'], [11.75, 'pop'], [12.0, 'click'], [12.6, 'chime'], [END, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // ---------- build ----------
+  const ip = K.p(T, 0.05, 0.6, E.outBack);
+  icon.style.opacity = Math.min(1, ip * 2);
+  icon.style.transform = `scale(${0.5 + 0.5 * ip}) rotate(${(1 - ip) * -14}deg)`;
+  const np = K.p(T, 0.3, 0.8, E.outExpo);
+  name.style.opacity = np; name.style.clipPath = `inset(-10px ${(1 - np) * 100}% -10px 0)`;
+  const sp = K.p(T, 0.6, 1.1, E.outExpo);
+  sub.style.opacity = sp; sub.style.transform = `translateY(${(1 - sp) * 20}px)`;
+  const gp = K.p(T, 1.15, 1.6, E.outBack);
+  get.style.opacity = Math.min(1, gp * 2); get.style.transform = `scale(${0.8 + 0.2 * gp})`; get.style.transformOrigin = '0 50%';
+  nav.style.opacity = K.p(T, 0.1, 0.5, E.linear);
+  factEls.forEach((d, i) => {
+    const p = K.p(T, 1.4 + i * 0.12, 1.9 + i * 0.12, E.outExpo);
+    d.style.opacity = p; d.style.transform = `translateY(${(1 - p) * 24}px)`;
+  });
+  sec1.style.opacity = K.p(T, 2.0, 2.3, E.linear);
+
+  // ---------- carousel ----------
+  const rIn = K.p(T, 2.05, 2.75, E.outExpo);
+  const pos = Math.min(railAt(T), maxRail), vel = Math.abs(Math.min(railAt(T), maxRail) - Math.min(railAt(T - 1 / 30), maxRail));
+  shots.forEach((c, i) => {
+    const d = K.p(T, 2.1 + i * 0.08, 2.75 + i * 0.08, E.outExpo);
+    c.style.left = i * STEP - pos * STEP + (1 - d) * 300 + 'px';
+    c.style.opacity = Math.min(1, d * 1.5);
+    const focus = 1 - Math.min(1, Math.abs(i - railAt(T)));
+    c.style.transform = `scale(${0.96 + 0.04 * focus}) translateY(${(1 - focus) * 14}px)`;
+    c.style.filter = vel > 0.01 ? `blur(${Math.min(8, vel * 60)}px)` : 'none';
+  });
+  const cur = Math.round(railAt(T));
+  dotEls.forEach((d, i) => { d.style.background = i === cur ? '#1F1F1F' : '#D9D3C9'; d.style.width = (i === cur ? 34 : 12) + 'px'; d.style.borderRadius = '6px'; });
+  dots.style.opacity = rIn;
+
+  // ---------- page scroll ----------
+  const sc = K.p(T, T_SCROLL[0], T_SCROLL[1], E.inOutCubic);
+  page.style.transform = `translateY(${-sc * L.scroll}px)`;
+  sec2.style.opacity = K.p(T, T_SCROLL[0] + 0.1, T_SCROLL[0] + 0.4, E.linear);
+  sec3.style.opacity = K.p(T, 10.9, 11.2, E.linear);
+  rows.forEach((r, i) => {
+    const p = K.p(T, T_SCROLL[0] + 0.3 + i * 0.12, T_SCROLL[0] + 0.8 + i * 0.12, E.outExpo);
+    r.style.opacity = p; r.style.transform = `translateX(${(1 - p) * 60}px)`;
+    r.querySelector('i').style.transform = `scale(${K.p(T, T_SCROLL[0] + 0.4 + i * 0.12, T_SCROLL[0] + 0.8 + i * 0.12, E.outBack)})`;
+  });
+  forEls.forEach((c, i) => {
+    const p = K.p(T, 11.05 + i * 0.08, 11.45 + i * 0.08, E.outBack);
+    c.style.opacity = Math.min(1, p * 2); c.style.transform = `scale(${0.7 + 0.3 * p})`;
+  });
+  const yp = K.p(T, 11.55, 12.05, E.outBack);
+  const press = T >= 12.0 && T < 12.15;
+  yes.style.opacity = Math.min(1, yp * 2); yes.style.transform = `translateY(${(1 - yp) * 30}px) scale(${(0.9 + 0.1 * yp) * (press ? 0.97 : 1)})`;
+  yes.querySelector('i').style.transform = `scale(${K.p(T, 12.05, 12.45, E.outBack)})`;
+
+  // generic-card label: low and small, inside the safe area
+  listTag.style.left = (W - listTag.offsetWidth) / 2 + 'px';
+  listTag.style.top = (tall ? L.navY + 2 : 1296) + 'px';
+  listTag.style.opacity = K.p(T, 1.6, 1.9, E.linear);
+
+  end(T);
+});
+</script></body></html>
