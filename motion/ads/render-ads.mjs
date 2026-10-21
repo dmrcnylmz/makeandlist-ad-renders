@@ -53,7 +53,8 @@ async function renderOne(browser, file, format) {
   if (ready.broken.length) throw new Error(file + ': broken images ' + ready.broken.join(', '));
   if (errors.length) throw new Error(file + ': page errors ' + errors.join(' | '));
   const id = meta.id;
-  const folder = path.join(OUT, `${id} ${meta.title}`);
+  // Folder names travel through artifacts and other file systems: no / \ ? : * " < > |
+  const folder = path.join(OUT, `${id} ${meta.title}`.replace(/[\\/?:*"<>|]/g, '').replace(/\s+/g, ' ').trim());
   await mkdir(folder, { recursive: true });
   await mkdir(TMP, { recursive: true });
   const base = `MakeAndList-${id}-${format}-EN`;
