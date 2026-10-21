@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E05 · The Documentary</title><link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=block">
+<style>
+#stage { background: #101010; }
+.shot { position: absolute; left: 0; top: 0; overflow: hidden; }
+.shot img.bg { position: absolute; display: block; transform-origin: 50% 50%; }
+.grade { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(110% 80% at 50% 45%, rgba(0,0,0,0) 50%, rgba(10,8,4,.5) 100%), linear-gradient(rgba(60,80,40,.08), rgba(60,80,40,.08)); }
+.vf { position: absolute; z-index: 40; pointer-events: none; }
+.br { position: absolute; width: 70px; height: 70px; border-color: rgba(250,247,238,.9); border-style: solid; border-width: 0; }
+.rec { position: absolute; z-index: 41; display: flex; align-items: center; gap: 12px; font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .12em; color: #FAF7EE; text-shadow: 0 1px 6px rgba(0,0,0,.6); white-space: nowrap; }
+.rec i { width: 18px; height: 18px; border-radius: 50%; background: #E8603C; display: block; box-shadow: 0 0 12px rgba(232,96,60,.8); }
+.tc { position: absolute; z-index: 41; font: 500 24px 'IBM Plex Mono', monospace; letter-spacing: .08em; color: #FAF7EE; text-shadow: 0 1px 6px rgba(0,0,0,.6); white-space: nowrap; }
+.fg { position: absolute; z-index: 42; background: rgba(250,247,238,.94); border-left: 10px solid #DFFF5A; padding: 18px 24px 20px; box-shadow: 0 30px 50px -30px rgba(0,0,0,.7); }
+.fg .a { font: 600 18px 'IBM Plex Mono', monospace; letter-spacing: .2em; text-transform: uppercase; color: #6B645A; }
+.fg .b { margin-top: 6px; font: italic 800 50px/1 'Playfair Display'; color: #1F1F1F; }
+.fg .c { margin-top: 10px; font: 500 22px/1.3 'Archivo'; color: #45403A; }
+.sub { position: absolute; z-index: 45; padding: 10px 0; text-align: center; font: italic 600 60px/1.12 'Playfair Display'; color: #FAF7EE; text-shadow: 0 3px 22px rgba(0,0,0,.75), 0 1px 2px rgba(0,0,0,.6); }
+.sub b { font-weight: 800; color: #DFFF5A; }
+.note { position: absolute; z-index: 43; font: 600 46px 'Caveat', cursive; color: #DFFF5A; white-space: nowrap; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+.ink { position: absolute; left: 0; top: 0; z-index: 43; overflow: visible; pointer-events: none; }
+.clipc { position: absolute; z-index: 30; background: #FFFDF8; border-radius: 18px; overflow: hidden; box-shadow: 0 40px 70px -30px rgba(0,0,0,.75); }
+.clipc img { position: absolute; display: block; }
+.typ { position: absolute; font: 400 15px/1.35 'Archivo'; color: #1F1F1F; background: #FFFDF8; }
+.typ i { display: inline-block; width: 2px; height: 1.1em; background: #1F1F1F; vertical-align: -3px; margin-left: 1px; }
+.bino { position: absolute; left: 0; top: 0; z-index: 20; background: #0C0C0B; }
+.bino .in { position: absolute; inset: 0; overflow: hidden; }
+.bino .blur { position: absolute; display: block; filter: blur(14px) brightness(.7); }
+.ring { position: absolute; z-index: 6; border-radius: 14px; border: 5px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; pointer-events: none; }
+.chipD { position: absolute; z-index: 44; white-space: nowrap; font: 700 27px 'Archivo'; padding: 13px 22px; border-radius: 99px; display: flex; gap: 12px; align-items: center; box-shadow: 0 20px 40px -20px rgba(0,0,0,.7); }
+.chipD.lime { background: #DFFF5A; color: #1F1F1F; }
+.chipD.ink { background: #1F1F1F; color: #FAF7EE; box-shadow: 0 0 0 2px #DFFF5A; }
+.fin { position: absolute; z-index: 46; text-align: center; font: 800 112px/0.98 'Playfair Display'; letter-spacing: -0.025em; color: #FAF7EE; }
+.fin em { font-style: italic; color: #FAF7EE; background: linear-gradient(#DFFF5A, #DFFF5A) no-repeat 0 0 / 0% 100%; padding: 0 .12em; border-radius: 8px; }
+.flash { position: absolute; inset: 0; z-index: 60; background: #FFFDF8; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 80; opacity: .14; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E05 — The Documentary. A gentle wildlife-film parody shot "through the camera": REC dot, running timecode, focus
+// brackets, a field-guide lower third ("Venditor parvus · the small seller"). Shot 1 her habitat (an empty home studio);
+// shot 2 her hands sketching, a field-note ring and the real create box with her one sentence; shot 3 seen through
+// binoculars: her draft on the real product screen; shot 4 her market stall, with the real Send step's "drafts first,
+// public only when you say"; a shutter freeze, and the title card: "She keeps the final say."
+document.fonts && document.fonts.load('600 46px Caveat');
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 89.1, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const VO = [[0.3, 'Here, a small seller in her natural habitat.'], [4.06, 'She describes an idea in one sentence.'], [7.57, 'She checks every draft.'],
+  [9.11, 'Only then does it reach her shop.'], [11.22, 'She keeps the final say.']];
+const CUT = [0, 4.62, 7.46, 9.42, 11.44];
+
+// ---------- shots ----------
+const cover = (w, h) => { const b = Math.max(w / 1024, h / 1536); return { b, iw: 1024 * b, ih: 1536 * b }; };
+const C = cover(W, H);
+const shot = (id, z) => {
+  const r = K.box(0, 0, W, H, { cls: 'shot', style: { zIndex: z } });
+  const img = id ? K.el('img', { parent: r, cls: 'bg', src: K.pub('r05/' + id + '.webp'), style: { width: C.iw + 'px', height: C.ih + 'px', left: (W - C.iw) / 2 + 'px', top: (H - C.ih) / 2 + 'px' } }) : null;
+  if (id) K.el('div', { parent: r, cls: 'grade' });
+  return { r, img };
+};
+const s0 = shot('h06-craft-studio', 2), s1 = shot('h10-hands-sketch', 3), s3 = shot('h07-market-stall', 5);
+// shot 3: binoculars over the studio, her phone in view
+const bino = K.box(0, 0, W, H, { cls: 'bino', style: { zIndex: 4 } });
+const binIn = K.el('div', { parent: bino, cls: 'in' });
+K.el('img', { parent: binIn, cls: 'blur', src: K.pub('r05/h06-craft-studio.webp'), style: { width: C.iw + 'px', height: C.ih + 'px', left: (W - C.iw) / 2 + 'px', top: (H - C.ih) / 2 + 'px' } });
+const PHW = tall ? 470 : 400;
+const ph = K.phone((W - PHW) / 2, 0, PHW, K.screen('24-phone-product'), { parent: binIn });
+const pk = (PHW - 28) / 780;
+const chipDraft = K.box(0, 0, null, null, { cls: 'chipD lime', html: 'Draft · waiting for her review', style: { width: 'auto', height: 'auto' } });
+
+// ---------- viewfinder chrome ----------
+const VF = tall ? { x: 50, y: 270, w: W - 100, h: 990 } : { x: 40, y: 40, w: W - 80, h: H - 80 };
+const vf = K.box(VF.x, VF.y, VF.w, VF.h, { cls: 'vf' });
+[['0', '0', '5px 0 0 5px'], ['auto', '0', '5px 5px 0 0'], ['0', 'auto', '0 0 5px 5px'], ['auto', 'auto', '0 5px 5px 0']].forEach(([l, t, bw], i) => {
+  K.el('div', { parent: vf, cls: 'br', style: { left: i % 2 ? 'auto' : '0', right: i % 2 ? '0' : 'auto', top: i < 2 ? '0' : 'auto', bottom: i < 2 ? 'auto' : '0',
+    borderWidth: i === 0 ? '5px 0 0 5px' : i === 1 ? '5px 5px 0 0' : i === 2 ? '0 0 5px 5px' : '0 5px 5px 0' } });
+});
+const rec = K.box(VF.x + 34, VF.y + 30, null, null, { cls: 'rec', html: '<i></i>REC · DAY 1', style: { width: 'auto', height: 'auto' } });
+const tc = K.box(0, VF.y + 30, null, null, { cls: 'tc', style: { width: 'auto', height: 'auto', left: 'auto', right: W - VF.x - VF.w + 34 + 'px' } });
+const focus = K.box(0, 0, 120, 120, { cls: 'vf', html: '<svg width="120" height="120" viewBox="0 0 120 120" fill="none" stroke="#FAF7EE" stroke-width="3"><path d="M0 26V0h26M94 0h26v26M120 94v26H94M26 120H0V94"/><path d="M60 52v16M52 60h16" stroke-width="2"/></svg>' });
+
+// ---------- field guide lower third ----------
+const FG = tall ? { x: 65, y: 430 } : { x: 60, y: 150 };
+const fg = K.box(FG.x, FG.y, null, null, { cls: 'fg', style: { width: 'auto', height: 'auto' }, html: '<div class="a">Venditor parvus</div><div class="b">The small seller</div><div class="c">Habitat: spare rooms, kitchen tables,<br>weekend markets.</div>' });
+
+// ---------- shot 2: field note + the real create box ----------
+const NS = 'http://www.w3.org/2000/svg';
+const ink = document.createElementNS(NS, 'svg'); ink.setAttribute('class', 'ink'); ink.setAttribute('width', W); ink.setAttribute('height', H);
+document.getElementById('stage').appendChild(ink);
+const circ = document.createElementNS(NS, 'path'); circ.setAttribute('fill', 'none'); circ.setAttribute('stroke', '#DFFF5A'); circ.setAttribute('stroke-width', '6'); circ.setAttribute('stroke-linecap', 'round'); circ.setAttribute('pathLength', '1');
+ink.appendChild(circ);
+const note = K.box(0, 0, null, null, { cls: 'note', html: 'one sentence, observed', style: { width: 'auto', height: 'auto' } });
+const CW = tall ? 760 : 640, CS = CW / 714;
+const clipc = K.box((W - CW) / 2, 0, CW, 380 * CS, { cls: 'clipc' });
+K.el('img', { parent: clipc, src: K.screen('22-phone-create'), style: { width: 780 * CS + 'px', left: -33 * CS + 'px', top: -420 * CS + 'px' } });
+const typ = K.el('div', { parent: clipc, cls: 'typ', style: { left: 45 * CS + 'px', top: 184 * CS + 'px', width: 620 * CS + 'px', height: 160 * CS + 'px', fontSize: 26 * CS + 'px' } });
+const TYPED = 'A lemon-pattern notebook cover, A5, for a calm desk.';
+
+// ---------- shot 4: the stall + the real send step ----------
+const SW4 = tall ? 820 : 700, SS4 = SW4 / 780;
+const sendc = K.box((W - SW4) / 2, 0, SW4, 170 * SS4, { cls: 'clipc' });
+K.el('img', { parent: sendc, src: K.screen('72-phone-listing-send'), style: { width: 780 * SS4 + 'px', left: '0px', top: -1060 * SS4 + 'px' } });
+const ringS = K.el('div', { parent: sendc, cls: 'ring' });
+
+// ---------- subtitles (the key words, with her) ----------
+const SUBY = tall ? 1062 : 1086;
+const SUBS = [
+  [1.17, 4.45, 'Here, a small seller<br>in her <b>natural habitat.</b>'],
+  [4.81, 7.3, 'She describes an idea<br>in <b>one sentence.</b>'],
+  [7.66, 9.24, 'She checks<br><b>every draft.</b>'],
+  [9.6, 11.26, 'Only then does it<br><b>reach her shop.</b>'],
+];
+const subShade = K.box(0, SUBY - 120, W, 420, { style: { zIndex: 44, pointerEvents: 'none', background: 'radial-gradient(60% 45% at 50% 50%, rgba(8,8,6,.55), rgba(8,8,6,0) 100%)' } });
+const subs = SUBS.map(([a, b, h]) => ({ a, b, el: K.box(50, SUBY, W - 100, null, { cls: 'sub', html: h, style: { fontSize: (tall ? 60 : 54) + 'px' } }) }));
+const fin = K.box(60, 0, W - 120, null, { cls: 'fin', html: 'She keeps<br>the <em>final say.</em>', style: { fontSize: (tall ? 112 : 100) + 'px' } });
+const flash = K.box(0, 0, W, H, { cls: 'flash' });
+const conceptTag = K.demoTag('Concept images · AI-generated', 0, 0), realTag = K.demoTag('Real app · demo workspace', 0, 0);
+[conceptTag, realTag].forEach((t) => { t.style.zIndex = 70; });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'You keep the final say.' });
+
+K.run({
+  id: 'E05', title: 'The Documentary', dur: DUR, bpm: BPM, music: 'happy-but-a-little-off', mood: 'calm', key: 'D', intro: 0.0, cover: 3.4,
+  technique: 'A gentle wildlife-documentary parody seen through the camera: REC dot, running timecode, focus brackets that hunt and lock, a field-guide lower third, graded footage with grain; a field-note ring drawn around her tablet and the real create box; her draft on the real product screen seen through a binocular mask; the real Send step over her market stall; a shutter-flash freeze into the title card',
+  caption: 'Observed in her natural habitat: the small seller describes an idea in one sentence, checks every draft, and only then does it reach her shop. She keeps the final say. Images are concept images. Start free at makeandlist.com',
+  short: 'She keeps the final say.',
+  vo: VO,
+  beats: ['0–4.6 s: “Here, a small seller in her natural habitat.” — a home studio, REC, field-guide card (concept image)', '4.6–7.5 s: “She describes an idea in one sentence.” — hands sketching, a field-note ring, the real create box', '7.5–9.4 s: “She checks every draft.” — through binoculars: the real product screen, a draft', '9.4–11.4 s: “Only then does it reach her shop.” — the market stall and the real Send step: drafts first', '11.4–13 s: shutter freeze: “She keeps the final say.”', '13–15 s: end card'],
+  cues: [[0.0, 'shutter'], [0.6, 'swish'], [CUT[1] - 0.12, 'whoosh'], [5.95, 'marker'], [6.5, 'type'], [CUT[2] - 0.1, 'shutter'], [8.3, 'pop'], [CUT[3] - 0.12, 'whoosh'], [10.25, 'pop'], [CUT[4] - 0.08, 'shutter'], [11.5, 'hit'], [12.75, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 70}px, ${(seed(f + 7) - 0.5) * 70}px)`;
+  const shake = [(seed(f * 3 + 1) - 0.5) * 3, (seed(f * 5 + 2) - 0.5) * 3]; // handheld long lens
+  let cur = 0; CUT.forEach((c, i) => { if (T >= c) cur = i; });
+
+  // ---------- shots ----------
+  const sh = (s, i, from, to) => {
+    const a = CUT[i], b = CUT[i + 1] ?? 13.2;
+    const on = T >= a - 0.25 && T < b + 0.05;
+    s.r.style.visibility = on ? 'visible' : 'hidden';
+    s.r.style.opacity = i === 0 ? K.p(T, 0, 0.3, E.linear) : K.p(T, a - 0.25, a + 0.05, E.linear);
+    if (s.img) {
+      const p = K.p(T, a - 0.25, b, E.linear);
+      s.img.style.transform = `translate(${K.lerp(from[0], to[0], p) * W + shake[0]}px, ${K.lerp(from[1], to[1], p) * H + shake[1]}px) scale(${K.lerp(from[2], to[2], p)})`;
+    }
+  };
+  sh(s0, 0, [0.06, 0, 1.18], [-0.06, 0.01, 1.12]);
+  sh(s1, 1, [0, 0.04, 1.08], [0.02, -0.02, 1.22]);
+  sh(s3, 3, [-0.04, 0.02, 1.2], [0.03, 0, 1.1]);
+  // freeze: the stall stops moving, desaturates
+  const fz = K.p(T, CUT[4], CUT[4] + 0.4, E.outCubic);
+  if (T >= CUT[4]) { s3.img.style.transform = `translate(${0.015 * W}px, ${0.008 * H}px) scale(1.14)`; s3.img.style.filter = `saturate(${1 - 0.8 * fz}) brightness(${1 - 0.45 * fz})`; } else s3.img.style.filter = 'none';
+  s3.r.style.visibility = T >= CUT[3] - 0.25 ? 'visible' : 'hidden';
+
+  // binoculars
+  const bOn = T >= CUT[2] - 0.2 && T < CUT[3] + 0.05;
+  bino.style.visibility = bOn ? 'visible' : 'hidden';
+  bino.style.opacity = K.p(T, CUT[2] - 0.2, CUT[2] + 0.05, E.linear);
+  const br = (tall ? 400 : 350) * (0.9 + 0.1 * K.p(T, CUT[2], CUT[2] + 0.6, E.outCubic));
+  const bcy = tall ? 650 : 600, bdx = tall ? 200 : 230;
+  const m = `radial-gradient(circle ${br}px at ${W / 2 - bdx}px ${bcy}px, #000 ${br - 3}px, transparent ${br}px), radial-gradient(circle ${br}px at ${W / 2 + bdx}px ${bcy}px, #000 ${br - 3}px, transparent ${br}px)`;
+  binIn.style.webkitMaskImage = m; binIn.style.maskImage = m;
+  const php = K.p(T, CUT[2] - 0.1, CUT[2] + 0.5, E.outExpo);
+  ph.root.style.top = (tall ? 330 : 270) + 'px';
+  ph.root.style.transform = `translate(${shake[0] * 3}px, ${(1 - php) * 120 + shake[1] * 3}px) rotate(${-3 + Math.sin(T) * 0.5}deg)`;
+  ph.scroll(K.lerp(120, 360, K.p(T, CUT[2], CUT[3], E.inOutCubic)) * pk);
+  const cd = K.p(T, 8.3, 8.65, E.outBack);
+  Object.assign(chipDraft.style, { left: W / 2 + 'px', top: (tall ? 300 : 196) + 'px', opacity: Math.min(1, cd * 2) * (bOn ? 1 : 0), transform: `translateX(-50%) scale(${0.7 + 0.3 * cd}) rotate(-3deg)` });
+
+  // ---------- viewfinder ----------
+  rec.firstChild.style.opacity = Math.floor(T * 1.6) % 2 ? 0.25 : 1;
+  rec.lastChild && (rec.childNodes[1].textContent = 'REC · DAY ' + (cur < 2 ? 1 : cur < 4 ? 2 : 3));
+  const fr = Math.floor(T * 25) % 25, sec = Math.floor(T) + 6 * 60 + 41;
+  tc.textContent = `06:${String(Math.floor(sec / 60) % 60).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}:${String(fr).padStart(2, '0')}`;
+  const chromeOut = 1 - K.p(T, CUT[4] + 0.1, CUT[4] + 0.4, E.linear);
+  vf.style.opacity = rec.style.opacity = tc.style.opacity = chromeOut;
+  // the focus reticle hunts, then locks, once per shot
+  const FOC = [[0.62, 0.55], [0.6, 0.5], [0.5, 0.45], [0.42, 0.5], [0.5, 0.5]];
+  const lt = T - CUT[cur], lock = K.p(lt, 0.15, 0.6, E.outBack);
+  const fxp = FOC[cur][0] * W + (1 - lock) * Math.sin(T * 13) * 30, fyp = FOC[cur][1] * H + (1 - lock) * Math.cos(T * 11) * 24;
+  focus.style.transform = `translate(${fxp - 60}px, ${fyp - 60}px) scale(${1.3 - 0.3 * lock})`;
+  focus.style.opacity = chromeOut * (cur === 1 && T > 5.85 ? 0 : 0.9) * (cur === 2 ? 0 : 1);
+
+  // ---------- field guide card ----------
+  const fgp = K.p(T, 2.1, 2.6, E.outExpo), fgo = K.p(T, CUT[1] - 0.35, CUT[1] - 0.1, E.inCubic);
+  fg.style.opacity = fgp * (1 - fgo); fg.style.clipPath = `inset(0 ${(1 - fgp) * 100}% 0 0)`;
+  fg.style.transform = `translateY(${fgo * -20}px)`;
+
+  // ---------- shot 2: ring + note + create box ----------
+  // the tablet sits around 50 % × 62 % of h10
+  const tcx = W * 0.5, tcy = H * (tall ? 0.62 : 0.6), rx = tall ? 300 : 280, ry = tall ? 250 : 210;
+  circ.setAttribute('d', `M ${tcx - rx} ${tcy - ry * 0.3} C ${tcx - rx * 0.6} ${tcy - ry * 1.2}, ${tcx + rx * 1.1} ${tcy - ry * 1.05}, ${tcx + rx} ${tcy + ry * 0.1} S ${tcx - rx * 0.3} ${tcy + ry * 1.3}, ${tcx - rx * 1.02} ${tcy + ry * 0.15} S ${tcx - rx * 0.1} ${tcy - ry * 1.25}, ${tcx + rx * 0.4} ${tcy - ry * 1.0}`);
+  const cp = K.p(T, 5.9, 6.3, E.inOutCubic), co = K.p(T, CUT[2] - 0.3, CUT[2] - 0.05, E.linear);
+  circ.setAttribute('stroke-dasharray', `${cp} 1`); circ.style.opacity = cp > 0 ? 1 - co : 0;
+  note.style.left = tcx - rx * 0.6 + 'px'; note.style.top = tcy - ry * 1.15 - 66 + 'px';
+  const np = K.p(T, 6.15, 6.5, E.linear);
+  note.style.webkitMaskImage = `linear-gradient(90deg, #000 ${np * 100}%, transparent ${np * 100 + 5}%)`; note.style.opacity = 1 - co;
+  note.style.transform = 'rotate(-4deg)';
+  const clp = K.p(T, 6.35, 6.85, E.outExpo);
+  clipc.style.top = (tall ? 392 : 150) + 'px';
+  clipc.style.opacity = Math.min(1, clp * 2) * (1 - co); clipc.style.visibility = T > 6.35 && T < CUT[2] ? 'visible' : 'hidden';
+  clipc.style.transform = `translateY(${(1 - clp) * 80}px) rotate(${-2 + (1 - clp) * 4}deg)`;
+  const n = Math.round(TYPED.length * K.p(T, 6.5, 7.3, E.linear));
+  typ.innerHTML = TYPED.slice(0, n) + (n < TYPED.length || Math.floor(T * 3) % 2 ? '<i></i>' : '');
+
+  // ---------- shot 4: send step ----------
+  const sp = K.p(T, CUT[3] + 0.1, CUT[3] + 0.6, E.outExpo), so = K.p(T, CUT[4] - 0.2, CUT[4], E.inCubic);
+  sendc.style.top = (tall ? 440 : 250) + 'px';
+  sendc.style.opacity = sp * (1 - so); sendc.style.visibility = T > CUT[3] && T < CUT[4] ? 'visible' : 'hidden';
+  sendc.style.transform = `translateY(${(1 - sp) * 60}px) rotate(-1.5deg)`;
+  const rs = K.p(T, 10.2, 10.5, E.outBack);
+  Object.assign(ringS.style, { left: 10 * SS4 + 'px', top: 14 * SS4 + 'px', width: 760 * SS4 + 'px', height: 60 * SS4 + 'px', opacity: rs > 0 ? 1 : 0, transform: `scale(${1.08 - 0.08 * rs})` });
+
+  // ---------- subtitles ----------
+  subs.forEach((s) => {
+    const p = K.p(T, s.a - 0.05, s.a + 0.3, E.outCubic), o = K.p(T, s.b + 0.02, s.b + 0.2, E.linear);
+    s.el.style.opacity = p * (1 - o); s.el.style.visibility = T > s.a - 0.05 && T < s.b + 0.2 ? 'visible' : 'hidden';
+    s.el.style.transform = `translateY(${(1 - p) * 16}px)`;
+  });
+  subShade.style.opacity = T > 1.0 && T < CUT[4] ? 1 : 0;
+  // the freeze: a shutter flash and the title card
+  flash.style.opacity = Math.max(0, 1 - Math.abs(T - CUT[4] + 0.02) / 0.12) * 0.85 + Math.max(0, 1 - Math.abs(T - CUT[2] + 0.02) / 0.1) * 0.5;
+  const fp = K.p(T, 11.6, 12.1, E.outExpo);
+  fin.style.top = (tall ? 560 : 440) + 'px';
+  fin.style.opacity = fp; fin.style.visibility = T > 11.55 ? 'visible' : 'hidden';
+  fin.style.transform = `translateY(${(1 - fp) * 40}px) scale(${0.96 + 0.04 * fp})`;
+  const finEm = fin.querySelector('em');
+  const ep = K.p(T, 12.15, 12.5, E.outCubic);
+  finEm.style.backgroundSize = `${ep * 100}% 100%`;
+  finEm.style.color = ep > 0.5 ? '#1F1F1F' : '#FAF7EE';
+
+  // ---------- tags ----------
+  const tagY = VF.y + 84;
+  const realOn = (T > 6.35 && T < CUT[2]) || bOn || (T > CUT[3] + 0.1 && T < CUT[4]);
+  realTag.style.opacity = realOn && T < CUT[4] ? 1 : 0;
+  conceptTag.style.opacity = !(cur === 2) && T < 12.9 ? 1 : 0;
+  conceptTag.style.left = VF.x + 30 + 'px'; conceptTag.style.top = tagY + 'px';
+  realTag.style.left = 'auto'; realTag.style.right = W - VF.x - VF.w + 30 + 'px'; realTag.style.top = tagY + 'px';
+
+  end(T);
+});
+</script></body></html>

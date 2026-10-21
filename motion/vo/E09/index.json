@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.25,
+  "text": "Once upon a time, a fox had an idea.",
+  "file": "01-5aa4e013b2.wav",
+  "dur": 3.16
+ },
+ {
+  "t": 3.7,
+  "text": "She described it, checked every page, and said yes.",
+  "file": "02-a628b4ab86.wav",
+  "dur": 3.9
+ },
+ {
+  "t": 7.9,
+  "text": "Her own print partner printed each order.",
+  "file": "03-fd2df4b5c3.wav",
+  "dur": 2.42
+ },
+ {
+  "t": 10.6,
+  "text": "And they listed happily ever after.",
+  "file": "04-8e9e5003f7.wav",
+  "dur": 2.18
+ }
+]

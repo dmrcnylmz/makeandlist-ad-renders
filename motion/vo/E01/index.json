@@ -1,0 +1,38 @@
+[
+ {
+  "t": 0.3,
+  "text": "Dear seller,",
+  "file": "01-b55e1f689a.wav",
+  "dur": 0.98
+ },
+ {
+  "t": 1.13,
+  "text": "that idea you keep sketching?",
+  "file": "02-1209262629.wav",
+  "dur": 2.09
+ },
+ {
+  "t": 2.97,
+  "text": "Describe it in one sentence.",
+  "file": "03-3372046142.wav",
+  "dur": 2.37
+ },
+ {
+  "t": 5.37,
+  "text": "We'll make the files and the listing, as a draft.",
+  "file": "04-c3fd5afee3.wav",
+  "dur": 3.07
+ },
+ {
+  "t": 8.39,
+  "text": "Nothing goes live without your yes.",
+  "file": "05-c1cc178f51.wav",
+  "dur": 2.09
+ },
+ {
+  "t": 10.08,
+  "text": "Your idea deserves a shop.",
+  "file": "06-c7939f5d06.wav",
+  "dur": 2.74
+ }
+]

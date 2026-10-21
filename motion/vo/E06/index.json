@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.3,
+  "text": "Today's recipe: a new product.",
+  "file": "01-d19f3fba1c.wav",
+  "dur": 2.88
+ },
+ {
+  "t": 3,
+  "text": "You'll need one idea.",
+  "file": "02-f818c3be34.wav",
+  "dur": 1.49
+ },
+ {
+  "t": 4.76,
+  "text": "Describe it, check the draft, then say yes.",
+  "file": "03-c0dd2d1f00.wav",
+  "dur": 2.83
+ },
+ {
+  "t": 7.82,
+  "text": "Garnish with prints from your own partner.",
+  "file": "04-873129f1e1.wav",
+  "dur": 2.28
+ },
+ {
+  "t": 10.17,
+  "text": "Serves every store you sell in.",
+  "file": "05-d97869da53.wav",
+  "dur": 2.23
+ }
+]

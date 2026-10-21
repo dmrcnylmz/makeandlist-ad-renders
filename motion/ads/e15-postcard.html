@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E15 · A Postcard From the Printer</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #3A2A1E; }
+.ph { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: block; }
+.shade { position: absolute; inset: 0; pointer-events: none; }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 96px/1.0 'Playfair Display'; letter-spacing: -0.025em; color: #FFFDF8; text-shadow: 0 4px 40px rgba(20,12,6,.5); }
+.hook em { font-style: italic; color: #DFFF5A; }
+.card { position: absolute; z-index: 30; transform-style: preserve-3d; }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 10px; overflow: hidden; }
+.front img { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 1024px; height: 1536px; }
+.back { transform: rotateY(180deg); background: #F6F0E2; box-shadow: inset 0 0 0 1px rgba(60,40,20,.12); }
+.back::before { content: ''; position: absolute; inset: 0; opacity: .5; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .45  0 0 0 0 .3  0 0 0 .18 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"); }
+.cshadow { position: absolute; z-index: 29; border-radius: 14px; background: rgba(20,10,4,.55); filter: blur(30px); }
+.div { position: absolute; top: 8%; bottom: 8%; width: 2px; background: rgba(60,40,20,.25); }
+.msg { position: absolute; font: italic 500 40px/1.42 'Playfair Display'; color: #2A2622; }
+.msg .ln { white-space: nowrap; }
+.msg .w { display: inline-block; white-space: pre; }
+.msg u { text-decoration: none; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 90%, transparent 90%) no-repeat 0 0 / 0% 100%; }
+.stampP { position: absolute; background: #FFFDF8; padding: 9px; box-shadow: 0 2px 6px rgba(60,40,20,.25);
+  outline: 6px dotted #F6F0E2; outline-offset: -3px; }
+.stampP img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.addr { position: absolute; font: italic 500 34px 'Playfair Display'; color: #2A2622; }
+.addr i { display: block; height: 2px; background: rgba(60,40,20,.3); margin-top: 46px; }
+.pm { position: absolute; mix-blend-mode: multiply; transform-origin: 50% 50%; }
+.cct { position: absolute; font: 500 15px 'IBM Plex Mono', monospace; color: rgba(42,38,34,.6); white-space: nowrap; }
+.route { position: absolute; z-index: 35; }
+.route svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.node { position: absolute; transform: translateX(-50%); text-align: center; white-space: nowrap; }
+.node .d { width: 46px; height: 46px; margin: 0 auto; border-radius: 50%; background: #FFFDF8; display: grid; place-items: center; font: 800 20px 'Archivo'; color: #1F1F1F; box-shadow: 0 8px 18px -8px rgba(0,0,0,.6); }
+.node .t { margin-top: 10px; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: #FFFDF8; text-shadow: 0 1px 10px rgba(0,0,0,.5); }
+.tok { position: absolute; z-index: 36; width: 58px; height: 42px; margin: -21px 0 0 -29px; border-radius: 6px; background: #C9A272; box-shadow: 0 8px 16px -6px rgba(0,0,0,.6), inset 0 0 0 2px rgba(90,60,30,.35); }
+.tok::after { content: ''; position: absolute; left: 0; right: 0; top: 18px; height: 6px; background: rgba(250,247,238,.75); }
+.slip { position: absolute; z-index: 34; overflow: hidden; border-radius: 22px; background: #FAF7EE; box-shadow: 0 40px 70px -30px rgba(0,0,0,.7); }
+.slip img { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 780px; }
+.ring { position: absolute; border: 5px solid #DFFF5A; border-radius: 14px; box-shadow: 0 0 0 2px #1F1F1F; }
+.paid { position: absolute; z-index: 37; white-space: nowrap; padding: 12px 20px; border-radius: 16px; background: #1F1F1F; color: #FAF7EE; font: 600 23px/1.25 'Archivo'; }
+.paid b { color: #DFFF5A; }
+.demo.dk { background: rgba(40,28,18,.7); color: rgba(255,253,248,.85); border-color: rgba(255,253,248,.4); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E15 — "A postcard from the printer." A botanical postcard on a desk lifts off the photograph and flips: its back is
+// the letter Marian reads, written word by word in ink as she says it, and every step of a printed order gets its own
+// postmark in her breaths — ORDER IN · APPROVED BY YOU · PRINTED BY YOUR PARTNER · SHIPPED & TRACKED · PAID FROM YOUR
+// PARTNER ACCOUNT. Above it, the parcel travels the route (your store → your partner → on its way → your buyer) and a
+// dashed line carries the tracking back to your store (the real store order, demo workspace, shows "Shipped").
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 89.1, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice — speech windows: L1 0.61–1.64 · L2 2.15–3.13 / 3.77–5.03 · L3 5.52–7.52 · L4 8.00–9.35 · L5 9.79–10.92 / 11.94–12.59
+const T_LIFT = 1.72, T_FLIP = [1.98, 2.55];
+const PM = [
+  { t: 3.35, big: 'ORDER IN', ring: 'YOUR STORE · YOUR STORE ·', ink: '#2F3A4A' },
+  { t: 5.24, big: 'APPROVED', ring: 'BY YOU · BY YOU · BY YOU ·', ink: '#B8442A' },
+  { t: 7.62, big: 'PRINTED', ring: 'BY YOUR PRINT PARTNER ·', ink: '#2F3A4A' },
+  { t: 9.5, big: 'SHIPPED', ring: 'TRACKED · TRACKED · TRACKED ·', ink: '#3E6B4A' },
+  { t: 11.42, big: 'PAID', ring: 'FROM YOUR PARTNER ACCOUNT ·', ink: '#B8442A' },
+];
+const MSG = [
+  [2.15, 3.1, 'An order came in.'],
+  [3.77, 5.0, 'You *approved* it.'],
+  [5.52, 6.55, 'Your partner *printed* it'],
+  [6.6, 7.5, 'and *shipped* it.'],
+  [8.0, 8.7, '*Tracking* went back'],
+  [8.7, 9.35, 'to your store.'],
+  [9.79, 10.9, 'Printed by *your partner.*'],
+  [11.94, 12.55, 'Paid from *your account.*'],
+];
+
+const L = tall
+  ? { cardW: 950, cardY: 560, routeY: 300, routeX: 120, routeW: 840, hookY: 330, slipY: 1300, slipW: 700, msgFs: 40 }
+  : { cardW: 900, cardY: 296, routeY: 108, routeX: 150, routeW: 780, hookY: 120, slipY: 998, slipW: 540, msgFs: 37 };
+const cardH = Math.round(L.cardW / 1.345), cardX = (W - L.cardW) / 2, cardCX = W / 2, cardCY = L.cardY + cardH / 2;
+
+// ---------- the desk photograph (the postcard lives in it at image px centre 538,770, tilted −7.1°, 846 wide) ----------
+const IMG = K.pub('r05/h08-postcard.webp');
+const PC = { x: 538, y: 770, w: 846, rot: -7.1 };
+const cover = Math.max(W / 1024, H / 1536);
+const bgBlur = K.el('img', { src: IMG, cls: 'ph', style: { width: '1024px', height: '1536px', filter: 'blur(30px) brightness(.62) saturate(1.1)' } });
+const photo = K.el('img', { src: IMG, cls: 'ph', style: { width: '1024px', height: '1536px' } });
+const shade = K.box(0, 0, W, H, { cls: 'shade', style: { background: 'linear-gradient(180deg, rgba(30,18,8,.6) 0%, rgba(30,18,8,.15) 35%, rgba(30,18,8,0) 60%, rgba(30,18,8,.35) 100%)' } });
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'hook', html: 'A postcard<br>from <em>the printer.</em>', style: { fontSize: (tall ? 104 : 92) + 'px' } });
+const tagC = K.demoTag('Concept images · AI-generated', 0, 0); tagC.classList.add('dk');
+
+// photo transform at time T (scale about the postcard so the hand-off to the card is exact)
+const photoS = (T) => cover * (1.04 + 0.05 * K.p(T, 0, T_LIFT, E.inOutCubic));
+const pcScreen = (T) => { const s = photoS(T); return { x: W / 2 + (PC.x - 512) * s, y: H * 0.5 + (PC.y - 768) * s + 40 * (1 - K.p(T, 0, T_LIFT, E.inOutCubic)), s }; };
+
+// ---------- the card ----------
+const cshadow = K.box(cardX + 20, L.cardY + 40, L.cardW - 40, cardH - 20, { cls: 'cshadow' });
+const card = K.box(cardX, L.cardY, L.cardW, cardH, { cls: 'card' });
+const front = K.el('div', { parent: card, cls: 'face front', html: `<img src="${IMG}">` });
+const fimg = front.querySelector('img');
+const kF = L.cardW / PC.w;
+fimg.style.transform = `translate(${L.cardW / 2}px, ${cardH / 2}px) rotate(${-PC.rot}deg) scale(${kF}) translate(${-PC.x}px, ${-PC.y}px)`;
+const back = K.el('div', { parent: card, cls: 'face back' });
+const divX = L.cardW * 0.6;
+K.el('div', { parent: back, cls: 'div', style: { left: divX + 'px' } });
+const msg = K.el('div', { parent: back, cls: 'msg', style: { left: '46px', top: (tall ? 40 : 34) + 'px', fontSize: L.msgFs + 'px' } });
+const msgLines = MSG.map(([a, b, txt]) => {
+  const ln = K.el('div', { parent: msg, cls: 'ln' });
+  let u = false;
+  ln.innerHTML = txt.split(' ').map((w) => {
+    if (w.startsWith('*')) u = true;
+    const out = `<span class="w">${u ? '<u>' : ''}${w.replace(/\*/g, '')}${u ? '</u>' : ''} </span>`;
+    if (w.endsWith('*') || w.endsWith('*.')) u = false;
+    return out;
+  }).join('');
+  return { ln, ws: [...ln.querySelectorAll('.w')], us: [...ln.querySelectorAll('u')], a, b };
+});
+const stW = L.cardW * 0.15, stH = stW * 1.25;
+const stampP = K.el('div', { parent: back, cls: 'stampP', style: { left: L.cardW - 40 - stW + 'px', top: '36px', width: stW + 'px', height: stH + 'px' }, html: `<img src="${K.pub('r05/h05-story-courier.webp')}" style="object-position:40% 60%">` });
+const addr = K.el('div', { parent: back, cls: 'addr', style: { left: divX + 34 + 'px', top: stH + 90 + 'px', width: L.cardW - divX - 76 + 'px' }, html: 'To: your buyer<i></i><i></i><i></i>' });
+K.el('div', { parent: back, cls: 'cct', style: { left: divX + 34 + 'px', bottom: '22px' }, html: 'Concept postcard · AI-generated art' });
+// postmarks (SVG, text on a circle)
+const pmEls = PM.map((p, i) => {
+  const R = tall ? 92 : 86;
+  const el = K.el('div', { parent: back, cls: 'pm', style: { width: 2 * R + 20 + 'px', height: 2 * R + 20 + 'px' } });
+  el.innerHTML = `<svg width="${2 * R + 20}" height="${2 * R + 20}" viewBox="${-R - 10} ${-R - 10} ${2 * R + 20} ${2 * R + 20}">
+    <defs><path id="pmc${i}" d="M ${-R + 18} 0 A ${R - 18} ${R - 18} 0 1 1 ${R - 18} 0 A ${R - 18} ${R - 18} 0 1 1 ${-R + 18} 0"/>
+    <filter id="pmr${i}"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="${i + 3}"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 1.5"/><feComposite in="SourceGraphic" operator="in"/></filter></defs>
+    <g filter="url(#pmr${i})" fill="none" stroke="${p.ink}">
+      <circle r="${R}" stroke-width="5"/><circle r="${R - 36}" stroke-width="2.5"/>
+      <text font-family="IBM Plex Mono, monospace" font-size="${tall ? 16 : 15}" font-weight="600" letter-spacing="2.2" fill="${p.ink}" stroke="none"><textPath href="#pmc${i}">${p.ring}</textPath></text>
+      <text text-anchor="middle" y="${tall ? 10 : 9}" font-family="Archivo, sans-serif" font-size="${p.big.length > 7 ? (tall ? 24 : 22) : (tall ? 30 : 28)}" font-weight="800" letter-spacing="1" fill="${p.ink}" stroke="none">${p.big}</text>
+      <path d="M ${R + 6} -24 h 130 M ${R + 6} -8 h 140 M ${R + 6} 8 h 140 M ${R + 6} 24 h 130" stroke-width="3.5" opacity=".9"/>
+    </g></svg>`;
+  el.querySelector('svg').style.overflow = 'visible';
+  // where each lands on the back: around the stamp and over the address
+  const spots = tall
+    ? [[0.58, 0.04, -12], [0.66, 0.36, 9], [0.56, 0.56, -6], [0.7, 0.16, 14], [0.64, 0.66, -16]]
+    : [[0.58, 0.04, -12], [0.66, 0.36, 9], [0.56, 0.56, -6], [0.7, 0.16, 14], [0.64, 0.66, -16]];
+  const [sx, sy, rot] = spots[i];
+  el.style.left = sx * L.cardW - 10 + 'px'; el.style.top = sy * cardH - 10 + 'px';
+  return { el, rot };
+});
+
+// ---------- the route ----------
+const NODES = ['Your store', 'Your partner', 'On its way', 'Your buyer'];
+const route = K.box(L.routeX, L.routeY, L.routeW, 120, { cls: 'route' });
+const nx = (i) => (L.routeW * i) / 3;
+const rsvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+rsvg.setAttribute('width', L.routeW); rsvg.setAttribute('height', 120); route.appendChild(rsvg);
+rsvg.innerHTML = `<path id="rl" d="M0 23 H${L.routeW}" stroke="rgba(255,253,248,.35)" stroke-width="4" stroke-dasharray="2 12" stroke-linecap="round" fill="none"/>
+  <path id="rf" d="M0 23 H${L.routeW}" stroke="#DFFF5A" stroke-width="5" stroke-linecap="round" fill="none" pathLength="1" stroke-dasharray="0 1"/>
+  <path id="rt" d="M${nx(3)} 23 C ${nx(3)} -60, ${nx(0)} -60, ${nx(0)} 23" stroke="#DFFF5A" stroke-width="3.5" stroke-dasharray="10 9" fill="none" pathLength="1"/>
+  <text id="rtt" x="${L.routeW / 2}" y="-34" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="19" font-weight="600" letter-spacing="1.5" fill="#DFFF5A">TRACKING → YOUR STORE</text>`;
+const rf = rsvg.querySelector('#rf'), rt = rsvg.querySelector('#rt'), rtt = rsvg.querySelector('#rtt');
+const nodes = NODES.map((n, i) => {
+  const el = K.el('div', { parent: route, cls: 'node', style: { left: nx(i) + 'px', top: '0px' }, html: `<div class="d">${i + 1}</div><div class="t">${n}</div>` });
+  return { el, d: el.querySelector('.d') };
+});
+const tok = K.box(0, 0, 58, 42, { cls: 'tok' });
+
+// ---------- proof: the real store order, shipped ----------
+const kS = L.slipW / 780;
+const slip = K.box((W - L.slipW) / 2, L.slipY, L.slipW, 370 * kS, { cls: 'slip', html: `<img src="${K.screen('81-phone-orders')}">` });
+slip.querySelector('img').style.transform = `translate(0, ${-2660 * kS}px) scale(${kS})`;
+const ringS = K.el('div', { parent: slip, cls: 'ring', style: { left: 92 * kS + 'px', top: (2936 - 2660) * kS + 'px', width: 210 * kS + 'px', height: 72 * kS + 'px' } });
+const realTag = K.demoTag('Real app · demo workspace · simulated order', 0, 0); realTag.classList.add('dk');
+const paid = K.box(0, 0, null, null, { cls: 'paid', style: { width: 'auto', height: 'auto' }, html: 'Paid from <b>your partner account</b> · never Credits' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Printed by your partner.<br>Paid from your account.' });
+
+// token position along the route (in route units 0..3)
+const tokU = (T) => K.p(T, 5.3, 5.95, E.inOutCubic) + 2 * K.p(T, 6.7, 7.6, E.inOutCubic);
+
+K.run({
+  id: 'E15', title: 'A Postcard From the Printer', dur: DUR, bpm: BPM, music: 'poor-but-happy', mood: 'warm', key: 'G', intro: 0.0, cover: 9.8,
+  technique: 'A postcard lifts off a desk photograph (an exact hand-off from the photo to a 3D card) and flips; its back is the letter the narrator reads, inked word by word with her voice, and each step of a printed order lands as a textured postmark in her breaths, while a parcel token travels a four-stop route above and a dashed line carries the tracking back to the store',
+  caption: 'A postcard from the printer: an order comes in, you approve it, your own print partner prints and ships it, and tracking goes back to your store order. Printing is paid from your own partner account — never Credits. Start free at makeandlist.com',
+  short: 'Printed by your partner. Paid from your account.',
+  question: 'Can I sell physical products too?', gain: 'Physical products without stock, printed per order by your own partner',
+  vo: [[0.3, 'A postcard from the printer.'], [1.95, 'An order came in. You approved it.'], [5.05, 'Your partner printed it and shipped it.'], [7.75, 'Tracking went back to your store.'], [9.6, 'Printed by your partner. Paid from your account.']],
+  beats: ['0–1.9 s: “A postcard from the printer.” — a botanical postcard on a desk', '1.9–2.6 s: the postcard lifts and flips; its back is a letter', '2.6–5.5 s: an order came in · you approved it — postmarks ORDER IN, APPROVED BY YOU', '5.5–7.9 s: your partner printed it and shipped it — the parcel travels; PRINTED', '7.9–9.7 s: tracking went back to your store — the real store order shows Shipped; SHIPPED · TRACKED', '9.7–13 s: printed by your partner, paid from your account — PAID postmark', '13–15 s: end card'],
+  cues: [[0.0, 'paper'], [1.8, 'whoosh'], [2.02, 'paper'], [PM[0].t, 'stamp'], [PM[1].t, 'stamp'], [5.32, 'swish'], [6.05, 'printer'], [6.72, 'swish'], [7.55, 'box'], [PM[2].t, 'stamp'],
+    [8.05, 'swish'], [8.4, 'pop'], [PM[3].t, 'stamp'], [PM[4].t, 'stamp'], [11.6, 'coin'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // ---------- photo ----------
+  const s = photoS(T);
+  const pc = pcScreen(T);
+  photo.style.transform = `translate(${pc.x - PC.x * s}px, ${pc.y - PC.y * s}px) scale(${s})`;
+  const after = K.p(T, T_LIFT, T_LIFT + 0.6, E.inOutCubic);
+  photo.style.filter = after > 0.01 ? `blur(${after * 18}px) brightness(${1 - 0.38 * after})` : 'none';
+  bgBlur.style.transform = photo.style.transform;
+  shade.style.opacity = 0.7 + 0.3 * after;
+  const hk = K.p(T, 0.05, 0.6, E.outExpo), ho = K.p(T, T_LIFT - 0.1, T_LIFT + 0.2, E.inCubic);
+  hook.style.opacity = hk * (1 - ho); hook.style.transform = `translateY(${(1 - hk) * 40 - ho * 40}px)`;
+  hook.style.visibility = T < T_LIFT + 0.25 ? 'visible' : 'hidden';
+  tagC.style.left = (tall ? 65 : 60) + 'px'; tagC.style.top = (T < T_LIFT ? (tall ? 1196 : 1270) : L.cardY - 48) + 'px';
+  tagC.style.opacity = K.p(T, 0.4, 0.8, E.linear) * (1 - K.p(T, 12.6, 13, E.linear));
+
+  // ---------- card: hand-off from the photo, lift, flip ----------
+  const lift = K.p(T, T_LIFT, T_LIFT + 0.5, E.inOutCubic);
+  const pcAt = pcScreen(Math.min(T, T_LIFT));
+  const cx = K.lerp(pcAt.x, cardCX, lift), cy = K.lerp(pcAt.y, cardCY, lift);
+  const sc = K.lerp((pcAt.s * PC.w) / L.cardW, 1, lift) * (1 + 0.025 * Math.sin(Math.PI * lift));
+  const flip = K.p(T, T_FLIP[0], T_FLIP[1], E.inOutCubic);
+  const rotZ = K.lerp(PC.rot, -1.5, lift) + Math.sin(T * 0.6) * 0.4 * after;
+  card.style.visibility = T >= T_LIFT - 0.02 ? 'visible' : 'hidden';
+  card.style.transform = `translate(${cx - cardCX}px, ${cy - cardCY + Math.sin(T * 0.9) * 3 * after}px) perspective(2200px) rotateZ(${rotZ}deg) rotateY(${180 * flip}deg) rotateX(${Math.sin(Math.PI * flip) * 8}deg) scale(${sc})`;
+  card.style.opacity = K.p(T, 12.75, 13.0, E.linear) > 0 ? 1 - K.p(T, 12.75, 13.0, E.linear) : 1;
+  cshadow.style.opacity = after * 0.9;
+  cshadow.style.transform = `translate(${cx - cardCX + 10}px, ${cy - cardCY + 20 * after}px) rotate(${rotZ}deg) scale(${sc * (1 - 0.06 * Math.sin(Math.PI * flip))}, ${sc})`;
+
+  // ---------- the letter ----------
+  msgLines.forEach((m) => {
+    const n = m.ws.length;
+    m.ws.forEach((w, j) => {
+      const at = m.a + (m.b - m.a) * (j / n) * 0.9 - 0.05;
+      const p = K.p(T, at, at + 0.35, E.outCubic);
+      w.style.opacity = p;
+      w.style.clipPath = `inset(-10px ${(1 - p) * 100}% -10px 0)`;
+      w.style.transform = `translateY(${(1 - p) * 6}px)`;
+    });
+    m.us.forEach((u) => { u.style.backgroundSize = `${K.p(T, m.b - 0.1, m.b + 0.3, E.outCubic) * 100}% 100%`; });
+  });
+
+  // ---------- postmarks ----------
+  pmEls.forEach(({ el, rot }, i) => {
+    const t = PM[i].t;
+    const p = K.p(T, t, t + 0.16, E.outCubic);
+    const shake = T >= t + 0.16 && T < t + 0.3 ? Math.sin((T - t) * 120) * 3 : 0;
+    el.style.opacity = T >= t ? 0.86 * Math.min(1, p * 1.4) : 0;
+    el.style.transform = `rotate(${rot + shake}deg) scale(${1.7 - 0.7 * p})`;
+  });
+
+  // ---------- route ----------
+  const rIn = K.p(T, T_FLIP[1] - 0.2, T_FLIP[1] + 0.4, E.outExpo);
+  route.style.opacity = rIn * (1 - K.p(T, 12.75, 13, E.linear));
+  route.style.transform = `translateY(${(1 - rIn) * -30}px)`;
+  const u = tokU(T);
+  rf.setAttribute('stroke-dasharray', `${u / 3} 1`);
+  const tr = K.p(T, 8.0, 9.0, E.inOutCubic);
+  // reveal the tracking arc from the buyer back to the store by drawing it: animate a dash window over a dashed look
+  rt.setAttribute('stroke-dasharray', Array.from({ length: 44 }, (_, k) => (k / 44 < tr ? '0.012 0.0107' : '0 0.0227')).join(' '));
+  rtt.style.opacity = K.p(T, 8.5, 8.9, E.linear);
+  nodes.forEach((nd, i) => {
+    const on = (i === 0 && T >= 2.2) || (i === 1 && T >= 5.95) || (i === 2 && u >= 1.9) || (i === 3 && u >= 2.98);
+    const pulseAt = [2.2, 5.95, 7.15, 7.6][i];
+    const pp = K.p(T, pulseAt, pulseAt + 0.4, E.outBack);
+    nd.d.style.background = on ? '#DFFF5A' : '#FFFDF8';
+    nd.d.style.transform = `scale(${on ? 0.8 + 0.2 * pp + 0.1 * Math.sin(Math.PI * pp) : 1})`;
+    nd.d.innerHTML = (i === 0 && T >= 5.24) || (i === 1 && T >= 7.62) || (i === 2 && u >= 1.9) || (i === 3 && T >= 7.6) ? '✓' : String(i + 1);
+  });
+  const ux = L.routeX + (L.routeW / 3) * u;
+  const hop = Math.sin(Math.PI * (u % 1)) * 16 * (u > 0 && u < 3 ? 1 : 0);
+  tok.style.left = ux + 'px'; tok.style.top = L.routeY + 23 - 34 - hop + 'px';
+  tok.style.opacity = K.p(T, 5.2, 5.35, E.linear) * (1 - K.p(T, 12.75, 13, E.linear));
+  tok.style.transform = `rotate(${Math.sin(T * 9) * 4 * (u > 0.02 && u < 2.98 && (u % 1) > 0.02 ? 1 : 0)}deg)`;
+
+  // ---------- proof slip ----------
+  const sp = K.p(T, 8.2, 8.75, E.outBack), so = K.p(T, 12.75, 13.0, E.inCubic);
+  slip.style.opacity = Math.min(1, sp * 2) * (1 - so);
+  slip.style.transform = `translateY(${(1 - sp) * 80}px) rotate(${2 - (1 - sp) * 3}deg)`;
+  slip.style.visibility = T >= 8.2 ? 'visible' : 'hidden';
+  const rp = K.p(T, 9.0, 9.3, E.outBack);
+  ringS.style.opacity = K.p(T, 9.0, 9.1, E.linear); ringS.style.transform = `scale(${1.2 - 0.2 * rp})`;
+  realTag.style.left = (W - L.slipW) / 2 + 'px'; realTag.style.top = L.slipY + 370 * kS + 18 + 'px';
+  realTag.style.opacity = Math.min(1, sp * 2) * (1 - so);
+  const pd = K.p(T, 11.5, 11.9, E.outBack);
+  paid.style.left = cardX + L.cardW + 14 + 'px'; paid.style.top = L.cardY + cardH - 30 + 'px';
+  paid.style.opacity = Math.min(1, pd * 2) * (1 - so);
+  paid.style.transform = `translateX(-100%) rotate(-3deg) scale(${0.8 + 0.2 * pd})`;
+  paid.style.visibility = T >= 11.5 ? 'visible' : 'hidden';
+
+  end(T);
+});
+</script></body></html>

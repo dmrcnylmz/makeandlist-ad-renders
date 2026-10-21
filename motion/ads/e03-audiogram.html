@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E03 · The Audiogram</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EFE9DC; }
+.bg { position: absolute; inset: 0; background: radial-gradient(120% 70% at 50% 30%, #F8F4EA 0, #EFE9DC 60%, #E4DCCB 100%); }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.hdr { position: absolute; z-index: 20; display: flex; align-items: center; gap: 26px; }
+.cov { position: relative; flex: none; border-radius: 26px; overflow: hidden; box-shadow: 0 24px 40px -22px rgba(31,31,31,.6); }
+.cov img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+.pulse { position: absolute; border-radius: 34px; border: 4px solid #DFFF5A; pointer-events: none; }
+.htx .k { font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .18em; text-transform: uppercase; color: #6B645A; display: flex; align-items: center; gap: 10px; }
+.htx .k i { width: 12px; height: 12px; border-radius: 50%; background: #E8603C; display: block; }
+.htx .t { margin-top: 8px; font: 800 44px/1.04 'Playfair Display'; letter-spacing: -0.015em; color: #1F1F1F; }
+.capt { position: absolute; z-index: 30; font: 800 78px/1.08 'Archivo'; letter-spacing: -0.025em; color: #1F1F1F; }
+.capt span { display: inline-block; white-space: pre; border-radius: 12px; }
+.capt span b { font-weight: 800; padding: 0 .08em; margin: 0 -.08em; border-radius: 12px; }
+.stage { position: absolute; z-index: 15; }
+.card { position: absolute; border-radius: 24px; overflow: hidden; background: #FFFDF8; box-shadow: 0 40px 70px -36px rgba(31,31,31,.6), 0 0 0 1px rgba(31,31,31,.06); }
+.card img.ph { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+.card .lb { position: absolute; left: 14px; bottom: 14px; z-index: 2; font: 700 22px 'Archivo'; color: #1F1F1F; background: #FFFDF8; padding: 8px 14px; border-radius: 99px; white-space: nowrap; }
+.crop { position: absolute; border-radius: 22px; overflow: hidden; background: #FFFDF8; box-shadow: 0 34px 60px -30px rgba(31,31,31,.55), 0 0 0 1px rgba(31,31,31,.08); }
+.crop img { position: absolute; display: block; }
+.ring { position: absolute; z-index: 3; border-radius: 14px; border: 5px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; pointer-events: none; }
+.tick { position: absolute; z-index: 4; width: 46px; height: 46px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 3px #1F1F1F; display: grid; place-items: center; }
+.art { position: absolute; border-radius: 24px; background: #FFFDF8; box-shadow: 0 30px 60px -34px rgba(31,31,31,.5), 0 0 0 1.5px #E2DBCE; overflow: hidden; }
+.art .rul { position: absolute; left: 0; right: 0; top: 0; height: 34px; background: repeating-linear-gradient(90deg, #C9C1B3 0 1px, transparent 1px 20px) bottom / 100% 12px no-repeat, #F1ECE1; border-bottom: 1px solid #D9D3C9; }
+.art .tb { position: absolute; left: 0; top: 34px; bottom: 0; width: 64px; background: #F1ECE1; border-right: 1px solid #D9D3C9; }
+.art .tb i { display: block; width: 32px; height: 32px; margin: 16px auto 0; border-radius: 8px; background: #DDD5C8; }
+.art .q { position: absolute; font: 600 24px 'IBM Plex Mono', monospace; color: #8A8378; }
+.strike { position: absolute; height: 14px; border-radius: 7px; background: #E8603C; transform-origin: 0 50%; z-index: 5; }
+.typ { position: absolute; font: 400 15px/1.35 'Archivo'; color: #1F1F1F; background: #FFFDF8; }
+.typ i { display: inline-block; width: 2px; height: 1.1em; background: #1F1F1F; vertical-align: -3px; margin-left: 1px; }
+.wave { position: absolute; z-index: 25; border-radius: 30px; background: #1F1F1F; box-shadow: 0 30px 60px -30px rgba(31,31,31,.7); overflow: hidden; }
+.wave .bars { position: absolute; left: 34px; right: 34px; display: flex; align-items: center; justify-content: space-between; }
+.wave .bars i { display: block; width: 8px; border-radius: 4px; background: #DFFF5A; }
+.wave .sc { position: absolute; left: 34px; right: 34px; height: 4px; border-radius: 2px; background: rgba(250,247,238,.18); }
+.wave .sc b { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: #FAF7EE; }
+.wave .sc u { position: absolute; top: -7px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: #FAF7EE; }
+.chipA { position: absolute; z-index: 32; white-space: nowrap; font: 700 26px 'Archivo'; padding: 13px 22px; border-radius: 99px; display: flex; gap: 12px; align-items: center; box-shadow: 0 20px 40px -20px rgba(31,31,31,.6); }
+.chipA.ink { background: #1F1F1F; color: #FAF7EE; }
+.chipA.lime { background: #DFFF5A; color: #1F1F1F; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E03 — The Audiogram. The look of a podcast clip: a cover tile with a pulse, big word-by-word captions, a waveform
+// card that is driven by the narrator's actual voice (the envelope of the vo.mjs takes, one value per frame), and a
+// stage above it where each line's proof slides in: a design tool crossed out → the real create box; three concept
+// products on their words; the real file list with ticks; the real Send step ("drafts first, public only when you
+// say"); the create box again with the sentence typed. "One sentence is enough to start."
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 89.1, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const VO = [[0.3, 'No design skills? Fine.'], [2.72, 'A planner, a print, a colouring book.'], [5.58, 'Describe it. Check every file.'],
+  [8.53, 'Nothing goes live until you say yes.'], [9.9, 'One sentence is enough to start.']];
+// word onsets per line (+ the line's end), measured from the takes
+const WT = [[0.6, 0.94, 1.65, 2.2, 3.06], [3.36, 3.49, 4.09, 4.25, 4.38, 4.64, 5.3, 5.5], [5.8, 6.51, 6.84, 7.31, 7.85, 8.3],
+  [8.6, 8.89, 9.26, 9.59, 9.77, 10.11, 10.41, 10.56], [10.86, 11.16, 11.63, 11.76, 12.25, 12.35, 12.71]];
+// the voice's loudness, one digit per frame (0–9), from motion/vo/E03
+const ENV = '000000000000000000112699545215643200004533443000000000000000000000000000000000476444332100000000000001554000012333422333211000210000021111100001000023213311111102111000000000111100444321011000000000000000000000000034410000003330012211000000110000000000000000222455300331113552211245565421111101222221100122111101100000000000001112332220002222001000000000001101110111100000000000000000000000000000000000000000000000000000000000000000000000000000000000';
+const env = (fr) => { const v = fr < 0 || fr >= ENV.length ? 0 : +ENV[fr] / 9; return Math.pow(v, 0.42); };
+const envS = (T) => { const fr = T * 30, a = Math.floor(fr); return Math.max(env(a), env(a - 1) * 0.8, env(a + 1) * 0.6); };
+
+K.box(0, 0, W, H, { cls: 'bg' });
+const blobA = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.3), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 800, 800, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(232,96,60,.12), rgba(232,96,60,0) 62%)' } });
+
+// ---------- layout ----------
+const L = tall
+  ? { hdr: [65, 284], cov: 120, capY: 430, capFs: 84, stage: [65, 668, 950, 400], wave: [65, 1092, 950, 150] }
+  : { hdr: [60, 50], cov: 110, capY: 196, capFs: 70, stage: [60, 400, 960, 590], wave: [60, 1060, 960, 180] };
+
+// ---------- header ----------
+const hdr = K.box(L.hdr[0], L.hdr[1], W - 130, L.cov, { cls: 'hdr' });
+const cov = K.el('div', { parent: hdr, cls: 'cov', style: { width: L.cov + 'px', height: L.cov + 'px' }, html: `<img src="${K.pub('r05/h10-hands-sketch.webp')}" style="object-position:50% 55%">` });
+const pulse = K.box(L.hdr[0] - 8, L.hdr[1] - 8, L.cov + 16, L.cov + 16, { cls: 'pulse' }); pulse.style.zIndex = 19;
+K.el('div', { parent: hdr, cls: 'htx', html: `<div class="k"><i></i>MakeAndList · audio note</div><div class="t">How to start with<br>one sentence</div>` });
+
+// ---------- captions ----------
+const capt = K.box(L.hdr[0], L.capY, W - 130, null, { cls: 'capt', style: { fontSize: L.capFs + 'px' } });
+const lines = VO.map(([, txt], li) => txt.split(' ').map((w, k) => ({ w, t: WT[li][k], e: WT[li][k + 1] })));
+let shownLine = -1, spans = [];
+
+// ---------- the stage ----------
+const [SX, SY, SW, SH] = L.stage;
+const stage = K.box(SX, SY, SW, SH, { cls: 'stage' });
+// 1 · a design tool, crossed out
+const art = K.el('div', { parent: stage, cls: 'art', style: { left: '0px', top: '0px', width: SW + 'px', height: SH + 'px' }, html: '<div class="rul"></div><div class="tb">' + '<i></i>'.repeat(7) + '</div>' });
+const artQ = K.el('div', { parent: art, cls: 'q', html: 'untitled-1.design · 0 layers', style: { left: '96px', top: '58px' } });
+const strike = K.el('div', { parent: stage, cls: 'strike' });
+// crops of real screens: [screen, sx, sy, sw, sh]
+function crop(scr, sx, sy, sw, sh, w) {
+  const s = w / sw, h = sh * s;
+  const el = K.el('div', { parent: stage, cls: 'crop', style: { width: w + 'px', height: h + 'px' } });
+  K.el('img', { parent: el, src: K.screen(scr), style: { width: 780 * s + 'px', left: -sx * s + 'px', top: -sy * s + 'px' } });
+  return { el, s, h, w, sx, sy };
+}
+const cw = Math.min(SW, tall ? 700 : 760);
+const create1 = crop('22-phone-create', 33, 420, 714, 380, cw);
+const files = crop('24-phone-product', 0, 2560, 780, 400, tall ? 660 : 760);
+const send = crop('72-phone-listing-send', 0, 1060, 780, 170, cw);
+const sendB = crop('72-phone-listing-send', 0, 3210, 780, 250, cw);
+const create2 = crop('22-phone-create', 33, 420, 714, 380, cw);
+const typ = K.el('div', { parent: create2.el, cls: 'typ', style: { left: (78 - 33) * create2.s + 'px', top: (604 - 420) * create2.s + 'px', width: 620 * create2.s + 'px', height: 160 * create2.s + 'px', fontSize: 26 * create2.s + 'px' } });
+const TYPED = 'A botanical wedding planner, 36 printable pages, for couples who like calm.';
+const ringS = K.el('div', { parent: send.el, cls: 'ring' });
+const ticks = [0, 1].map(() => K.el('div', { parent: files.el, cls: 'tick', html: '<svg width="24" height="24" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#1F1F1F" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' }));
+// 2 · three concept products, each on its word
+const PRODS = [['g06-wedding-planner', 'A planner', 3.49], ['g01-botanical-print', 'A print', 4.25], ['g24-colouring-book', 'A colouring book', 4.64]];
+const pcw = tall ? 300 : 300, pch = tall ? 400 : 470;
+const cards = PRODS.map(([id, lb]) => K.el('div', { parent: stage, cls: 'card', style: { width: pcw + 'px', height: pch + 'px' }, html: `<img class="ph" src="${K.pub('r04/' + id + '.webp')}"><div class="lb">${lb}</div>` }));
+const conceptTag = K.demoTag('Concept images · AI-generated', 0, 0); conceptTag.style.zIndex = 40;
+const realTag = K.demoTag('Real app · demo workspace', 0, 0); realTag.style.zIndex = 40;
+const chips = [K.box(0, 0, null, null, { cls: 'chipA lime', html: 'Draft · waiting for your yes', style: { width: 'auto', height: 'auto' } }),
+  K.box(0, 0, null, null, { cls: 'chipA ink', html: 'You see the cost first', style: { width: 'auto', height: 'auto' } })];
+
+// ---------- the waveform card ----------
+const [WX, WY, WW, WH] = L.wave;
+const wave = K.box(WX, WY, WW, WH, { cls: 'wave' });
+const NB = 46;
+const barsEl = K.el('div', { parent: wave, cls: 'bars', style: { top: '18px', height: WH - 66 + 'px' } });
+const bars = Array.from({ length: NB }, () => K.el('i', { parent: barsEl }));
+const scr = K.el('div', { parent: wave, cls: 'sc', html: '<b></b><u></u>', style: { top: WH - 34 + 'px' } });
+const scB = scr.querySelector('b'), scU = scr.querySelector('u');
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'One sentence is<br>enough to start.' });
+
+// which proof is on stage
+const SCN = [[0.0, 2.25], [2.25, 3.25], [3.3, 5.66], [5.66, 8.42], [8.42, 10.7], [10.7, 13.2]]; // art, create1, products, files, send, create2
+const vis = (T, i, fin = 0.35, fout = 0.25) => { const [a, b] = SCN[i]; return { p: K.p(T, a, a + fin, E.outExpo), o: K.p(T, b - fout, b, E.inCubic), on: T >= a && T < b }; };
+
+K.run({
+  id: 'E03', title: 'The Audiogram', dur: DUR, bpm: BPM, music: 'a-small-town-on-pluto', mood: 'bright', key: 'C', intro: 0.0, cover: 4.9,
+  technique: 'Podcast audiogram: a cover tile whose lime ring pulses with the voice, a dark waveform card whose bars scroll with the narrator’s real loudness (the envelope of the takes, frame by frame) and a scrubber, karaoke captions that light each word as she says it, and a stage above that swaps one proof per line (crossed-out design tool → real create box, three concept products on their words, real file list with ticks, real Send step, the sentence typed)',
+  caption: 'No design skills? Fine. Describe a planner, a print or a colouring book in one sentence, check every file, and nothing goes live until you say yes. Start free at makeandlist.com',
+  short: 'One sentence is enough to start.',
+  vo: VO,
+  beats: ['0–2.3 s: “No design skills? Fine.” — a blank design tool is struck out', '2.3–3.3 s: the real create box replaces it', '3.3–5.6 s: “A planner, a print, a colouring book.” — three concept products land on their words', '5.6–8.4 s: “Describe it. Check every file.” — the real file list, ticked', '8.4–10.7 s: “Nothing goes live until you say yes.” — the real Send step: drafts first', '10.7–13 s: “One sentence is enough to start.” — the sentence typed; 13–15 s end card'],
+  cues: [[0.0, 'pop'], [1.95, 'marker'], [2.25, 'swish'], [3.22, 'whoosh'], [3.49, 'pop'], [4.25, 'pop'], [4.64, 'pop'], [5.64, 'whoosh'], [6.9, 'click'], [7.35, 'click'], [8.42, 'swish'], [8.95, 'pop'], [10.68, 'swish'], [11.0, 'type'], [12.75, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.7 - 450 + Math.sin(T * 0.5) * 120}px, ${H * 0.25 - 450 + Math.cos(T * 0.4) * 90}px)`;
+  blobB.style.transform = `translate(${W * 0.15 - 400 + Math.cos(T * 0.45) * 100}px, ${H * 0.75 - 400 + Math.sin(T * 0.6) * 80}px)`;
+  const a = envS(T);
+
+  // ---------- header ----------
+  const hp = K.p(T, 0, 0.5, E.outExpo);
+  hdr.style.opacity = hp; hdr.style.transform = `translateY(${(1 - hp) * -24}px)`;
+  pulse.style.opacity = hp * (0.25 + 0.75 * a);
+  pulse.style.transform = `scale(${1 + 0.1 * a})`;
+  cov.style.transform = `scale(${1 + 0.03 * a})`;
+
+  // ---------- karaoke captions ----------
+  let li = -1; WT.forEach((w, i) => { if (T >= w[0] - 0.15) li = i; });
+  if (T > 12.95) li = -1;
+  if (li !== shownLine) {
+    capt.innerHTML = '';
+    spans = li < 0 ? [] : lines[li].map((o, k) => K.el('span', { parent: capt, html: `<b>${o.w}</b>` + (k < lines[li].length - 1 ? ' ' : '') }));
+    shownLine = li;
+  }
+  if (li >= 0) {
+    const lin = K.p(T, WT[li][0] - 0.15, WT[li][0] + 0.2, E.outExpo);
+    const lout = K.p(T, WT[li][WT[li].length - 1] + 0.05, WT[li][WT[li].length - 1] + 0.28, E.inCubic) * (li < 4 ? 1 : 0);
+    capt.style.opacity = lin * (1 - lout);
+    capt.style.transform = `translateY(${(1 - lin) * 30 - lout * 20}px)`;
+    lines[li].forEach((o, k) => {
+      const b = spans[k].firstChild;
+      const said = T >= o.t - 0.03, now = said && T < o.e - 0.02;
+      b.style.color = said ? '#1F1F1F' : 'rgba(31,31,31,.28)';
+      b.style.background = now ? '#DFFF5A' : 'transparent';
+      const pp = K.p(T, o.t - 0.03, o.t + 0.16, E.outBack);
+      spans[k].style.transform = `translateY(${said ? (1 - pp) * 10 : 0}px) scale(${now ? 1 + 0.03 * pp : 1})`;
+    });
+  } else capt.style.opacity = 0;
+
+  // ---------- stage ----------
+  const st0 = vis(T, 0, 0.45, 0.2);
+  art.style.opacity = st0.p * (1 - st0.o); art.style.visibility = st0.on ? 'visible' : 'hidden';
+  art.style.transform = `translateY(${(1 - st0.p) * 40}px) scale(${1 - 0.04 * st0.o})`;
+  artQ.textContent = 'untitled-1.design · ' + (T < 1.0 ? '0' : Math.min(14, Math.floor((T - 1) * 9))) + ' layers';
+  const sk = K.p(T, 1.95, 2.2, E.outCubic);
+  Object.assign(strike.style, { left: '40px', top: SH / 2 - 7 + 'px', width: SW - 80 + 'px', transform: `rotate(-8deg) scaleX(${sk})`, opacity: sk > 0 && st0.on ? 1 : 0 });
+  const place = (c, i, T0) => {
+    const v = vis(T, i);
+    c.el.style.left = (SW - c.w) / 2 + 'px'; c.el.style.top = (SH - c.h) / 2 + 'px';
+    c.el.style.opacity = v.p * (1 - v.o); c.el.style.visibility = v.on ? 'visible' : 'hidden';
+    c.el.style.transform = `translateY(${(1 - v.p) * 60 - v.o * 40}px) rotate(${(i % 2 ? 1.2 : -1.2) + Math.sin(T * 0.8) * 0.3}deg) scale(${0.96 + 0.04 * v.p})`;
+    return v;
+  };
+  place(create1, 1);
+  const vf = place(files, 3);
+  ticks.forEach((tk, i) => {
+    const q = K.p(T, 6.9 + i * 0.45, 7.15 + i * 0.45, E.outBack);
+    Object.assign(tk.style, { left: 680 * files.s + 'px', top: ((i === 0 ? 2596 : 2882) - 2560) * files.s - 23 + 'px', transform: `scale(${q})` });
+  });
+  // send: header strip on top, the "stays not for sale until you confirm" card below
+  const vs = vis(T, 4);
+  const gap = 24, tot = send.h + gap + sendB.h;
+  [send, sendB].forEach((c, i) => {
+    c.el.style.left = (SW - c.w) / 2 + 'px'; c.el.style.top = (SH - tot) / 2 + (i ? send.h + gap : 0) + 'px';
+    const p = K.p(T, SCN[4][0] + i * 0.15, SCN[4][0] + 0.45 + i * 0.15, E.outExpo);
+    c.el.style.opacity = p * (1 - vs.o); c.el.style.visibility = vs.on ? 'visible' : 'hidden';
+    c.el.style.transform = `translateY(${(1 - p) * 60}px) rotate(${i ? 1 : -1}deg)`;
+  });
+  const rs = K.p(T, 8.95, 9.25, E.outBack);
+  Object.assign(ringS.style, { left: 10 * send.s + 'px', top: 14 * send.s + 'px', width: 760 * send.s + 'px', height: 60 * send.s + 'px', opacity: rs > 0 ? 1 : 0, transform: `scale(${1.08 - 0.08 * rs})` });
+  place(create2, 5);
+  const n = Math.round(TYPED.length * K.p(T, 10.95, 12.3, E.linear));
+  typ.innerHTML = TYPED.slice(0, n) + (n < TYPED.length || Math.floor(T * 3) % 2 ? '<i></i>' : '');
+  // products: fanned, each on its word
+  const vp = vis(T, 2);
+  cards.forEach((c, i) => {
+    const t0 = PRODS[i][2];
+    const p = K.p(T, t0 - 0.08, t0 + 0.42, E.outBack);
+    const cx = SW / 2 + (i - 1) * (tall ? 300 : 320) - pcw / 2, cy = (SH - pch) / 2 + (i === 1 ? -14 : 14);
+    c.style.left = cx + 'px'; c.style.top = cy + 'px';
+    c.style.opacity = Math.min(1, p * 2) * (1 - vp.o); c.style.visibility = T >= t0 - 0.08 && vp.on ? 'visible' : 'hidden';
+    c.style.transform = `translateY(${(1 - p) * 120 - vp.o * 40}px) rotate(${(i - 1) * 6 + (1 - p) * 10 + Math.sin(T * 0.9 + i) * 0.8}deg)`;
+    c.style.zIndex = 5 + (i === 1 ? 2 : 0);
+  });
+  // tags + chips
+  const tagY = SY - 40;
+  conceptTag.style.left = SX + 'px'; conceptTag.style.top = tagY + 'px';
+  conceptTag.style.opacity = K.win(T, 3.45, 5.6, 0.2) + K.win(T, 0.25, 2.2, 0.2);
+  conceptTag.textContent = T < 3 ? 'Cover: concept image · AI-generated' : 'Concept images · AI-generated';
+  realTag.style.left = SX + 'px'; realTag.style.top = tagY + 'px';
+  realTag.style.opacity = K.win(T, 2.3, 3.25, 0.15) + K.win(T, 5.7, 12.95, 0.2);
+  chips.forEach((ch, i) => {
+    const [t0, t1] = i === 0 ? [9.3, 10.65] : [2.45, 3.25];
+    const p = K.p(T, t0, t0 + 0.4, E.outBack), o = K.p(T, t1 - 0.2, t1, E.inCubic);
+    ch.style.opacity = Math.min(1, p * 2) * (1 - o); ch.style.visibility = T >= t0 && T < t1 ? 'visible' : 'hidden';
+    ch.style.left = SX + SW - 10 + 'px'; ch.style.top = SY + SH - 40 + 'px';
+    ch.style.transform = `translateX(-100%) scale(${0.75 + 0.25 * p}) rotate(-2deg)`; ch.style.transformOrigin = '100% 50%';
+  });
+
+  // ---------- waveform ----------
+  const wp = K.p(T, 0.1, 0.6, E.outExpo);
+  wave.style.opacity = wp; wave.style.transform = `translateY(${(1 - wp) * 60}px)`;
+  const bh = WH - 66;
+  bars.forEach((b, i) => {
+    // newest sample on the right; older ones scroll left, two frames per bar
+    const v = env(f - (NB - 1 - i) * 2) * 0.9 + 0.1 * (0.5 + 0.5 * Math.sin(T * 3 + i * 0.7)) * 0.4;
+    b.style.height = Math.max(8, v * bh) + 'px';
+    b.style.opacity = 0.45 + 0.55 * (i / NB);
+  });
+  const prog = K.clamp(T / 13);
+  scB.style.width = prog * 100 + '%'; scU.style.left = prog * 100 + '%';
+
+  end(T);
+});
+</script></body></html>

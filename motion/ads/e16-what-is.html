@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E16 · What Is MakeAndList?</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+.bgA { position: absolute; border-radius: 50%; pointer-events: none; }
+.rule { position: absolute; z-index: 5; height: 2px; background: #1F1F1F; transform-origin: 0 50%; }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 132px/0.95 'Playfair Display'; letter-spacing: -0.035em; color: #1F1F1F; }
+.hook em { font-style: italic; }
+.hook .q { display: inline-block; color: #1F1F1F; background: #DFFF5A; border-radius: 0.2em; padding: 0 .12em; margin-left: .04em; transform-origin: 50% 90%; }
+.hsub { position: absolute; z-index: 40; text-align: center; font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #6B645A; }
+.head { position: absolute; z-index: 30; white-space: nowrap; }
+.head .hw { font: 800 92px/1 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.head .hw i { font-style: normal; color: #B9B1A3; padding: 0 .04em; }
+.head .pr { margin-top: 14px; font: 500 26px 'IBM Plex Mono', monospace; color: #6B645A; }
+.head .pr em { font: italic 600 30px 'Playfair Display'; color: #1F1F1F; margin-left: 14px; }
+.sense { position: absolute; z-index: 30; font: 700 56px/1.08 'Playfair Display'; letter-spacing: -0.015em; color: #1F1F1F; }
+.sense .n { display: inline-grid; place-items: center; width: 62px; height: 62px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; font: 800 30px 'IBM Plex Mono', monospace; vertical-align: 8px; margin-right: 20px; }
+.w { display: inline-block; white-space: pre; }
+.hl { background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 94%, transparent 94%) no-repeat 0 0 / 0% 100%; }
+.pc { position: absolute; z-index: 20; overflow: hidden; border-radius: 26px; background: #FFFDF8; box-shadow: 0 46px 80px -40px rgba(31,31,31,.6), 0 0 0 7px #FFFDF8, 0 0 0 8px #E2DBCE; }
+.pc img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pl { position: absolute; z-index: 22; left: 50%; bottom: -66px; transform: translateX(-50%); white-space: nowrap; font: 700 26px 'Archivo'; color: #1F1F1F; background: #FFFDF8; padding: 9px 18px; border-radius: 99px; box-shadow: 0 10px 24px -14px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; }
+.oc { position: absolute; z-index: 24; overflow: hidden; border-radius: 22px; background: #FFFDF8; box-shadow: 0 40px 70px -36px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.oc .im { position: absolute; left: 0; top: 52px; right: 0; bottom: 0; overflow: hidden; }
+.oc .im img { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: block; }
+.oc .lb { position: absolute; left: 0; right: 0; top: 0; height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 18px; background: #1F1F1F; color: #FAF7EE; font: 700 24px 'Archivo'; }
+.oc .lb b { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #DFFF5A; color: #1F1F1F; font: 800 17px 'Archivo'; }
+.typ { position: absolute; font: 500 15px/1.35 'Archivo'; color: #1F1F1F; background: #FFFDF8; border-radius: 6px; padding: 6px 8px; }
+.typ i { display: inline-block; width: 2px; height: 16px; background: #1F1F1F; vertical-align: -3px; margin-left: 1px; }
+.stampD { position: absolute; z-index: 36; padding: 12px 30px; border: 7px solid #B8442A; border-radius: 14px; color: #B8442A; font: 800 64px/1 'Archivo'; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; background: rgba(250,247,238,.6); }
+.stampD small { display: block; margin-top: 6px; font: 600 19px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: none; }
+.yes { position: absolute; z-index: 36; white-space: nowrap; display: flex; align-items: center; gap: 14px; padding: 22px 36px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 36px 'Archivo'; box-shadow: 0 24px 40px -20px rgba(31,31,31,.7), 0 0 0 3px #1F1F1F; }
+.stores { position: absolute; z-index: 34; display: flex; gap: 14px; }
+.st { width: 132px; height: 92px; border-radius: 20px; background: #FFFDF8; display: grid; place-items: center; box-shadow: 0 16px 30px -18px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; position: relative; }
+.st img { max-width: 92px; max-height: 40px; }
+.st i { position: absolute; right: -8px; top: -8px; width: 30px; height: 30px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; font: 800 17px/30px 'Archivo'; text-align: center; font-style: normal; }
+.stl { position: absolute; z-index: 34; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .06em; color: #45403A; white-space: nowrap; }
+.chipP { position: absolute; z-index: 34; padding: 14px 22px; border-radius: 18px; background: #1F1F1F; color: #FAF7EE; font: 600 25px/1.25 'Archivo'; }
+.chipP b { color: #DFFF5A; }
+.cover { position: absolute; inset: 0; z-index: 28; background: #FAF7EE; }
+.list { position: absolute; z-index: 30; }
+.list .li { display: flex; align-items: center; gap: 18px; font: 700 40px/1.1 'Playfair Display'; color: #1F1F1F; margin-bottom: 18px; white-space: nowrap; }
+.list .li span { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; font: 800 21px 'IBM Plex Mono', monospace; flex: none; }
+.usage { position: absolute; z-index: 30; font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #6B645A; }
+.trio { position: absolute; z-index: 30; font: 800 112px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.trio div { white-space: nowrap; }
+.trio em { font-style: italic; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E16 — "What is MakeAndList?" told as a dictionary entry that writes itself while Marian reads it. The question
+// becomes a headword (Make·And·List, noun); three numbered senses arrive one per line of voice, each proved below it:
+// 1 a studio for small sellers (concept products), 2 from one sentence it makes the files, images and listing (the real
+// phone: a typed sentence, then the finished product; the three outputs pop out as she names them), 3 nothing goes live
+// without your yes (a Draft stamp, then the yes, then drafts in your own stores; printing by your own partner). The
+// entry closes with its usage line: "Describe it. Review it. Sell it." — each phrase landing with her voice.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian): speech windows measured from the takes (vo.mjs), file start = speech start − lead.
+//   L1 0.41–1.56 · L2 1.95–3.14 · L3 3.93–7.49 ("From one sentence," 3.93 · "it makes the files," 5.19 · "images and listing." 6.49)
+//   L4 7.95–9.67 · L5 10.20–12.22 ("Describe it," 10.20 · "review it," 11.08 · "sell it." 11.88)
+const S1 = 1.8, S2 = 3.72, S3 = 7.62, RC = 9.98;
+const T_TYPE = [3.9, 5.0], T_SWIPE = 5.05, T_OUT = [5.75, 6.62, 7.2], T_STAMP = 7.78, T_YES = 9.78, T_STORES = 9.92;
+const TRIO = [10.2, 11.08, 11.88];
+
+const L = tall
+  ? { hookY: 600, hookFs: 128, headX: 65, headY: 290, hwFs: 92, ruleY: 452, senseY: 486, senseFs: 54, senseW: 950,
+      cardY: 760, cardW: 290, cardH: 400, phX: 65, phY: 700, phW: 430, ocX: 535, ocW: 480, ocY: [700, 930, 1150], ocH: [200, 190, 160],
+      stampX: 545, stampY: 760, yesX: 560, yesY: 930, storesX: 545, storesY: 1060, chipY: 1190, chipW: 470,
+      listY: 500, listFs: 40, usageY: 780, trioY: 834, trioFs: 128, tagY: 1196 }
+  : { hookY: 380, hookFs: 116, headX: 60, headY: 54, hwFs: 80, ruleY: 196, senseY: 222, senseFs: 48, senseW: 960,
+      cardY: 420, cardW: 280, cardH: 380, phX: 70, phY: 380, phW: 410, ocX: 520, ocW: 500, ocY: [400, 640, 870], ocH: [210, 200, 170],
+      stampX: 540, stampY: 430, yesX: 560, yesY: 610, storesX: 540, storesY: 750, chipY: 890, chipW: 480,
+      listY: 238, listFs: 38, usageY: 482, trioY: 530, trioFs: 104, tagY: 1270 };
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'bgA', style: { background: 'radial-gradient(circle, rgba(223,255,90,.26), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'bgA', style: { background: 'radial-gradient(circle, rgba(126,154,126,.16), rgba(126,154,126,0) 62%)' } });
+
+// ---------- hook ----------
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'hook', style: { fontSize: L.hookFs + 'px' } });
+hook.innerHTML = ['What', 'is', '<br>', 'MakeAndList<span class="q">?</span>']
+  .map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w} </span>`)).join('');
+const hookW = [...hook.querySelectorAll('.w')];
+const qm = hook.querySelector('.q');
+const hsub = K.box(65, L.hookY + 2 * L.hookFs * 0.95 + 50, W - 130, null, { cls: 'hsub', html: 'A definition · read aloud' });
+
+// ---------- the headword ----------
+const head = K.box(L.headX, L.headY, null, null, { cls: 'head', style: { width: 'auto', height: 'auto' },
+  html: `<div class="hw" style="font-size:${L.hwFs}px">Make<i>·</i>And<i>·</i>List</div><div class="pr">/meɪk ənd lɪst/<em>noun</em></div>` });
+const rule = K.box(L.headX, L.ruleY, W - 2 * L.headX, 2, { cls: 'rule' });
+
+// ---------- the three senses ----------
+function sense(n, parts) {
+  const el = K.box(L.headX, L.senseY, L.senseW, null, { cls: 'sense', style: { fontSize: L.senseFs + 'px' } });
+  el.innerHTML = `<span class="n">${n}</span>` + parts.map(([t, hl]) => t.split(' ').map((w) => `<span class="w${hl ? ' hl' : ''}">${w} </span>`).join('')).join('');
+  return { el, ws: [...el.querySelectorAll('.w')], hls: [...el.querySelectorAll('.hl')], n: el.querySelector('.n') };
+}
+const SENSES = [
+  sense(1, [['a studio for', 0], ['small sellers.', 1]]),
+  sense(2, tall ? [['it turns one sentence into', 0], ['files,', 1], ['images', 1], ['and a', 0], ['listing.', 1]] : [['turns one sentence into', 0], ['files,', 1], ['images', 1], ['and a', 0], ['listing.', 1]]),
+  sense(3, [['nothing goes live without', 0], ['your yes.', 1]]),
+];
+// highlight timing: [span index in hls, at]
+const HL = [[[0, 2.55], [1, 2.75]], [[0, T_OUT[0] - 0.15], [1, T_OUT[1] - 0.15], [2, T_OUT[2] - 0.15]], [[0, 9.1], [1, 9.3]]];
+
+// ---------- sense 1: who it's for (concept images) ----------
+const WHO = [
+  { id: 'r04/g05-kids-activity-book', lab: 'Printables', pos: '50% 50%' },
+  { id: 'r04/g01-botanical-print', lab: 'Art prints', pos: '50% 30%' },
+  { id: 'r04/g10-greeting-cards', lab: 'Cards & gifts', pos: '50% 50%' },
+];
+const whoCards = WHO.map((p) => {
+  const c = K.box(0, 0, L.cardW, L.cardH, { cls: 'pc', html: `<img src="${K.pub(p.id + '.webp')}" style="object-position:${p.pos}">` });
+  const lb = K.el('div', { cls: 'pl', parent: c, html: p.lab });
+  c.style.overflow = 'visible'; c.querySelector('img').style.borderRadius = '26px';
+  return c;
+});
+const conceptTag = K.demoTag('Concept image · AI-generated', 0, 0);
+
+// ---------- sense 2: the real phone + three outputs ----------
+const deck = K.phoneDeck(L.phX, L.phY, L.phW, ['22-phone-create', '24-phone-product', '72-phone-listing-send'].map((n) => K.screen(n)));
+deck.root.style.zIndex = 21;
+const k780 = deck.sw / 780;
+const layer0 = deck.root.querySelectorAll('.screen > div')[0];
+const typ = K.el('div', { parent: layer0, cls: 'typ', style: { left: 70 * k780 + 'px', top: 594 * k780 + 'px', width: 636 * k780 + 'px', height: 172 * k780 + 'px', fontSize: Math.round(26 * k780) + 'px' } });
+const TYPED = 'A botanical wedding planner, 36 printable pages, for couples who like calm.';
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+const OUT = [
+  { lb: 'Files', src: '24-phone-product', sx: 0, sy: 2545, sw: 780 },
+  { lb: 'Images', src: '24-phone-product', sx: 0, sy: 1330, sw: 780 },
+  { lb: 'Listing', src: '72-phone-listing-send', sx: 0, sy: 500, sw: 780 },
+];
+const outs = OUT.map((o, i) => {
+  const c = K.box(L.ocX, L.ocY[i], L.ocW, L.ocH[i], { cls: 'oc', html: `<div class="lb"><b>✓</b>${o.lb}</div><div class="im"><img src="${K.screen(o.src)}"></div>` });
+  const k = L.ocW / o.sw;
+  c.querySelector('.im img').style.transform = `translate(${-o.sx * k}px, ${-o.sy * k}px) scale(${k})`;
+  c.querySelector('.im img').style.width = '780px';
+  return c;
+});
+
+// ---------- sense 3: draft → yes → your own stores ----------
+const stamp = K.box(L.stampX, L.stampY, null, null, { cls: 'stampD', html: 'Draft<small>not live · waiting for you</small>', style: { width: 'auto', height: 'auto' } });
+const yes = K.box(L.yesX, L.yesY, null, null, { cls: 'yes', html: '<svg width="34" height="34" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#1F1F1F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Yes, send it', style: { width: 'auto', height: 'auto' } });
+const STORES = ['ikas', 'woocommerce', 'wix'];
+const stores = K.box(L.storesX, L.storesY, null, null, { cls: 'stores', style: { width: 'auto', height: 'auto' },
+  html: STORES.map((s) => `<div class="st"><img src="${K.pub('platforms/' + s + '.svg')}"><i>✓</i></div>`).join('') });
+const stEls = [...stores.querySelectorAll('.st')];
+const stl = K.box(L.storesX, L.storesY + 108, null, null, { cls: 'stl', html: 'Drafts in your own stores', style: { width: 'auto', height: 'auto' } });
+const chipP = K.box(L.storesX, L.chipY, L.chipW, null, { cls: 'chipP', html: 'Printed products? <b>Your own print partner</b> prints each order.' });
+const cursor = K.cursor();
+const ripple = cursor;
+
+// ---------- recap: the whole entry + its usage line ----------
+const cover = K.box(0, 0, W, H, { cls: 'cover' });
+const list = K.box(L.headX, L.listY, W - 130, null, { cls: 'list', html: ['a studio for small sellers', 'one sentence → files, images, listing', 'nothing goes live without your yes']
+  .map((t, i) => `<div class="li" style="font-size:${L.listFs}px"><span>${i + 1}</span>${t}</div>`).join('') });
+const lis = [...list.querySelectorAll('.li')];
+const usage = K.box(L.headX, L.usageY, W - 130, null, { cls: 'usage', html: 'Usage —' });
+const trio = K.box(L.headX, L.trioY, W - 130, null, { cls: 'trio', style: { fontSize: L.trioFs + 'px' }, html: '<div>Describe it.</div><div>Review it.</div><div><em class="hl">Sell it.</em></div>' });
+const trioL = [...trio.querySelectorAll('div')];
+const trioHl = trio.querySelector('.hl');
+
+// recap strip: what people make with it (concept images), drifting under the entry
+const STRIP = ['r04/g06-wedding-planner', 'r04/g01-botanical-print', 'r04/g24-colouring-book', 'r04/g10-greeting-cards', 'r04/g02-sunset-tee', 'r04/g14-calendar', 'r04/g05-kids-activity-book'];
+const stripH = tall ? 330 : 250, stripW = stripH * 0.72, stripY = tall ? 1300 : 1000;
+const strip = K.box(0, stripY, W, stripH, { style: { zIndex: 30, overflow: 'visible' } });
+const stripEls = STRIP.map((id, i) => K.el('div', { parent: strip, cls: 'pc', html: `<img src="${K.pub(id + '.webp')}">`, style: { position: 'absolute', top: '0px', width: stripW + 'px', height: stripH + 'px', zIndex: 30 } }));
+const stripTag = K.demoTag('Concept images · AI-generated', 0, 0);
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'A studio for<br>small sellers.' });
+
+const posAt = (t) => K.p(t, T_SWIPE - 0.2, T_SWIPE + 0.3, E.inOutCubic) + K.p(t, S3 - 0.2, S3 + 0.3, E.inOutCubic);
+const cueT = (x) => +x.toFixed(2);
+
+K.run({
+  id: 'E16', title: 'What Is MakeAndList?', dur: DUR, bpm: BPM, music: 'happy-dance', mood: 'bright', key: 'C', intro: 0.0, cover: 6.9,
+  technique: 'A dictionary entry that writes itself while the narrator reads it: the question becomes the headword Make·And·List (noun), three numbered senses arrive one per spoken line with their words highlighted as she says them, each proved underneath (concept products, the real phone typing a sentence and the finished product, three outputs popping out as named, a Draft stamp and the yes), closing on the entry’s usage line',
+  caption: 'What is MakeAndList? A studio for small sellers: describe a product in one sentence and it makes the files, the listing images and the listing — you review everything, and nothing goes live without your yes. Printed products are printed per order by your own print partner. Start free at makeandlist.com',
+  short: 'Describe it. Review it. Sell it.',
+  question: 'What is it?', gain: 'Everything: from a sentence to your own stores, on your yes',
+  vo: [[0.3, 'What is MakeAndList?', 1.02], [1.42, 'A studio for small sellers.'], [2.75, 'From one sentence, it makes the files, images and listing.'], [7.78, 'You say yes before anything goes live.'], [10.0, 'Describe it, review it, sell it.']],
+  beats: ['0–1.8 s: “What is MakeAndList?” — the question', '1.8–3.7 s: the question becomes a headword; sense 1: a studio for small sellers (printables, art prints, cards)', '3.7–7.6 s: sense 2: one sentence typed on the real phone → files, images, listing pop out as she names them', '7.6–10 s: sense 3: a Draft stamp; nothing goes live without your yes → drafts in your own stores; printing by your own partner', '10–13 s: the whole entry and its usage line: Describe it. Review it. Sell it.', '13–15 s: end card'],
+  cues: [[0.0, 'pop'], [0.05, 'type'], [1.62, 'swish'], [1.78, 'marker'], [3.22, 'swish'], [3.45, 'paper'], [3.62, 'pop'], [3.82, 'type'],
+    [T_SWIPE - 0.1, 'swish'], [cueT(T_OUT[0]), 'pop'], [cueT(T_OUT[1]), 'pop'], [cueT(T_OUT[2]), 'pop'], [7.52, 'whoosh'], [T_STAMP, 'stamp'],
+    [T_YES, 'click'], [T_STORES, 'chime'], [RC - 0.12, 'whoosh'], [10.06, 'pop'], [cueT(TRIO[1] - 0.2), 'pop'], [cueT(TRIO[2] - 0.2), 'pop'], [12.5, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.6 - 550 + Math.sin(T * 0.5) * 160}px, ${H * 0.3 - 550 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.1 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.82 - 450 + Math.sin(T * 0.6) * 100}px)`;
+
+  // ---------- hook ----------
+  const hOut = K.p(T, S1 - 0.2, S1 + 0.15, E.inCubic);
+  hookW.forEach((w, i) => {
+    const p = K.p(T, 0.02 + i * 0.09, 0.5 + i * 0.09, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - hOut);
+    w.style.transform = `translateY(${(1 - p) * 70 - hOut * 40}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 10}px)` : 'none';
+  });
+  const qp = K.p(T, 0.55, 1.0, E.outBack);
+  qm.style.transform = `rotate(${(1 - qp) * -30 + Math.sin(T * 3) * 4}deg) scale(${0.6 + 0.4 * qp})`;
+  hook.style.transform = `scale(${1 + 0.03 * T})`;
+  hook.style.visibility = T < S1 + 0.2 ? 'visible' : 'hidden';
+  hsub.style.opacity = K.p(T, 0.6, 1.0, E.linear) * (1 - hOut);
+
+  // ---------- headword + rule (stay to the end) ----------
+  const hp = K.p(T, S1 - 0.05, S1 + 0.55, E.outExpo);
+  head.style.opacity = hp;
+  head.style.clipPath = `inset(-20px ${(1 - hp) * 100}% -40px 0)`;
+  head.style.transform = `translateY(${(1 - hp) * 30}px)`;
+  rule.style.transform = `scaleX(${K.p(T, S1 + 0.1, S1 + 0.8, E.outExpo)})`;
+
+  // ---------- senses ----------
+  const SA = [S1 + 0.25, S2, S3], SB = [S2, S3, RC];
+  SENSES.forEach((s, i) => {
+    const a = SA[i], b = SB[i];
+    const o = K.p(T, b - 0.22, b + 0.05, E.inCubic);
+    s.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.045, a + 0.45 + j * 0.045, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.5) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 40 - o * 24}px)`;
+    });
+    const np = K.p(T, a - 0.05, a + 0.35, E.outBack);
+    s.n.style.transform = `scale(${np * (1 - o)}) rotate(${(1 - np) * -90}deg)`;
+    HL[i].forEach(([k, t]) => { s.hls[k].style.backgroundSize = `${K.p(T, t, t + 0.35, E.outCubic) * 100}% 100%`; });
+    s.el.style.visibility = T >= a - 0.1 && T < b + 0.1 ? 'visible' : 'hidden';
+  });
+
+  // ---------- sense 1: three concept product cards fan in ----------
+  const w1 = K.p(T, S2 - 0.3, S2 + 0.05, E.inCubic);
+  whoCards.forEach((c, i) => {
+    const at = 2.0 + i * 0.16;
+    const p = K.p(T, at, at + 0.6, E.outBack);
+    const cx = W / 2 + (i - 1) * (L.cardW * 1.02);
+    const rot = (i - 1) * 7 + (1 - p) * (i - 1) * 14 + Math.sin(T * 1.1 + i) * 0.8;
+    c.style.left = cx - L.cardW / 2 + 'px'; c.style.top = L.cardY + Math.abs(i - 1) * 34 + 'px';
+    c.style.opacity = Math.min(1, p * 2) * (1 - w1);
+    c.style.transform = `translateY(${(1 - p) * 260 - w1 * 120}px) rotate(${rot}deg) scale(${0.85 + 0.15 * p})`;
+    c.style.visibility = T >= at && T < S2 + 0.1 ? 'visible' : 'hidden';
+  });
+
+  // ---------- phone ----------
+  const phIn = K.p(T, S2 - 0.1, S2 + 0.5, E.outExpo), phOut = K.p(T, RC - 0.25, RC + 0.05, E.inCubic);
+  const pos = posAt(T);
+  deck.draw(pos, [0, 0, 0.47], pos - posAt(T - 1 / 30));
+  deck.root.style.opacity = phIn * (1 - phOut);
+  deck.root.style.transform = `translateY(${(1 - phIn) * 360 + phOut * 80}px) rotate(${-2 + Math.sin(T * 0.7) * 0.5}deg)`;
+  deck.root.style.visibility = T >= S2 - 0.1 && T < RC + 0.05 ? 'visible' : 'hidden';
+  const n = Math.round(TYPED.length * K.p(T, T_TYPE[0], T_TYPE[1], E.linear));
+  typ.innerHTML = TYPED.slice(0, n) + (Math.floor(T * 4) % 2 === 0 || n < TYPED.length ? '<i></i>' : '');
+  realTag.style.left = L.phX + 10 + 'px'; realTag.style.top = (tall ? L.phY - 50 : L.tagY) + 'px';
+  realTag.style.opacity = phIn * (1 - phOut);
+  realTag.style.visibility = deck.root.style.visibility;
+  conceptTag.style.left = (tall ? 65 : 60) + 'px'; conceptTag.style.top = (tall ? L.cardY - 40 : L.tagY) + 'px';
+  conceptTag.style.opacity = K.p(T, 2.3, 2.6, E.linear) * (1 - w1);
+
+  // ---------- outputs pop out of the phone, one per spoken word ----------
+  const oOut = K.p(T, S3 - 0.3, S3, E.inCubic);
+  outs.forEach((c, i) => {
+    const p = K.p(T, T_OUT[i], T_OUT[i] + 0.55, E.outBack);
+    const fromX = L.phX + L.phW / 2 - L.ocX - L.ocW / 2, fromY = L.phY + 300 - L.ocY[i];
+    c.style.opacity = Math.min(1, p * 2.5) * (1 - oOut);
+    c.style.transform = `translate(${(1 - p) * fromX + oOut * 80}px, ${(1 - p) * fromY + Math.sin(T * 1.2 + i) * 4}px) scale(${0.4 + 0.6 * p}) rotate(${(1 - p) * -8 + (i - 1) * 1.2}deg)`;
+    c.style.visibility = T >= T_OUT[i] && T < S3 ? 'visible' : 'hidden';
+  });
+
+  // ---------- sense 3 ----------
+  const s3o = K.p(T, RC - 0.25, RC, E.inCubic);
+  const sp = K.p(T, T_STAMP, T_STAMP + 0.28, E.outCubic);
+  stamp.style.opacity = Math.min(1, sp * 3) * (1 - s3o) * (1 - 0.55 * K.p(T, T_YES, T_YES + 0.3, E.linear));
+  stamp.style.transform = `rotate(-7deg) scale(${1.8 - 0.8 * sp})`;
+  stamp.style.visibility = T >= T_STAMP && T < RC ? 'visible' : 'hidden';
+  const yp = K.p(T, 8.3, 8.8, E.outBack);
+  const press = T >= T_YES && T < T_YES + 0.16;
+  yes.style.opacity = Math.min(1, yp * 2) * (1 - s3o);
+  yes.style.transform = `translateY(${(1 - yp) * 40}px) scale(${(0.8 + 0.2 * yp) * (press ? 0.93 : 1)})`;
+  yes.style.visibility = T >= 8.3 && T < RC ? 'visible' : 'hidden';
+  const yesCx = L.yesX + 150, yesCy = L.yesY + 42;
+  const cuP = K.p(T, 9.2, T_YES, E.inOutCubic);
+  cursor.at(yesCx + 160 * (1 - cuP), yesCy + 180 * (1 - cuP), press);
+  cursor.hide(T < RC ? K.p(T, 9.15, 9.3, E.linear) * (1 - K.p(T, T_YES + 0.3, T_YES + 0.45, E.linear)) : 0);
+  cursor.ripple(yesCx, yesCy, T, T_YES);
+  stEls.forEach((s, i) => {
+    const p = K.p(T, T_STORES + i * 0.1, T_STORES + 0.45 + i * 0.1, E.outBack);
+    s.style.opacity = Math.min(1, p * 2) * (1 - s3o);
+    s.style.transform = `translateY(${(1 - p) * 40}px) scale(${0.7 + 0.3 * p})`;
+    s.querySelector('i').style.transform = `scale(${K.p(T, T_STORES + 0.3 + i * 0.1, T_STORES + 0.6 + i * 0.1, E.outBack)})`;
+  });
+  stores.style.visibility = T >= T_STORES && T < RC ? 'visible' : 'hidden';
+  stl.style.opacity = K.p(T, T_STORES + 0.3, T_STORES + 0.6, E.linear) * (1 - s3o);
+  const cp = K.p(T, 8.55, 9.0, E.outExpo);
+  chipP.style.opacity = cp * (1 - s3o);
+  chipP.style.transform = `translateY(${(1 - cp) * 30}px)`;
+  // the stores row slides in under the yes; the print chip waits below it
+  chipP.style.top = L.chipY + 'px';
+
+  // ---------- recap ----------
+  const rIn = K.p(T, RC - 0.1, RC + 0.3, E.outCubic);
+  cover.style.opacity = rIn;
+  cover.style.visibility = T >= RC - 0.1 ? 'visible' : 'hidden';
+  head.style.zIndex = rule.style.zIndex = 31;
+  lis.forEach((li, i) => {
+    const p = K.p(T, RC + 0.05 + i * 0.08, RC + 0.45 + i * 0.08, E.outExpo);
+    li.style.opacity = p; li.style.transform = `translateX(${(1 - p) * 60}px)`;
+    li.querySelector('span').style.transform = `scale(${K.p(T, RC + 0.15 + i * 0.08, RC + 0.5 + i * 0.08, E.outBack)})`;
+  });
+  list.style.visibility = T >= RC ? 'visible' : 'hidden';
+  usage.style.opacity = K.p(T, 10.1, 10.4, E.linear);
+  usage.style.visibility = list.style.visibility;
+  trioL.forEach((l, i) => {
+    const p = K.p(T, TRIO[i] - 0.12, TRIO[i] + 0.38, E.outExpo);
+    l.style.opacity = Math.min(1, p * 1.5);
+    l.style.transform = `translateY(${(1 - p) * 60}px)`;
+    l.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+  trio.style.visibility = list.style.visibility;
+  stripEls.forEach((el, i) => {
+    const p = K.p(T, RC + 0.2 + i * 0.07, RC + 0.8 + i * 0.07, E.outExpo);
+    el.style.left = (i * (stripW + 26) - 40 - (T - RC) * 34) + 'px';
+    el.style.opacity = p;
+    el.style.transform = `translateY(${(1 - p) * 120 + Math.sin(T * 1.1 + i) * 5}px) rotate(${(i % 2 ? 2 : -2)}deg)`;
+  });
+  strip.style.visibility = T >= RC ? 'visible' : 'hidden';
+  stripTag.style.left = (tall ? 65 : 60) + 'px'; stripTag.style.top = stripY - 46 + 'px';
+  stripTag.style.opacity = K.p(T, RC + 0.5, RC + 0.8, E.linear);
+  trioHl.style.backgroundSize = `${K.p(T, 12.35, 12.75, E.outCubic) * 100}% 100%`;
+
+  end(T);
+});
+</script></body></html>

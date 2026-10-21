@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E10 · The Manual</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #DCD6CA; }
+.sheet { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.pg { position: absolute; top: 0; background: #FBFAF6; overflow: hidden; }
+.pg::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .28  0 0 0 0 .25  0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.fold { position: absolute; top: 0; width: 60px; margin-left: -30px; pointer-events: none; z-index: 5;
+  background: linear-gradient(90deg, rgba(0,0,0,0) 0, rgba(60,50,40,.10) 45%, rgba(255,255,255,.6) 52%, rgba(0,0,0,0) 100%); }
+.hd { position: absolute; display: flex; justify-content: space-between; align-items: center; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #1F1F1F; border-bottom: 4px solid #1F1F1F; padding-bottom: 12px; }
+.big { position: absolute; font: 900 150px/0.9 'Archivo'; letter-spacing: -0.045em; color: #1F1F1F; font-stretch: 90%; }
+.sub { position: absolute; font: 700 44px/1.1 'Archivo'; color: #1F1F1F; }
+.ttl { position: absolute; font: 900 92px/0.95 'Archivo'; letter-spacing: -0.04em; color: #1F1F1F; font-stretch: 90%; }
+.cell { position: absolute; border: 4px solid #1F1F1F; border-radius: 18px; background: #FFFFFF; }
+.cell .lt { position: absolute; left: 18px; top: 16px; width: 62px; height: 62px; border-radius: 50%; border: 4px solid #1F1F1F; display: grid; place-items: center; font: 900 34px 'Archivo'; background: #FFF; z-index: 2; }
+.cell .q { position: absolute; right: 22px; top: 18px; font: 800 40px 'Archivo'; color: #1F1F1F; }
+.cell .nm { position: absolute; left: 0; right: 0; bottom: 20px; text-align: center; font: 700 34px 'Archivo'; color: #1F1F1F; }
+.cell svg { position: absolute; left: 50%; transform: translateX(-50%); }
+.cell .crop { position: absolute; overflow: hidden; border-radius: 14px; border: 3px solid #1F1F1F; background: #FAF7EE; z-index: 1; }
+.cell .crop img { position: absolute; left: 0; width: 100%; }
+.cell .crop .typ { position: absolute; font-family: 'Archivo'; font-weight: 500; color: #1F1F1F; background: #FFFDF8; overflow: hidden; }
+.step { position: absolute; left: 18px; top: 12px; font: 900 76px/1 'Archivo'; color: #1F1F1F; letter-spacing: -0.04em; z-index: 2; }
+.ring { position: absolute; border-radius: 50%; background: #DFFF5A; z-index: 1; }
+.lab { position: absolute; left: 0; right: 0; text-align: center; font: 800 36px/1.05 'Archivo'; color: #1F1F1F; }
+.lab small { display: block; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .06em; color: #6B645A; margin-top: 6px; }
+.pill { position: absolute; font: 700 26px 'Archivo'; padding: 10px 22px; border-radius: 99px; border: 4px solid #1F1F1F; background: #DFFF5A; white-space: nowrap; }
+.notes { position: absolute; font: 500 21px/1.4 'IBM Plex Mono', monospace; color: #45403A; }
+.demo { z-index: 8; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 85; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E10 — The Manual. A fold-out assembly manual for one listing: the camera pans page to page across one long sheet,
+// holding on each (plateau keyframes), while Marian reads it straight. Cover (a flat-pack box, a puzzled builder) →
+// parts A–D (an idea, a sentence, your stores, your yes) → steps 1–4 (describe it on the real create screen, review
+// every file on the real product screen, say yes, in your stores) → “No tools required.” with the tools struck out.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 89.1, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const INK = '#1F1F1F';
+
+const VO = [
+  [0.3, 'Assembly instructions for one listing.'],
+  [3.45, 'You’ll need one idea and one sentence.', 1.05],
+  [6.9, 'Describe it, review every file, say yes.', 1.05],
+  [11.0, 'No tools required.'],
+  [13.05, 'MakeAndList. Start free.', 1.1],
+];
+const PAN = [3.1, 6.5, 10.55]; // page 0→1→2→3
+const PD = 0.6;
+
+// content box per page
+const C = tall ? { x: 65, y: 290, w: 950, h: 950 } : { x: 60, y: 60, w: 960, h: 1230 };
+const sheet = K.box(0, 0, W * 4, H, { cls: 'sheet' });
+const pages = [0, 1, 2, 3].map((i) => K.box(i * W, 0, W, H, { cls: 'pg', parent: sheet }));
+[1, 2, 3].forEach((i) => K.box(i * W, 0, 60, H, { cls: 'fold', parent: sheet }));
+const add = (pg, cls, html, st) => K.el('div', { parent: pages[pg], cls, html, style: { position: 'absolute', ...st } });
+pages.forEach((p, i) => add(i, 'hd', `<span>MakeAndList · Listing kit · ML-15</span><span>${i + 1}/4</span>`, { left: C.x + 'px', top: C.y + 'px', width: C.w + 'px' }));
+
+// the builder (our own little line figure)
+const builder = (mood) => `<g fill="#FFF" stroke="${INK}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="0" cy="-150" r="36"/><path d="M-34 -100 q34 -20 68 0 l10 110 h-88z"/>
+  <path d="M-24 10 l-6 110 M24 10 l6 110"/>
+  ${mood === 'puzzled' ? `<path d="M-34 -90 l-40 50 l30 20 M34 -90 q40 -10 30 -70"/><text x="54" y="-200" font-family="Archivo" font-weight="900" font-size="64" fill="${INK}" stroke="none">?</text>`
+  : `<path d="M-34 -90 l-36 60 M34 -90 l40 -64"/><path d="M74 -154 l14 -26 q6 -10 12 0 l-2 22 h14 q10 0 6 12 l-8 22 q-4 8 -14 8 h-22z" fill="#DFFF5A"/>`}
+  <circle cx="-12" cy="-154" r="3" fill="${INK}"/><circle cx="12" cy="-154" r="3" fill="${INK}"/>
+  ${mood === 'puzzled' ? '<path d="M-10 -136 q10 -6 20 0" fill="none"/>' : '<path d="M-14 -138 q14 12 28 0" fill="none"/>'}</g>`;
+
+// ---------- page 1: cover ----------
+add(0, 'big', 'Listing', { left: C.x + 'px', top: C.y + (tall ? 80 : 90) + 'px', fontSize: (tall ? 190 : 200) + 'px' });
+add(0, 'sub', 'Assembly instructions<br>for one listing.', { left: C.x + 4 + 'px', top: C.y + (tall ? 270 : 290) + 'px' });
+const coverArt = add(0, '', `<svg width="${C.w}" height="560" viewBox="0 0 950 560">
+  <g class="box" transform="translate(560 380)">
+   <path d="M-200 -80 L0 -170 L200 -80 L0 10 Z" fill="#FFF" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
+   <path d="M-200 -80 L0 10 L0 200 L-200 110 Z" fill="#F1EEE6" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
+   <path d="M200 -80 L0 10 L0 200 L200 110 Z" fill="#E4DFD3" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
+   <path d="M-100 -125 L100 -35" stroke="${INK}" stroke-width="5" stroke-dasharray="14 10"/>
+   <g transform="translate(-100 70) skewY(24)"><text x="0" y="0" text-anchor="middle" font-family="Archivo" font-weight="900" font-size="56" fill="${INK}">1×</text></g>
+   <g transform="translate(100 66) skewY(-24)"><rect x="-56" y="-46" width="112" height="70" rx="10" fill="#DFFF5A" stroke="${INK}" stroke-width="5"/><text x="0" y="2" text-anchor="middle" font-family="IBM Plex Mono" font-weight="600" font-size="22" fill="${INK}">LISTING</text></g></g>
+  <g class="bld" transform="translate(190 460)">${builder('puzzled')}</g></svg>`, { left: C.x + 'px', top: C.y + (tall ? 330 : 520) + 'px', width: C.w + 'px', height: '560px' });
+add(0, 'notes', 'Contents: 1 idea, 1 sentence, your stores, your yes.', { left: C.x + 'px', top: C.y + C.h - 40 + 'px' });
+
+// ---------- page 2: parts ----------
+add(1, 'ttl', 'Parts', { left: C.x + 'px', top: C.y + 50 + 'px' });
+const GW = (C.w - 30) / 2, GH = tall ? 360 : 470, GY = C.y + (tall ? 170 : 190);
+const PARTS = [
+  ['A', 'An idea', '×1', `<svg width="200" height="200" viewBox="-100 -100 200 200" style="top:${tall ? 80 : 120}px"><path d="M-44 10 a56 56 0 1 1 88 0 q-14 16 -14 34 h-60 q0 -18 -14 -34z" fill="#DFFF5A" stroke="${INK}" stroke-width="6"/><path d="M-26 58 h52 M-20 76 h40" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><path d="M-12 20 l12 -24 l12 24" fill="none" stroke="${INK}" stroke-width="5"/></svg>`],
+  ['B', 'A sentence', '×1', `<svg width="260" height="200" viewBox="-130 -100 260 200" style="top:${tall ? 80 : 120}px"><path d="M-110 -70 h220 q20 0 20 20 v90 q0 20 -20 20 h-130 l-40 34 v-34 h-50 q-20 0 -20 -20 v-90 q0 -20 20 -20z" fill="#FFF" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/><path d="M-80 -30 h160 M-80 0 h160 M-80 30 h90" stroke="${INK}" stroke-width="6" stroke-linecap="round"/></svg>`],
+  ['C', 'Your stores', '×any', ''],
+  ['D', 'Your yes', '×1', `<svg width="200" height="200" viewBox="-100 -100 200 200" style="top:${tall ? 80 : 120}px"><circle r="72" fill="#DFFF5A" stroke="${INK}" stroke-width="6"/><path d="M-32 2 l22 22 l44 -48" fill="none" stroke="${INK}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>`],
+];
+const parts = PARTS.map(([l, n, q, svg], i) => {
+  const c = add(1, 'cell', `<div class="lt">${l}</div><div class="q">${q}</div>${svg}<div class="nm">${n}</div>`,
+    { left: C.x + (i % 2) * (GW + 30) + 'px', top: GY + Math.floor(i / 2) * (GH + 30) + 'px', width: GW + 'px', height: GH + 'px' });
+  if (l === 'C') {
+    ['ikas', 'woocommerce', 'wix'].forEach((s, k) => K.el('div', { parent: c, html: `<img src="${K.pub('platforms/' + s + '.svg')}" style="max-width:110px;max-height:40px;${s === 'wix' ? 'filter:brightness(0)' : ''}">`,
+      style: { position: 'absolute', left: (GW - 300) / 2 + (k % 2) * 160 + (k === 2 ? 80 : 0) + 'px', top: (tall ? 96 : 140) + Math.floor(k / 2) * 92 + 'px', width: '140px', height: '76px', border: '4px solid ' + INK, borderRadius: '14px', display: 'grid', placeItems: 'center', background: '#FFF' } }));
+  }
+  return c;
+});
+add(1, 'notes', 'Check all parts before you begin.', { left: C.x + 'px', top: C.y + C.h - 40 + 'px' });
+
+// ---------- page 3: steps ----------
+const SH = tall ? 425 : 560, SY = C.y + 50;
+const STEPS = [['1', 'Describe it', 'one sentence'], ['2', 'Review every file', 'pages · images · copy'], ['3', 'Say yes', 'drafts until you do'], ['4', 'In your stores', 'your own shops']];
+const steps = STEPS.map(([n, t, s], i) => {
+  const c = add(2, 'cell', `<div class="ring"></div><div class="step">${n}</div><div class="lab" style="bottom:22px">${t}<small>${s}</small></div>`,
+    { left: C.x + (i % 2) * (GW + 30) + 'px', top: SY + Math.floor(i / 2) * (SH + 30) + 'px', width: GW + 'px', height: SH + 'px' });
+  return c;
+});
+// step 1: the real create screen crop
+const cw1 = GW - 40, sc1 = cw1 / 780, y1 = 450, ch1 = tall ? 210 : 320;
+const crop1 = K.el('div', { parent: steps[0], cls: 'crop', style: { left: '20px', top: '100px', width: cw1 + 'px', height: ch1 + 'px' } });
+K.el('img', { parent: crop1, src: K.screen('22-phone-create'), style: { top: -y1 * sc1 + 'px' } });
+const typ = K.el('div', { parent: crop1, cls: 'typ', style: { left: 70 * sc1 + 'px', top: (596 - y1) * sc1 + 'px', width: 636 * sc1 + 'px', height: 176 * sc1 + 'px', fontSize: 30 * sc1 + 'px', lineHeight: 1.3, padding: 4 * sc1 + 'px' } });
+// step 2: the real product screen (pages, listing images, video)
+const cw2 = GW - 40, sc2 = cw2 / 780, y2 = 1110, ch2 = tall ? 210 : 320;
+const crop2 = K.el('div', { parent: steps[1], cls: 'crop', style: { left: '20px', top: '100px', width: cw2 + 'px', height: ch2 + 'px' } });
+const img2 = K.el('img', { parent: crop2, src: K.screen('24-phone-product'), style: { top: -y2 * sc2 + 'px' } });
+const mag = K.el('div', { parent: steps[1], html: `<svg width="110" height="110" viewBox="0 0 110 110"><circle cx="44" cy="44" r="34" fill="rgba(223,255,90,.35)" stroke="${INK}" stroke-width="8"/><path d="M70 70 l30 30" stroke="${INK}" stroke-width="12" stroke-linecap="round"/></svg>`, style: { position: 'absolute', zIndex: 3, left: '0px', top: '0px' } });
+// step 3: a finger on the check
+K.el('div', { parent: steps[2], html: `<svg width="300" height="${tall ? 260 : 340}" viewBox="0 0 300 260"><circle class="ck" cx="150" cy="150" r="70" fill="#FFF" stroke="${INK}" stroke-width="6"/>
+  <path class="ckm" d="M118 152 l22 22 l44 -48" fill="none" stroke="${INK}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <g class="fing"><path d="M220 160 v-110 q0 -16 16 -16 q16 0 16 16 v70 q4 -12 16 -12 q14 0 14 16 v70 q0 40 -40 52 h-30 q-30 -10 -40 -40z" fill="#FFF" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/></g></svg>`,
+  style: { position: 'absolute', left: (GW - 300) / 2 + 'px', top: (tall ? 30 : 60) + 'px' } });
+// step 4: an arrow into a store front
+K.el('div', { parent: steps[3], html: `<svg width="360" height="${tall ? 260 : 340}" viewBox="0 0 360 260">
+  <path d="M190 60 h150 v150 h-150z" fill="#FFF" stroke="${INK}" stroke-width="6"/><path d="M180 60 l20 -36 h130 l20 36z" fill="#DFFF5A" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M240 210 v-70 h50 v70" fill="none" stroke="${INK}" stroke-width="6"/>
+  <g class="pkt"><rect x="-40" y="-50" width="80" height="100" rx="8" fill="#FFF" stroke="${INK}" stroke-width="6"/><path d="M-22 -20 h44 M-22 0 h44 M-22 20 h26" stroke="${INK}" stroke-width="5" stroke-linecap="round"/></g>
+  <path class="arr" d="M30 140 h120" stroke="${INK}" stroke-width="6" stroke-dasharray="14 10"/><path class="arrH" d="M140 124 l18 16 l-18 16" fill="none" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/></svg>`,
+  style: { position: 'absolute', left: (GW - 360) / 2 + 'px', top: (tall ? 30 : 60) + 'px' } });
+const tag2 = K.demoTag('Real app · demo workspace', 0, 0); steps[0].appendChild(tag2);
+Object.assign(tag2.style, { left: 'auto', right: '14px', top: '32px', fontSize: '17px' });
+// dashed flow arrows 1→2, 2→3 (down-left), 3→4
+const flow = add(2, '', `<svg width="${C.w}" height="${2 * SH + 30}" viewBox="0 0 ${C.w} ${2 * SH + 30}" style="position:absolute;left:0;top:0;overflow:visible">
+  <path class="f0" d="M${GW - 10} ${SH / 2} h50" stroke="${INK}" stroke-width="6" fill="none"/>
+  <path class="f1" d="M${GW + 30 + GW / 2} ${SH - 4} q0 30 -${GW + 30} 34" stroke="${INK}" stroke-width="6" fill="none" stroke-dasharray="12 9"/>
+  <path class="f2" d="M${GW - 10} ${SH * 1.5 + 30} h50" stroke="${INK}" stroke-width="6" fill="none"/></svg>`, { left: C.x + 'px', top: SY + 'px', zIndex: 4 });
+
+// ---------- page 4: no tools ----------
+add(3, 'ttl', 'No tools<br>required.', { left: C.x + 'px', top: C.y + (tall ? 70 : 90) + 'px', fontSize: (tall ? 132 : 140) + 'px' });
+const TOOLS = [
+  `<path d="M-14 -60 h28 v70 l-14 40 l-14 -40z" fill="#FFF" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/><rect x="-22" y="-96" width="44" height="40" rx="8" fill="#FFF" stroke="${INK}" stroke-width="6"/>`,
+  `<rect x="-60" y="-50" width="120" height="90" rx="10" fill="#FFF" stroke="${INK}" stroke-width="6"/><path d="M-60 -26 h120" stroke="${INK}" stroke-width="6"/><circle cx="-44" cy="-38" r="5" fill="${INK}"/><path d="M-36 20 l24 -26 l20 18 l26 -30" fill="none" stroke="${INK}" stroke-width="6"/>`,
+  `<path d="M-60 -10 l60 -40 l60 40 v60 h-120z" fill="#FFF" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/><path d="M-30 50 v-34 h60 v34 M-30 30 h60" stroke="${INK}" stroke-width="5" fill="none"/>`,
+];
+const TNAME = ['Design software', 'Warehouse', 'Stockroom'];
+const toolRow = add(3, '', '', { left: C.x + 'px', top: C.y + (tall ? 400 : 440) + 'px', width: C.w + 'px', height: '300px' });
+const tools = [TOOLS[0], TOOLS[1], TOOLS[2]].map((t, i) => {
+  const d = K.el('div', { parent: toolRow, html: `<svg width="240" height="240" viewBox="-120 -120 240 240">${t}
+    <g class="x"><circle r="100" fill="none" stroke="#C4532F" stroke-width="12"/><path d="M-70 -70 L70 70" stroke="#C4532F" stroke-width="12"/></g></svg>
+    <div style="text-align:center;font:700 26px Archivo;color:#1F1F1F;margin-top:6px">${['Screwdriver', 'Design software', 'Warehouse'][i]}</div>`,
+    style: { position: 'absolute', left: (C.w - 3 * 240) / 4 * (i + 1) + i * 240 + 'px', top: 0, width: '240px' } });
+  return d;
+});
+const bld2 = add(3, '', `<svg width="400" height="${tall ? 300 : 380}" viewBox="-200 -260 400 400">${builder('happy')}</svg>`, { left: C.x + 20 + 'px', top: C.y + (tall ? 690 : 780) + 'px' });
+const pill = add(3, 'pill', 'Drafts first · always your yes', { left: C.x + (tall ? 440 : 450) + 'px', top: C.y + (tall ? 800 : 900) + 'px' });
+add(3, 'notes', 'Printed products: printed per order by your own partner.', { left: C.x + 'px', top: tall ? C.y + 340 + 'px' : C.y + C.h - 40 + 'px', fontSize: (tall ? 20 : 21) + 'px' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'No tools required.' });
+
+const posAt = (t) => PAN.reduce((a, p) => a + K.p(t, p, p + PD, E.inOutExpo), 0);
+// the step highlights follow the words of line 3
+const T_S = [VO[2][0] + 0.05, VO[2][0] + 1.2, VO[2][0] + 2.85, VO[2][0] + 3.5];
+const T_PART = [VO[1][0] + 1.0, VO[1][0] + 2.2, VO[1][0] + 2.7, VO[1][0] + 3.1];
+
+K.run({
+  id: 'E10', title: 'The Manual', dur: DUR, bpm: BPM, music: 'happy-but-a-little-off', mood: 'calm', key: 'G', intro: 0.0, cover: 7.6,
+  technique: 'A fold-out flat-pack manual drawn in one line weight: the camera pans across one long sheet with plateau holds and paper folds between pages (cover with an isometric flat-pack box and a puzzled builder → parts A–D that pop in as she names them → steps 1–4 lit one by one in lime, two of them real screen crops → “No tools required.” with the tools struck out and a thumbs-up builder)',
+  caption: 'Assembly instructions for one listing. You need one idea, one sentence and your stores. Describe it, review every file, then say yes — drafts until you do. No tools required. Start free at makeandlist.com',
+  short: 'No tools required.',
+  question: 'How does it work?', gain: 'No design skills: describe it, review it, say yes',
+  vo: VO,
+  beats: ['0–3.1 s: the cover — “Assembly instructions for one listing.” A flat-pack box, a puzzled builder', '3.1–6.5 s: “You’ll need one idea and one sentence.” — parts A–D pop: an idea, a sentence, your stores, your yes', '6.5–10.6 s: steps 1–4 light up: describe it (real create screen), review every file (real product screen), say yes, in your stores', '10.6–13 s: “No tools required.” — tools struck out, the builder gives a thumbs-up', '13–15 s: end card — “MakeAndList. Start free.”'],
+  cues: [[0.0, 'paper'], [0.2, 'box'], ...PAN.map((p) => [+(p + PD - 0.1).toFixed(3), 'paper']),
+    ...T_PART.map((t) => [t, 'pop']),
+    [T_S[0] + 0.1, 'type'], [T_S[1], 'pop'], [T_S[2], 'click'], [T_S[3] + 0.3, 'chime'], [PAN[2] + 0.9, 'marker'], [PAN[2] + 1.15, 'marker'], [PAN[2] + 1.4, 'marker'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const pos = posAt(T), vel = Math.abs(pos - posAt(T - 1 / 30));
+  const zoom = 1.03 + 0.015 * Math.sin(T * 0.5) - Math.min(0.025, vel * 0.5);
+  sheet.style.transform = `translate(${-pos * W * zoom + W * (1 - zoom) / 2 + Math.sin(T * 0.7) * 4}px, ${H * (1 - zoom) / 2 + Math.cos(T * 0.5) * 4}px) scale(${zoom})`;
+  sheet.style.filter = vel > 0.03 ? `blur(${Math.min(6, vel * 40)}px)` : 'none';
+
+  // cover: the box drops in, the builder scratches his head
+  const bx = K.p(T, 0, 0.6, E.outBack);
+  coverArt.querySelector('.box').setAttribute('transform', `translate(560 ${380 - (1 - bx) * 260}) rotate(${(1 - bx) * -8})`);
+  coverArt.querySelector('.bld').setAttribute('transform', `translate(190 460) rotate(${Math.sin(T * 3) * 3})`);
+
+  // parts pop as they are named
+  parts.forEach((c, i) => {
+    const t0 = T_PART[i];
+    const p = K.p(T, t0, t0 + 0.4, E.outBack);
+    c.style.opacity = T >= t0 ? Math.max(0.25, Math.min(1, p * 2)) : 0.25;
+    c.style.borderStyle = T >= t0 ? 'solid' : 'dashed';
+    c.style.transform = `scale(${0.85 + 0.15 * p})`;
+  });
+
+  // steps light up with the words
+  steps.forEach((c, i) => {
+    const p = K.p(T, T_S[i], T_S[i] + 0.35, E.outBack);
+    const r = c.querySelector('.ring');
+    Object.assign(r.style, { left: '10px', top: '8px', width: '86px', height: '86px', transform: `scale(${p})` });
+    c.style.borderColor = T >= T_S[i] ? INK : '#B9B2A6';
+    c.style.opacity = T >= T_S[i] - 0.2 ? 1 : 0.45;
+  });
+  const S = 'A lemon-pattern notebook cover, A5.';
+  const k = Math.round(S.length * K.p(T, T_S[0] + 0.1, T_S[0] + 0.95, E.linear));
+  typ.innerHTML = T < T_S[0] + 0.1 ? '<span style="color:#8A8378">For example: a 30-page ocean colouring book…</span>' : S.slice(0, k);
+  img2.style.top = -(y2 + 40 * K.p(T, T_S[1], T_S[1] + 1.4, E.inOutCubic)) * sc2 + 'px';
+  const mp = K.p(T, T_S[1], T_S[1] + 1.2, E.inOutCubic);
+  mag.style.transform = `translate(${K.lerp(40, cw2 - 110, mp)}px, ${130 + Math.sin(mp * Math.PI) * 60}px)`;
+  mag.style.opacity = T >= T_S[1] - 0.1 ? 1 : 0;
+  const s3 = steps[2];
+  const pr = K.k(T, [[T_S[2] - 0.4, -40], [T_S[2], 0], [T_S[2] + 0.3, -10]]);
+  s3.querySelector('.fing').setAttribute('transform', `translate(${-60 + 0} ${pr})`);
+  s3.querySelector('.ck').setAttribute('fill', T >= T_S[2] ? '#DFFF5A' : '#FFF');
+  s3.querySelector('.ckm').setAttribute('opacity', T >= T_S[2] ? 1 : 0.15);
+  const pk = K.p(T, T_S[3], T_S[3] + 0.7, E.inOutCubic);
+  steps[3].querySelector('.pkt').setAttribute('transform', `translate(${K.lerp(70, 265, pk)} ${140 - Math.sin(pk * Math.PI) * 40}) scale(${1 - pk * 0.4})`);
+  steps[3].querySelector('.pkt').setAttribute('opacity', 1 - K.p(T, T_S[3] + 0.6, T_S[3] + 0.75, E.linear));
+  ['f0', 'f1', 'f2'].forEach((cl, i) => { flow.querySelector('.' + cl).setAttribute('opacity', T >= T_S[i + 1] - 0.1 ? 1 : 0.15); });
+
+  // no tools: each struck out in turn; the builder's thumbs up
+  tools.forEach((d, i) => {
+    const t0 = PAN[2] + 0.9 + i * 0.25;
+    const p = K.p(T, t0, t0 + 0.3, E.outBack);
+    const x = d.querySelector('.x');
+    x.setAttribute('opacity', T >= t0 ? 1 : 0);
+    x.setAttribute('transform', `scale(${0.6 + 0.4 * p})`);
+  });
+  const bp = K.p(T, PAN[2] + 1.6, PAN[2] + 2.0, E.outBack);
+  bld2.style.transform = `translateY(${(1 - bp) * 40}px) rotate(${Math.sin(T * 2.5) * 2}deg)`; bld2.style.opacity = Math.min(1, bp * 2);
+  const pp = K.p(T, PAN[2] + 1.9, PAN[2] + 2.3, E.outBack);
+  pill.style.transform = `scale(${0.6 + 0.4 * pp}) rotate(-3deg)`; pill.style.opacity = Math.min(1, pp * 2);
+
+  end(T);
+});
+</script></body></html>

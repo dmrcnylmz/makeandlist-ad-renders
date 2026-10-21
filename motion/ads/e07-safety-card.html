@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E07 · The Safety Card</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #23282D; }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.fabric { position: absolute; background-color: #2A3036;
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.025) 0 3px, transparent 3px 9px), repeating-linear-gradient(-45deg, rgba(0,0,0,.18) 0 2px, transparent 2px 8px); }
+.pocket { position: absolute; background: #1D2125; border-top: 10px solid #15181B; box-shadow: 0 -30px 60px -10px rgba(0,0,0,.55);
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 2px, transparent 2px 14px); }
+.pocket i { position: absolute; left: 0; right: 0; top: 26px; border-top: 4px dashed rgba(255,255,255,.12); }
+.card { position: absolute; left: 0; top: 0; border-radius: 44px; background: #F6F2E8; overflow: hidden;
+  box-shadow: 0 80px 140px -40px rgba(0,0,0,.75), 0 0 0 2px #E2DBCE; }
+.hd { position: absolute; left: 0; top: 0; right: 0; height: 260px; background: #DFFF5A; }
+.hd .w { position: absolute; left: 60px; top: 34px; font: 800 124px/1 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.hd .s { position: absolute; left: 64px; top: 178px; font: 600 30px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #1F1F1F; }
+.hd img { position: absolute; right: 60px; top: 52px; width: 420px; }
+.hd .m { position: absolute; right: 60px; top: 178px; font: 600 30px 'IBM Plex Mono', monospace; letter-spacing: .14em; color: #1F1F1F; }
+.pn { position: absolute; width: 940px; height: 820px; border-radius: 28px; background: #FFFDF8; box-shadow: inset 0 0 0 5px #1F1F1F; overflow: hidden; }
+.pn svg.ill { position: absolute; left: 0; top: 0; }
+.pn .no { position: absolute; left: 30px; top: 30px; width: 92px; height: 92px; border-radius: 50%; background: #1F1F1F; color: #FAF7EE; display: grid; place-items: center; font: 800 54px 'Archivo'; z-index: 5; }
+.pn .st { position: absolute; left: 5px; right: 5px; bottom: 5px; height: 118px; background: #EFEADF; border-top: 5px solid #1F1F1F; display: flex; align-items: center; padding: 0 40px; font: 600 38px 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: #1F1F1F; z-index: 5; }
+.pn .st b { display: inline-block; width: 22px; height: 22px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 4px #1F1F1F; margin-right: 22px; flex: none; }
+.ph { position: absolute; border-radius: 46px; background: #1A1A1A; padding: 12px; box-shadow: 0 30px 50px -24px rgba(0,0,0,.55); z-index: 3; }
+.ph .sc { position: relative; width: 100%; height: 100%; border-radius: 36px; overflow: hidden; background: #FAF7EE; }
+.ph .sc img { position: absolute; left: 0; width: 100%; }
+.bub { position: absolute; z-index: 4; background: #FFFDF8; border: 5px solid #1F1F1F; border-radius: 34px; padding: 22px 28px; font: 600 38px/1.22 'Archivo'; color: #1F1F1F; }
+.bub .c { display: inline-block; width: 4px; height: 38px; background: #1F1F1F; vertical-align: -6px; margin-left: 2px; }
+.typ { position: absolute; font-family: 'Archivo'; font-weight: 500; color: #1F1F1F; background: #FFFDF8; overflow: hidden; }
+.draft { position: absolute; z-index: 4; width: 360px; height: 330px; border-radius: 26px; background: #FFFDF8; box-shadow: inset 0 0 0 5px #1F1F1F, 0 26px 40px -20px rgba(0,0,0,.45); transform-origin: 50% -150px; }
+.draft .chip { position: absolute; left: 24px; top: 22px; font: 700 26px 'IBM Plex Mono', monospace; padding: 6px 16px; background: #DFFF5A; box-shadow: 0 0 0 3px #1F1F1F; letter-spacing: .1em; }
+.store { position: absolute; z-index: 4; width: 230px; height: 104px; border-radius: 22px; background: #FFFDF8; box-shadow: inset 0 0 0 5px #1F1F1F; display: grid; place-items: center; }
+.store img { max-width: 150px; max-height: 56px; }
+.ft { position: absolute; display: flex; align-items: center; gap: 26px; font: 600 34px/1.2 'Archivo'; color: #1F1F1F; }
+.ft b { font-weight: 800; }
+.stamp { position: absolute; z-index: 8; border: 22px solid #C4532F; border-radius: 48px; color: #C4532F; padding: 40px 70px; text-align: center; font: 800 132px/1.0 'Archivo'; width: max-content; background: #FBF8F1; box-shadow: 0 40px 80px -30px rgba(0,0,0,.5); letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; }
+.stamp small { display: block; font: 600 60px 'IBM Plex Mono', monospace; letter-spacing: .2em; margin-top: 24px; }
+.sheen { position: absolute; inset: 0; z-index: 7; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.28) 50%, rgba(255,255,255,0) 60%); mix-blend-mode: screen; }
+.cap { position: absolute; z-index: 40; left: 50%; text-align: center; font: 800 76px/1.06 'Playfair Display'; letter-spacing: -0.02em; color: #FAF7EE; white-space: nowrap;
+  background: #1F1F1F; border-radius: 30px; padding: 22px 40px 26px; box-shadow: 0 30px 60px -20px rgba(0,0,0,.6), 0 0 0 3px #DFFF5A; }
+.cap em { font-style: italic; color: #DFFF5A; }
+.kick { position: absolute; z-index: 40; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(250,247,238,.7); white-space: nowrap; text-align: center; }
+.demo { z-index: 6; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 85; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E07 — The Safety Card. A laminated in-flight safety card is pulled from the seat pocket; the camera reads it panel by
+// panel as Marian narrates: 1 describe it (a speech bubble and the real create screen), 2 "in the unlikely event" a draft
+// drops like an oxygen mask, 3 a hand presses the armrest YES and the cabin sign lights, 4 a paper-plane listing takes
+// off to the seller's own stores. Pull back, a rubber stamp: nothing takes off without you.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// ---------- voice (fitted to the real takes: node vo.mjs e07) ----------
+const VO = [
+  [0.3, 'Welcome aboard. Please review this card.'],
+  [3.5, 'Describe it in one sentence.'],
+  [6.45, 'In the unlikely event it’s not right, it stays a draft.', 1.08],
+  [9.8, 'Nothing takes off without you.', 1.08],
+  [13.05, 'MakeAndList. Start free.', 1.1],
+];
+// camera beats
+const T_P1 = B(4.5), T_P2 = B(8.5), T_P3 = B(12.75), T_P4 = B(14), T_OUT = B(16);
+const T_TYPE = T_P1 + 0.35, T_DROP = T_P2 + 0.4, T_PRESS = T_P3 + 0.45, T_FLY = T_P4 + 0.15, T_STAMP = B(16.75);
+
+// ---------- the world (card units: the card is 2000 × 2240) ----------
+const CW = 2000, CH = 2240;
+const PN = [[40, 300], [1020, 300], [40, 1160], [1020, 1160]];
+const world = K.box(0, 0, CW, CH, { cls: 'world' });
+K.box(-2600, -2600, CW + 5200, CH + 5200, { cls: 'fabric', parent: world });
+const card = K.box(0, 0, CW, CH, { cls: 'card', parent: world });
+const pocket = K.box(-2600, CH + 60, CW + 5200, 2400, { cls: 'pocket', parent: world, html: '<i></i>' });
+
+// header
+K.el('div', { parent: card, cls: 'hd', html: `<div class="w">Welcome aboard.</div><div class="s">Please review this card before take-off</div>
+  <img src="${K.brand('makeandlist-logo.svg')}"><div class="m">SAFETY CARD · ML-15</div>` });
+
+// panels
+const SK = '#E9C6A4', SH = '#7E9A7E', SH2 = '#5F7A60', SEAT = '#4A5560', INK = '#1F1F1F';
+const seat = (x, y) => `<g transform="translate(${x} ${y})"><rect x="0" y="0" width="120" height="360" rx="40" fill="${SEAT}" stroke="${INK}" stroke-width="5"/>
+  <rect x="10" y="300" width="260" height="70" rx="26" fill="${SEAT}" stroke="${INK}" stroke-width="5"/><rect x="40" y="370" width="22" height="80" fill="${INK}"/></g>`;
+const person = (x, y, armPath) => `<g transform="translate(${x} ${y})">
+  <path d="M40 120 q-6 -70 54 -78 q60 8 54 78 v150 h-108z" fill="${SH}" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M46 250 h190 q24 0 24 24 v8 q0 22 -22 22 h-192z" fill="${SH2}" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M232 280 l12 150 h46" fill="none" stroke="${INK}" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M232 280 l12 150 h46" fill="none" stroke="${SH2}" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="96" cy="-12" r="52" fill="${SK}" stroke="${INK}" stroke-width="5"/>
+  <path d="M46 -22 q4 -52 54 -52 q44 2 50 44 q-30 -18 -64 -6 q-20 8 -40 14z" fill="${INK}"/>
+  <path class="arm" d="${armPath}" fill="none" stroke="${INK}" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="arm2" d="${armPath}" fill="none" stroke="${SH}" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+const panels = PN.map(([x, y], i) => K.box(x, y, 940, 820, { cls: 'pn', parent: card }));
+const STRIP = ['Describe it · one sentence', 'Not right? It stays a draft', 'Only your yes sends it', 'To your own stores'];
+panels.forEach((p, i) => { K.el('div', { parent: p, cls: 'no', html: String(i + 1) }); K.el('div', { parent: p, cls: 'st', html: '<b></b>' + STRIP[i] }); });
+
+// 1 · describe
+panels[0].insertAdjacentHTML('beforeend', `<svg class="ill" width="940" height="820" viewBox="0 0 940 820">
+  ${seat(40, 300)}${person(70, 300, 'M120 140 l120 70 l150 -40')}
+  <path d="M300 236 q30 -40 60 -60" fill="none" stroke="${INK}" stroke-width="5" stroke-dasharray="2 16" stroke-linecap="round"/></svg>`);
+const bub = K.el('div', { parent: panels[0], cls: 'bub', style: { left: '150px', top: '120px', width: '400px' } });
+const PHW = 320, PHH = 590, PSC = (PHW - 24) / 780, SRC_Y = 430;
+const ph1 = K.el('div', { parent: panels[0], cls: 'ph', style: { left: '580px', top: '70px', width: PHW + 'px', height: PHH + 'px' } });
+const ph1s = K.el('div', { parent: ph1, cls: 'sc' });
+K.el('img', { parent: ph1s, src: K.screen('22-phone-create'), style: { top: -SRC_Y * PSC + 'px' } });
+const typ = K.el('div', { parent: ph1s, cls: 'typ', style: { left: 70 * PSC + 'px', top: (596 - SRC_Y) * PSC + 'px', width: 636 * PSC + 'px', height: 176 * PSC + 'px', fontSize: 30 * PSC + 'px', lineHeight: 1.3, padding: 4 * PSC + 'px' } });
+const tag1 = K.demoTag('Real app · demo workspace', 0, 0); panels[0].appendChild(tag1);
+Object.assign(tag1.style, { left: '560px', top: '626px', fontSize: '24px' });
+const SENT = 'A botanical wedding planner, 36 printable pages.';
+
+// 2 · the draft drops
+panels[1].insertAdjacentHTML('beforeend', `<svg class="ill" width="940" height="820" viewBox="0 0 940 820">
+  <rect x="300" y="0" width="640" height="96" fill="${SEAT}" stroke="${INK}" stroke-width="5"/>
+  <g class="flap"><rect x="470" y="96" width="320" height="24" fill="#39434C" stroke="${INK}" stroke-width="5"/></g>
+  ${seat(50, 320)}${person(80, 320, 'M120 140 l130 -40 l140 -150')}
+  <path class="pull" d="M420 600 q120 40 200 -60" fill="none" stroke="#C4532F" stroke-width="10" stroke-linecap="round"/>
+  <path class="pullH" d="M600 520 l26 18 l-6 34" fill="none" stroke="#C4532F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>`);
+const cord = K.el('div', { parent: panels[1], style: { position: 'absolute', left: '622px', top: '110px', width: '16px', height: '120px', zIndex: 3, transformOrigin: '50% 0',
+  background: `repeating-linear-gradient(170deg, ${INK} 0 5px, transparent 5px 14px)` } });
+const draft = K.el('div', { parent: panels[1], cls: 'draft', style: { left: '450px', top: '230px' }, html: `<div class="chip">DRAFT</div>
+  <svg width="360" height="330" viewBox="0 0 360 330" style="position:absolute;left:0;top:0">
+  ${[0, 1, 2].map((k) => `<g transform="translate(${28 + k * 106} 84)"><rect width="92" height="124" rx="8" fill="#F4F1EA" stroke="${INK}" stroke-width="4"/>
+    <path d="M46 102 q-2 -36 0 -62 M46 70 q-18 -12 -24 -30 q16 4 24 22 M46 60 q16 -12 22 -28 q-14 2 -22 20" fill="none" stroke="${SH2}" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="64" cy="28" r="10" fill="#E8603C"/></g>`).join('')}
+  <rect x="28" y="236" width="140" height="58" rx="29" fill="#FFFDF8" stroke="${INK}" stroke-width="4"/><text x="98" y="274" text-anchor="middle" font-family="Archivo" font-weight="700" font-size="26">Edit</text>
+  <rect x="184" y="236" width="150" height="58" rx="29" fill="#DFFF5A" stroke="${INK}" stroke-width="4"/><text x="259" y="274" text-anchor="middle" font-family="Archivo" font-weight="700" font-size="26">Approve</text></svg>` });
+
+// 3 · the armrest YES
+panels[2].insertAdjacentHTML('beforeend', `<svg class="ill" width="940" height="820" viewBox="0 0 940 820">
+  <rect x="190" y="40" width="560" height="190" rx="30" fill="${SEAT}" stroke="${INK}" stroke-width="5"/>
+  <g transform="translate(240 82)"><rect class="l1" width="210" height="104" rx="18" fill="#2F3740" stroke="${INK}" stroke-width="4"/><text x="105" y="64" text-anchor="middle" font-family="IBM Plex Mono" font-weight="600" font-size="30" class="l1t" fill="#8A8378">DRAFT</text></g>
+  <g transform="translate(476 82)"><rect class="l2" width="230" height="104" rx="18" fill="#2F3740" stroke="${INK}" stroke-width="4"/>
+   <path class="l2p" d="M48 66 l50 -12 l40 -30 l10 6 l-28 36 l66 -6 l-2 12 l-120 18 z" fill="#8A8378"/></g>
+  <path d="M60 820 v-250 q0 -60 60 -60 h700 q60 0 60 60 v250z" fill="${SEAT}" stroke="${INK}" stroke-width="5"/>
+  <ellipse cx="470" cy="560" rx="160" ry="56" fill="#15181B"/>
+  <g class="btn"><ellipse cx="470" cy="548" rx="138" ry="48" fill="#9FBF24" stroke="${INK}" stroke-width="5"/>
+   <ellipse class="btop" cx="470" cy="530" rx="138" ry="48" fill="#DFFF5A" stroke="${INK}" stroke-width="5"/>
+   <text class="btxt" x="470" y="546" text-anchor="middle" font-family="Archivo" font-weight="900" font-size="54" fill="${INK}">YES</text></g>
+  <g class="hand"><path d="M470 520 v-150 q0 -22 22 -22 q22 0 22 22 v80 q4 -20 24 -20 q22 0 22 24 q4 -18 24 -18 q22 0 22 26 v120 q0 60 -60 80 h-60 q-50 -20 -76 -84 l-30 -60 q-10 -22 10 -30 q18 -6 30 12 l26 40z" fill="${SK}" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>
+   <path d="M400 640 h170 v200 h-170z" fill="${SH}" stroke="${INK}" stroke-width="5"/></g>
+  <g class="ring" opacity="0"><ellipse cx="470" cy="530" rx="200" ry="74" fill="none" stroke="#DFFF5A" stroke-width="10"/></g></svg>`);
+
+// 4 · take-off to your stores
+panels[3].insertAdjacentHTML('beforeend', `<svg class="ill" width="940" height="820" viewBox="0 0 940 820">
+  <path d="M120 700 L380 330 h180 L820 700z" fill="#D9D3C9" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M470 680 V350" stroke="#FFFDF8" stroke-width="12" stroke-dasharray="40 36"/>
+  <path class="fp0" d="M470 520 C 470 400, 300 330, 210 250" fill="none" stroke="${INK}" stroke-width="6" stroke-dasharray="1 0" stroke-linecap="round"/>
+  <path class="fp1" d="M470 520 C 470 380, 470 320, 470 250" fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>
+  <path class="fp2" d="M470 520 C 470 400, 640 330, 730 250" fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>
+  <g class="plane"><path d="M0 -70 L44 50 L0 26 L-44 50 Z" fill="#FFFDF8" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
+   <path d="M0 -70 L0 26" stroke="${INK}" stroke-width="4"/><path d="M-14 6 h10 M4 -6 h10" stroke="#9FBF24" stroke-width="6" stroke-linecap="round"/></g></svg>`);
+const STORES = ['ikas', 'woocommerce', 'wix'];
+const stores = STORES.map((s, i) => K.el('div', { parent: panels[3], cls: 'store', style: { left: [95, 355, 615][i] + 'px', top: '120px' }, html: `<img src="${K.pub('platforms/' + s + '.svg')}" style="${s === 'wix' ? 'filter:brightness(0)' : ''}">` }));
+
+// footer: the prohibition pictogram and the quote rule
+K.el('div', { parent: card, cls: 'ft', style: { left: '60px', top: '2034px', width: '940px' }, html: `<svg width="120" height="120" viewBox="0 0 120 120">
+  <rect x="36" y="38" width="48" height="44" rx="10" fill="${SEAT}"/><circle cx="50" cy="58" r="6" fill="#DFFF5A"/><circle cx="70" cy="58" r="6" fill="#DFFF5A"/><path d="M60 38 v-12" stroke="${SEAT}" stroke-width="5"/><circle cx="60" cy="24" r="5" fill="${SEAT}"/>
+  <circle cx="60" cy="60" r="52" fill="none" stroke="#C4532F" stroke-width="10"/><path d="M24 24 L96 96" stroke="#C4532F" stroke-width="10"/></svg>
+  <div><b>No auto-posting.</b><br>Nothing goes live without your yes.</div>` });
+K.el('div', { parent: card, cls: 'ft', style: { left: '1040px', top: '2034px', width: '920px' }, html: `<svg width="120" height="120" viewBox="0 0 120 120">
+  <circle cx="60" cy="60" r="52" fill="#DFFF5A" stroke="${INK}" stroke-width="6"/><path d="M36 62 l16 16 l32 -36" fill="none" stroke="${INK}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div><b>Quote first.</b><br>Nothing is made until you approve it.</div>` });
+const dim = K.el('div', { parent: card, style: { position: 'absolute', inset: 0, zIndex: 7, background: 'rgba(31,31,31,.55)', opacity: 0 } });
+const stamp = K.el('div', { parent: card, cls: 'stamp', html: 'Nothing takes off<br>without you<small>✓ Cleared by you</small>' });
+const sheen = K.el('div', { parent: card, cls: 'sheen' });
+
+// ---------- overlays ----------
+const CAPS = [
+  [VO[1][0] - 0.1, T_P2 - 0.1, 'Describe it in<br><em>one sentence.</em>'],
+  [VO[2][0] - 0.1, T_P3 - 0.1, 'Not right? It stays<br>a <em>draft.</em>'],
+  [VO[3][0] - 0.1, T_OUT - 0.05, 'Nothing takes off<br><em>without you.</em>'],
+];
+const CAPY = tall ? 300 : 44;
+const caps = CAPS.map(([a, b, h]) => ({ a, b, d: K.box(W / 2, CAPY, null, null, { cls: 'cap', html: h, style: { width: 'auto', height: 'auto', fontSize: (tall ? 64 : 54) + 'px' } }) }));
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'Nothing takes off<br>without you.' });
+
+// ---------- camera ----------
+// anchor: the screen point the focus sits on; s: scale. Overview frames the whole card, panels fill the frame under the caption.
+const OV = tall ? { s: 0.42, ax: W / 2, ay: 300 + CH * 0.42 / 2 } : { s: 0.5, ax: W / 2, ay: H / 2 + 6 };
+const PZ = tall ? { s: 0.9, ay: 500 + 820 * 0.9 / 2 } : { s: 1.0, ay: 236 + 820 / 2 };
+const focus = (i) => ({ cx: PN[i][0] + 470, cy: PN[i][1] + 410, s: PZ.s, ay: PZ.ay });
+const OVK = { cx: CW / 2, cy: CH / 2, s: OV.s, ay: OV.ay };
+const CAM = [[0, OVK], [T_P1 - 0.5, OVK], [T_P1 + 0.1, focus(0)], [T_P2 - 0.35, focus(0)], [T_P2 + 0.25, focus(1)], [T_P3 - 0.35, focus(1)], [T_P3 + 0.25, focus(2)],
+  [T_P4 - 0.3, focus(2)], [T_P4 + 0.25, focus(3)], [T_OUT - 0.2, focus(3)], [T_OUT + 0.5, OVK], [15, OVK]];
+function cam(T) {
+  let i = 1; while (i < CAM.length - 1 && T > CAM[i][0]) i++;
+  const [ta, A] = CAM[i - 1], [tb, Bk] = CAM[i];
+  const p = E.inOutCubic(K.clamp((T - ta) / Math.max(1e-6, tb - ta)));
+  const ls = Math.exp(K.lerp(Math.log(A.s), Math.log(Bk.s), p));
+  return { cx: K.lerp(A.cx, Bk.cx, p), cy: K.lerp(A.cy, Bk.cy, p), s: ls, ay: K.lerp(A.ay, Bk.ay, p), mv: A.cx !== Bk.cx || A.s !== Bk.s ? Math.sin(p * Math.PI) : 0 };
+}
+
+K.run({
+  id: 'E07', title: 'The Safety Card', dur: DUR, bpm: BPM, music: 'happy-dance', mood: 'bright', key: 'F', intro: 0.0, cover: 7.4,
+  technique: 'A laminated in-flight safety card pulled from a seat pocket; one camera reads it panel by panel (log-space zooms and pans on the beat) while flat safety-card pictograms act out the flow — a speech bubble types the idea beside the real create screen, a draft drops like an oxygen mask, a hand presses the armrest YES and the cabin sign lights, a paper-plane listing takes off to ikas, WooCommerce and Wix — then pulls back for a rubber stamp',
+  caption: 'Please review this card: describe your product in one sentence, and if it is not right it stays a draft. Nothing goes live in your stores, and nothing is made, without your yes. Start free at makeandlist.com',
+  short: 'Nothing takes off without you.',
+  question: 'Can I trust it?', gain: 'Control: drafts first, nothing live without your yes',
+  vo: VO,
+  beats: ['0–3 s: a safety card is pulled from the seat pocket — “Welcome aboard. Please review this card.”', '3–6.3 s: panel 1 — describe it in one sentence; the real create screen types it', '6.3–9.5 s: panel 2 — “in the unlikely event it’s not right” a draft drops like an oxygen mask', '9.5–11.9 s: panels 3–4 — a hand presses YES; a paper-plane listing takes off to your own stores', '11.9–13 s: pull back; the stamp “Nothing takes off without you”', '13–15 s: end card — “MakeAndList. Start free.”'],
+  cues: [[0.0, 'swish'], [0.25, 'paper'], [T_P1 - 0.12, 'whoosh'], [T_TYPE, 'type'], [T_P2 - 0.12, 'swish'], [T_DROP - 0.05, 'pop'],
+    [T_P3 - 0.12, 'swish'], [T_PRESS, 'click'], [T_PRESS + 0.12, 'chime'], [T_P4 - 0.12, 'swish'], [T_FLY + 0.1, 'whoosh'], [T_FLY + 0.5, 'pop'], [T_FLY + 0.62, 'pop'], [T_FLY + 0.74, 'pop'],
+    [T_OUT, 'whoosh'], [T_STAMP, 'stamp'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // camera, with a little handheld breathing (and a whisper of blur on the fast moves)
+  const c = cam(T);
+  const sx = Math.sin(T * 0.9) * 6 + Math.sin(T * 2.3) * 2, sy = Math.cos(T * 0.7) * 5;
+  const tilt = Math.sin(T * 0.5) * 0.35;
+  world.style.transform = `translate(${W / 2 - c.cx * c.s + sx}px, ${c.ay - c.cy * c.s + sy}px) rotate(${tilt}deg) scale(${c.s})`;
+  world.style.filter = c.mv > 0.6 ? `blur(${(c.mv - 0.6) * 4}px)` : 'none';
+
+  // pulled from the pocket
+  const pull = K.p(T, 0, 0.95, E.outQuint);
+  card.style.transform = `translateY(${(1 - pull) * 1500}px) rotate(${(1 - pull) * -4}deg)`;
+  sheen.style.transform = `translateX(${K.lerp(-120, 120, (T % 6) / 6)}%)`;
+
+  // 1 · bubble types the sentence, the phone mirrors it
+  const nB = Math.round(SENT.length * K.p(T, T_TYPE, T_TYPE + 1.5, E.linear));
+  bub.innerHTML = SENT.slice(0, nB) + (nB < SENT.length || Math.floor(T * 3) % 2 ? '<span class="c"></span>' : '');
+  const bp = K.p(T, T_P1 - 0.1, T_P1 + 0.35, E.outBack);
+  bub.style.transform = `scale(${0.6 + 0.4 * bp})`; bub.style.opacity = Math.min(1, bp * 2); bub.style.transformOrigin = '30% 100%';
+  typ.innerHTML = T < T_TYPE ? '<span style="color:#8A8378">For example: a 30-page ocean colouring book…</span>' : SENT.slice(0, nB);
+  ph1.style.transform = `translateY(${Math.sin(T * 1.3) * 4}px) rotate(${2 + Math.sin(T * 0.8) * 0.6}deg)`;
+
+  // 2 · the flap opens, the draft drops on its cord and swings
+  const fl = K.p(T, T_DROP - 0.25, T_DROP, E.outCubic);
+  panels[1].querySelector('.flap').setAttribute('transform', `rotate(${fl * 28} 470 108)`);
+  const dp = K.p(T, T_DROP, T_DROP + 0.55, E.outBack);
+  const sw = T > T_DROP ? Math.sin((T - T_DROP) * 6) * Math.exp(-(T - T_DROP) * 1.6) * 7 : 0;
+  draft.style.transform = `translateY(${(1 - dp) * -420}px) rotate(${sw}deg)`;
+  draft.style.opacity = T >= T_DROP ? 1 : 0;
+  cord.style.transform = `scaleY(${0.05 + 0.95 * dp}) rotate(${sw * 0.6}deg)`;
+  cord.style.opacity = T >= T_DROP ? 1 : 0;
+  const pl = K.p(T, T_DROP + 0.8, T_DROP + 1.4, E.outCubic);
+  panels[1].querySelectorAll('.pull, .pullH').forEach((n) => { n.style.opacity = pl; });
+
+  // 3 · the hand presses YES; the sign lights up
+  const h3 = panels[2];
+  const down = K.k(T, [[T_PRESS - 0.5, -60], [T_PRESS, 14], [T_PRESS + 0.25, 4]], E.inOutCubic);
+  h3.querySelector('.hand').setAttribute('transform', `translate(0 ${down})`);
+  const pressed = T >= T_PRESS;
+  const by = pressed ? 12 : 0;
+  h3.querySelector('.btop').setAttribute('transform', `translate(0 ${by})`); h3.querySelector('.btxt').setAttribute('transform', `translate(0 ${by})`);
+  const lit = K.p(T, T_PRESS, T_PRESS + 0.2, E.linear);
+  h3.querySelector('.l1').setAttribute('fill', pressed ? '#2F3740' : '#E8B04A');
+  h3.querySelector('.l1t').setAttribute('fill', pressed ? '#8A8378' : '#1F1F1F');
+  h3.querySelector('.l2').setAttribute('fill', pressed ? '#DFFF5A' : '#2F3740');
+  h3.querySelector('.l2p').setAttribute('fill', pressed ? '#1F1F1F' : '#8A8378');
+  const rp = K.p(T, T_PRESS, T_PRESS + 0.6, E.outCubic);
+  const ring = h3.querySelector('.ring');
+  ring.setAttribute('opacity', pressed ? (1 - rp) * lit : 0);
+  ring.setAttribute('transform', `translate(470 530) scale(${1 + rp * 0.4}) translate(-470 -530)`);
+
+  // 4 · the paper plane takes off and the flight paths draw to each store
+  const h4 = panels[3];
+  const fp = K.p(T, T_FLY, T_FLY + 0.8, E.inOutCubic);
+  const px = 470, py = K.lerp(640, 300, fp), ps = K.lerp(1.6, 0.9, fp);
+  h4.querySelector('.plane').setAttribute('transform', `translate(${px} ${py}) scale(${ps})`);
+  [0, 1, 2].forEach((i) => {
+    const path = h4.querySelector('.fp' + i);
+    const q = K.p(T, T_FLY + 0.2 + i * 0.1, T_FLY + 0.6 + i * 0.1, E.outCubic);
+    path.setAttribute('stroke-dasharray', `${q * 400} 400`);
+    path.setAttribute('opacity', q > 0 ? 1 : 0);
+    const sp = K.p(T, T_FLY + 0.4 + i * 0.12, T_FLY + 0.72 + i * 0.12, E.outBack);
+    stores[i].style.transform = `scale(${0.7 + 0.3 * sp})`;
+    stores[i].style.boxShadow = sp > 0.99 ? 'inset 0 0 0 5px #1F1F1F, 0 0 0 10px #DFFF5A' : 'inset 0 0 0 5px #1F1F1F';
+  });
+
+  // the stamp lands on the overview
+  const stp = K.p(T, T_STAMP, T_STAMP + 0.22, E.outCubic);
+  stamp.style.opacity = T >= T_STAMP ? Math.min(1, stp * 1.4) * 0.92 : 0;
+  dim.style.opacity = K.p(T, T_STAMP - 0.25, T_STAMP + 0.1, E.linear);
+  stamp.style.left = CW / 2 + 'px'; stamp.style.top = '1230px';
+  stamp.style.transform = `translate(-50%, -50%) rotate(-7deg) scale(${K.lerp(1.6, 1, stp)})`;
+
+  // captions over the fabric, one per line of voice
+  caps.forEach((cp) => {
+    const p = K.p(T, cp.a, cp.a + 0.5, E.outExpo), o = K.p(T, cp.b - 0.25, cp.b, E.inCubic);
+    cp.d.style.opacity = p * (1 - o);
+    cp.d.style.transform = `translateX(-50%) translateY(${(1 - p) * 40 - o * 20}px) scale(${0.94 + 0.06 * p})`;
+    cp.d.style.visibility = T >= cp.a && T < cp.b ? 'visible' : 'hidden';
+  });
+
+  end(T);
+});
+</script></body></html>

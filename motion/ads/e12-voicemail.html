@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E12 · You Have One New Message</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #151412; color: #FAF7EE; }
+.glow { position: absolute; border-radius: 50%; pointer-events: none; }
+.clock { position: absolute; z-index: 10; text-align: center; font: 300 200px/1 'Archivo'; letter-spacing: -0.04em; color: #FAF7EE; font-stretch: 90%; }
+.date { position: absolute; z-index: 10; text-align: center; font: 600 32px 'Archivo'; color: rgba(250,247,238,.7); }
+.banner { position: absolute; z-index: 30; border-radius: 34px; background: rgba(250,247,238,.13); backdrop-filter: blur(18px); box-shadow: 0 30px 60px -30px rgba(0,0,0,.8), inset 0 0 0 1px rgba(250,247,238,.12); padding: 22px 26px; display: flex; gap: 20px; align-items: center; }
+.banner .ic, .player .ic { flex: none; width: 76px; height: 76px; border-radius: 18px; background: #FAF7EE; display: grid; place-items: center; }
+.banner .ic img, .player .ic img { width: 52px; }
+.banner .t1 { font: 600 22px 'Archivo'; color: rgba(250,247,238,.65); display: flex; justify-content: space-between; }
+.banner .t2 { margin-top: 4px; font: 700 31px/1.2 'Archivo'; color: #FAF7EE; }
+.hook { position: absolute; z-index: 30; text-align: center; font: 800 96px/1.0 'Playfair Display'; letter-spacing: -0.025em; color: #FAF7EE; }
+.hook em { font-style: italic; color: #DFFF5A; }
+.player { position: absolute; z-index: 30; border-radius: 36px; background: #22201C; box-shadow: 0 40px 80px -40px rgba(0,0,0,.9), inset 0 0 0 1px rgba(250,247,238,.08); padding: 26px 30px; }
+.player .row { display: flex; gap: 20px; align-items: center; }
+.player .nm { font: 700 32px 'Archivo'; color: #FAF7EE; }
+.player .sb { margin-top: 4px; font: 500 21px 'IBM Plex Mono', monospace; color: rgba(250,247,238,.55); }
+.player .pb { margin-left: auto; width: 74px; height: 74px; border-radius: 50%; background: #DFFF5A; display: grid; place-items: center; flex: none; }
+.player .wave { position: relative; margin-top: 26px; height: 96px; }
+.player .wave i { position: absolute; bottom: 50%; width: 8px; margin-left: -4px; border-radius: 4px; transform-origin: 50% 50%; }
+.player .tm { margin-top: 14px; display: flex; justify-content: space-between; font: 500 21px 'IBM Plex Mono', monospace; color: rgba(250,247,238,.55); }
+.ph { position: absolute; top: -8px; bottom: -8px; width: 3px; margin-left: -1.5px; background: #FAF7EE; border-radius: 2px; }
+.trl { position: absolute; z-index: 30; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,247,238,.5); }
+.cap { position: absolute; z-index: 30; font: 700 66px/1.1 'Playfair Display'; letter-spacing: -0.015em; color: #FAF7EE; }
+.cap .w { display: inline-block; white-space: pre; }
+.cap .k { color: #1F1F1F; background: #DFFF5A; border-radius: 8px; padding: 0 .1em; margin: 0 -.02em; }
+.prev { position: absolute; z-index: 29; font: 600 30px/1.2 'Playfair Display'; color: rgba(250,247,238,.38); }
+.dram { position: absolute; z-index: 30; font: 500 18px 'IBM Plex Mono', monospace; color: rgba(250,247,238,.5); white-space: nowrap; }
+.pr { position: absolute; z-index: 25; }
+.crop { position: absolute; overflow: hidden; border-radius: 26px; background: #FAF7EE; box-shadow: 0 50px 90px -40px rgba(0,0,0,.9); }
+.crop img { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 780px; display: block; }
+.photo { position: absolute; overflow: hidden; border-radius: 26px; box-shadow: 0 50px 90px -40px rgba(0,0,0,.9), 0 0 0 6px #FAF7EE; }
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ring { position: absolute; border: 5px solid #DFFF5A; border-radius: 16px; box-shadow: 0 0 0 2px #1F1F1F; }
+.mcard { position: absolute; border-radius: 28px; background: #FAF7EE; color: #1F1F1F; padding: 30px 34px; box-shadow: 0 50px 90px -40px rgba(0,0,0,.9); }
+.mcard .hd { font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #6B645A; display: flex; justify-content: space-between; }
+.mcard .hd b { background: #DFFF5A; color: #1F1F1F; padding: 2px 10px; border-radius: 6px; font-weight: 600; }
+.mrow { margin-top: 20px; }
+.mrow .l { display: flex; justify-content: space-between; font: 700 30px 'Archivo'; }
+.mrow .l span:last-child { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+.mrow .bar { margin-top: 10px; height: 14px; border-radius: 7px; background: #E8E2D6; overflow: hidden; }
+.mrow .bar b { display: block; height: 100%; border-radius: 7px; }
+.mrow.big .l { font-size: 36px; }
+.mnote { margin-top: 18px; font: 500 22px/1.3 'Archivo'; color: #45403A; }
+.approve { position: absolute; z-index: 35; display: flex; align-items: center; justify-content: center; gap: 16px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 46px 'Archivo'; white-space: nowrap; box-shadow: 0 30px 60px -24px rgba(223,255,90,.45); }
+.done { position: absolute; z-index: 35; border-radius: 28px; background: #FAF7EE; color: #1F1F1F; padding: 28px 32px; box-shadow: 0 50px 90px -40px rgba(0,0,0,.9); }
+.done .h { display: flex; align-items: center; gap: 16px; font: 800 38px/1.1 'Playfair Display'; }
+.done .h i { flex: none; width: 52px; height: 52px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; display: grid; place-items: center; font: 800 28px 'Archivo'; font-style: normal; }
+.done .s { margin-top: 14px; font: 600 25px/1.3 'Archivo'; color: #45403A; }
+.done .s b { color: #1F1F1F; background: linear-gradient(transparent 60%, #DFFF5A 60%); }
+.demo.dk { background: rgba(21,20,18,.8); color: rgba(250,247,238,.75); border-color: rgba(250,247,238,.35); }
+.touch { position: absolute; z-index: 40; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; background: rgba(250,247,238,.45); border: 3px solid rgba(250,247,238,.8); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E12 — "You have one new message." A phone lock screen at night; a notification drops in and opens a voicemail
+// player. Marian *is* the message: the waveform plays with her voice, a live transcript writes her words (key words
+// marked), and under it the proof for each line — the real order (#1088, demo workspace), a sample margin breakdown,
+// the real "Where it stands" rows (waiting for your approval · not sent), then the Approve button a thumb presses in her
+// pause. Dramatised: the app does not phone you; it shows this on the Orders screen (said on screen).
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice — speech windows (from the takes): file t = speech − lead
+const VO = [
+  { t: 0.53, a: 1.00, b: 2.55, txt: 'Hi, it’s *MakeAndList.*' },
+  { t: 2.94, a: 3.10, b: 4.92, txt: 'A buyer *ordered* your botanical print.' },
+  { t: 4.72, a: 5.45, b: 7.75, txt: 'Your partner’s *cost* and your *margin* — on screen.' },
+  { t: 7.67, a: 8.30, b: 10.36, txt: 'Nothing is sent to print *until you approve.*' },
+  { t: 10.46, a: 10.90, b: 12.38, txt: 'Press *yes* when you’re ready.' },
+];
+const T_OPEN = 0.82, T_TAP = 11.22, T_PROOF = [3.0, 5.25, 8.1, 10.55];
+const PLAY0 = 0.95, PLAY1 = 12.5;
+
+const L = tall
+  ? { clockY: 330, bannerY: 640, hookY: 860, plX: 65, plY: 290, plW: 950, trlY: 640, capY: 684, capFs: 64, prevY: 600,
+      zX: 65, zY: 900, zW: 950, zH: 340, dramY: 586 }
+  : { clockY: 70, bannerY: 330, hookY: 560, plX: 60, plY: 50, plW: 960, trlY: 384, capY: 426, capFs: 58, prevY: 0,
+      zX: 60, zY: 610, zW: 960, zH: 640, dramY: 344 };
+
+const glowA = K.box(0, 0, 1300, 1300, { cls: 'glow', style: { background: 'radial-gradient(circle, rgba(232,96,60,.22), rgba(232,96,60,0) 62%)' } });
+const glowB = K.box(0, 0, 1100, 1100, { cls: 'glow', style: { background: 'radial-gradient(circle, rgba(223,255,90,.10), rgba(223,255,90,0) 62%)' } });
+
+// ---------- wallpaper: a rainy night street (concept image), dimmer once the message plays ----------
+const wpW = Math.max(W * 1.12, H * 1.1 / 1.5);
+const wp = K.el('img', { src: K.pub('r05/h09-night-street.webp'), style: { position: 'absolute', left: '0px', top: '0px', width: wpW + 'px', height: wpW * 1.5 + 'px', objectFit: 'cover', transformOrigin: '50% 50%' } });
+const wpShade = K.box(0, 0, W, H, { style: { background: 'linear-gradient(180deg, rgba(21,20,18,.55) 0%, rgba(21,20,18,.35) 40%, rgba(21,20,18,.2) 70%, rgba(21,20,18,.55) 100%)' } });
+const wpDim = K.box(0, 0, W, H, { style: { background: '#151412' } });
+const tagW = K.demoTag('Wallpaper: concept image · AI-generated', 0, 0); tagW.classList.add('dk');
+// ---------- lock screen ----------
+const clock = K.box(0, L.clockY, W, null, { cls: 'clock', html: '9:41', style: { fontSize: (tall ? 200 : 150) + 'px' } });
+const date = K.box(0, L.clockY + (tall ? 210 : 160), W, null, { cls: 'date', html: 'Tuesday, 14 October' });
+const banner = K.box(65, L.bannerY, W - 130, null, { cls: 'banner',
+  html: `<div class="ic"><img src="${K.brand('makeandlist-monogram.svg')}"></div><div style="flex:1"><div class="t1"><span>MAKEANDLIST · ORDERS</span><span>now</span></div><div class="t2">1 new message · a print order is waiting for you</div></div>` });
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'hook', html: 'You have<br><em>one new</em> message.', style: { fontSize: (tall ? 104 : 88) + 'px' } });
+const touch = K.box(0, 0, 0, 0, { cls: 'touch' });
+
+// ---------- the player ----------
+const NB = 56;
+const player = K.box(L.plX, L.plY, L.plW, null, { cls: 'player',
+  html: `<div class="row"><div class="ic"><img src="${K.brand('makeandlist-monogram.svg')}"></div><div><div class="nm">MakeAndList · Orders</div><div class="sb">Order #1088 · demo workspace</div></div>
+  <div class="pb"><svg width="30" height="30" viewBox="0 0 24 24"><rect x="5" y="4" width="5" height="16" rx="1.5" fill="#1F1F1F"/><rect x="14" y="4" width="5" height="16" rx="1.5" fill="#1F1F1F"/></svg></div></div>
+  <div class="wave">${Array.from({ length: NB }, () => '<i></i>').join('')}<div class="ph"></div></div><div class="tm"><span class="t0">0:00</span><span>0:12</span></div>` });
+const bars = [...player.querySelectorAll('.wave i')];
+const ph = player.querySelector('.ph');
+const t0 = player.querySelector('.t0');
+const waveW = L.plW - 60;
+bars.forEach((b, i) => { b.style.left = (i + 0.5) * (waveW / NB) + 'px'; });
+const dram = K.box(L.plX + 4, L.dramY, null, null, { cls: 'dram', html: 'Dramatised · in the app this waits on your Orders screen', style: { width: 'auto', height: 'auto' } });
+
+// ---------- transcript ----------
+const trl = K.box(L.plX, L.trlY, 600, null, { cls: 'trl', html: 'Transcript' });
+const caps = VO.map((v) => {
+  const el = K.box(L.plX, L.capY, L.plW, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  let k = false;
+  el.innerHTML = v.txt.split(' ').map((w) => {
+    const st = w.startsWith('*'), en = w.endsWith('*') || w.endsWith('*.') ;
+    if (st) k = true;
+    const clean = w.replace(/\*/g, '');
+    const s = `<span class="w${k ? ' k' : ''}">${clean}</span> `;
+    if (en) k = false;
+    return s;
+  }).join('');
+  return { el, ws: [...el.querySelectorAll('.w')] };
+});
+
+// ---------- proofs ----------
+const Z = { x: L.zX, y: L.zY, w: L.zW, h: L.zH };
+function crop(src, sy, sh, x, y, w) {
+  const k = w / 780;
+  const c = K.box(x, y, w, sh * k, { cls: 'crop', html: `<img src="${K.screen(src)}">` });
+  c.querySelector('img').style.transform = `translate(0, ${-sy * k}px) scale(${k})`;
+  return c;
+}
+// 1 · the order (real) + the print (concept)
+const P1 = K.box(0, 0, W, H, { cls: 'pr' });
+const phW = tall ? 300 : 380, phH = tall ? 340 : 500;
+const photo = K.box(Z.x, Z.y, phW, phH, { cls: 'photo', html: `<img src="${K.pub('r04/g01-botanical-print.webp')}" style="object-position:50% 30%">` });
+const ordW = Z.w - phW - 30;
+const ord = crop('52-phone-order', 905, 185, Z.x + phW + 30, Z.y + (tall ? 30 : 60), ordW);
+P1.append(photo, ord);
+const tagC = K.demoTag('Concept image · AI-generated', 0, 0); tagC.classList.add('dk');
+const tagR = K.demoTag('Real app · demo workspace · simulated order', 0, 0); tagR.classList.add('dk');
+
+// 2 · the margin (sample)
+const mW = tall ? Z.w : 860;
+const mcard = K.box(Z.x + (Z.w - mW) / 2, Z.y - (tall ? 10 : 0), mW, null, { cls: 'mcard',
+  html: `<div class="hd"><span>Before you approve</span><b>Sample figures</b></div>
+  ${[['Buyer paid your store', '€45.00', 1, '#7E9A7E'], ['Partner cost', '−€18.40', 0.41, '#E8603C'], ['Shipping', '−€4.99', 0.11, '#E8603C'], ['Your margin', '€21.61', 0.48, '#DFFF5A']]
+    .map(([l, v, w, c], i) => `<div class="mrow${i === 3 ? ' big' : ''}"><div class="l"><span>${l}</span><span>${v}</span></div><div class="bar"><b style="background:${c}" data-w="${w}"></b></div></div>`).join('')}
+  <div class="mnote">The partner charges your own partner account — never Credits.</div>` });
+const mrows = [...mcard.querySelectorAll('.mrow')];
+const mbars = [...mcard.querySelectorAll('.bar b')];
+
+// 3 · where it stands (real)
+const stW = tall ? 800 : 760, stY0 = 2760, stH = 340;
+const stand = crop('52-phone-order', stY0, stH, Z.x + (Z.w - stW) / 2, Z.y + (tall ? 0 : 40), stW);
+const ring1 = K.el('div', { parent: stand, cls: 'ring' });
+const ring2 = K.el('div', { parent: stand, cls: 'ring' });
+const kS = stW / 780;
+Object.assign(ring1.style, { left: 22 * kS + 'px', top: (2772 - stY0) * kS + 'px', width: 400 * kS + 'px', height: 150 * kS + 'px' });
+Object.assign(ring2.style, { left: 22 * kS + 'px', top: (2938 - stY0) * kS + 'px', width: 400 * kS + 'px', height: 150 * kS + 'px' });
+
+// 4 · approve
+const apW = tall ? 760 : 820, apH = 128;
+const approve = K.box((W - apW) / 2, Z.y + (tall ? 20 : 60), apW, apH, { cls: 'approve',
+  html: '<svg width="46" height="46" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#1F1F1F" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Approve production' });
+const done = K.box(Z.x + (Z.w - apW) / 2, Z.y + (tall ? 180 : 240), apW, null, { cls: 'done',
+  html: '<div class="h"><i>✓</i>Approved by you. Sent to your print partner.</div><div class="s">Printing is paid from <b>your own partner account</b> — never from Credits.</div>' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your order waits<br>for your yes.' });
+
+const voAt = (T) => VO.findIndex((v) => T >= v.a && T < v.b);
+const curLine = (T) => { let c = -1; VO.forEach((v, i) => { if (T >= v.a - 0.15) c = i; }); return c; };
+
+K.run({
+  id: 'E12', title: 'You Have One New Message', dur: DUR, bpm: BPM, music: 'puppy-love', mood: 'calm', key: 'F', intro: 0.0, cover: 6.6,
+  technique: 'A night lock screen: a notification opens a voicemail player and the narrator is the message — the waveform plays with her voice, a live transcript writes her words with key words marked, and under it each line’s proof (the real order, a sample margin breakdown, the real “where it stands” rows), ending on an Approve button a thumb presses in her pause',
+  caption: 'An order for a printed product comes in — and it waits for you. You see the partner’s cost and your margin first; nothing is sent to print until you approve, and printing is paid from your own partner account. Start free at makeandlist.com',
+  short: 'Press yes when you’re ready.',
+  question: 'Can I sell physical products too?', gain: 'Control: no print order is sent without your yes',
+  vo: [[0.53, "Hi, it's MakeAndList."], [2.94, 'A buyer ordered your botanical print.'], [4.72, "Your partner's cost and your margin are on screen."], [7.67, 'Nothing is sent to print until you approve.'], [10.46, "Press yes when you're ready."]],
+  beats: ['0–1 s: night lock screen — “You have one new message.” — a MakeAndList notification drops in', '1–2.9 s: the voicemail plays: “Hi, it’s MakeAndList.”', '2.9–5 s: a buyer ordered your botanical print — the real order #1088 (demo, simulated)', '5–7.9 s: the partner’s cost and your margin, on screen (sample figures)', '7.9–10.5 s: nothing is sent to print until you approve — waiting for your approval · not sent', '10.5–13 s: “Press yes when you’re ready.” — Approve; printing paid from your own partner account', '13–15 s: end card'],
+  cues: [[0.12, 'notify'], [T_OPEN, 'click'], [0.9, 'swish'], [T_PROOF[0] - 0.08, 'swish'], [T_PROOF[0] + 0.12, 'pop'], [T_PROOF[1] - 0.12, 'swish'], [5.3, 'pop'], [7.85, 'coin'],
+    [T_PROOF[2] - 0.08, 'swish'], [8.2, 'pop'], [T_PROOF[3] - 0.05, 'pop'], [T_TAP, 'click'], [T_TAP + 0.18, 'chime'], [12.6, 'swish'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  glowA.style.transform = `translate(${W * 0.2 - 650 + Math.sin(T * 0.4) * 120}px, ${H * 0.25 - 650 + Math.cos(T * 0.3) * 90}px)`;
+  glowB.style.transform = `translate(${W * 0.9 - 550 + Math.cos(T * 0.35) * 120}px, ${H * 0.8 - 550 + Math.sin(T * 0.5) * 90}px)`;
+
+  const dimP = K.p(T, T_OPEN, T_OPEN + 0.8, E.inOutCubic);
+  wp.style.transform = `translate(${(W - wpW) / 2}px, ${(H - wpW * 1.5) / 2 + 30 - T * 4}px) scale(${1.02 + T * 0.004})`;
+  wp.style.filter = `blur(${dimP * 6}px) saturate(${1 - dimP * 0.3})`;
+  wpDim.style.opacity = 0.1 + dimP * 0.62;
+  tagW.style.left = (W - 420) / 2 + 'px'; tagW.style.top = (tall ? 1200 : 1270) + 'px'; tagW.style.opacity = 1 - dimP;
+  // ---------- lock screen → player ----------
+  const open = K.p(T, T_OPEN, T_OPEN + 0.45, E.inOutCubic);
+  const lockIn = K.p(T, 0, 0.35, E.outCubic);
+  clock.style.opacity = lockIn * (1 - open); date.style.opacity = clock.style.opacity;
+  clock.style.transform = `translateY(${-open * 120}px) scale(${1 - open * 0.1})`; date.style.transform = clock.style.transform;
+  const bp = K.p(T, 0.1, 0.55, E.outBack);
+  banner.style.opacity = Math.min(1, bp * 2) * (1 - open);
+  banner.style.transform = `translateY(${(1 - bp) * -160 + open * (L.plY - L.bannerY)}px) scale(${0.92 + 0.08 * bp})`;
+  banner.style.visibility = T < T_OPEN + 0.5 ? 'visible' : 'hidden';
+  const hk = K.p(T, 0.05, 0.5, E.outExpo);
+  hook.style.opacity = hk * (1 - K.p(T, T_OPEN, T_OPEN + 0.25, E.linear));
+  hook.style.transform = `translateY(${(1 - hk) * 40}px)`;
+  hook.style.visibility = T < T_OPEN + 0.3 ? 'visible' : 'hidden';
+  const tp = K.p(T, 0.55, T_OPEN, E.inOutCubic);
+  touch.style.left = W / 2 + 'px'; touch.style.top = L.bannerY + 60 + 'px';
+  touch.style.opacity = T > 0.55 && T < T_OPEN + 0.2 ? Math.min(tp * 2, 1) * (1 - K.p(T, T_OPEN, T_OPEN + 0.2, E.linear)) : 0;
+  touch.style.transform = `scale(${T >= T_OPEN - 0.05 && T < T_OPEN + 0.1 ? 0.82 : 1})`;
+
+  const pl = K.p(T, T_OPEN + 0.05, T_OPEN + 0.6, E.outExpo);
+  player.style.opacity = pl;
+  player.style.transform = `translateY(${(1 - pl) * (L.bannerY - L.plY) * 0.6}px) scale(${0.94 + 0.06 * pl})`;
+  player.style.visibility = T >= T_OPEN ? 'visible' : 'hidden';
+  dram.style.opacity = K.p(T, 1.3, 1.7, E.linear) * 0.9;
+  trl.style.opacity = K.p(T, 1.0, 1.4, E.linear) * (tall ? 1 : 0);
+
+  // waveform: played part lime, the bars around the playhead breathe with her voice
+  const prog = K.clamp((T - PLAY0) / (PLAY1 - PLAY0));
+  const speaking = voAt(T) >= 0;
+  bars.forEach((b, i) => {
+    const u = (i + 0.5) / NB;
+    const base = 0.18 + 0.82 * Math.pow(seed(i * 3.1 + 2), 1.4);
+    const near = Math.max(0, 1 - Math.abs(u - prog) * 9);
+    const live = speaking ? near * (0.5 + 0.5 * Math.abs(Math.sin(T * 17 + i * 1.3))) : 0;
+    const h = 96 * Math.min(1, base * (0.55 + 0.45 * K.p(T, T_OPEN + 0.2 + i * 0.008, T_OPEN + 0.7 + i * 0.008, E.outExpo)) + live * 0.5);
+    b.style.height = h + 'px'; b.style.marginBottom = -h / 2 + 'px';
+    b.style.background = u <= prog ? '#DFFF5A' : 'rgba(250,247,238,.28)';
+  });
+  ph.style.left = prog * waveW + 'px';
+  const secs = Math.floor(prog * 12);
+  t0.textContent = `0:${String(secs).padStart(2, '0')}`;
+
+  // ---------- transcript: words appear as she says them ----------
+  const cl = curLine(T);
+  caps.forEach((c, i) => {
+    const v = VO[i];
+    const on = i === cl && T < 12.75;
+    const o = i < cl ? 1 : 0;
+    c.el.style.visibility = (on || (i === cl - 1 && T < VO[cl].a + 0.2)) ? 'visible' : 'hidden';
+    const outP = i === cl - 1 ? K.p(T, VO[cl].a - 0.15, VO[cl].a + 0.15, E.inCubic) : 0;
+    const n = c.ws.length;
+    c.ws.forEach((w, j) => {
+      const at = v.a + (v.b - v.a) * (j / n) * 0.92 - 0.05;
+      const p = K.p(T, at, at + 0.3, E.outExpo);
+      w.style.opacity = (o ? 1 : Math.min(1, p * 1.4)) * (1 - outP);
+      w.style.transform = `translateY(${(o ? 0 : (1 - p) * 26) - outP * 40}px)`;
+      w.style.filter = !o && p < 1 ? `blur(${(1 - p) * 6}px)` : 'none';
+    });
+    c.el.style.opacity = T > 12.6 ? 1 - K.p(T, 12.6, 12.95, E.linear) : 1;
+  });
+
+  // ---------- proofs ----------
+  const win = (a, b) => [K.p(T, a, a + 0.55, E.outExpo), K.p(T, b - 0.3, b, E.inCubic)];
+  // 1 · order
+  const [i1, o1] = win(T_PROOF[0], T_PROOF[1]);
+  P1.style.visibility = T >= T_PROOF[0] && T < T_PROOF[1] ? 'visible' : 'hidden';
+  photo.style.opacity = i1 * (1 - o1);
+  photo.style.transform = `translate(${(1 - i1) * -80}px, ${(1 - i1) * 60 - o1 * 50}px) rotate(${-3 + (1 - i1) * -6}deg) scale(${1 + 0.03 * K.p(T, T_PROOF[0], T_PROOF[1], E.linear)})`;
+  const i1b = K.p(T, T_PROOF[0] + 0.15, T_PROOF[0] + 0.7, E.outExpo);
+  ord.style.opacity = i1b * (1 - o1);
+  ord.style.transform = `translate(${(1 - i1b) * 80}px, ${-o1 * 50}px) rotate(${1.5 - (1 - i1b) * -4}deg)`;
+  tagC.style.left = Z.x + 'px'; tagC.style.top = Z.y + phH + 26 + 'px'; tagC.style.opacity = i1 * (1 - o1);
+  // 2 · margin
+  const [i2, o2] = win(T_PROOF[1], T_PROOF[2]);
+  mcard.style.visibility = T >= T_PROOF[1] && T < T_PROOF[2] ? 'visible' : 'hidden';
+  mcard.style.opacity = i2 * (1 - o2);
+  mcard.style.transform = `translateY(${(1 - i2) * 90 - o2 * 50}px) rotate(${(1 - i2) * 3}deg)`;
+  mbars.forEach((b, i) => {
+    const at = [5.55, 6.15, 6.45, 7.0][i];
+    b.style.width = K.p(T, at, at + 0.6, E.outCubic) * 100 * Number(b.dataset.w) + '%';
+    mrows[i].style.opacity = 0.35 + 0.65 * K.p(T, at - 0.1, at + 0.2, E.linear);
+  });
+  // 3 · where it stands
+  const [i3, o3] = win(T_PROOF[2], T_PROOF[3]);
+  stand.style.visibility = T >= T_PROOF[2] && T < T_PROOF[3] ? 'visible' : 'hidden';
+  stand.style.opacity = i3 * (1 - o3);
+  stand.style.transform = `translateY(${(1 - i3) * 90 - o3 * 50}px) rotate(${-1.5 + (1 - i3) * -3}deg)`;
+  [ring1, ring2].forEach((r, i) => {
+    const at = [9.2, 9.7][i];
+    const p = K.p(T, at, at + 0.35, E.outBack);
+    r.style.opacity = K.p(T, at, at + 0.1, E.linear); r.style.transform = `scale(${1.15 - 0.15 * p})`;
+  });
+  // real tag follows whichever real crop is up
+  const realOn = Math.max(i1b * (1 - o1) * (T < T_PROOF[1] ? 1 : 0), i3 * (1 - o3) * (T >= T_PROOF[2] && T < T_PROOF[3] ? 1 : 0), K.p(T, T_PROOF[3], T_PROOF[3] + 0.3, E.linear) * (1 - K.p(T, 12.7, 13, E.linear)));
+  tagR.style.opacity = realOn;
+  if (T < T_PROOF[1]) { tagR.style.left = Z.x + phW + 30 + 'px'; tagR.style.top = Z.y + (tall ? 30 : 60) + 185 * ordW / 780 + 24 + 'px'; tagR.innerHTML = 'Real app · demo workspace · simulated order'; }
+  else if (T < T_PROOF[3]) { tagR.style.left = Z.x + (Z.w - stW) / 2 + 'px'; tagR.style.top = Z.y + (tall ? 0 : 40) + stH * kS + 22 + 'px'; tagR.innerHTML = 'Real app · demo workspace · simulated order'; }
+  else { tagR.style.left = Z.x + (Z.w - apW) / 2 + 'px'; tagR.style.top = Z.y + (tall ? 180 : 240) + 236 + 'px'; tagR.innerHTML = 'Approve step as in the app · demo workspace'; }
+  // 4 · approve + done
+  const i4 = K.p(T, T_PROOF[3], T_PROOF[3] + 0.5, E.outBack), o4 = K.p(T, 12.7, 13.0, E.inCubic);
+  const press = T >= T_TAP - 0.04 && T < T_TAP + 0.14;
+  const tapped = K.p(T, T_TAP, T_TAP + 0.4, E.outCubic);
+  approve.style.visibility = T >= T_PROOF[3] ? 'visible' : 'hidden';
+  approve.style.opacity = Math.min(1, i4 * 2) * (1 - o4);
+  approve.style.transform = `translateY(${(1 - i4) * 60}px) scale(${(0.85 + 0.15 * i4) * (press ? 0.94 : 1)})`;
+  approve.style.background = tapped > 0.5 ? '#FAF7EE' : '#DFFF5A';
+  approve.style.boxShadow = `0 0 0 ${(1 - tapped) * 40 * (T >= T_TAP ? 1 : 0)}px rgba(223,255,90,${0.4 * (1 - tapped)}), 0 30px 60px -24px rgba(223,255,90,.45)`;
+  if (T >= T_TAP - 0.5 && T < T_TAP + 0.4) {
+    const tp2 = K.p(T, T_TAP - 0.5, T_TAP - 0.02, E.inOutCubic);
+    touch.style.left = W / 2 + 120 * (1 - tp2) + 'px'; touch.style.top = approve.offsetTop + apH / 2 + 160 * (1 - tp2) + 'px';
+    touch.style.opacity = Math.min(1, tp2 * 2) * (1 - K.p(T, T_TAP + 0.1, T_TAP + 0.35, E.linear));
+    touch.style.transform = `scale(${press ? 0.82 : 1})`;
+  }
+  const dp = K.p(T, T_TAP + 0.12, T_TAP + 0.65, E.outBack);
+  done.style.visibility = T >= T_TAP + 0.1 ? 'visible' : 'hidden';
+  done.style.opacity = Math.min(1, dp * 2) * (1 - o4);
+  done.style.transform = `translateY(${(1 - dp) * 50}px) scale(${0.9 + 0.1 * dp})`;
+  player.style.opacity = pl * (1 - o4 * 0.0);
+
+  end(T);
+});
+</script></body></html>

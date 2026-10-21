@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.3,
+  "text": "A postcard from the printer.",
+  "file": "01-201e29218f.wav",
+  "dur": 1.63
+ },
+ {
+  "t": 1.95,
+  "text": "An order came in. You approved it.",
+  "file": "02-d192fea235.wav",
+  "dur": 3.3
+ },
+ {
+  "t": 5.05,
+  "text": "Your partner printed it and shipped it.",
+  "file": "03-3b6d197b6f.wav",
+  "dur": 2.65
+ },
+ {
+  "t": 7.75,
+  "text": "Tracking went back to your store.",
+  "file": "04-63858d8dbb.wav",
+  "dur": 1.77
+ },
+ {
+  "t": 9.6,
+  "text": "Printed by your partner. Paid from your account.",
+  "file": "05-eee84e83bf.wav",
+  "dur": 3.16
+ }
+]

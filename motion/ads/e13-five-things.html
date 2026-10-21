@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E13 · Five Things You Get</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F3EEE3; }
+.flash { position: absolute; inset: 0; z-index: 80; background: #DFFF5A; pointer-events: none; }
+.num { position: absolute; z-index: 20; font: 900 900px/0.8 'Playfair Display'; letter-spacing: -0.06em; white-space: nowrap; color: transparent;
+  -webkit-background-clip: text; background-clip: text; background-repeat: no-repeat; transform-origin: 50% 60%; }
+.numO { position: absolute; z-index: 19; font: 900 900px/0.8 'Playfair Display'; letter-spacing: -0.06em; white-space: nowrap; color: transparent; -webkit-text-stroke: 4px #1F1F1F; transform-origin: 50% 60%; }
+.numS { position: absolute; z-index: 18; font: 900 900px/0.8 'Playfair Display'; letter-spacing: -0.06em; white-space: nowrap; color: #1F1F1F; transform-origin: 50% 60%; }
+.hook { position: absolute; z-index: 30; font: 800 92px/0.98 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.hook em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.cap { position: absolute; z-index: 30; font: 800 84px/0.98 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.cap em { font-style: italic; }
+.cap .w { display: inline-block; white-space: pre; }
+.sub { position: absolute; z-index: 30; font: 600 30px/1.25 'Archivo'; color: #45403A; }
+.sub b { color: #1F1F1F; background: linear-gradient(transparent 60%, #DFFF5A 60%); }
+.dots { position: absolute; z-index: 30; display: flex; gap: 12px; align-items: center; }
+.dots i { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font: 800 24px 'IBM Plex Mono', monospace; font-style: normal; }
+.dots span { margin-left: 10px; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #6B645A; }
+.crop { position: absolute; z-index: 26; overflow: hidden; border-radius: 24px; background: #FAF7EE; box-shadow: 0 40px 70px -34px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.crop img { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 780px; display: block; }
+.ring { position: absolute; border: 5px solid #DFFF5A; border-radius: 14px; box-shadow: 0 0 0 2px #1F1F1F; }
+.photo { position: absolute; z-index: 26; overflow: hidden; border-radius: 24px; box-shadow: 0 40px 70px -34px rgba(31,31,31,.6), 0 0 0 6px #FFFDF8; }
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.chipI { position: absolute; z-index: 30; padding: 14px 22px; border-radius: 18px; background: #1F1F1F; color: #FAF7EE; font: 600 25px/1.25 'Archivo'; }
+.chipI b { color: #DFFF5A; }
+.tile { position: absolute; z-index: 40; overflow: hidden; border-radius: 26px; background: #1F1F1F; box-shadow: 0 30px 60px -30px rgba(31,31,31,.7); }
+.tile img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .9; }
+.tile b { position: absolute; left: 14px; top: 6px; font: 900 96px/1 'Playfair Display'; color: #DFFF5A; text-shadow: 0 4px 16px rgba(0,0,0,.4); }
+.tile span { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 14px 14px; font: 700 22px/1.15 'Archivo'; color: #FFFDF8; background: linear-gradient(180deg, rgba(20,16,10,0), rgba(20,16,10,.85)); }
+.fin { position: absolute; z-index: 40; text-align: center; font: 800 96px/0.98 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.fin em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.chipR { position: absolute; z-index: 40; white-space: nowrap; display: flex; gap: 12px; align-items: center; padding: 16px 28px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 32px 'Archivo'; box-shadow: 0 20px 40px -20px rgba(31,31,31,.6), 0 0 0 3px #1F1F1F; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .06; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E13 — "Five things you get." A countdown of giant serif numerals, each one a window cut into a product photograph
+// (concept images), slamming in on the breath before the narrator names it: 5 print-ready files · 4 listing images ·
+// 3 a short video · 2 the listing, written for you · 1 a printed edition, if you want one. Each count carries its proof
+// (real app crops; the printed edition by your own partner). The five collapse into a row of tiles: "All five, from one
+// sentence." — drafts first, you review it all.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 117.5, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice — speech windows: L1 0.59–1.30 · L2 1.75–2.39 · L3 2.85–3.74 · L4 4.15–5.14 · L5 5.55–7.34 · L6 7.80–10.26 · L7 10.75–12.39
+const LAND = [1.55, 2.65, 3.95, 5.35, 7.6];   // each numeral slams in, in the breath before its line
+const T_FIN = 10.5;
+const ITEMS = [
+  { n: 5, cap: 'Print-ready<br>files.', sub: 'PDFs in <b>A4 and US Letter</b>, pages counted.', img: 'r04/g06-wedding-planner', pos: '50% 40%',
+    proof: { src: '24-phone-product', sy: 2545, sh: 300 } },
+  { n: 4, cap: 'Listing<br>images.', sub: 'Made from <b>your real pages</b>.', img: 'r04/g08-gallery-wall', pos: '50% 30%',
+    proof: { src: '24-phone-product', sy: 1330, sh: 740, ring: [0.53, 0.86, 0.43, 0.13] } },
+  { n: 3, cap: 'A short<br><em>video.</em>', sub: 'For your listing, <b>ready to post</b>.', img: 'r04/g03-slow-mornings-mug', pos: '50% 55%',
+    proof: { src: '24-phone-product', sx: 10, sw: 720, sy: 1150, sh: 120, ring: [0.615, 0.08, 0.2, 0.84] } },
+  { n: 2, cap: 'The listing,<br><em>written.</em>', sub: '<b>Title, description, tags</b> — for the stores you choose.', img: 'r04/g10-greeting-cards', pos: '50% 50%',
+    proof: { src: '72-phone-listing-send', sy: 500, sh: 280 } },
+  { n: 1, cap: 'A printed<br><em>edition.</em>', sub: 'If you want one. <b>Your own print partner</b> prints each order.', img: 'r04/g22-tee-rack', pos: '50% 45%',
+    proof: { photo: 'r04/g20-parcel', pos: '50% 60%' } },
+];
+
+const L = tall
+  ? { numX: 30, numY: 115, numFs: 820, numW: 620, capX: 65, capY: 950, capW: 950, capFs: 96, subY: 1062, subW: 900, prX: 555, prY: 590, prW: 470,
+      chipX: 555, chipY: 440, dotsY: 1172, hookX: 560, hookY: 420, tileY: 690, tileW: 178, tileH: 250, finY: 330, chipRY: 1010 }
+  : { numX: 10, numY: -90, numFs: 1000, numW: 600, capX: 620, capY: 110, capW: 410, capFs: 72, subY: 290, subW: 400, prX: 620, prY: 480, prW: 400,
+      chipX: 620, chipY: 0, dotsY: 1236, hookX: 600, hookY: 300, tileY: 520, tileW: 178, tileH: 320, finY: 170, chipRY: 920 };
+
+// ---------- ambient: the current photo, blurred, bleeding up from the bottom ----------
+const ambs = ITEMS.map((it) => K.el('img', { src: K.pub(it.img + '.webp'), style: { position: 'absolute', left: '-5%', width: '110%', height: (tall ? 900 : 520) + 'px', top: H - (tall ? 820 : 420) + 'px', objectFit: 'cover', objectPosition: it.pos,
+  filter: 'blur(36px) saturate(1.1)', opacity: 0, WebkitMaskImage: 'linear-gradient(180deg, transparent 0, #000 55%)', maskImage: 'linear-gradient(180deg, transparent 0, #000 55%)' } }));
+// ---------- numerals: shadow + photo-filled face + ink outline ----------
+const nums = ITEMS.map((it) => {
+  const mk = (cls) => K.box(L.numX, L.numY, L.numW, L.numFs * 0.8, { cls, html: String(it.n), style: { fontSize: L.numFs + 'px', textAlign: 'center' } });
+  const s = mk('numS'), o = mk('numO'), f = mk('num');
+  f.style.backgroundImage = `url("${K.pub(it.img + '.webp')}")`;
+  f.style.backgroundSize = `${L.numW * 1.25}px auto`;
+  return { s, o, f };
+});
+const tagC = K.demoTag('Concept images · AI-generated', 0, 0);
+
+// ---------- hook ----------
+const hook = K.box(L.hookX, L.hookY, W - L.hookX - 60, null, { cls: 'hook', html: tall ? 'things<br>you<br><em>get.</em>' : 'things<br>you <em>get.</em>', style: { fontSize: (tall ? 120 : 110) + 'px' } });
+
+// ---------- captions + proofs ----------
+const caps = ITEMS.map((it) => {
+  const c = K.box(L.capX, L.capY, L.capW, null, { cls: 'cap', html: tall ? it.cap.replace('<br>', ' ') : it.cap, style: { fontSize: L.capFs + 'px' } });
+  const s = K.box(L.capX, L.subY, L.subW, null, { cls: 'sub', html: it.sub, style: { fontSize: (tall ? 32 : 27) + 'px' } });
+  return { c, s };
+});
+const proofs = ITEMS.map((it) => {
+  const p = it.proof;
+  if (p.photo) {
+    const el = K.box(L.prX, L.prY, L.prW, L.prW * 0.8, { cls: 'photo', html: `<img src="${K.pub(p.photo + '.webp')}" style="object-position:${p.pos}">` });
+    return { el, h: L.prW * 0.8, real: false };
+  }
+  const k = L.prW / (p.sw || 780), h = p.sh * k;
+  const el = K.box(L.prX, L.prY, L.prW, h, { cls: 'crop', html: `<img src="${K.screen(p.src)}">` });
+  el.querySelector('img').style.transform = `translate(${-(p.sx || 0) * k}px, ${-p.sy * k}px) scale(${k})`;
+  let ring = null;
+  if (p.ring) { ring = K.el('div', { parent: el, cls: 'ring', style: { left: p.ring[0] * L.prW + 'px', top: p.ring[1] * h + 'px', width: p.ring[2] * L.prW + 'px', height: p.ring[3] * h + 'px' } }); }
+  return { el, h, ring, real: true };
+});
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+const chipI = K.box(L.prX, 0, L.prW, null, { cls: 'chipI', html: 'Printing is paid from <b>your own partner account</b> — never Credits.' });
+
+// ---------- progress dots ----------
+const dots = K.box(65, L.dotsY, null, null, { cls: 'dots', style: { width: 'auto', height: 'auto' }, html: ITEMS.map((it) => `<i>${it.n}</i>`).join('') + '<span>things you get</span>' });
+const dotEls = [...dots.querySelectorAll('i')];
+
+// ---------- finale ----------
+const flash = K.box(0, 0, W, H, { cls: 'flash' });
+const finBg = K.box(0, 0, W, H, { style: { zIndex: 35, background: '#F3EEE3' } });
+const fin = K.box(65, L.finY, W - 130, null, { cls: 'fin', html: 'All five,<br>from <em>one sentence.</em>', style: { fontSize: (tall ? 100 : 92) + 'px' } });
+const tileGap = (W - 130 - 5 * L.tileW) / 4;
+const tiles = ITEMS.map((it, i) => K.box(65 + i * (L.tileW + tileGap), L.tileY, L.tileW, L.tileH, { cls: 'tile',
+  html: `<img src="${K.pub(it.img + '.webp')}" style="object-position:${it.pos}"><b>${it.n}</b><span>${it.cap.replace(/<br>/g, ' ').replace(/<\/?em>/g, '')}</span>` }));
+const chipR = K.box(0, L.chipRY, null, null, { cls: 'chipR', style: { width: 'auto', height: 'auto' }, html: '<svg width="30" height="30" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#1F1F1F" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Drafts first · you review it all' });
+const tagF = K.demoTag('Concept images · AI-generated', 65, L.tileY + L.tileH + 20);
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Five things.<br>One sentence.' });
+
+const cur = (T) => { let c = -1; LAND.forEach((t, i) => { if (T >= t - 0.18) c = i; }); return T >= T_FIN ? 5 : c; };
+
+K.run({
+  id: 'E13', title: 'Five Things You Get', dur: DUR, bpm: BPM, music: 'back-in-the-80s', mood: 'bright', key: 'D', intro: 0.0, cover: 4.3,
+  technique: 'A 5-4-3-2-1 countdown of giant serif numerals cut as windows into product photographs (shadow, photo face, ink outline), each slamming in on the breath before the narrator names it, with its proof beside it (real app crops, a printed edition by your own partner); the five collapse into a row of tiles for “All five, from one sentence.”',
+  caption: 'Five things you get from one sentence: print-ready files, listing images, a short video, the listing written for you — and a printed edition if you want one, printed per order by your own print partner. Everything arrives as a draft for you to review. Start free at makeandlist.com',
+  short: 'All five, from one sentence.',
+  question: 'What do I get?', gain: 'What you get: the whole product from one sentence',
+  vo: [[0.3, 'Five things you get.', 1.05], [1.41, 'Print-ready files.'], [2.7, 'Listing images.'], [3.78, 'A short video.'], [5.0, 'The listing, written for you.'], [7.55, 'And a printed edition, if you want one.'], [10.46, 'All five, from one sentence.']],
+  beats: ['0–1.5 s: “Five things you get.” — a giant 5', '1.5–2.6 s: 5 — print-ready files (real files view)', '2.6–3.9 s: 4 — listing images (real)', '3.9–5.3 s: 3 — a short video (real tabs: Pages · Listing images · Video)', '5.3–7.6 s: 2 — the listing, written for you (real listing title)', '7.6–10.5 s: 1 — a printed edition, if you want one; your own partner prints, paid from your partner account', '10.5–13 s: the five tiles: “All five, from one sentence.” — drafts first', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [0.08, 'pop'], [LAND[0] - 0.2, 'whoosh'], [LAND[0], 'hit'], [LAND[1] - 0.2, 'whoosh'], [LAND[1], 'pop'], [LAND[2] - 0.15, 'whoosh'], [LAND[2], 'pop'],
+    [LAND[3] - 0.2, 'whoosh'], [LAND[3], 'pop'], [LAND[4] - 0.2, 'whoosh'], [LAND[4], 'hit'], [9.4, 'box'], [T_FIN - 0.05, 'whoosh'], [T_FIN + 0.1, 'hit'], [12.5, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const c = cur(T);
+
+  // ---------- numerals ----------
+  nums.forEach((nm, i) => {
+    // 5 is on screen from the hook (outline only), its photo fills on its land
+    const inAt = i === 0 ? 0 : LAND[i] - 0.18;
+    const outAt = i < 4 ? LAND[i + 1] - 0.18 : T_FIN - 0.12;
+    const p = K.p(T, inAt, inAt + 0.3, E.outExpo), o = K.p(T, outAt, outAt + 0.2, E.inCubic);
+    const vis = T >= inAt && T < outAt + 0.2;
+    const sc = (1.45 - 0.45 * p) * (1 + 0.04 * K.p(T, inAt, outAt, E.linear)) * (1 + o * 0.6);
+    const tr = `translate(${o * (tall ? -120 : -200)}px, ${o * -40}px) scale(${sc}) rotate(${(1 - p) * -8 + o * -10}deg)`;
+    const fill = i === 0 ? K.p(T, LAND[0] - 0.05, LAND[0] + 0.2, E.outCubic) : 1;
+    [nm.s, nm.o, nm.f].forEach((el) => { el.style.transform = tr; el.style.visibility = vis ? 'visible' : 'hidden'; });
+    nm.f.style.opacity = Math.min(1, p * 2) * fill * (1 - o);
+    nm.o.style.opacity = Math.min(1, p * 2) * (1 - o);
+    nm.s.style.opacity = 0.14 * Math.min(1, p * 2) * (1 - o);
+    nm.s.style.transform = tr + ' translate(18px, 22px)';
+    nm.f.style.backgroundPosition = `${-L.numW * 0.12 + Math.sin(T * 0.6 + i) * 20}px ${-60 - (T - inAt) * 18}px`;
+  });
+  tagC.style.left = L.numX + 20 + 'px'; tagC.style.top = (tall ? 282 : 1180) + 'px';
+  tagC.style.opacity = K.p(T, LAND[0], LAND[0] + 0.3, E.linear) * (1 - K.p(T, T_FIN - 0.2, T_FIN, E.linear));
+
+  ambs.forEach((a, i) => {
+    const inAt = LAND[i] - 0.18, outAt = i < 4 ? LAND[i + 1] - 0.18 : 13.0;
+    a.style.opacity = 0.55 * K.p(T, inAt, inAt + 0.5, E.linear) * (1 - K.p(T, outAt, outAt + 0.4, E.linear));
+    a.style.transform = `translateY(${-(T - inAt) * 10}px) scale(1.05)`;
+  });
+  // ---------- hook ----------
+  const hp = K.p(T, 0.1, 0.55, E.outExpo), ho = K.p(T, LAND[0] - 0.25, LAND[0] - 0.05, E.inCubic);
+  hook.style.opacity = hp * (1 - ho);
+  hook.style.transform = `translateX(${(1 - hp) * 60 - ho * 40}px)`;
+  hook.style.visibility = T < LAND[0] ? 'visible' : 'hidden';
+
+  // ---------- captions ----------
+  caps.forEach((cp, i) => {
+    const a = LAND[i] + 0.05, b = i < 4 ? LAND[i + 1] - 0.18 : T_FIN - 0.12;
+    const p = K.p(T, a, a + 0.4, E.outExpo), o = K.p(T, b - 0.12, b + 0.05, E.inCubic);
+    const vis = T >= a && T < b + 0.05;
+    cp.c.style.opacity = p * (1 - o); cp.c.style.visibility = vis ? 'visible' : 'hidden';
+    cp.c.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+    cp.c.style.clipPath = `inset(-20px ${(1 - p) * 100}% -30px 0)`;
+    const sp = K.p(T, a + 0.2, a + 0.6, E.outExpo);
+    cp.s.style.opacity = sp * (1 - o); cp.s.style.visibility = cp.c.style.visibility;
+    cp.s.style.transform = `translateY(${(1 - sp) * 24}px)`;
+  });
+
+  // ---------- proofs ----------
+  let realOn = 0, realY = 0;
+  proofs.forEach((pr, i) => {
+    const a = LAND[i] + 0.12, b = i < 4 ? LAND[i + 1] - 0.18 : T_FIN - 0.12;
+    const p = K.p(T, a, a + 0.5, E.outBack), o = K.p(T, b - 0.15, b + 0.05, E.inCubic);
+    const y = L.prY;
+    pr.el.style.top = y + 'px';
+    pr.el.style.opacity = Math.min(1, p * 2) * (1 - o);
+    pr.el.style.visibility = T >= a && T < b + 0.05 ? 'visible' : 'hidden';
+    pr.el.style.transform = `translateY(${(1 - p) * 80 - o * 40 + Math.sin(T * 1.4 + i) * 4}px) rotate(${(i % 2 ? 2 : -2) * (0.6 + 0.4 * (1 - p))}deg) scale(${0.85 + 0.15 * p})`;
+    if (pr.ring) { const rp = K.p(T, a + 0.45, a + 0.75, E.outBack); pr.ring.style.opacity = K.p(T, a + 0.45, a + 0.55, E.linear); pr.ring.style.transform = `scale(${1.2 - 0.2 * rp})`; }
+    if (pr.real && T >= a && T < b) { realOn = Math.min(1, p * 2) * (1 - o); realY = y - 46; }
+  });
+  realTag.style.left = L.prX + 'px'; realTag.style.top = realY + 'px'; realTag.style.opacity = realOn;
+  const ci = K.p(T, 8.5, 8.9, E.outExpo) * (1 - K.p(T, T_FIN - 0.3, T_FIN - 0.1, E.inCubic));
+  chipI.style.top = (tall ? L.chipY : L.prY + L.prW * 0.8 + 30) + 'px'; chipI.style.left = L.chipX + 'px';
+  chipI.style.opacity = ci; chipI.style.transform = `translateY(${(1 - ci) * 30}px)`;
+
+  // ---------- dots ----------
+  dotEls.forEach((d, i) => {
+    const now = c === i, past = c > i;
+    d.style.background = now ? '#DFFF5A' : past ? '#1F1F1F' : 'transparent';
+    d.style.color = now ? '#1F1F1F' : past ? '#DFFF5A' : '#8A8378';
+    d.style.boxShadow = now ? 'inset 0 0 0 3px #1F1F1F' : past ? 'none' : 'inset 0 0 0 3px #D3CBBE';
+    d.style.transform = `scale(${now ? 1 + 0.25 * (1 - K.p(T, LAND[i] - 0.18, LAND[i] + 0.3, E.outCubic)) : 1})`;
+  });
+  dots.style.opacity = K.p(T, LAND[0] - 0.1, LAND[0] + 0.2, E.linear);
+  dots.style.zIndex = 41;
+
+  // ---------- finale ----------
+  flash.style.opacity = 0.55 * (1 - K.p(T, T_FIN, T_FIN + 0.22, E.linear)) * (T >= T_FIN ? 1 : 0);
+  const fb = K.p(T, T_FIN - 0.02, T_FIN + 0.1, E.linear);
+  finBg.style.opacity = fb; finBg.style.visibility = T >= T_FIN - 0.02 ? 'visible' : 'hidden';
+  const fp = K.p(T, T_FIN + 0.1, T_FIN + 0.6, E.outExpo);
+  fin.style.opacity = fp; fin.style.transform = `translateY(${(1 - fp) * 50}px) scale(${0.96 + 0.04 * fp})`;
+  fin.style.visibility = T >= T_FIN ? 'visible' : 'hidden';
+  tiles.forEach((t, i) => {
+    const p = K.p(T, T_FIN + 0.05 + i * 0.07, T_FIN + 0.55 + i * 0.07, E.outBack);
+    t.style.opacity = Math.min(1, p * 2);
+    t.style.transform = `translateY(${(1 - p) * 140 + Math.sin(T * 1.6 + i) * 5}px) rotate(${(i - 2) * 2.5 * (1 - p) + (i - 2) * 1.2}deg) scale(${0.7 + 0.3 * p})`;
+    t.style.visibility = T >= T_FIN ? 'visible' : 'hidden';
+  });
+  tagF.style.opacity = K.p(T, T_FIN + 0.5, T_FIN + 0.8, E.linear);
+  const cr = K.p(T, 11.6, 12.0, E.outBack);
+  chipR.style.left = W / 2 + 'px';
+  chipR.style.opacity = Math.min(1, cr * 2); chipR.style.transform = `translateX(-50%) scale(${0.7 + 0.3 * cr}) rotate(-1.5deg)`;
+  chipR.style.visibility = T >= 11.6 ? 'visible' : 'hidden';
+
+  end(T);
+});
+</script></body></html>

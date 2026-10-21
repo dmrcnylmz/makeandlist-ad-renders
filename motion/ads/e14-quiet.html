@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E14 · The Quiet One</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1E1B17; }
+.shot { position: absolute; left: 0; top: 0; overflow: hidden; }
+.shot img { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: block; }
+.vig { position: absolute; inset: 0; z-index: 40; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, rgba(20,16,12,0) 45%, rgba(20,16,12,.55) 100%); }
+.low { position: absolute; left: 0; right: 0; z-index: 41; pointer-events: none; }
+.mote { position: absolute; z-index: 42; border-radius: 50%; background: rgba(255,248,228,.85); filter: blur(1.5px); }
+.cap { position: absolute; z-index: 50; text-align: center; font: italic 500 68px/1.12 'Playfair Display'; letter-spacing: -0.01em; color: #FFFDF8; text-shadow: 0 2px 30px rgba(20,14,8,.55); }
+.cap .w { display: inline-block; white-space: pre; }
+.cap b { font-weight: 700; font-style: italic; }
+.idx { position: absolute; z-index: 50; left: 50% !important; width: auto !important; transform: translateX(-50%); padding: 7px 16px; border-radius: 99px; background: rgba(30,27,23,.45); font: 500 20px 'IBM Plex Mono', monospace; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,253,248,.75); white-space: nowrap; }
+.note { position: absolute; z-index: 48; padding: 8px 12px 8px 0; border-radius: 99px; background: rgba(30,27,23,.55); backdrop-filter: blur(6px); display: flex; align-items: center; gap: 14px; white-space: nowrap; font: 500 23px 'IBM Plex Mono', monospace; letter-spacing: .06em; color: #FFFDF8; }
+.note i { display: block; height: 1.5px; background: rgba(255,253,248,.8); transform-origin: 0 50%; }
+.note b { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #DFFF5A; color: #1F1F1F; font: 800 18px 'Archivo'; }
+.loupe { position: absolute; z-index: 47; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 3px rgba(255,253,248,.9), 0 30px 60px -20px rgba(0,0,0,.6); }
+.loupe img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.paper { position: absolute; z-index: 46; overflow: hidden; border-radius: 18px; background: #FAF7EE; box-shadow: 0 60px 100px -40px rgba(0,0,0,.7); }
+.paper img { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 780px; display: block; }
+.demo.dk { background: rgba(30,27,23,.7); color: rgba(255,253,248,.85); border-color: rgba(255,253,248,.4); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E14 — the quiet one. Slow macro photography, long dissolves, dust in the light, a soft voice, lowercase italic words.
+// Look closely (a print's texture) · every page counted (pages, a counter whispering) · every print checked (a loupe on
+// the line art) · nothing listed until you've seen it (the real "drafts first" line, laid on the desk like paper) · an
+// order waits for your yes (a wrapped gift; the real "waiting for your approval" pill) · made with care, sent when you say.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 71.8, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice — speech windows: L1 0.95–1.66 · L2 2.45–3.38 / 4.40–5.08 · L3 5.85–7.83 · L4 8.45–9.94 · L5 10.60–11.27 / 11.30–12.53
+// Shots (each dissolves over ~0.9 s): [start, end, image, focus x, focus y (image px), scale from → to, drift px]
+const SH = [
+  { a: 0, b: 2.3, img: 'r05/h12-print-macro', fx: 560, fy: 720, s0: 1.55, s1: 1.38, dx: -40, dy: 30 },
+  { a: 1.9, b: 4.25, img: 'r04/g06-wedding-planner', fx: 470, fy: 760, s0: 1.6, s1: 1.45, dx: 30, dy: -40 },
+  { a: 3.85, b: 5.9, img: 'r04/g01-botanical-print', fx: 470, fy: 520, s0: 1.7, s1: 1.52, dx: -20, dy: 30 },
+  { a: 5.5, b: 8.4, img: 'r05/h02-morning-desk', fx: 560, fy: 840, s0: 1.25, s1: 1.14, dx: 30, dy: 0 },
+  { a: 8.0, b: 10.65, img: 'r05/h11-gift-wrap', fx: 640, fy: 860, s0: 1.5, s1: 1.33, dx: -30, dy: -20 },
+  { a: 10.25, b: 13.6, img: 'r04/g20-parcel', fx: 470, fy: 1000, s0: 1.32, s1: 1.18, dx: 20, dy: -30 },
+];
+const XF = 0.9; // dissolve length
+
+const L = tall ? { capY: 960, capFs: 70, idxY: 300 } : { capY: 1000, capFs: 62, idxY: 70 };
+
+const shots = SH.map((s) => {
+  const box = K.box(0, 0, W, H, { cls: 'shot' });
+  const img = K.el('img', { parent: box, src: K.pub(s.img + '.webp'), style: { width: '1024px', height: '1536px' } });
+  return { box, img, s };
+});
+const low = K.box(0, 0, W, H, { cls: 'low', style: { background: tall ? 'linear-gradient(180deg, rgba(20,16,12,.0) 35%, rgba(20,16,12,.45) 58%, rgba(20,16,12,.2) 80%, rgba(20,16,12,.0) 100%)' : 'linear-gradient(180deg, rgba(20,16,12,.0) 50%, rgba(20,16,12,.5) 100%)' } });
+const vig = K.box(0, 0, W, H, { cls: 'vig' });
+const motes = Array.from({ length: 26 }, (_, i) => K.box(0, 0, 3 + seed(i) * 7, 3 + seed(i) * 7, { cls: 'mote' }));
+const tagC = K.demoTag('Concept images · AI-generated', 0, 0); tagC.classList.add('dk');
+
+// captions: lowercase italic, the voice's own words, word by word
+const CAPS = [
+  { a: 0.92, b: 2.2, html: 'look closely.' },
+  { a: 2.42, b: 3.9, html: 'every page, <b>counted.</b>' },
+  { a: 4.38, b: 5.65, html: 'every print, <b>checked.</b>' },
+  { a: 5.82, b: 8.1, html: 'nothing is listed<br>until <b>you’ve seen it.</b>' },
+  { a: 8.42, b: 10.3, html: 'an order waits<br>for <b>your yes.</b>' },
+  { a: 10.41, b: 12.85, html: 'made with care.<br><b>sent when you say.</b>' },
+];
+const caps = CAPS.map((c) => {
+  const el = K.box(65, tall && c.a > 4 && c.a < 5 ? 600 : L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  let bold = false;
+  el.innerHTML = c.html.split('<br>').map((line) => line.split(' ').map((w) => {
+    if (w.startsWith('<b>')) bold = true;
+    const clean = w.replace(/<\/?b>/g, '');
+    const out = `<span class="w"${bold ? ' style="font-weight:700"' : ''}>${clean} </span>`;
+    if (w.endsWith('</b>')) bold = false;
+    return out;
+  }).join('')).join('<br>');
+  return { el, ws: [...el.querySelectorAll('.w')], c };
+});
+const idx = K.box(65, L.idxY, W - 130, null, { cls: 'idx', style: { textAlign: 'center' } });
+
+// shot 2: the page counter whispers along a hairline
+const noteP = K.box(0, 0, null, null, { cls: 'note', style: { width: 'auto', height: 'auto' }, html: '<i style="width:120px"></i><span class="tx">page 01</span><b>✓</b>' });
+const notePtx = noteP.querySelector('.tx'), notePb = noteP.querySelector('b'), notePi = noteP.querySelector('i');
+// shot 3: a loupe over the line art
+const LS = tall ? 300 : 260;
+const loupe = K.box(0, 0, LS, LS, { cls: 'loupe' });
+const loupeImg = K.el('img', { parent: loupe, src: K.pub('r04/g01-botanical-print.webp'), style: { width: '1024px', height: '1536px' } });
+const noteS = K.box(0, 0, null, null, { cls: 'note', style: { width: 'auto', height: 'auto' }, html: '<i style="width:90px"></i><span>print sharpness · checked</span><b>✓</b>' });
+// shot 4: the real line, laid on the desk like a sheet of paper
+const pW = tall ? 760 : 700;
+const paper = K.box((W - pW) / 2, tall ? 470 : 250, pW, 440 * pW / 780, { cls: 'paper', html: `<img src="${K.screen('72-phone-listing-send')}">` });
+paper.querySelector('img').style.transform = `translate(0, ${-1060 * pW / 780}px) scale(${pW / 780})`;
+// shot 5: the real pill
+const pillW = tall ? 760 : 620;
+const pill = K.box((W - pillW) / 2, tall ? 560 : 360, pillW, 170 * pillW / 780, { cls: 'paper', html: `<img src="${K.screen('52-phone-order')}">` });
+pill.querySelector('img').style.transform = `translate(0, ${-2780 * pillW / 780}px) scale(${pillW / 780})`;
+const realTag = K.demoTag('Real app · demo workspace', 0, 0); realTag.classList.add('dk');
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Made with care.<br>Sent when you say.' });
+
+K.run({
+  id: 'E14', title: 'The Quiet One', dur: DUR, bpm: BPM, music: 'clouds', mood: 'calm', key: 'F', intro: 0.0, cover: 4.9,
+  technique: 'ASMR-calm macro film: six concept photographs in slow push-ins and long dissolves with dust drifting in the light, a soft narrator and lowercase italic words that arrive with her voice; whispered mono annotations (a page counter, a loupe on the line art) and two real app lines laid in like sheets of paper',
+  caption: 'Made with care, sent when you say. Every page is counted and every print checked for sharpness; nothing is listed until you have seen it, and an order for a printed product waits for your yes. Start free at makeandlist.com',
+  short: 'Made with care. Sent when you say.',
+  question: 'Can I trust it?', gain: 'Quality and control: checked first, sent on your yes',
+  vo: [[0.3, 'Look closely.'], [2.19, 'Every page counted. Every print checked.'], [5.66, 'Nothing is listed until you have seen it.'], [7.67, 'An order waits for your yes.'], [9.5, 'Made with care, sent when you say.']],
+  beats: ['0–2.2 s: “Look closely.” — a macro of a print’s texture, dust in the light', '2.2–3.9 s: every page, counted — planner pages, a counter whispers', '3.9–5.6 s: every print, checked — a loupe over the line art', '5.6–8.1 s: nothing is listed until you’ve seen it — the real “drafts first” line on the desk', '8.1–10.3 s: an order waits for your yes — a wrapped gift; the real “waiting for your approval”', '10.3–13 s: made with care, sent when you say — a parcel on the doorstep', '13–15 s: end card'],
+  cues: [[0.0, 'swish'], [2.05, 'paper'], [3.95, 'marker'], [5.45, 'paper'], [8.15, 'swish'], [8.3, 'pop'], [10.2, 'box'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // ---------- shots: slow push, long dissolves, a breath of focus at each start ----------
+  shots.forEach(({ box, img, s }, i) => {
+    const vis = T >= s.a && T < s.b;
+    box.style.visibility = vis ? 'visible' : 'hidden';
+    if (!vis) return;
+    const u = K.clamp((T - s.a) / (s.b - s.a));
+    const sc = K.lerp(s.s0, s.s1, E.inOutCubic(u)) * Math.max(W / 1024, H / 1536);
+    const x = K.clamp(W / 2 - s.fx * sc + s.dx * u, W - 1024 * sc, 0), y = K.clamp(H / 2 - s.fy * sc + s.dy * u, H - 1536 * sc, 0);
+    img.style.transform = `translate(${x}px, ${y}px) scale(${sc})`;
+    const fin = i === 0 ? K.p(T, 0, 0.6, E.linear) : K.p(T, s.a, s.a + XF, E.inOutCubic);
+    box.style.opacity = fin;
+    box.style.zIndex = 10 + i;
+    const foc = 1 - K.p(T, s.a + (i === 0 ? 0.2 : 0.3), s.a + (i === 0 ? 1.3 : 1.2), E.inOutCubic);
+    img.style.filter = foc > 0.01 ? `blur(${foc * 9}px)` : 'none';
+  });
+  tagC.style.left = (tall ? W - 65 - 380 : 60) + 'px'; tagC.style.top = (tall ? 1196 : 1270) + 'px';
+  tagC.style.opacity = K.p(T, 0.6, 1.0, E.linear) * (1 - K.p(T, 12.6, 13, E.linear));
+
+  // dust motes in the light
+  motes.forEach((m, i) => {
+    const sp = 8 + seed(i + 3) * 18;
+    const x = (seed(i + 11) * W + Math.sin(T * 0.3 + i) * 40 + T * (seed(i + 5) - 0.5) * 20) % W;
+    const y = ((seed(i + 17) * H - T * sp) % H + H) % H;
+    m.style.transform = `translate(${x}px, ${y}px)`;
+    m.style.opacity = (0.25 + 0.5 * seed(i + 23)) * (0.6 + 0.4 * Math.sin(T * 1.3 + i * 2)) * K.p(T, 0.3, 1.2, E.linear) * (1 - K.p(T, 12.6, 13, E.linear));
+  });
+
+  // ---------- captions ----------
+  caps.forEach(({ el, ws, c }) => {
+    const vis = T >= c.a - 0.05 && T < c.b + 0.05;
+    el.style.visibility = vis ? 'visible' : 'hidden';
+    const o = K.p(T, c.b - 0.45, c.b, E.inOutCubic);
+    ws.forEach((w, j) => {
+      const at = c.a + j * 0.11;
+      const p = K.p(T, at, at + 0.8, E.outCubic);
+      w.style.opacity = p * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 14}px)`;
+      w.style.filter = p < 1 || o > 0 ? `blur(${(1 - p) * 8 + o * 6}px)` : 'none';
+    });
+  });
+  const idxTxt = T < 2.2 ? 'i · texture' : T < 3.9 ? 'ii · pages' : T < 5.6 ? 'iii · sharpness' : T < 8.1 ? 'iv · your eyes first' : T < 10.3 ? 'v · your yes' : 'vi · on its way';
+  idx.textContent = idxTxt;
+  idx.style.opacity = 0.9 * K.p(T, 0.5, 1.2, E.linear) * (1 - K.p(T, 12.5, 12.9, E.linear));
+
+  // ---------- page counter (shot 2) ----------
+  const nP = K.win(T, 2.6, 4.2, 0.4);
+  const pages = Math.max(1, Math.round(36 * K.p(T, 2.6, 3.7, E.inOutCubic)));
+  notePtx.textContent = `page ${String(pages).padStart(2, '0')} / 36`;
+  notePb.style.transform = `scale(${K.p(T, 3.7, 3.95, E.outBack)})`;
+  notePi.style.transform = `scaleX(${K.p(T, 2.6, 3.2, E.outCubic)})`;
+  noteP.style.left = (tall ? 120 : 140) + 'px'; noteP.style.top = (tall ? 760 : 560) + 'px';
+  noteP.style.opacity = nP;
+
+  // ---------- loupe (shot 3) ----------
+  const lP = K.win(T, 4.0, 5.75, 0.45);
+  const s3 = SH[2], u3 = K.clamp((T - s3.a) / (s3.b - s3.a));
+  const base = K.lerp(s3.s0, s3.s1, E.inOutCubic(u3)) * Math.max(W / 1024, H / 1536);
+  const zoom = base * 2.2;
+  const ix = K.clamp(W / 2 - s3.fx * base + s3.dx * u3, W - 1024 * base, 0), iy = K.clamp(H / 2 - s3.fy * base + s3.dy * u3, H - 1536 * base, 0);
+  const px = (tall ? 360 : 400) + Math.sin(T * 0.7) * 18, py = (tall ? 555 : 560) + Math.cos(T * 0.5) * 14; // image px: the protea's line work
+  const lx = ix + px * base, ly = iy + py * base;
+  loupe.style.left = lx - LS / 2 + 'px'; loupe.style.top = ly - LS / 2 + 'px';
+  loupeImg.style.transform = `translate(${LS / 2 - px * zoom}px, ${LS / 2 - py * zoom}px) scale(${zoom})`;
+  loupe.style.opacity = lP; loupe.style.transform = `scale(${0.85 + 0.15 * K.p(T, 4.0, 4.6, E.outCubic)})`;
+  loupe.style.visibility = lP > 0 ? 'visible' : 'hidden';
+  noteS.style.left = lx + LS / 2 + 10 - (tall ? 330 : 300) + 'px'; noteS.style.top = (tall ? ly - LS / 2 - 70 : ly + LS / 2 + 26) + 'px';
+  noteS.style.opacity = K.win(T, 4.4, 5.75, 0.4);
+
+  // ---------- real lines (shots 4 and 5) ----------
+  const pp = K.win(T, 6.1, 8.15, 0.6);
+  const ppIn = K.p(T, 6.1, 7.0, E.outCubic);
+  paper.style.opacity = pp;
+  paper.style.transform = `translateY(${(1 - ppIn) * 40 - (T - 6.1) * 6}px) rotate(${-1.5 + (1 - ppIn) * -2}deg)`;
+  paper.style.visibility = pp > 0 ? 'visible' : 'hidden';
+  const qp = K.win(T, 8.4, 10.35, 0.55);
+  const qIn = K.p(T, 8.4, 9.2, E.outCubic);
+  pill.style.opacity = qp;
+  pill.style.transform = `translateY(${(1 - qIn) * 40 - (T - 8.4) * 6}px) rotate(${1.2 + (1 - qIn) * 2}deg)`;
+  pill.style.visibility = qp > 0 ? 'visible' : 'hidden';
+  const rOn = Math.max(pp, qp);
+  realTag.style.opacity = rOn;
+  realTag.style.left = (W - (pp > qp ? pW : pillW)) / 2 + 'px';
+  realTag.style.top = (pp > qp ? (tall ? 470 : 250) + 440 * pW / 780 + 18 : (tall ? 560 : 360) + 170 * pillW / 780 + 18) + 'px';
+
+  end(T);
+});
+</script></body></html>

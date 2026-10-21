@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.3,
+  "text": "Look closely.",
+  "file": "01-39c68d5f5a.wav",
+  "dur": 1.81
+ },
+ {
+  "t": 2.19,
+  "text": "Every page counted. Every print checked.",
+  "file": "02-a839930e42.wav",
+  "dur": 3.16
+ },
+ {
+  "t": 5.66,
+  "text": "Nothing is listed until you have seen it.",
+  "file": "03-c9c5cc59f0.wav",
+  "dur": 2.32
+ },
+ {
+  "t": 7.67,
+  "text": "An order waits for your yes.",
+  "file": "04-d411893cfe.wav",
+  "dur": 2.69
+ },
+ {
+  "t": 9.5,
+  "text": "Made with care, sent when you say.",
+  "file": "05-581b64c1a2.wav",
+  "dur": 3.3
+ }
+]

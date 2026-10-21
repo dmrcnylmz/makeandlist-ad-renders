@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.3,
+  "text": "Here’s your shop forecast.",
+  "file": "01-5578953889.wav",
+  "dur": 1.49
+ },
+ {
+  "t": 2.1,
+  "text": "New products, moving in.",
+  "file": "02-5f9ad4459a.wav",
+  "dur": 2.37
+ },
+ {
+  "t": 4.8,
+  "text": "A hundred percent chance of drafts.",
+  "file": "03-5016ba173a.wav",
+  "dur": 2.14
+ },
+ {
+  "t": 7.3,
+  "text": "Nothing goes live without your yes.",
+  "file": "04-b5daf583cd.wav",
+  "dur": 2.18
+ },
+ {
+  "t": 9.85,
+  "text": "Then, clear skies for your launch.",
+  "file": "05-28f518b6a6.wav",
+  "dur": 2.09
+ }
+]

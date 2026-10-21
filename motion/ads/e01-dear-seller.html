@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E01 · Dear Seller</title><link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&display=block">
+<style>
+#stage { background: #2A1D14; }
+.desk { position: absolute; inset: -80px; background:
+  repeating-linear-gradient(92deg, rgba(0,0,0,0) 0 38px, rgba(0,0,0,.07) 38px 41px, rgba(0,0,0,0) 41px 97px, rgba(255,220,170,.035) 97px 99px),
+  repeating-linear-gradient(88deg, rgba(0,0,0,0) 0 13px, rgba(0,0,0,.05) 13px 14px),
+  linear-gradient(180deg, #4A3221 0, #3A271A 55%, #2B1C12 100%); }
+.lamp { position: absolute; pointer-events: none; z-index: 2; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,214,150,.42) 0, rgba(255,190,120,.16) 38%, rgba(255,190,120,0) 66%); mix-blend-mode: screen; }
+.cam { position: absolute; left: 0; top: 0; transform-origin: 0 0; z-index: 10; }
+.paper { position: absolute; left: 0; top: 0; background: #FBF6EA; border-radius: 3px;
+  box-shadow: 0 2px 0 rgba(0,0,0,.08), 0 40px 80px -30px rgba(0,0,0,.75), 0 0 0 1px rgba(80,60,40,.12);
+  background-image: radial-gradient(120% 60% at 50% 0, rgba(255,255,255,.5), rgba(255,255,255,0) 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .38  0 0 0 0 .28  0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.lh { position: absolute; left: 50px; right: 50px; top: 44px; display: flex; align-items: center; gap: 16px; padding-bottom: 22px; border-bottom: 1.5px solid #D9CFBE; }
+.lh img { height: 54px; }
+.lh span { font: 600 17px 'IBM Plex Mono', monospace; letter-spacing: .22em; text-transform: uppercase; color: #6B645A; }
+.lh b { margin-left: auto; font: 500 17px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #8A8378; font-weight: 500; }
+.row { position: absolute; left: 70px; white-space: nowrap; font-family: 'Caveat', 'Bradley Hand', cursive; font-weight: 600; color: #24211E; line-height: 1; }
+.row span { display: inline-block; }
+.hl { position: absolute; z-index: 0; background: #DFFF5A; border-radius: 6px 14px 8px 16px; transform-origin: 0 50%; opacity: .95; }
+.pol { position: absolute; background: #FFFDF8; padding: 18px 18px 70px; box-shadow: 0 30px 50px -24px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.06); }
+.pol .ph { width: 100%; height: 100%; overflow: hidden; position: relative; }
+.pol img { position: absolute; left: 50%; top: 50%; width: 100%; transform-origin: 50% 50%; }
+.pol .cap { position: absolute; left: 22px; bottom: 16px; font: 600 34px 'Caveat', cursive; color: #45403A; }
+.clip { position: absolute; background: #FFFDF8; box-shadow: 0 24px 40px -22px rgba(0,0,0,.5), 0 0 0 1px rgba(0,0,0,.08); overflow: hidden; }
+.clip img { position: absolute; display: block; }
+.typ { position: absolute; font: 400 15px/1.35 'Archivo'; color: #1F1F1F; background: #FFFDF8; }
+.typ i { display: inline-block; width: 2px; height: 1.1em; background: #1F1F1F; vertical-align: -3px; margin-left: 1px; }
+.tape { position: absolute; width: 150px; height: 44px; background: rgba(236,228,206,.82); box-shadow: 0 2px 6px rgba(0,0,0,.12); z-index: 3; }
+.stamp { position: absolute; padding: 14px 26px 16px; border: 6px double #D9542F; border-radius: 12px; color: #D9542F; text-align: center; transform-origin: 50% 50%;
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feComponentTransfer><feFuncA type='discrete' tableValues='1 1 1 0 1 1'/></feComponentTransfer></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.stamp b { display: block; font: 800 52px/1 'Archivo'; letter-spacing: .14em; }
+.stamp s { display: block; margin-top: 6px; text-decoration: none; font: 600 17px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; }
+.ink { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 4; }
+.pen { position: absolute; left: 0; top: 0; z-index: 20; pointer-events: none; transform-origin: 0 0; }
+.vig { position: absolute; inset: 0; pointer-events: none; z-index: 40; background: radial-gradient(120% 90% at 50% 45%, rgba(0,0,0,0) 50%, rgba(20,10,4,.55) 100%); }
+.kick { position: absolute; z-index: 45; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(250,247,238,.82); white-space: nowrap; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 60; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E01 — Dear Seller. A letter on a lamp-lit desk writes itself in ink as Marian reads it: the pen keeps pace with her
+// words, the camera follows the pen down the page. A polaroid of the idea is clipped in, a clipping of the real create
+// box is taped in with the sentence typed, a DRAFT stamp lands in the breath, the pen rings "yes", and the last line
+// gets a lime highlighter. The handwriting is the caption, so the letter reads with the sound off.
+document.fonts && document.fonts.load('600 60px Caveat');
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 76, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice: line starts (vo.mjs files) and each word's spoken window, measured from the takes.
+const VO = [[0.3, 'Dear seller,'], [1.13, 'that idea you keep sketching?'], [2.97, 'Describe it in one sentence.'],
+  [5.37, "We'll make the files and the listing, as a draft."], [8.39, 'Nothing goes live without your yes.'], [10.08, 'Your idea deserves a shop.']];
+const WT = [[[0.39, 0.7], [0.7, 1.19]], [[1.54, 1.82], [1.82, 2.09], [2.09, 2.31], [2.31, 2.59], [2.59, 3.16]],
+  [[3.51, 4.03], [4.03, 4.22], [4.22, 4.41], [4.41, 4.66], [4.66, 5.23]],
+  [[5.58, 6.01], [6.01, 6.16], [6.16, 6.35], [6.35, 6.65], [6.65, 6.87], [6.87, 7.08], [7.08, 7.5], [7.5, 7.62], [7.62, 7.8], [7.8, 8.15]],
+  [[8.5, 8.87], [8.87, 9.1], [9.1, 9.34], [9.34, 9.71], [9.71, 9.94], [9.94, 10.18]],
+  [[10.53, 10.93], [10.93, 11.32], [11.32, 12.01], [12.01, 12.23], [12.23, 12.66]]];
+
+// ---------- the desk, the camera, the paper (paper space: 860 wide) ----------
+K.box(0, 0, W, H, { cls: 'desk' });
+const lamp = K.box(0, 0, 1700, 1700, { cls: 'lamp' });
+const PW = 860, PH = 2440;
+const S = tall ? 1.25 : 1.12;               // paper scale on screen
+const PX = (W - PW * S) / 2;
+const FOCUS = tall ? 860 : 780;             // screen y the pen's row sits on
+const cam = K.box(0, 0, PW, PH, { cls: 'cam' });
+const paper = K.box(0, 0, PW, PH, { cls: 'paper', parent: cam });
+K.el('div', { parent: paper, cls: 'lh', html: `<img src="${K.brand('makeandlist-monogram.svg')}"><span>MakeAndList</span><b>A letter, for you</b>` });
+
+// ---------- the rows of handwriting: [paper y, font px, voice line, first word, last word] ----------
+const ROWS = [[176, 84, 0, 0, 1], [296, 76, 1, 0, 4], [1010, 76, 2, 0, 4], [1580, 76, 3, 0, 3], [1690, 76, 3, 4, 9],
+  [1830, 80, 4, 0, 2], [1940, 80, 4, 3, 5], [2090, 100, 5, 0, 2], [2205, 150, 5, 3, 4]];
+const hl = K.el('div', { parent: paper, cls: 'hl' });
+const rows = ROWS.map(([y, fs, li, w0, w1]) => {
+  const el = K.el('div', { parent: paper, cls: 'row', style: { top: y + 'px', fontSize: fs + 'px' } });
+  const words = VO[li][1].split(' ').slice(w0, w1 + 1);
+  const spans = words.map((w, k) => K.el('span', { parent: el, html: w + (k < words.length - 1 ? '&nbsp;' : '') }));
+  const times = WT[li].slice(w0, w1 + 1);
+  return { el, spans, times, y, fs, a: times[0][0] - 0.04, b: times[times.length - 1][1] };
+});
+let geo = null; // measured once the hand font is in
+const measure = () => rows.map((r) => ({ w: r.el.offsetWidth, ws: r.spans.map((s) => [s.offsetLeft, s.offsetLeft + s.offsetWidth]) }));
+// how far (px) the pen has written along a row at T
+const writtenX = (r, g, T) => {
+  let x = 0;
+  r.times.forEach(([ta, tb], k) => {
+    const d = Math.max(0.12, tb - ta - 0.04);
+    const p = K.clamp((T - ta + 0.06) / d);
+    if (p > 0) x = K.lerp(g.ws[k][0], g.ws[k][1] - (k < r.spans.length - 1 ? 14 : 0), p);
+  });
+  return x;
+};
+
+// ---------- the polaroid (the idea) ----------
+const POL = { x: 300, y: 440, w: 430, h: 520 };
+const pol = K.el('div', { parent: paper, cls: 'pol', style: { left: POL.x + 'px', top: POL.y + 'px', width: POL.w + 'px', height: POL.h + 'px' } });
+const polPh = K.el('div', { parent: pol, cls: 'ph' });
+const polImg = K.el('img', { parent: polPh, src: K.pub('r05/h10-hands-sketch.webp') });
+K.el('div', { parent: pol, cls: 'cap', html: 'lemons, again ♡' });
+const clipPin = K.el('div', { parent: paper, style: { position: 'absolute', zIndex: 5 }, html: `<svg width="60" height="150" viewBox="0 0 60 150"><path d="M20 140 V30 a12 12 0 0 1 24 0 V120 a8 8 0 0 1 -16 0 V40" fill="none" stroke="#8C8A86" stroke-width="5" stroke-linecap="round"/></svg>` });
+const conceptTag = K.demoTag('Concept image · AI-generated', 0, 0); paper.appendChild(conceptTag); conceptTag.style.zIndex = 6;
+
+// ---------- the clipping: the real create box, taped in ----------
+const CS = 1.0, CL = { sx: 33, sy: 420, sw: 714, sh: 380 }; // source rect in the 780-wide shot
+const CLP = { x: 73, y: 1130, w: CL.sw * CS, h: CL.sh * CS };
+const clip = K.el('div', { parent: paper, cls: 'clip', style: { left: CLP.x + 'px', top: CLP.y + 'px', width: CLP.w + 'px', height: CLP.h + 'px' } });
+K.el('img', { parent: clip, src: K.screen('22-phone-create'), style: { width: 780 * CS + 'px', left: -CL.sx * CS + 'px', top: -CL.sy * CS + 'px' } });
+const typ = K.el('div', { parent: clip, cls: 'typ', style: { left: (78 - CL.sx) * CS + 'px', top: (604 - CL.sy) * CS + 'px', width: 620 * CS + 'px', height: 160 * CS + 'px', fontSize: 25 * CS + 'px' } });
+const tapes = [[CLP.x - 40, CLP.y - 16, -14], [CLP.x + CLP.w - 110, CLP.y - 18, 9]].map(([x, y, r]) => K.el('div', { parent: paper, cls: 'tape', style: { left: x + 'px', top: y + 'px', transform: `rotate(${r}deg)` } }));
+const IDEA = 'A lemon-pattern notebook cover, A5, for a calm desk.';
+const realTag = K.demoTag('Real app · demo workspace', 0, 0); paper.appendChild(realTag); realTag.style.zIndex = 6;
+
+// ---------- the stamp, the ring, the pen ----------
+const stamp = K.el('div', { parent: paper, cls: 'stamp', html: '<b>DRAFT</b><s>waits for your yes</s>', style: { left: '470px', top: '1388px', zIndex: 7 } });
+const NS = 'http://www.w3.org/2000/svg';
+const ink = document.createElementNS(NS, 'svg'); ink.setAttribute('class', 'ink'); ink.setAttribute('width', PW); ink.setAttribute('height', PH); paper.appendChild(ink);
+const ring = document.createElementNS(NS, 'path'); ring.setAttribute('fill', 'none'); ring.setAttribute('stroke', '#24211E'); ring.setAttribute('stroke-width', '4.5'); ring.setAttribute('stroke-linecap', 'round'); ring.setAttribute('pathLength', '1'); ink.appendChild(ring);
+const T_RING = 10.2, T_RING_END = 10.5;
+const pen = K.el('div', { parent: cam, cls: 'pen', html: `<svg width="560" height="120" viewBox="0 0 560 120" style="position:absolute;left:-6px;top:-60px;overflow:visible">
+  <defs><linearGradient id="bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3B3A37"/><stop offset=".45" stop-color="#1A1A19"/><stop offset="1" stop-color="#0E0E0D"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3DFA6"/><stop offset=".5" stop-color="#C9A55A"/><stop offset="1" stop-color="#8E6E2F"/></linearGradient></defs>
+  <g transform="translate(6,60)"><ellipse cx="190" cy="44" rx="210" ry="13" fill="rgba(0,0,0,.22)" transform="translate(30 14)"/>
+  <path d="M0 0 L46 -9 L62 -4 L62 4 L46 9 Z" fill="url(#gold)"/><path d="M4 0 L44 0" stroke="#5B4520" stroke-width="1.6"/>
+  <rect x="58" y="-16" width="96" height="32" rx="10" fill="url(#bar)"/><rect x="150" y="-19" width="12" height="38" rx="3" fill="url(#gold)"/>
+  <rect x="160" y="-19" width="330" height="38" rx="17" fill="url(#bar)"/><rect x="232" y="-26" width="150" height="9" rx="4" fill="url(#gold)"/>
+  <rect x="170" y="-14" width="300" height="5" rx="3" fill="rgba(255,255,255,.18)"/></g></svg>` });
+
+// ---------- type on top ----------
+const kick = K.box(65, tall ? 286 : 40, W - 130, null, { cls: 'kick', html: '' });
+K.box(0, 0, W, H, { cls: 'vig' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your idea deserves a shop.' });
+
+// camera: [time, paper y held on the focus line]
+const CAMK = [[0, 200], [1.3, 250], [2.3, 560], [3.3, 820], [3.95, 1120], [5.3, 1420], [6.4, 1660], [8.2, 1760], [8.6, 1880], [10.2, 1980], [10.55, 2160], [12.55, 2230]];
+const camY = (T) => K.k(T, CAMK, E.inOutCubic);
+
+K.run({
+  id: 'E01', title: 'Dear Seller', dur: DUR, bpm: BPM, music: 'letting-go-of-the-past', mood: 'calm', key: 'F', intro: 0.0, cover: 9.9,
+  technique: 'A letter writes itself in ink in time with the narrator: each handwritten word is unmasked over its spoken window with a fountain pen riding the edge, the camera dollies down the page with the pen; a polaroid of the idea, a taped clipping of the real create box, a DRAFT rubber stamp in the breath, a pen-drawn ring around "yes" and a lime highlighter on the last line',
+  caption: 'A letter to every seller with an idea they keep sketching: describe it in one sentence, MakeAndList makes the files and the listing as a draft, and nothing goes live without your yes. Start free at makeandlist.com',
+  short: 'Your idea deserves a shop.',
+  vo: VO,
+  beats: ['0–1.2 s: “Dear seller,” — a letter on a lamp-lit desk starts writing itself', '1.2–3.4 s: “that idea you keep sketching?” — a polaroid of the idea is clipped in (concept image)', '3.4–5.4 s: “Describe it in one sentence.” — the real create box, taped in, the sentence typed', '5.4–8.3 s: “We’ll make the files and the listing, as a draft.” — DRAFT stamp lands', '8.3–10.6 s: “Nothing goes live without your yes.” — the pen rings “yes”', '10.6–13 s: “Your idea deserves a shop.” — lime highlighter; 13–15 s end card'],
+  cues: [[0.0, 'paper'], [0.36, 'marker'], [2.62, 'swish'], [3.22, 'paper'], [5.0, 'type'], [5.34, 'paper'], [8.24, 'stamp'], [T_RING, 'marker'], [12.2, 'marker'], [12.7, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  if (!geo) geo = measure();
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  lamp.style.transform = `translate(${W * 0.5 - 850 + Math.sin(T * 0.35) * 60}px, ${H * 0.36 - 850 + Math.cos(T * 0.3) * 40}px)`;
+
+  // ---------- camera ----------
+  const zo = K.p(T, 12.45, 13.05, E.inOutCubic);         // a small pull-back as the last word lands
+  const sc = S * K.k(T, [[0, 1.42], [1.3, 1.36], [2.7, 1], [12.4, 1.03]], E.inOutCubic) * (1 - 0.1 * zo);
+  const enter = K.p(T, 0, 0.7, E.outExpo);
+  const y = FOCUS - camY(T) * sc + (1 - enter) * 160;
+  const rot = -1.2 + Math.sin(T * 0.4) * 0.35 + (1 - enter) * 3;
+  const L0 = PX + 70 * S, x0 = L0 - 70 * sc;   // the writing's left margin stays put while the camera zooms
+  cam.style.transform = `translate(${x0 + zo * (PW * sc / 0.9 - PW * sc) / 2 + Math.sin(T * 0.5) * 6}px, ${y}px) rotate(${rot}deg) scale(${sc})`;
+
+  // ---------- handwriting ----------
+  let penX = 70, penY = 0, active = -1;
+  rows.forEach((r, i) => {
+    const g = geo[i];
+    const x = writtenX(r, g, T);
+    const m = x <= 0 ? -40 : x >= g.w - 1 ? g.w + 40 : x;
+    r.el.style.webkitMaskImage = `linear-gradient(90deg, #000 ${m}px, transparent ${m + 16}px)`;
+    r.el.style.maskImage = r.el.style.webkitMaskImage;
+    if (T >= r.a - 0.02) { active = i; penX = 70 + x; penY = r.y + r.fs * 0.78; }
+  });
+  // between rows the pen travels to the next row's start
+  const nxt = rows.findIndex((r) => r.a > T);
+  if (nxt > 0 && active >= 0) {
+    const pr = rows[nxt - 1], g = geo[nxt - 1], nr = rows[nxt];
+    const from = [70 + g.w, pr.y + pr.fs * 0.78], to = [70, nr.y + nr.fs * 0.78];
+    const p = K.p(T, Math.max(pr.b, nr.a - 0.42), nr.a - 0.02, E.inOutCubic);
+    penX = K.lerp(from[0], to[0], p); penY = K.lerp(from[1], to[1], p) - Math.sin(p * Math.PI) * 30;
+  }
+  if (nxt === 0) { penX = 70 + K.lerp(380, 0, K.p(T, 0, 0.36, E.outCubic)); penY = rows[0].y + rows[0].fs * 0.78 - (1 - K.p(T, 0, 0.36, E.outCubic)) * 60; }
+
+  // ring around "yes" — the pen draws it
+  const yr = rows[6], yg = geo[6], yw = yg.ws[2];
+  const rcx = 70 + (yw[0] + yw[1]) / 2 - 6, rcy = yr.y + yr.fs * 0.55, rrx = (yw[1] - yw[0]) / 2 + 26, rry = yr.fs * 0.62;
+  ring.setAttribute('d', `M ${rcx - rrx * 0.9} ${rcy - rry * 0.55} C ${rcx - rrx * 0.3} ${rcy - rry * 1.25}, ${rcx + rrx * 1.15} ${rcy - rry * 1.05}, ${rcx + rrx} ${rcy + rry * 0.05}
+    S ${rcx - rrx * 0.2} ${rcy + rry * 1.35}, ${rcx - rrx * 1.02} ${rcy + rry * 0.2} S ${rcx - rrx * 0.1} ${rcy - rry * 1.2}, ${rcx + rrx * 0.45} ${rcy - rry * 0.95}`);
+  const rp = K.p(T, T_RING, T_RING_END, E.inOutCubic);
+  ring.setAttribute('stroke-dasharray', `${rp} 1`);
+  ring.style.opacity = rp > 0 ? 1 : 0;
+  if (T >= T_RING && T < T_RING_END + 0.02) {
+    const pt = ring.getPointAtLength(ring.getTotalLength() * rp);
+    penX = pt.x; penY = pt.y;
+  } else if (T >= T_RING_END && T < rows[7].a) {
+    const p = K.p(T, T_RING_END, rows[7].a - 0.02, E.inOutCubic);
+    const pt = ring.getPointAtLength(ring.getTotalLength());
+    penX = K.lerp(pt.x, 70, p); penY = K.lerp(pt.y, rows[7].y + rows[7].fs * 0.78, p) - Math.sin(p * Math.PI) * 30;
+  }
+  // after the last word the pen lifts away
+  const lift = K.p(T, 12.66, 13.1, E.inCubic);
+  const writing = rows.some((r) => T > r.a && T < r.b) || (T > T_RING && T < T_RING_END);
+  const bob = writing ? Math.sin(T * 47) * 3 + Math.sin(T * 31) * 2 : 0;
+  pen.style.transform = `translate(${penX + lift * 260}px, ${penY + bob - lift * 160}px) rotate(${-38 + Math.sin(T * 5) * 1.5 - lift * 10}deg)`;
+  pen.style.opacity = 1;
+
+  // lime highlighter under "a shop."
+  const hg = geo[8], hr = rows[8];
+  const hp = K.p(T, 12.12, 12.62, E.outCubic);
+  Object.assign(hl.style, { left: 70 - 14 + 'px', top: hr.y + hr.fs * 0.42 + 'px', width: hg.w + 30 + 'px', height: hr.fs * 0.5 + 'px', transform: `scaleX(${hp}) rotate(-1.2deg)`, opacity: hp > 0 ? 0.95 : 0 });
+
+  // ---------- the polaroid ----------
+  const pp = K.p(T, 2.62, 3.25, E.outBack);
+  pol.style.opacity = K.p(T, 2.62, 2.8, E.linear);
+  pol.style.transform = `translate(${(1 - pp) * 420}px, ${(1 - pp) * -60}px) rotate(${4 + (1 - pp) * 16}deg)`;
+  polImg.style.transform = `translate(-50%, -50%) scale(${1.25 + 0.1 * K.p(T, 2.6, 6, E.linear)}) translateY(${4 - 6 * K.p(T, 2.6, 6, E.linear)}%)`;
+  clipPin.style.left = POL.x + 60 + 'px'; clipPin.style.top = POL.y - 70 + 'px';
+  clipPin.style.opacity = K.p(T, 3.15, 3.3, E.linear);
+  clipPin.style.transform = `translate(${(1 - pp) * 420}px, 0) rotate(${4 + (1 - pp) * 16}deg)`;
+
+  // ---------- the clipping, typed ----------
+  const cp = K.p(T, 4.62, 5.25, E.outExpo);
+  clip.style.opacity = K.p(T, 4.62, 4.8, E.linear);
+  clip.style.transform = `translateY(${(1 - cp) * 70}px) rotate(${-1.6 + (1 - cp) * -5}deg) scale(${1.04 - 0.04 * cp})`;
+  tapes.forEach((tp, i) => { const q = K.p(T, 5.2 + i * 0.08, 5.36 + i * 0.08, E.outCubic); tp.style.opacity = q; tp.style.marginTop = (1 - q) * -20 + 'px'; });
+  const n = Math.round(IDEA.length * K.p(T, 4.95, 6.2, E.linear));
+  typ.innerHTML = IDEA.slice(0, n) + (n < IDEA.length || Math.floor(T * 3) % 2 ? '<i></i>' : '');
+
+  // ---------- stamp ----------
+  const sp = K.p(T, 8.18, 8.34, E.inCubic);
+  const sett = K.p(T, 8.34, 8.6, E.outCubic);
+  stamp.style.opacity = sp > 0 ? Math.min(1, sp * 3) : 0;
+  stamp.style.transform = `rotate(-9deg) scale(${K.lerp(1.7, 1, sp) * (1 + 0.04 * Math.sin(sett * Math.PI))})`;
+
+  // ---------- tags and kicker (screen space) ----------
+  conceptTag.style.opacity = K.p(T, 3.1, 3.4, E.linear); conceptTag.style.left = '40px'; conceptTag.style.top = POL.y + POL.h - 64 + 'px';
+  conceptTag.style.transform = 'rotate(-90deg)'; conceptTag.style.transformOrigin = '0 0'; conceptTag.style.left = POL.x - 54 + 'px'; conceptTag.style.top = POL.y + POL.h - 10 + 'px';
+  realTag.style.opacity = K.p(T, 5.0, 5.3, E.linear); realTag.style.left = CLP.x + 'px'; realTag.style.top = CLP.y + CLP.h + 14 + 'px';
+  kick.innerHTML = 'A letter from MakeAndList';
+  kick.style.opacity = K.p(T, 0.2, 0.7, E.linear) * (1 - K.p(T, 1.6, 2.1, E.linear));
+
+  end(T);
+});
+</script></body></html>

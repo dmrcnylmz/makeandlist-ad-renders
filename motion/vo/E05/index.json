@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.3,
+  "text": "Here, a small seller in her natural habitat.",
+  "file": "01-299cccd1bc.wav",
+  "dur": 4.27
+ },
+ {
+  "t": 4.06,
+  "text": "She describes an idea in one sentence.",
+  "file": "02-d1357cd884.wav",
+  "dur": 3.3
+ },
+ {
+  "t": 7.57,
+  "text": "She checks every draft.",
+  "file": "03-3a91ab9430.wav",
+  "dur": 1.77
+ },
+ {
+  "t": 9.11,
+  "text": "Only then does it reach her shop.",
+  "file": "04-4572aed83c.wav",
+  "dur": 2.28
+ },
+ {
+  "t": 11.22,
+  "text": "She keeps the final say.",
+  "file": "05-1cafc75b0c.wav",
+  "dur": 1.81
+ }
+]

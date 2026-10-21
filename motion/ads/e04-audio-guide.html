@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E04 · The Audio Guide</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #E9E3D7; }
+.wall { position: absolute; left: 0; top: 0; z-index: 2; }
+.paint { position: absolute; inset: 0; background: linear-gradient(180deg, #F3EEE4 0, #ECE6DA 70%, #E3DCCE 100%); }
+.floor { position: absolute; left: 0; right: 0; z-index: 1;
+  background: repeating-linear-gradient(90deg, rgba(0,0,0,0) 0 158px, rgba(60,38,20,.25) 158px 160px), linear-gradient(180deg, #9B7552 0, #7E5C3E 100%); }
+.skirt { position: absolute; left: 0; right: 0; height: 22px; background: #FBF8F1; box-shadow: 0 6px 10px -6px rgba(0,0,0,.35); z-index: 2; }
+.spot { position: absolute; border-radius: 50%; pointer-events: none; background: radial-gradient(ellipse at 50% 30%, rgba(255,246,222,.95) 0, rgba(255,240,210,.35) 40%, rgba(255,240,210,0) 70%); mix-blend-mode: soft-light; }
+.lampb { position: absolute; width: 90px; height: 26px; border-radius: 0 0 40px 40px; background: #2A2826; }
+.frame { position: absolute; background: #2B2622; padding: 22px; box-shadow: 0 40px 60px -30px rgba(31,20,10,.6), 0 2px 0 rgba(255,255,255,.3) inset; }
+.frame .mat { position: absolute; inset: 22px; background: #FBF8F1; padding: 46px; box-shadow: inset 0 3px 8px rgba(0,0,0,.18); }
+.frame .art { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.frame .art img { position: absolute; display: block; }
+.vit { position: absolute; background: #FBF8F1; border-radius: 6px; padding: 18px; box-shadow: 0 40px 60px -30px rgba(31,20,10,.55), 0 0 0 1px rgba(31,31,31,.08); }
+.vit .art { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 4px; }
+.vit img { position: absolute; display: block; }
+.glass { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(255,255,255,.35) 45%, rgba(255,255,255,0) 55%); }
+.card { position: absolute; background: #FFFDF8; padding: 14px 18px; box-shadow: 0 6px 14px -8px rgba(0,0,0,.4); font: 500 17px/1.35 'Archivo'; color: #45403A; }
+.card b { display: block; font: 700 19px 'Playfair Display'; color: #1F1F1F; font-style: italic; }
+.wt { position: absolute; z-index: 30; color: #1F1F1F; }
+.wt .k { font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .2em; text-transform: uppercase; color: #6B645A; display: flex; align-items: center; gap: 14px; }
+.wt .k u { text-decoration: none; display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; font: 700 24px 'IBM Plex Mono', monospace; letter-spacing: 0; }
+.wt .t { margin-top: 12px; font: 800 86px/1.0 'Playfair Display'; letter-spacing: -0.02em; white-space: nowrap; }
+.wt .t em { font-style: italic; }
+.wt .n { margin-top: 16px; font: 600 38px/1.2 'Archivo'; color: #45403A; }
+.wt .n span { display: block; }
+.wt .n b { color: #1F1F1F; background: linear-gradient(transparent 60%, #DFFF5A 60%); }
+.loupe { position: absolute; z-index: 20; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 10px #1F1F1F, 0 0 0 14px #C9A55A, 0 40px 60px -20px rgba(0,0,0,.6); }
+.loupe img { position: absolute; display: block; }
+.lchip { position: absolute; z-index: 21; white-space: nowrap; font: 700 24px 'Archivo'; padding: 12px 20px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; display: flex; gap: 10px; align-items: center; box-shadow: 0 0 0 2px #1F1F1F; }
+.dev { position: absolute; z-index: 50; transform-origin: 50% 0; }
+.body { position: absolute; inset: 0; border-radius: 70px 70px 90px 90px; background: linear-gradient(160deg, #3A3936 0, #1C1B1A 45%, #121211 100%);
+  box-shadow: 0 60px 90px -30px rgba(0,0,0,.7), inset 0 2px 0 rgba(255,255,255,.12), inset 0 -6px 14px rgba(0,0,0,.5); }
+.spk { position: absolute; left: 50%; width: 120px; margin-left: -60px; height: 34px; border-radius: 17px; background: repeating-linear-gradient(90deg, #0A0A0A 0 6px, #2A2A28 6px 10px); }
+.lcd { position: absolute; border-radius: 22px; background: linear-gradient(180deg, #D7E6A8, #C5D78E); box-shadow: inset 0 3px 10px rgba(0,0,0,.35); overflow: hidden; color: #1F2A12; }
+.lcd .hd { position: absolute; left: 18px; right: 18px; top: 12px; display: flex; justify-content: space-between; font: 600 15px 'IBM Plex Mono', monospace; letter-spacing: .12em; }
+.lcd .num { position: absolute; left: 18px; top: 34px; font: 600 60px/1 'IBM Plex Mono', monospace; }
+.lcd .ttl { position: absolute; left: 112px; top: 44px; right: 14px; font: 600 16px/1.2 'IBM Plex Mono', monospace; text-transform: uppercase; }
+.lcd .wv { position: absolute; left: 18px; right: 18px; bottom: 14px; height: 40px; display: flex; align-items: center; justify-content: space-between; }
+.lcd .wv i { display: block; width: 5px; background: #1F2A12; border-radius: 2px; }
+.keys { position: absolute; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.key { height: 56px; border-radius: 20px; background: linear-gradient(180deg, #34332F, #232220); box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 6px 10px -4px rgba(0,0,0,.6);
+  display: grid; place-items: center; font: 600 28px 'Archivo'; color: #E9E3D7; }
+.key.play { background: #DFFF5A; color: #1F1F1F; }
+.tag { position: absolute; z-index: 60; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .06; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E04 — The Audio Guide. A gallery wall, numbered exhibits, and a museum audio-guide handset in the foreground whose LCD
+// waveform moves with the narrator's actual voice. Each key press dollies the camera to the next exhibit (in the breaths):
+// 01 a botanical print — a loupe checks its print texture; 02 the real try-on, the design on a tee, in a vitrine;
+// 03 your print partner packing the order; 04 an empty frame, "Untitled (No Stock)". Wall text carries the key words.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const VO = [[0.31, 'Exhibit one. A botanical print.'], [3.08, 'Made from one sentence, checked for sharpness.'], [5.86, 'Exhibit two. Now on a tee.'],
+  [7.98, 'Your own print partner prints each one.'], [10.53, 'Printed per order. No stock.']];
+const ENV = '000000000000000001311112541462000110000000000000000000000002565187012598540034000221000000000000224443330003333222333320002220011110000000000000000003330000021011233320000000000000000002201112313400000000000000000000000000000000123355325422200000000000000002332036677665200466110035521222000222210000221011001110000000000000002220211012211111000000000000000000112210001100000000000000000000000000000000000000000000000000000000000000000000000000000000';
+const env = (fr) => { const v = fr < 0 || fr >= ENV.length ? 0 : +ENV[fr] / 9; return Math.pow(v, 0.45); };
+// stops: the key press and dolly happen in the breaths between lines
+const STOP = [0.0, 5.96, 8.36, 10.62];
+const KEYT = [0.18, 5.84, 8.24, 10.52];
+
+const L = tall
+  ? { wallH: 1310, wtX: 65, wtY: 296, fr: { w: 520, h: 580, y: 672 }, artX: 0.5, dev: { x: 730, y: 1010, w: 300, h: 660 }, tagY: 300 }
+  : { wallH: 1150, wtX: 60, wtY: 56, fr: { w: 500, h: 600, y: 420 }, artX: 0.4, dev: { x: 770, y: 720, w: 280, h: 620 }, tagY: 60 };
+const NS = 4, GAP = W;
+const wall = K.box(0, 0, GAP * NS + W, H, { cls: 'wall' });
+K.el('div', { parent: wall, cls: 'paint', style: { height: L.wallH + 'px', bottom: 'auto' } });
+K.el('div', { parent: wall, cls: 'skirt', style: { top: L.wallH - 22 + 'px' } });
+K.el('div', { parent: wall, cls: 'floor', style: { top: L.wallH + 'px', height: H - L.wallH + 'px' } });
+
+const fx = (i) => GAP * i + W * L.artX - L.fr.w / 2;
+// lights over each exhibit
+for (let i = 0; i < NS; i++) {
+  K.el('div', { parent: wall, cls: 'lampb', style: { left: fx(i) + L.fr.w / 2 - 45 + 'px', top: '0px' } });
+  K.el('div', { parent: wall, cls: 'spot', style: { left: fx(i) - 220 + 'px', top: L.fr.y - 380 + 'px', width: L.fr.w + 440 + 'px', height: L.fr.h + 700 + 'px' } });
+}
+function framed(i, src, pos, opts = {}) {
+  const fr = K.el('div', { parent: wall, cls: 'frame', style: { left: fx(i) + 'px', top: L.fr.y + 'px', width: L.fr.w + 'px', height: L.fr.h + 'px' } });
+  const mat = K.el('div', { parent: fr, cls: 'mat' });
+  const art = K.el('div', { parent: mat, cls: 'art' });
+  let img = null;
+  if (src) img = K.el('img', { parent: art, src, style: { width: '100%', height: '100%', objectFit: 'cover', objectPosition: pos || '50% 50%' } });
+  return { fr, art, img };
+}
+const ex1 = framed(0, K.pub('r04/g01-botanical-print.webp'), '50% 38%');
+// exhibit 2: the real try-on, in a vitrine
+const VW = L.fr.w + 40, VH = L.fr.h;
+const vit = K.el('div', { parent: wall, cls: 'vit', style: { left: fx(1) - 20 + 'px', top: L.fr.y + 'px', width: VW + 'px', height: VH + 'px' } });
+const vart = K.el('div', { parent: vit, cls: 'art' });
+const vs = (VW - 36) / 780;
+K.el('img', { parent: vart, src: K.screen('54-phone-try-on'), style: { width: 780 * vs * 1.04 + 'px', left: -14 * vs + 'px', top: -236 * vs + 'px' } });
+K.el('div', { parent: vit, cls: 'glass' });
+const ex3 = framed(2, K.pub('r04/g21-packing.webp'), '50% 50%');
+const ex4 = framed(3, null);
+K.el('div', { parent: ex4.art, style: { position: 'absolute', inset: '0', background: 'linear-gradient(180deg, #F3EEE4, #E9E2D4)' } });
+const c4 = K.el('div', { parent: wall, cls: 'card', html: '<b>Untitled (No Stock), 2026</b>Nothing is printed until<br>someone orders.', style: { left: fx(3) + L.fr.w / 2 - 150 + 'px', top: L.fr.y + L.fr.h / 2 - 50 + 'px', width: '300px', zIndex: 3 } });
+const conceptTag = K.demoTag('Concept image · AI-generated', 0, 0), realTag = K.demoTag('Real app · demo workspace', 0, 0);
+[conceptTag, realTag].forEach((t) => { t.style.left = 'auto'; t.style.right = (tall ? 65 : 60) + 'px'; t.style.top = L.tagY + 'px'; t.style.zIndex = 70; });
+
+// the loupe on exhibit 1 (print texture macro)
+const LS = tall ? 300 : 280;
+const loupe = K.box(0, 0, LS, LS, { cls: 'loupe', html: `<img src="${K.pub('r05/h12-print-macro.webp')}" style="width:${LS * 1.6}px;left:${-LS * 0.25}px;top:${-LS * 0.7}px">` });
+const lchip = K.box(0, 0, null, null, { cls: 'lchip', html: '✓ Sharpness checked', style: { width: 'auto', height: 'auto' } });
+
+// ---------- wall text (one block per exhibit; the key words of each line) ----------
+const WT = [
+  { k: 'Exhibit', n: '01', t: 'A botanical<br><em>print.</em>', notes: [[3.2, 'Made from <b>one sentence.</b>'], [4.56, 'Checked for <b>sharpness.</b>']] },
+  { k: 'Exhibit', n: '02', t: 'Now on<br>a <em>tee.</em>', notes: [[7.2, 'Tried on before it’s <b>printed.</b>']] },
+  { k: 'Exhibit', n: '03', t: 'Your print<br><em>partner.</em>', notes: [[8.58, '<b>Prints each one.</b>'], [9.6, 'Paid from your partner account.']] },
+  { k: 'Exhibit', n: '04', t: 'Printed<br>per <em>order.</em>', notes: [[11.86, '<b>No stock.</b>']] },
+];
+const TT = [[0.55, 1.5], [6.16, 6.79], [8.4, 8.58], [10.7, 10.86]]; // kicker, title
+const wts = WT.map((w) => {
+  const el = K.box(L.wtX, L.wtY, W - 130, null, { cls: 'wt', html: `<div class="k"><u>${w.n}</u>${w.k}</div><div class="t" style="font-size:${tall ? 80 : 72}px">${w.t}</div><div class="n" style="font-size:${tall ? 34 : 30}px"></div>` });
+  const nEl = el.querySelector('.n');
+  const ns = w.notes.map(([, h]) => K.el('span', { parent: nEl, html: h + ' ' }));
+  return { el, ns, k: el.querySelector('.k'), t: el.querySelector('.t') };
+});
+if (!tall) wts.forEach((w) => { w.el.style.width = '640px'; });
+
+// ---------- the audio guide ----------
+const D = L.dev;
+const dev = K.box(D.x, D.y, D.w, D.h, { cls: 'dev' });
+K.el('div', { parent: dev, cls: 'body' });
+K.el('div', { parent: dev, cls: 'spk', style: { top: '34px' } });
+const lcd = K.el('div', { parent: dev, cls: 'lcd', style: { left: '30px', right: '30px', top: '90px', height: '190px' } });
+const lcdHd = K.el('div', { parent: lcd, cls: 'hd', html: '<span>GUIDE</span><span class="tm">0:00</span>' });
+const lcdTm = lcdHd.querySelector('.tm');
+const lcdNum = K.el('div', { parent: lcd, cls: 'num' });
+const lcdTtl = K.el('div', { parent: lcd, cls: 'ttl' });
+const wv = K.el('div', { parent: lcd, cls: 'wv' });
+const wbars = Array.from({ length: 26 }, () => K.el('i', { parent: wv }));
+const keys = K.el('div', { parent: dev, cls: 'keys', style: { left: '36px', right: '36px', top: '312px' } });
+const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '◀', '0', '▶'].map((n) => K.el('div', { parent: keys, cls: 'key' + (n === '▶' ? ' play' : ''), html: n }));
+const LCDT = ['Botanical print', 'On a tee', 'Your print partner', 'No stock'];
+K.el('img', { parent: dev, src: K.brand('makeandlist-logo-ivory.svg'), style: { position: 'absolute', left: '50%', bottom: '26px', width: '120px', marginLeft: '-60px', opacity: 0.8 } });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Printed per order.<br>No stock.' });
+const stopAt = (T) => K.p(T, STOP[1] - 0.12, STOP[1] + 0.5, E.inOutCubic) + K.p(T, STOP[2] - 0.12, STOP[2] + 0.5, E.inOutCubic) + K.p(T, STOP[3] - 0.12, STOP[3] + 0.5, E.inOutCubic);
+
+K.run({
+  id: 'E04', title: 'The Audio Guide', dur: DUR, bpm: BPM, music: 'new-shoes', mood: 'calm', key: 'E', intro: 0.0, cover: 4.9,
+  technique: 'Museum audio guide: a handset in the foreground (keypad, LCD whose waveform follows the narrator’s real loudness frame by frame) and a gallery wall; each key press, timed to the breaths, dollies the camera to the next numbered exhibit under its spotlight, with gallery wall text carrying the key words; a brass loupe passes over the print texture, the real try-on sits in a vitrine, the last frame is empty: “Untitled (No Stock)”',
+  caption: 'An audio guide to your next product: a botanical print made from one sentence and checked for sharpness, the same idea tried on a tee, printed by your own print partner — per order, with no stock. Start free at makeandlist.com',
+  short: 'Printed per order. No stock.',
+  vo: VO,
+  beats: ['0–3 s: key 1 — “Exhibit one. A botanical print.” (concept image)', '3–5.9 s: “Made from one sentence, checked for sharpness.” — a loupe over the print texture', '5.9–8.3 s: key 2 — “Exhibit two. Now on a tee.” — the real try-on in a vitrine', '8.3–10.6 s: key 3 — “Your own print partner prints each one.” — packing (concept image)', '10.6–13 s: key 4 — “Printed per order. No stock.” — an empty frame, Untitled (No Stock)', '13–15 s: end card'],
+  cues: [[0.0, 'swish'], [KEYT[0], 'click'], [3.05, 'pop'], [4.42, 'swish'], [5.65, 'pop'], [KEYT[1], 'click'], [STOP[1] - 0.05, 'whoosh'], [KEYT[2], 'click'], [STOP[2] - 0.05, 'whoosh'], [KEYT[3], 'click'], [STOP[3] - 0.05, 'whoosh'], [12.55, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // ---------- dolly ----------
+  const st = stopAt(T);
+  const sv = st - stopAt(T - 1 / 30);
+  const ent = K.p(T, 0, 0.9, E.outExpo);
+  wall.style.transform = `translateX(${-st * GAP + (1 - ent) * 120 + Math.sin(T * 0.4) * 6}px) scale(${1.04 - 0.04 * ent})`;
+  wall.style.filter = Math.abs(sv) > 0.01 ? `blur(${Math.min(8, Math.abs(sv) * 60)}px)` : 'none';
+  // gentle push-in on each exhibit while it is the stop
+  ex1.img.style.transform = `scale(${1.02 + 0.05 * K.p(T, 0, 6, E.linear)})`;
+  ex3.img.style.transform = `scale(${1.02 + 0.05 * K.p(T, 8, 11, E.linear)})`;
+
+  // ---------- loupe over exhibit 1 ----------
+  const lp = K.p(T, 4.4, 4.85, E.outBack), lo = K.p(T, 5.7, 5.95, E.inCubic);
+  const lx = W * L.artX - LS / 2 + K.lerp(-80, 60, K.p(T, 4.4, 5.9, E.inOutCubic)), ly = L.fr.y + L.fr.h * 0.42 - LS / 2 + K.lerp(40, -30, K.p(T, 4.4, 5.9, E.inOutCubic));
+  loupe.style.opacity = Math.min(1, lp * 2) * (1 - lo); loupe.style.visibility = T > 4.4 && T < 5.95 ? 'visible' : 'hidden';
+  loupe.style.transform = `translate(${lx}px, ${ly}px) scale(${0.6 + 0.4 * lp})`;
+  loupe.firstChild.style.transform = `translate(${-K.p(T, 4.4, 5.9, E.linear) * 40}px, ${K.p(T, 4.4, 5.9, E.linear) * 20}px)`;
+  const cp = K.p(T, 5.1, 5.45, E.outBack);
+  lchip.style.opacity = Math.min(1, cp * 2) * (1 - lo); lchip.style.visibility = T > 5.1 && T < 5.95 ? 'visible' : 'hidden';
+  lchip.style.transform = `translate(${lx - 70}px, ${ly + LS - 10}px) scale(${0.7 + 0.3 * cp})`;
+
+  // ---------- wall text ----------
+  wts.forEach((w, i) => {
+    const a = i === 0 ? 0.3 : STOP[i], b = i < 3 ? STOP[i + 1] - 0.05 : 13.2;
+    const vis = T >= a - 0.1 && T < b;
+    w.el.style.visibility = vis ? 'visible' : 'hidden';
+    const o = K.p(T, b - 0.3, b - 0.05, E.inCubic);
+    const kp = K.p(T, TT[i][0] - 0.1, TT[i][0] + 0.35, E.outExpo), tp = K.p(T, TT[i][1] - 0.1, TT[i][1] + 0.4, E.outExpo);
+    w.k.style.opacity = kp * (1 - o); w.k.style.transform = `translateX(${(1 - kp) * -30}px)`;
+    w.t.style.opacity = tp * (1 - o); w.t.style.transform = `translateY(${(1 - tp) * 40 - o * 20}px)`;
+    w.t.style.clipPath = `inset(-20px ${(1 - tp) * 100}% -30px 0)`;
+    w.ns.forEach((s, j) => {
+      const t0 = WT[i].notes[j][0];
+      const q = K.p(T, t0 - 0.05, t0 + 0.35, E.outExpo);
+      s.style.opacity = q * (1 - o); s.style.transform = `translateY(${(1 - q) * 20}px)`;
+    });
+  });
+  const ci = Math.round(st);
+  conceptTag.style.opacity = (ci === 0 || ci === 2) && T < 12.9 ? 1 : 0; realTag.style.opacity = ci === 1 ? 1 : 0;
+  // the empty frame's card arrives with "No stock."
+  const c4p = K.p(T, 11.9, 12.3, E.outBack);
+  c4.style.opacity = Math.min(1, c4p * 2); c4.style.transform = `scale(${0.85 + 0.15 * c4p}) rotate(-1deg)`;
+
+  // ---------- the handset ----------
+  const dp = K.p(T, 0.05, 0.75, E.outExpo);
+  const press = KEYT.reduce((m, k) => Math.max(m, 1 - Math.abs(T - k - 0.06) / 0.12), 0);
+  dev.style.transform = `translateY(${(1 - dp) * 500 + Math.max(0, press) * 10 + Math.sin(T * 1.1) * 6}px) rotate(${-8 + Math.sin(T * 0.7) * 1.2}deg)`;
+  const cur = KEYT.reduce((c, k, i) => (T >= k ? i : c), 0);
+  KEYS.forEach((kEl, i) => {
+    const on = i === cur && T - KEYT[cur] < 0.25;
+    kEl.style.transform = on ? 'translateY(4px) scale(.94)' : 'none';
+    if (i < 4) kEl.style.boxShadow = i === cur ? 'inset 0 0 0 3px #DFFF5A, 0 6px 10px -4px rgba(0,0,0,.6)' : '';
+  });
+  lcdNum.textContent = String(cur + 1).padStart(2, '0');
+  lcdTtl.textContent = LCDT[cur];
+  const secs = Math.max(0, T - KEYT[cur]);
+  lcdTm.textContent = `0:${String(Math.floor(secs)).padStart(2, '0')}`;
+  wbars.forEach((b, i) => {
+    const v = env(f - (25 - i) * 2);
+    b.style.height = Math.max(4, v * 40) + 'px';
+  });
+
+  end(T);
+});
+</script></body></html>

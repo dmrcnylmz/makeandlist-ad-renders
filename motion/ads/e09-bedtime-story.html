@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E09 · A Bedtime Story</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #17120F; }
+.room { position: absolute; inset: 0; background: radial-gradient(90% 60% at 18% 8%, rgba(255,196,120,.38), rgba(255,170,90,0) 60%), radial-gradient(120% 90% at 50% 60%, #2A211B 0%, #140F0C 75%); }
+.quilt { position: absolute; left: -10%; right: -10%; bottom: -6%; height: 46%; border-radius: 50% 50% 0 0 / 14% 14% 0 0; background-color: #3B4A3E;
+  background-image: repeating-linear-gradient(45deg, rgba(250,247,238,.06) 0 3px, transparent 3px 46px), repeating-linear-gradient(-45deg, rgba(250,247,238,.06) 0 3px, transparent 3px 46px); box-shadow: inset 0 40px 80px rgba(0,0,0,.5); }
+.mote { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,220,160,.8); filter: blur(1px); }
+.book { position: absolute; perspective: 2600px; z-index: 10; }
+.stack { position: absolute; border-radius: 6px 18px 18px 6px; background: #E9DFCA; box-shadow: 0 60px 120px -40px rgba(0,0,0,.9); }
+.stack i { position: absolute; top: 8px; bottom: 8px; right: -1px; width: 14px; background: repeating-linear-gradient(90deg, #D9CDB4 0 2px, #F4ECDB 2px 4px); border-radius: 0 12px 12px 0; }
+.leaf { position: absolute; left: 0; top: 0; transform-origin: 0 50%; transform-style: preserve-3d; }
+.face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 4px 16px 16px 4px; overflow: hidden; background: #F7F0E1; }
+.face.back { transform: rotateY(180deg); background: #EFE6D2; border-radius: 16px 4px 4px 16px; }
+.face::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(60,40,20,.22) 0, rgba(60,40,20,0) 7%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .3  0 0 0 0 .2  0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.shade { position: absolute; inset: 0; pointer-events: none; background: #000; z-index: 5; }
+.pic { position: absolute; overflow: hidden; border-radius: 18px; box-shadow: 0 0 0 3px rgba(80,60,40,.25); }
+.pic img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 40%; }
+.txt { position: absolute; text-align: center; font-family: 'Playfair Display'; font-style: italic; font-weight: 600; color: #3A2E24; letter-spacing: -0.005em; }
+.txt b { font-weight: 800; font-style: normal; color: #1F1F1F; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 90%, transparent 90%); }
+.txt .w { display: inline-block; white-space: pre; }
+.pg { position: absolute; left: 0; right: 0; text-align: center; font: 500 20px 'IBM Plex Mono', monospace; color: #9A8C78; letter-spacing: .2em; }
+.orn { position: absolute; left: 50%; transform: translateX(-50%); }
+.cover { background: #44573F !important; }
+.cover .ttl { position: absolute; left: 0; right: 0; text-align: center; font: 800 96px/1.0 'Playfair Display'; color: #F3E3B5; letter-spacing: -0.01em; text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+.cover .ttl em { font-style: italic; color: #DFFF5A; }
+.cover .by { position: absolute; left: 0; right: 0; text-align: center; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .26em; text-transform: uppercase; color: #E9D9AE; }
+.cover .frame { position: absolute; inset: 34px; border: 3px solid rgba(243,227,181,.6); border-radius: 10px; }
+.cover .medal { position: absolute; left: 50%; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 8px #F3E3B5, 0 0 0 12px #2E3B2B; transform: translateX(-50%); }
+.cover .medal img { width: 100%; height: 100%; object-fit: cover; object-position: 30% 30%; }
+.scr { position: absolute; border-radius: 22px; overflow: hidden; background: #FAF7EE; box-shadow: 0 30px 60px -30px rgba(60,40,20,.7), 0 0 0 2px #E2DBCE; }
+.pic .scr img { position: absolute; left: 0; width: 100%; height: auto; object-fit: initial; transform: none; }
+.typ { position: absolute; font-family: 'Archivo'; font-weight: 500; color: #1F1F1F; background: #FFFDF8; overflow: hidden; }
+.yes { position: absolute; z-index: 6; width: 190px; height: 190px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 6px #1F1F1F, 0 20px 40px -14px rgba(0,0,0,.5); display: grid; place-items: center; text-align: center; font: 800 46px/0.95 'Archivo'; color: #1F1F1F; }
+.yes small { display: block; font: 600 17px 'IBM Plex Mono', monospace; letter-spacing: .1em; margin-top: 6px; }
+.wash { position: absolute; border-radius: 50%; filter: blur(30px); }
+.endw { position: absolute; left: 0; right: 0; text-align: center; font: italic 800 74px 'Playfair Display'; color: #3A2E24; }
+.note { position: absolute; left: 50px; right: 50px; text-align: center; font: 500 19px/1.4 'IBM Plex Mono', monospace; color: #7A6C58; }
+.story { position: absolute; z-index: 40; font: 600 19px 'IBM Plex Mono', monospace; letter-spacing: .18em; text-transform: uppercase; color: rgba(250,247,238,.8); white-space: nowrap; }
+.story i { font-style: normal; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #E8603C; margin-right: 10px; vertical-align: 1px; }
+.demo { z-index: 7; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 85; opacity: .1; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E09 — A Bedtime Story. A cloth-bound picture book on a quilt in lamplight; Marian reads it like a bedtime story while
+// the leaves turn in 3D around the spine: the cover, the fox's shop (h03), the page where she describes it and says yes
+// (the real create screen, a lime YES seal), the hedgehog's press (h04, her own print partner), the courier (h05) — and
+// “The End”. Every page's words are the voice, word by word, so it reads muted.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 71.8, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const VO = [
+  [0.25, 'Once upon a time, a fox had an idea.', 1.05],
+  [3.7, 'She described it, checked every page, and said yes.', 1.06],
+  [7.9, 'Her own print partner printed each order.'],
+  [10.6, 'And they listed happily ever after.', 1.05],
+];
+// page turns: the leaf i turns at TURN[i] (cover → 1 → 2 → 3 → 4)
+const TURN = [0.35, 3.3, 7.4, 10.1];
+const TD = 0.75;
+
+const L = tall
+  ? { bx: 110, by: 300, pw: 880, ph: 940, picH: 600, txtFs: 50, txtY: 660 }
+  : { bx: 170, by: 64, pw: 760, ph: 1150, picH: 760, txtFs: 46, txtY: 830 };
+const PW = L.pw, PH = L.ph;
+
+K.box(0, 0, W, H, { cls: 'room' });
+K.el('div', { cls: 'quilt' });
+const motes = Array.from({ length: 18 }, () => K.box(0, 0, 6, 6, { cls: 'mote' }));
+const book = K.box(L.bx, L.by, PW, PH, { cls: 'book' });
+const stack = K.box(0, 6, PW + 8, PH - 4, { cls: 'stack', parent: book, html: '<i></i>' });
+
+// ---------- pages ----------
+const PAGES = [
+  { kind: 'cover' },
+  { kind: 'pic', img: 'h03-story-shop', pos: '30% 30%', z: [1.04, 1.14], i: 0 },
+  { kind: 'app', i: 1 },
+  { kind: 'pic', img: 'h04-story-press', pos: '60% 55%', z: [1.12, 1.03], i: 2 },
+  { kind: 'pic', img: 'h05-story-courier', pos: '50% 50%', z: [1.02, 1.12], i: 3, last: true },
+];
+const leaves = PAGES.map((pg, n) => {
+  const leaf = K.el('div', { parent: book, cls: 'leaf', style: { width: PW + 'px', height: PH + 'px', zIndex: 50 - n } });
+  const fr = K.el('div', { parent: leaf, cls: 'face' + (pg.kind === 'cover' ? ' cover' : '') });
+  const bk = K.el('div', { parent: leaf, cls: 'face back' });
+  const sh = K.el('div', { parent: fr, cls: 'shade' });
+  const shB = K.el('div', { parent: bk, cls: 'shade' });
+  const o = { leaf, fr, bk, sh, shB, pg };
+  const M = 46;
+  if (pg.kind === 'cover') {
+    K.el('div', { parent: fr, cls: 'frame' });
+    const md = tall ? 360 : 380;
+    const medal = K.el('div', { parent: fr, cls: 'medal', style: { top: (tall ? 120 : 190) + 'px', width: md + 'px', height: md + 'px' } });
+    K.el('img', { parent: medal, src: K.pub('r05/h03-story-shop.webp') });
+    K.el('div', { parent: fr, cls: 'ttl', html: 'The Fox Who<br>Opened <em>a Shop</em>', style: { top: (tall ? 540 : 640) + 'px' } });
+    K.el('div', { parent: fr, cls: 'by', html: 'A bedtime story · MakeAndList', style: { top: (tall ? 790 : 900) + 'px' } });
+  }
+  if (pg.kind === 'pic' || pg.kind === 'app') {
+    const pic = K.el('div', { parent: fr, cls: 'pic', style: { left: M + 'px', top: M + 'px', width: PW - 2 * M + 'px', height: L.picH + 'px' } });
+    if (pg.kind === 'pic') {
+      o.img = K.el('img', { parent: pic, src: K.pub('r05/' + pg.img + '.webp'), style: { objectPosition: pg.pos } });
+      const t = K.demoTag('Concept image · AI-generated', 0, 0); pic.appendChild(t);
+      Object.assign(t.style, { left: 'auto', right: '14px', top: 'auto', bottom: '14px', fontSize: '17px' });
+    } else {
+      pic.style.background = '#F3EAD6'; pic.style.boxShadow = 'none';
+      K.el('div', { parent: pic, cls: 'wash', style: { left: '-60px', top: '-40px', width: '420px', height: '360px', background: 'rgba(126,154,126,.45)' } });
+      K.el('div', { parent: pic, cls: 'wash', style: { right: '-40px', bottom: '-60px', width: '380px', height: '320px', background: 'rgba(232,96,60,.28)' } });
+      const sw = tall ? 560 : 520, sc = sw / 780, y0 = 440, sh2 = tall ? 470 : 560;
+      o.scr = K.el('div', { parent: pic, cls: 'scr', style: { left: (PW - 2 * M - sw) / 2 + 'px', top: (L.picH - sh2) / 2 + 'px', width: sw + 'px', height: sh2 + 'px' } });
+      K.el('img', { parent: o.scr, src: K.screen('22-phone-create'), style: { top: -y0 * sc + 'px' } });
+      o.typ = K.el('div', { parent: o.scr, cls: 'typ', style: { left: 70 * sc + 'px', top: (596 - y0) * sc + 'px', width: 636 * sc + 'px', height: 176 * sc + 'px', fontSize: 30 * sc + 'px', lineHeight: 1.3, padding: 4 * sc + 'px' } });
+      o.yes = K.el('div', { parent: pic, cls: 'yes', html: '<div>Yes.<small>Your call</small></div>', style: { right: '34px', bottom: '30px' } });
+      const t = K.demoTag('Real app · demo workspace', 0, 0); pic.appendChild(t);
+      Object.assign(t.style, { left: '16px', top: '14px', fontSize: '17px' });
+    }
+    const line = VO[pg.i][1];
+    const tx = K.el('div', { parent: fr, cls: 'txt', style: { left: M + 10 + 'px', right: M + 10 + 'px', top: L.txtY + 'px', fontSize: L.txtFs + 'px', lineHeight: 1.18 } });
+    const HL = { 0: ['idea.'], 1: ['said', 'yes.'], 2: ['own', 'print', 'partner'], 3: ['listed'] }[pg.i];
+    o.words = line.split(' ').map((w) => K.el('span', { parent: tx, cls: 'w', html: (HL.includes(w) ? `<b>${w}</b>` : w) + ' ' }));
+    K.el('div', { parent: fr, cls: 'pg', html: '— ' + (pg.i + 1) + ' —', style: { bottom: '26px' } });
+    if (pg.last) {
+      o.endw = K.el('div', { parent: fr, cls: 'endw', html: 'The End.', style: { top: L.txtY + (tall ? 140 : 150) + 'px' } });
+    }
+  }
+  return o;
+});
+const story = K.box(tall ? 110 : 60, tall ? 260 : 24, null, null, { cls: 'story', html: '<i></i>A story, not a customer', style: { width: 'auto', height: 'auto' } });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'And they listed<br>happily ever after.' });
+
+// word timing: spread each line's words over its real duration (vo.mjs takes)
+const DURS = [3.16, 3.9, 2.42, 2.18];
+
+K.run({
+  id: 'E09', title: 'A Bedtime Story', dur: DUR, bpm: BPM, music: 'clouds', mood: 'calm', key: 'F', intro: 0.0, cover: 4.6,
+  technique: 'A cloth-bound picture book on a lamplit quilt, read aloud: real 3D page turns around the spine (backface leaves, cast shading on the page beneath), slow Ken Burns inside each watercolour plate, storybook text that inks in word by word with the voice, and one page that is the real create screen with a lime YES seal',
+  caption: 'A bedtime story: a fox has an idea, describes it in one sentence, checks every page and says yes; her own print partner prints each order. A story, not a customer — the watercolours are concept images. Start free at makeandlist.com',
+  short: 'And they listed happily ever after.',
+  question: 'Is this for someone like me?', gain: 'The whole flow, gently: idea → your yes → printed per order',
+  vo: VO,
+  beats: ['0–0.4 s: the book on a lamplit quilt — “The Fox Who Opened a Shop”', '0.4–3.3 s: the cover turns — “Once upon a time, a fox had an idea.” (h03)', '3.3–7.4 s: “She described it, checked every page, and said yes.” — the real create screen, a YES seal', '7.4–10.1 s: “Her own print partner printed each order.” (h04)', '10.1–13 s: “And they listed happily ever after.” (h05) — The End.', '13–15 s: end card'],
+  cues: [[0.0, 'paper'], ...TURN.flatMap((t) => [[t, 'paper'], [+(t + TD - 0.1).toFixed(3), 'swish']]), [4.1, 'type'], [7.02, 'stamp'], [8.9, 'printer'], [11.8, 'box'], [12.85, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  motes.forEach((m, i) => {
+    const sp = 0.02 + seed(i) * 0.03;
+    const y = ((seed(i + 3) + T * sp) % 1) * H, x = seed(i + 9) * W + Math.sin(T * 0.6 + i) * 30;
+    m.style.transform = `translate(${x}px, ${H - y}px)`; m.style.opacity = 0.25 + 0.5 * Math.abs(Math.sin(T * 0.8 + i));
+  });
+
+  // the book settles in, breathes
+  const bi = K.p(T, 0, 0.5, E.outExpo);
+  book.style.transform = `translateY(${(1 - bi) * 60 + Math.sin(T * 0.6) * 4}px) rotate(${-0.6 + Math.sin(T * 0.4) * 0.4}deg)`;
+  book.style.opacity = bi;
+  story.style.opacity = K.p(T, 0.2, 0.6, E.linear) * (1 - K.p(T, 12.6, 12.9, E.linear));
+
+  leaves.forEach((o, n) => {
+    const t0 = TURN[n];
+    const p = t0 === undefined ? 0 : K.p(T, t0, t0 + TD, E.inOutCubic);
+    const lift = Math.sin(p * Math.PI);
+    o.leaf.style.transform = `rotateY(${-180 * p}deg) translateZ(${lift * 2}px)`;
+    o.leaf.style.zIndex = p > 0.5 ? 60 + n : 50 - n;
+    o.sh.style.opacity = lift * 0.35;
+    o.shB.style.opacity = (1 - lift) * 0.2 + lift * 0.15;
+    // the page beneath darkens under the turning leaf
+    const nx = leaves[n + 1];
+    if (nx && t0 !== undefined && T >= t0 && T < t0 + TD) nx.sh.style.opacity = (1 - p) * 0.4;
+    o.leaf.style.visibility = p >= 1 ? 'hidden' : 'visible';
+    if (o.img) { const a = TURN[n - 1] ?? 0; o.img.style.transform = `scale(${K.lerp(o.pg.z[0], o.pg.z[1], K.p(T, a, a + 5, E.linear))})`; }
+    if (o.words) {
+      const a = VO[o.pg.i][0], d = DURS[o.pg.i];
+      o.words.forEach((w, k) => {
+        const tw = a + (k / o.words.length) * d * 0.92;
+        const q = K.p(T, tw - 0.05, tw + 0.4, E.outCubic);
+        w.style.opacity = 0.12 + 0.88 * q;
+        w.style.filter = `blur(${(1 - q) * 3}px)`;
+      });
+    }
+    if (o.typ) {
+      const S = 'A fox-and-fern print for a cosy shop.';
+      const k = Math.round(S.length * K.p(T, 4.1, 5.5, E.linear));
+      o.typ.innerHTML = T < 4.1 ? '<span style="color:#8A8378">For example: a 30-page ocean colouring book…</span>' : S.slice(0, k) + (k < S.length || Math.floor(T * 3) % 2 ? '<span style="display:inline-block;width:2px;height:1em;background:#1F1F1F;vertical-align:-2px"></span>' : '');
+      const yp = K.p(T, 7.0, 7.35, E.outBack);
+      o.yes.style.opacity = T >= 7.0 ? 1 : 0;
+      o.yes.style.transform = `scale(${K.lerp(1.8, 1, yp)}) rotate(${-12 + (1 - yp) * -10}deg)`;
+      o.scr.style.transform = `rotate(${-1.5 + Math.sin(T * 0.7) * 0.4}deg)`;
+    }
+    if (o.endw) {
+      const ep = K.p(T, 12.3, 12.8, E.outExpo);
+      o.endw.style.opacity = ep; o.endw.style.transform = `translateY(${(1 - ep) * 20}px)`;
+    }
+  });
+
+  end(T);
+});
+</script></body></html>

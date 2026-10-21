@@ -1,0 +1,44 @@
+[
+ {
+  "t": 0.3,
+  "text": "Five things you get.",
+  "file": "01-9603a29ec9.wav",
+  "dur": 1.21
+ },
+ {
+  "t": 1.41,
+  "text": "Print-ready files.",
+  "file": "02-fea66c4ec5.wav",
+  "dur": 1.39
+ },
+ {
+  "t": 2.7,
+  "text": "Listing images.",
+  "file": "03-5ada63483f.wav",
+  "dur": 1.53
+ },
+ {
+  "t": 3.78,
+  "text": "A short video.",
+  "file": "04-60d8a8f7b4.wav",
+  "dur": 1.49
+ },
+ {
+  "t": 5,
+  "text": "The listing, written for you.",
+  "file": "05-b99c1508f0.wav",
+  "dur": 2.65
+ },
+ {
+  "t": 7.55,
+  "text": "And a printed edition, if you want one.",
+  "file": "06-e09542743e.wav",
+  "dur": 2.83
+ },
+ {
+  "t": 10.46,
+  "text": "All five, from one sentence.",
+  "file": "07-d8c4600abc.wav",
+  "dur": 2.28
+ }
+]

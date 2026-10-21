@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E11 · The Trailer</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #000; }
+.film { position: absolute; left: 0; overflow: hidden; background: #000; }
+.shot { position: absolute; inset: 0; overflow: hidden; }
+.shot img { position: absolute; display: block; transform-origin: 50% 50%; }
+.grade { position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  background: radial-gradient(120% 80% at 50% 45%, rgba(0,0,0,0) 40%, rgba(0,0,0,.6) 100%), linear-gradient(rgba(20,40,60,.12), rgba(255,170,90,.06)); }
+.card { position: absolute; inset: 0; z-index: 20; background: #050505; display: grid; place-items: center; text-align: center; }
+.card .k { font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .5em; text-transform: uppercase; color: rgba(250,247,238,.6); margin-bottom: 26px; }
+.card .t { font: 700 86px/1.04 'Playfair Display'; letter-spacing: .06em; text-transform: uppercase; color: #F3EBDD; }
+.card .t em { font-style: italic; text-transform: none; letter-spacing: 0; color: #DFFF5A; }
+.flare { position: absolute; z-index: 21; pointer-events: none; mix-blend-mode: screen; height: 6px; border-radius: 3px;
+  background: linear-gradient(90deg, rgba(255,210,150,0), rgba(255,230,190,.95) 50%, rgba(255,210,150,0)); filter: blur(2px); }
+.glow { position: absolute; z-index: 21; pointer-events: none; mix-blend-mode: screen; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,200,130,.55), rgba(255,160,80,.15) 40%, rgba(255,160,80,0) 70%); }
+.sub { position: absolute; left: 50px; right: 50px; z-index: 30; text-align: center; font: italic 600 52px/1.15 'Playfair Display'; color: #FAF7EE; text-shadow: 0 2px 20px rgba(0,0,0,.9), 0 1px 3px rgba(0,0,0,.8); }
+.sub b { font-style: normal; font-weight: 800; color: #DFFF5A; }
+.bar { position: absolute; left: 0; right: 0; z-index: 40; background: #000; }
+.rating { position: absolute; z-index: 25; border: 3px solid #DFFF5A; border-radius: 14px; padding: 18px 26px; color: #DFFF5A; text-align: left; font: 600 26px/1.35 'IBM Plex Mono', monospace; letter-spacing: .04em; }
+.rating b { display: block; font: 800 40px 'Archivo'; letter-spacing: .02em; color: #F3EBDD; margin-bottom: 6px; }
+.scr { position: absolute; z-index: 22; overflow: hidden; border-radius: 26px; background: #FAF7EE; box-shadow: 0 0 120px rgba(223,255,90,.18), 0 40px 80px -30px rgba(0,0,0,.9); }
+.scr img { position: absolute; left: 0; width: 100%; }
+.big { position: absolute; left: 0; right: 0; z-index: 26; text-align: center; color: #F3EBDD; }
+.big .a { font: 600 26px 'IBM Plex Mono', monospace; letter-spacing: .5em; text-transform: uppercase; color: rgba(250,247,238,.8); }
+.big .b { font: 800 150px/0.92 'Playfair Display'; letter-spacing: -0.02em; margin-top: 18px; text-shadow: 0 6px 40px rgba(0,0,0,.7); }
+.big .b em { font-style: italic; color: #DFFF5A; }
+.demo { z-index: 35; background: rgba(10,10,10,.75); color: #EFEADF; border-color: #8A8378; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 38; opacity: .14; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E11 — The Trailer. A movie-trailer cut, narrated calmly (no deep-voice parody): letterbox bars close in on a rainy night
+// street with one lit shop window (h09); a green-band-style card “approved by you”; cuts on the beat between black title
+// cards and graded shots — the night desk and the sketch, the real Send screen (“drafts first, public only when you
+// say”), the print's texture and the packing bench (printed per order by your partner) — and the title: This season,
+// your shop opens.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 76, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const VO = [
+  [0.3, 'On a quiet street, one window stays lit.', 1.08],
+  [4.0, 'An idea becomes a product. Your call.'],
+  [7.2, 'Printed only when someone orders.'],
+  [9.5, 'This season, your shop opens.', 1.06],
+];
+// the cut list: [kind, from, to, ...]
+const FILM = tall ? { y: 270, h: 980 } : { y: 110, h: 1130 };
+const CUTS = [
+  { k: 'shot', img: 'r05/h09-night-street', a: 0, b: 3.55, A: { s: 1.08, fx: 0.2, fy: 0.1 }, Z: { s: 1.32, fx: 0.55, fy: -0.05 } },
+  { k: 'card', a: 3.55, b: 4.35, kick: 'MakeAndList presents', t: 'One <em>idea</em>' },
+  { k: 'shot', img: 'r05/h01-night-desk', a: 4.34, b: 5.2, A: { s: 1.25, fx: 0.3, fy: 0.3 }, Z: { s: 1.1, fx: 0.2, fy: 0.25 } },
+  { k: 'shot', img: 'r05/h10-hands-sketch', a: 5.2, b: 6.05, A: { s: 1.15, fx: -0.3, fy: -0.2 }, Z: { s: 1.28, fx: -0.1, fy: 0 } },
+  { k: 'scr', a: 6.05, b: 7.1 },
+  { k: 'shot', img: 'r05/h12-print-macro', a: 7.1, b: 8.15, A: { s: 1.35, fx: 0, fy: 0 }, Z: { s: 1.18, fx: 0.1, fy: 0.1 } },
+  { k: 'shot', img: 'r04/g21-packing', a: 8.15, b: 9.35, A: { s: 1.12, fx: 0, fy: 0.2 }, Z: { s: 1.26, fx: 0.1, fy: 0.3 } },
+  { k: 'shot', img: 'r05/h09-night-street', a: 9.35, b: 13.2, A: { s: 1.45, fx: 0.7, fy: -0.1 }, Z: { s: 1.15, fx: 0.4, fy: 0 }, fin: true },
+];
+
+const film = K.box(0, FILM.y, W, FILM.h, { cls: 'film' });
+const FW = W, FH = FILM.h;
+const layers = CUTS.map((c, i) => {
+  const r = K.el('div', { parent: film, cls: c.k === 'card' ? 'card' : 'shot', style: { zIndex: 2 + i } });
+  if (c.k === 'shot') {
+    const img = K.el('img', { parent: r, src: K.pub(c.img + '.webp') });
+    const b = Math.max(FW / 1024, FH / 1536);
+    Object.assign(img.style, { width: 1024 * b + 'px', height: 1536 * b + 'px', left: (FW - 1024 * b) / 2 + 'px', top: (FH - 1536 * b) / 2 + 'px' });
+    K.el('div', { parent: r, cls: 'grade' });
+    return { r, img, b, c };
+  }
+  if (c.k === 'card') {
+    r.innerHTML = `<div><div class="k">${c.kick}</div><div class="t">${c.t}</div></div>`;
+    return { r, c };
+  }
+  // the real Send screen, glowing in the dark
+  r.style.background = '#070707';
+  const sw = tall ? 760 : 820, sc = sw / 780, y0 = 1060, sh = tall ? 300 : 320;
+  const scr = K.el('div', { parent: r, cls: 'scr', style: { left: (FW - sw) / 2 + 'px', top: (FH - sh) / 2 - 40 + 'px', width: sw + 'px', height: sh + 'px' } });
+  K.el('img', { parent: scr, src: K.screen('72-phone-listing-send'), style: { top: -y0 * sc + 'px' } });
+  const tg = K.demoTag('Real app · demo workspace', 0, 0); r.appendChild(tg);
+  Object.assign(tg.style, { left: (FW - sw) / 2 + 'px', top: (FH + sh) / 2 - 20 + 'px' });
+  return { r, scr, c };
+});
+const flare = K.box(0, 0, W * 1.4, 6, { cls: 'flare', parent: film });
+const glow = K.box(0, 0, 900, 900, { cls: 'glow', parent: film });
+
+// the opening card (a trailer rating card, ours)
+const rating = K.box(0, 0, null, null, { cls: 'rating', parent: film, html: '<b>Approved by you.</b>The following product has been<br>reviewed by its seller. Drafts first.', style: { width: 'auto', height: 'auto' } });
+// title of the film
+const big = K.box(0, 0, W, null, { cls: 'big', parent: film, html: '<div class="a">This season</div><div class="b">Your shop<br><em>opens.</em></div>' });
+const ctag = K.demoTag('Concept images · AI-generated', 0, 0);
+const SUBS = [
+  [VO[0][0], VO[0][0] + 3.0, 'On a quiet street,<br>one window <b>stays lit.</b>'],
+  [VO[1][0], VO[1][0] + 2.95, 'An idea becomes a product.<br><b>Your call.</b>'],
+  [VO[2][0], VO[2][0] + 2.1, 'Printed <b>only when</b><br><b>someone orders.</b>'],
+];
+const subs = SUBS.map(([a, b, h]) => ({ a, b, d: K.box(50, 0, W - 100, null, { cls: 'sub', html: h, parent: film, style: { fontSize: (tall ? 52 : 50) + 'px' } }) }));
+const partner = K.box(0, 0, W, null, { cls: 'sub', parent: film, html: '<span style="font:600 22px IBM Plex Mono,monospace;letter-spacing:.16em;font-style:normal;text-transform:uppercase">Your print partner · per order · your account</span>' });
+const barT = K.box(0, 0, W, FILM.y, { cls: 'bar' });
+const barB = K.box(0, FILM.y + FILM.h, W, H - FILM.y - FILM.h, { cls: 'bar' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, dark: true, line: 'This season,<br>your shop opens.' });
+
+K.run({
+  id: 'E11', title: 'The Trailer', dur: DUR, bpm: BPM, music: 'letting-go-of-the-past', mood: 'calm', key: 'A', intro: 0.0, cover: 11.4,
+  technique: 'A movie-trailer cut: letterbox bars close onto a graded rainy night street, an “approved by you” rating card, hard cuts on the beat between black title cards and Ken Burns shots with gate weave, heavy grain and a lens flare across each card, one glowing insert of the real Send screen, and a title reveal over the lit shop window',
+  caption: 'This season, your shop opens: an idea becomes a product, and it is your call before anything goes live, and printed products are printed only when someone orders — by your own print partner. A trailer, not a promise of results; the images are concept images. Start free at makeandlist.com',
+  short: 'This season, your shop opens.',
+  question: 'Is this for someone like me?', gain: 'The dream, honestly: your call on every page; printed per order',
+  vo: VO,
+  beats: ['0–3.5 s: letterbox closes on a rainy night street, one lit window — “On a quiet street, one window stays lit.” · rating card “Approved by you.”', '3.5–6 s: card “One idea” → the night desk → hands sketching — “An idea becomes a product.”', '6–7.1 s: the real Send screen — “Your call.”', '7.1–9.3 s: the print’s texture, the packing bench — “Printed only when someone orders.” (your partner, your account)', '9.3–13 s: back to the window — title “This season, your shop opens.”', '13–15 s: end card'],
+  cues: [[0.0, 'whoosh'], [3.5, 'hit'], [4.32, 'swish'], [5.18, 'swish'], [6.03, 'pop'], [7.08, 'whoosh'], [8.13, 'paper'], [9.33, 'hit'], [12.72, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 70}px, ${(seed(f + 7) - 0.5) * 70}px)`;
+  const wx = (seed(f * 3 + 1) - 0.5) * 2.4, wy = (seed(f * 5 + 2) - 0.5) * 2.4;
+
+  // letterbox closes in
+  const lb = K.p(T, 0.1, 1.0, E.inOutCubic);
+  barT.style.transform = `translateY(${-(1 - lb) * FILM.y}px)`;
+  barB.style.transform = `translateY(${(1 - lb) * (H - FILM.y - FILM.h)}px)`;
+
+  layers.forEach((L, i) => {
+    const c = L.c;
+    const vis = T >= c.a && T < c.b + (c.fin ? 0.4 : 0);
+    L.r.style.visibility = vis ? 'visible' : 'hidden';
+    // a 2-frame dip at each cut
+    const dip = Math.min(1, K.p(T, c.a, c.a + 0.08, E.linear));
+    L.r.style.opacity = i === 0 ? K.p(T, 0, 0.6, E.linear) : dip;
+    if (L.img) {
+      const p = K.p(T, c.a, c.b, E.inOutCubic);
+      const S = K.lerp(c.A.s, c.Z.s, p), fx = K.lerp(c.A.fx, c.Z.fx, p), fy = K.lerp(c.A.fy, c.Z.fy, p);
+      const iw = 1024 * L.b * S, ih = 1536 * L.b * S;
+      L.img.style.transform = `translate(${fx * (iw - FW) / 2 + wx}px, ${fy * (ih - FH) / 2 + wy}px) scale(${S})`;
+      if (c.fin) L.img.style.filter = `brightness(${0.75 + 0.35 * K.p(T, 9.8, 11.5, E.inOutCubic)})`;
+    }
+    if (c.k === 'card') {
+      const p = K.p(T, c.a, c.b, E.linear);
+      L.r.firstChild.style.transform = `scale(${1.08 - 0.08 * p})`;
+      L.r.firstChild.style.opacity = K.p(T, c.a + 0.05, c.a + 0.3, E.linear);
+    }
+    if (L.scr) {
+      const p = K.p(T, c.a, c.b, E.linear);
+      L.scr.style.transform = `scale(${0.96 + 0.06 * p}) rotate(${-1 + p * 1.5}deg)`;
+    }
+  });
+
+  // flare across each card and the title
+  const fl = [3.55, 9.45].map((t) => K.p(T, t, t + 0.7, E.inOutCubic));
+  const fi = T >= 9.45 ? 1 : 0, fp = fl[fi];
+  flare.style.opacity = fp > 0 && fp < 1 ? Math.sin(fp * Math.PI) : 0;
+  flare.style.transform = `translate(${K.lerp(-W * 1.2, W * 0.6, fp)}px, ${FH * (fi ? 0.5 : 0.52)}px)`;
+  const gp = K.win(T, 9.4, 13.2, 0.8);
+  glow.style.opacity = gp * (0.7 + 0.3 * Math.sin(T * 3));
+  glow.style.transform = `translate(${FW * (tall ? 0.42 : 0.45) - 450}px, ${FH * 0.42 - 450}px) scale(${0.9 + 0.1 * Math.sin(T * 1.7)})`;
+
+  // rating card on the opening shot
+  const rp = K.win(T, 1.0, 3.4, 0.3);
+  rating.style.opacity = rp; rating.style.left = (tall ? 70 : 80) + 'px'; rating.style.top = (tall ? 60 : 60) + 'px';
+  rating.style.transform = `translateY(${(1 - K.p(T, 1.0, 1.5, E.outExpo)) * 20}px)`;
+
+  // subtitles
+  subs.forEach((s) => {
+    const p = K.p(T, s.a, s.a + 0.4, E.outCubic), o = K.p(T, s.b - 0.2, s.b, E.linear);
+    s.d.style.opacity = p * (1 - o);
+    s.d.style.top = FH - s.d.offsetHeight - 90 + 'px';
+    s.d.style.transform = `translateY(${(1 - p) * 14}px)`;
+  });
+  partner.style.top = FH - 64 + 'px'; partner.style.lineHeight = '1';
+  partner.style.opacity = K.win(T, 7.3, 9.3, 0.25);
+
+  // the title
+  const bp = K.p(T, 9.55, 10.4, E.outExpo);
+  big.style.top = FH * (tall ? 0.52 : 0.5) + 'px';
+  big.style.opacity = bp * (1 - K.p(T, 13.1, 13.3, E.linear));
+  big.style.transform = `translateY(${(1 - bp) * 30}px) scale(${1.04 - 0.04 * K.p(T, 9.55, 13, E.linear)})`;
+  big.style.letterSpacing = `${(1 - bp) * 0.2}em`;
+
+  // concept tag: on the photographic shots
+  const onShot = layers.some((L) => L.img && T >= L.c.a && T < L.c.b);
+  ctag.style.opacity = onShot && T < 13 ? 1 : 0;
+  ctag.style.left = W - (tall ? 65 : 60) - 360 + 'px'; ctag.style.top = FILM.y + 18 + 'px';
+
+  end(T);
+});
+</script></body></html>

@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.3,
+  "text": "It's late, and an idea arrives.",
+  "file": "01-12e49af881.wav",
+  "dur": 2.93
+ },
+ {
+  "t": 3.25,
+  "text": "Describe it. See the cost first.",
+  "file": "02-c11965e118.wav",
+  "dur": 2.55
+ },
+ {
+  "t": 5.38,
+  "text": "By morning, a draft is waiting.",
+  "file": "03-3dd23a4b8b.wav",
+  "dur": 2.51
+ },
+ {
+  "t": 7.93,
+  "text": "Nothing goes live until you say yes.",
+  "file": "04-84171f3ecf.wav",
+  "dur": 2.14
+ },
+ {
+  "t": 9.85,
+  "text": "Start tonight. Review it tomorrow.",
+  "file": "05-3e6f24aac9.wav",
+  "dur": 2.74
+ }
+]

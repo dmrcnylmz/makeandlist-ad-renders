@@ -188,6 +188,35 @@ def music_bed(name, dur, offset=0.0):
     return x
 
 
+VO_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'vo')
+
+
+def voice_track(ad_id, n):
+    """The ad's voice-over (motion/vo/<ID>/index.json from vo.mjs), placed at its times; None without one."""
+    idx = os.path.join(VO_DIR, ad_id, 'index.json')
+    if not os.path.exists(idx):
+        return None
+    vo = np.zeros(n)
+    for line in json.load(open(idx)):
+        place(vo, load_wav(os.path.join(VO_DIR, ad_id, line['file'])), float(line['t']), 1.0)
+    return vo
+
+
+def duck(vo, depth=0.32, attack=0.08, release=0.35):
+    """1 where nobody speaks, `depth` under speech, with smooth attack and release."""
+    env = np.abs(vo)
+    w = int(0.03 * SR)
+    env = np.convolve(env, np.ones(w) / w, mode='same')
+    speaking = (env > 0.01).astype(np.float64)
+    a, r = int(attack * SR), int(release * SR)
+    # widen the speaking mask so the dip starts before the first word and lifts after the last
+    k = np.ones(a + r)
+    speaking = np.clip(np.convolve(speaking, k, mode='same'), 0, 1)
+    gain = 1 - (1 - depth) * speaking
+    sm = int(0.12 * SR)
+    return np.convolve(gain, np.ones(sm) / sm, mode='same')
+
+
 def main():
     meta = json.load(open(sys.argv[1]))
     out = sys.argv[2]
@@ -279,6 +308,11 @@ def main():
         mix = music * 0.62 + sfx * 0.95
     else:
         mix = drums * 0.8 + music * 0.75 + sfx * 0.9
+    vo = voice_track(meta.get('id', ''), n) if meta.get('vo') else None
+    if vo is not None:
+        # The narrator leads: music and effects dip under every line, the voice sits clearly on top.
+        g = duck(vo)
+        mix = mix * g + vo * 0.9
     # Fade in/out
     fi = int(0.05 * SR)
     mix[:fi] *= np.linspace(0, 1, fi)

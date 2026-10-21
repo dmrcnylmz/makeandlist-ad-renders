@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>E02 · From Night to Morning</title><link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=block">
+<style>
+#stage { background: #0E1219; }
+.shot { position: absolute; left: 0; top: 0; overflow: hidden; }
+.shot img { position: absolute; display: block; transform-origin: 50% 50%; }
+.tint { position: absolute; inset: 0; pointer-events: none; }
+.motes { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
+.mote { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,220,160,.9); box-shadow: 0 0 10px rgba(255,200,120,.9); }
+.note { position: absolute; z-index: 5; font: 600 40px/1.05 'Caveat', cursive; color: #3A2F25; white-space: nowrap; mix-blend-mode: multiply; transform-origin: 0 0; }
+.sweep { position: absolute; z-index: 30; pointer-events: none; mix-blend-mode: screen;
+  background: linear-gradient(100deg, rgba(255,200,130,0) 30%, rgba(255,214,160,.85) 50%, rgba(255,240,210,.95) 53%, rgba(255,200,130,0) 70%); }
+.top { position: absolute; left: 0; right: 0; top: 0; pointer-events: none; z-index: 7; }
+.clock { position: absolute; z-index: 40; display: flex; align-items: center; gap: 14px; padding: 12px 22px 12px 14px; border-radius: 99px; white-space: nowrap;
+  background: rgba(20,22,28,.55); color: #FAF7EE; font: 600 30px 'IBM Plex Mono', monospace; letter-spacing: .04em; backdrop-filter: blur(6px); box-shadow: 0 0 0 1.5px rgba(250,247,238,.25); }
+.clock .ic { width: 44px; height: 44px; position: relative; }
+.clock .ic svg { position: absolute; inset: 0; }
+.cap { position: absolute; z-index: 40; color: #FAF7EE; font: 800 92px/1.0 'Playfair Display'; letter-spacing: -0.02em; text-shadow: 0 4px 30px rgba(0,0,0,.55), 0 1px 2px rgba(0,0,0,.4); }
+.cap em { font-style: italic; color: #DFFF5A; }
+.cap.ink { color: #1F1F1F; text-shadow: 0 2px 24px rgba(255,248,232,.85); }
+.cap.ink em { color: #1F1F1F; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.typ { position: absolute; font: 400 15px/1.35 'Archivo'; color: #1F1F1F; background: #FFFDF8; border-radius: 6px; }
+.typ i { display: inline-block; width: 2px; height: 1.1em; background: #1F1F1F; vertical-align: -3px; margin-left: 1px; }
+.ring { position: absolute; z-index: 6; border-radius: 14px; border: 5px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; pointer-events: none; }
+.sleep { position: absolute; inset: 0; z-index: 5; background: #0B0C10; border-radius: 52px; }
+.lock { position: absolute; left: 0; right: 0; z-index: 6; text-align: center; color: #FAF7EE; }
+.lock .tm { font: 300 92px/1 'Archivo'; letter-spacing: -0.02em; }
+.lock .dt { font: 500 20px 'Archivo'; opacity: .8; margin-bottom: 6px; }
+.notif { position: absolute; z-index: 7; left: 22px; right: 22px; padding: 16px 18px; border-radius: 22px; background: rgba(250,247,238,.94); color: #1F1F1F; display: flex; gap: 14px; align-items: center; box-shadow: 0 20px 40px -20px rgba(0,0,0,.7); }
+.phone .screen .notif img { position: static; flex: none; width: 44px; height: 44px; border-radius: 11px; background: #FAF7EE; box-shadow: 0 0 0 1px #D9D3C9; padding: 5px; }
+.notif b { display: block; font: 700 17px 'Archivo'; }
+.notif span { display: block; font: 500 16px/1.25 'Archivo'; color: #45403A; }
+.notif s { position: absolute; right: 18px; top: 14px; text-decoration: none; font: 500 13px 'Archivo'; color: #8A8378; }
+.chipN { position: absolute; z-index: 42; white-space: nowrap; font: 700 27px 'Archivo'; padding: 14px 24px; border-radius: 99px; display: flex; gap: 12px; align-items: center; box-shadow: 0 20px 40px -20px rgba(0,0,0,.6); }
+.chipN.lime { background: #DFFF5A; color: #1F1F1F; }
+.chipN.ink { background: #1F1F1F; color: #FAF7EE; }
+.chipN i { width: 12px; height: 12px; border-radius: 50%; background: currentColor; display: block; }
+.half { position: absolute; left: 0; top: 0; overflow: hidden; z-index: 20; }
+.half img { position: absolute; display: block; }
+.seam { position: absolute; z-index: 21; height: 6px; background: #DFFF5A; transform-origin: 0 50%; box-shadow: 0 0 30px rgba(223,255,90,.6); }
+.hl { position: absolute; z-index: 41; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 80; opacity: .1; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// E02 — From Night to Morning. One desk, two times of day. At 11:48 PM an idea is pencilled into the sketchbook under
+// the lamp; the phone comes up, the sentence is typed into the real create box and the real quote shows the cost first.
+// In the breath, time-lapse: the clock races to 7:05 AM, a sunrise sweep crossfades the night desk (h01) into the
+// morning desk (h02), the phone wakes to "your draft is waiting", the real Waiting-for-you list, then the real Send step
+// ("drafts first, public only when you say"). It closes on a split: night says "Start tonight", morning says "Review it
+// tomorrow". Nothing about speed is claimed: the draft is simply there when you come back.
+document.fonts && document.fonts.load('600 40px Caveat');
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 71.8, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const VO = [[0.3, "It's late, and an idea arrives."], [3.25, 'Describe it. See the cost first.'], [5.38, 'By morning, a draft is waiting.'],
+  [7.93, 'Nothing goes live until you say yes.'], [9.85, 'Start tonight. Review it tomorrow.']];
+// spoken windows (measured): line speech start/end and the key words
+const SP = [[1.0, 3.12], [3.42, 5.65], [5.95, 7.77], [8.07, 9.94], [10.24, 12.48]];
+const T_SWIPE_Q = 4.22, T_DAWN = 5.66, T_DAY = 6.15, T_WAKE = 5.93, T_LIST = 6.3, T_SEND = 7.8, T_SPLIT = 9.98;
+
+// ---------- the two shots (cover-fit 1024×1536) ----------
+const cover = (w, h) => { const b = Math.max(w / 1024, h / 1536); return { b, iw: 1024 * b, ih: 1536 * b }; };
+const mk = (id, z) => {
+  const r = K.box(0, 0, W, H, { cls: 'shot', style: { zIndex: z } });
+  const img = K.el('img', { parent: r, src: K.pub('r05/' + id + '.webp') });
+  const c = cover(W, H);
+  Object.assign(img.style, { width: c.iw + 'px', height: c.ih + 'px', left: (W - c.iw) / 2 + 'px', top: (H - c.ih) / 2 + 'px' });
+  return { r, img, c };
+};
+const night = mk('h01-night-desk', 2), day = mk('h02-morning-desk', 3);
+const nTint = K.el('div', { parent: night.r, cls: 'tint', style: { background: 'linear-gradient(180deg, rgba(10,14,30,.55) 0, rgba(10,14,30,.05) 45%, rgba(10,14,30,.35) 100%)' } });
+const dTint = K.el('div', { parent: day.r, cls: 'tint', style: { background: 'linear-gradient(180deg, rgba(255,236,200,.5) 0, rgba(255,236,200,0) 40%, rgba(40,30,20,.18) 100%)' } });
+// the idea, pencilled onto the sketchbook's right page (h01: page centre ≈ 54 % × 61 % of the image)
+const note = K.el('div', { parent: night.r, cls: 'note', html: 'botanical<br>wedding planner?' });
+const motes = K.el('div', { parent: night.r, cls: 'motes' });
+const MOTES = Array.from({ length: 26 }, (_, i) => ({ el: K.el('div', { parent: motes, cls: 'mote' }), x: seed(i * 3.1), y: seed(i * 7.7), s: 0.4 + seed(i * 1.9) * 0.9, v: 0.2 + seed(i * 5.3) }));
+const sweep = K.box(0, 0, W * 1.6, H, { cls: 'sweep' });
+const topShade = K.box(0, 0, W, tall ? 760 : 520, { cls: 'top', style: { background: 'linear-gradient(180deg, rgba(8,10,16,.62) 0, rgba(8,10,16,.3) 55%, rgba(8,10,16,0) 100%)' } });
+
+// ---------- layout ----------
+const L = tall
+  ? { clk: [65, 290], capX: 65, capY: 380, capW: 950, fs: 92, ph: { x: (W - 440) / 2, y: 690, w: 440 }, chip: [W / 2, 650] }
+  : { clk: [60, 56], capX: 60, capY: 300, capW: 500, fs: 84, ph: { x: 600, y: 170, w: 420 }, chip: [60, 640] };
+
+// ---------- the clock ----------
+const clock = K.box(L.clk[0], L.clk[1], null, null, { cls: 'clock', style: { width: 'auto', height: 'auto' }, html: `<div class="ic">
+  <svg viewBox="0 0 44 44" class="moon"><path d="M28 6a16 16 0 1 0 10 26A13 13 0 0 1 28 6z" fill="#F3E3B5"/></svg>
+  <svg viewBox="0 0 44 44" class="sun"><circle cx="22" cy="22" r="8" fill="#FFC86B"/><g stroke="#FFC86B" stroke-width="3" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map((a) => `<line x1="22" y1="5" x2="22" y2="10" transform="rotate(${a} 22 22)"/>`).join('')}</g></svg></div><span class="tm"></span>` });
+const moon = clock.querySelector('.moon'), sun = clock.querySelector('.sun'), tm = clock.querySelector('.tm');
+const fmt = (mins) => { const m = ((Math.round(mins) % 1440) + 1440) % 1440; let h = Math.floor(m / 60); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${String(m % 60).padStart(2, '0')} ${ap}`; };
+
+// ---------- the phone (real screens) ----------
+const SCR = ['22-phone-create', '65-phone-configure', '74-phone-waiting', '72-phone-listing-send'];
+const deck = K.phoneDeck(L.ph.x, L.ph.y, L.ph.w, SCR.map((n) => K.screen(n)));
+deck.root.style.zIndex = 25;
+const k = deck.sw / 780;
+const scrEl = deck.root.querySelector('.screen');
+const layers = [...deck.root.querySelectorAll('.screen > div')];
+const typ = K.el('div', { parent: layers[0], cls: 'typ', style: { left: 70 * k + 'px', top: 594 * k + 'px', width: 636 * k + 'px', height: 160 * k + 'px', fontSize: 27 * k + 'px', padding: 4 * k + 'px' } });
+const TYPED = 'A botanical wedding planner, 36 printable pages, for couples who like calm.';
+const ringQ = K.el('div', { parent: layers[1], cls: 'ring' });
+const ringS = K.el('div', { parent: layers[3], cls: 'ring' });
+const ringW = K.el('div', { parent: layers[2], cls: 'ring' });
+const sleep = K.el('div', { parent: scrEl, cls: 'sleep' });
+const lock = K.el('div', { parent: scrEl, cls: 'lock', html: '<div class="dt">Saturday</div><div class="tm">7:05</div>', style: { top: 120 * k * 1.6 + 'px' } });
+const notif = K.el('div', { parent: scrEl, cls: 'notif', html: `<img src="${K.brand('makeandlist-monogram.svg')}"><div><b>MakeAndList</b><span>Your draft is waiting for your review.</span></div><s>now</s>`, style: { top: 380 * k * 1.6 + 'px' } });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0); realTag.style.zIndex = 45;
+const conceptTag = K.demoTag('Concept images · AI-generated', 0, 0); conceptTag.style.zIndex = 45;
+const sh = deck.sh;
+const fr = (srcY, srcH) => Math.max(0, Math.min(1, (srcY * k) / (srcH * k - sh)));
+const SCROLL = [fr(260, 3400), 1, fr(0, 3800), fr(960, 3800)];
+
+// ---------- chips ----------
+const chips = [
+  K.box(0, 0, null, null, { cls: 'chipN ink', html: '<i style="color:#DFFF5A"></i>Nothing is made until you approve', style: { width: 'auto', height: 'auto' } }),
+  K.box(0, 0, null, null, { cls: 'chipN lime', html: '<i></i>Draft · waiting for you', style: { width: 'auto', height: 'auto' } }),
+];
+const CHIPT = [[4.8, T_DAWN - 0.1], [6.75, T_SEND]];
+
+// ---------- captions (key words of each line, in time with her) ----------
+const capEl = (html, cls) => K.box(L.capX, L.capY, L.capW, null, { cls: 'cap ' + (cls || ''), html, style: { fontSize: L.fs + 'px' } });
+const CAPS = [
+  { a: 1.0, b: 3.2, w: [[1.0, "It's late."], [2.0, '<em>An idea</em>'], [2.5, 'arrives.']], ink: false },
+  { a: 3.42, b: 5.62, w: [[3.42, 'Describe it.'], [4.28, 'See the'], [4.84, '<em>cost first.</em>']], ink: false },
+  { a: 5.95, b: 7.82, w: [[5.95, 'By morning,'], [6.7, 'a <em>draft</em>'], [7.27, 'is waiting.']], ink: true },
+  { a: 8.07, b: 9.96, w: [[8.07, 'Nothing'], [8.46, 'goes live'], [8.97, 'until you'], [9.48, 'say <em>yes.</em>']], ink: true },
+];
+const caps = CAPS.map((c) => {
+  const el = capEl('', c.ink ? 'ink' : '');
+  const parts = c.w.map(([t, h], i) => K.el('span', { parent: el, html: h + (i < c.w.length - 1 ? ' ' : ''), style: { display: 'inline-block', whiteSpace: 'pre' } }));
+  return { ...c, el, parts };
+});
+// the split ending
+const halfN = K.box(0, 0, W, H, { cls: 'half' }), halfD = K.box(0, 0, W, H, { cls: 'half' });
+const hN = K.el('img', { parent: halfN, src: K.pub('r05/h01-night-desk.webp') }), hD = K.el('img', { parent: halfD, src: K.pub('r05/h02-morning-desk.webp') });
+K.el('div', { parent: halfN, cls: 'tint', style: { background: 'rgba(8,10,20,.4)' } });
+K.el('div', { parent: halfD, cls: 'tint', style: { background: 'rgba(255,240,215,.22)' } });
+const seam = K.box(0, 0, 10, 6, { cls: 'seam' });
+const endA = K.box(0, 0, W, null, { cls: 'cap', html: 'Start <em>tonight.</em>', style: { fontSize: (tall ? 104 : 92) + 'px', zIndex: 30 } });
+const endB = K.box(0, 0, W, null, { cls: 'cap ink', html: 'Review it <em>tomorrow.</em>', style: { fontSize: (tall ? 104 : 92) + 'px', zIndex: 30 } });
+const hlA = K.box(0, 0, null, null, { cls: 'hl', html: '11:48 PM · you describe', style: { color: '#F3E3B5', width: 'auto', height: 'auto', zIndex: 30 } });
+const hlB = K.box(0, 0, null, null, { cls: 'hl', html: '7:05 AM · you review', style: { color: '#45403A', width: 'auto', height: 'auto', zIndex: 30 } });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Start tonight.<br>Review it tomorrow.' });
+
+const posAt = (t) => K.p(t, T_SWIPE_Q - 0.15, T_SWIPE_Q + 0.35, E.inOutCubic) + K.p(t, T_LIST - 0.2, T_LIST + 0.15, E.inOutCubic) + K.p(t, T_SEND - 0.15, T_SEND + 0.35, E.inOutCubic);
+// split geometry: the seam runs diagonally; night owns the top-left, morning the bottom-right
+const SPLIT = tall ? { y0: 980, y1: 820 } : { y0: 760, y1: 560 };
+
+K.run({
+  id: 'E02', title: 'From Night to Morning', dur: DUR, bpm: BPM, music: 'clouds', mood: 'calm', key: 'A', intro: 0.0, cover: 6.6,
+  technique: 'A day-cycle on one desk: the night shot (lamp, dust motes, a pencilled idea on the sketchbook) holds the real create box and the real quote; in the breath a sunrise light-sweep and a racing clock crossfade it into the morning shot while the phone sleeps and wakes to a notification, then the real Waiting-for-you list and Send step; it closes on a diagonal night/morning split, one caption per half',
+  caption: 'Have the idea at night: describe it in one sentence and see the Credit cost first. In the morning the draft is waiting for you — nothing goes live until you say yes. Start free at makeandlist.com',
+  short: 'Start tonight. Review it tomorrow.',
+  vo: VO,
+  beats: ['0–3.2 s: 11:48 PM, a night desk (concept image); “It’s late, and an idea arrives.” — pencilled into the sketchbook', '3.2–5.7 s: “Describe it. See the cost first.” — the real create box, then the real quote', '5.7–6.2 s: time-lapse to 7:05 AM, sunrise sweep; the phone wakes to a notification', '6.2–8 s: “By morning, a draft is waiting.” — the real Waiting-for-you list', '8–10 s: “Nothing goes live until you say yes.” — the real Send step: drafts first', '10–13 s: night/morning split: “Start tonight. Review it tomorrow.”; 13–15 s end card'],
+  cues: [[0.0, 'swish'], [0.5, 'marker'], [3.2, 'swish'], [3.45, 'type'], [T_SWIPE_Q, 'swish'], [4.62, 'pop'], [T_DAWN - 0.02, 'whoosh'], [5.86, 'notify'], [T_LIST, 'swish'], [T_SEND - 0.05, 'swish'], [7.98, 'pop'], [T_SPLIT, 'whoosh'], [11.1, 'click'], [12.6, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const dawn = K.p(T, T_DAWN - 0.1, T_DAY + 0.15, E.inOutCubic);
+
+  // ---------- shots (Ken Burns) ----------
+  const nS = 1.06 + 0.1 * K.p(T, 0, 6, E.linear), dS = 1.14 - 0.08 * K.p(T, 5.6, 10.2, E.linear);
+  night.img.style.transform = `translate(${-W * 0.02 * K.p(T, 0, 6, E.linear)}px, ${-H * 0.02 * K.p(T, 0, 6, E.linear)}px) scale(${nS})`;
+  day.img.style.transform = `translate(${W * 0.015 * K.p(T, 5.6, 10.2, E.linear)}px, 0) scale(${dS})`;
+  night.r.style.visibility = T < T_DAY + 0.3 ? 'visible' : 'hidden';
+  day.r.style.opacity = dawn; day.r.style.visibility = dawn > 0 ? 'visible' : 'hidden';
+  night.img.style.filter = `brightness(${1 + 0.15 * Math.sin(T * 9) * 0.1 + 0.3 * dawn}) saturate(${1 + 0.2 * dawn})`;
+  // lamp flicker on motes
+  MOTES.forEach((m, i) => {
+    const x = (m.x * W + Math.sin(T * m.v + i) * 40 + T * 8 * m.v) % W;
+    const y = (m.y * H * 0.7 + H * 0.1 - T * 14 * m.v + H) % H;
+    m.el.style.transform = `translate(${x}px, ${y}px) scale(${m.s})`;
+    m.el.style.opacity = (0.35 + 0.45 * Math.sin(T * 1.3 + i)) * (1 - dawn);
+  });
+  // the pencilled idea, mapped onto the sketchbook page in the moving shot
+  const c = night.c, ix = 0.2 * 1024, iy = 0.6 * 1536;
+  const sx = (W - c.iw) / 2 + (ix * c.b - c.iw / 2) * nS + c.iw / 2 - W * 0.02 * K.p(T, 0, 6, E.linear);
+  const sy = (H - c.ih) / 2 + (iy * c.b - c.ih / 2) * nS + c.ih / 2 - H * 0.02 * K.p(T, 0, 6, E.linear);
+  note.style.fontSize = 34 * c.b * nS * 1.5 + 'px';
+  note.style.left = sx + 'px'; note.style.top = sy + 'px';
+  note.style.transform = 'rotate(-7deg) skewX(-6deg)';
+  const np = K.p(T, 2.05, 2.9, E.linear);
+  note.style.webkitMaskImage = `linear-gradient(100deg, #000 ${np * 100}%, transparent ${np * 100 + 8}%)`;
+  note.style.opacity = 0.85;
+
+  // sunrise sweep
+  const sw = K.p(T, T_DAWN - 0.2, T_DAY + 0.3, E.inOutCubic);
+  sweep.style.transform = `translateX(${K.lerp(-W * 1.6, W, sw)}px)`;
+  sweep.style.opacity = sw > 0 && sw < 1 ? 1 : 0;
+  topShade.style.opacity = 1 - 0.75 * dawn;
+
+  // ---------- clock ----------
+  const mins = K.lerp(23 * 60 + 48, 24 * 60 + 7 * 60 + 5, K.p(T, T_DAWN - 0.1, T_DAY, E.inOutCubic)) + Math.floor(K.p(T, 0, T_DAWN - 0.1, E.linear) * 2);
+  tm.textContent = fmt(mins);
+  moon.style.opacity = 1 - dawn; sun.style.opacity = dawn;
+  sun.style.transform = `rotate(${T * 20}deg)`; sun.style.transformOrigin = '50% 50%';
+  const cIn = K.p(T, 0.2, 0.8, E.outExpo);
+  clock.style.opacity = cIn * (1 - K.p(T, T_SPLIT - 0.2, T_SPLIT, E.linear));
+  clock.style.transform = `translateY(${(1 - cIn) * -20}px) scale(${1 + 0.06 * Math.sin(Math.PI * K.p(T, T_DAWN - 0.1, T_DAY, E.linear))})`;
+  clock.style.background = `rgba(${Math.round(K.lerp(20, 250, dawn))},${Math.round(K.lerp(22, 247, dawn))},${Math.round(K.lerp(28, 238, dawn))},${K.lerp(0.55, 0.85, dawn)})`;
+  clock.style.color = dawn > 0.5 ? '#1F1F1F' : '#FAF7EE';
+
+  // ---------- phone ----------
+  const phIn = K.p(T, 3.05, 3.6, E.outExpo), phOut = K.p(T, T_SPLIT - 0.25, T_SPLIT + 0.1, E.inCubic);
+  const pos = posAt(T);
+  deck.draw(pos, SCROLL, pos - posAt(T - 1 / 30));
+  deck.root.style.opacity = Math.min(1, phIn * 2) * (1 - phOut);
+  deck.root.style.visibility = phIn > 0 && phOut < 1 ? 'visible' : 'hidden';
+  deck.root.style.transform = `translateY(${(1 - phIn) * 420 + phOut * 200}px) rotate(${(tall ? -2 : 2) + Math.sin(T * 0.7) * 0.6}deg)`;
+  const n = Math.round(TYPED.length * K.p(T, 3.45, 4.15, E.linear));
+  typ.innerHTML = TYPED.slice(0, n) + (n < TYPED.length || Math.floor(T * 3) % 2 ? '<i></i>' : '');
+  // the quote total ("Total quote · 100 Credits", source y 3230–3420 when scrolled to the end)
+  const qOff = 3800 - sh / k;
+  const rq = K.p(T, 4.62, 4.95, E.outBack);
+  Object.assign(ringQ.style, { left: 24 * k + 'px', top: (3236 - qOff) * k + 'px', width: 700 * k + 'px', height: 190 * k + 'px', opacity: rq > 0 ? 1 : 0, transform: `scale(${1.12 - 0.12 * rq})` });
+  // "Waiting for you" heading (source y 170–260)
+  const rw = K.p(T, 6.7, 7.0, E.outBack);
+  Object.assign(ringW.style, { left: 14 * k + 'px', top: 160 * k + 'px', width: 560 * k + 'px', height: 110 * k + 'px', opacity: rw > 0 ? 1 : 0, transform: `scale(${1.12 - 0.12 * rw})` });
+  // "SEND · DRAFTS FIRST, PUBLIC ONLY WHEN YOU SAY" (source y 1090–1130, view from 960)
+  const rs = K.p(T, 7.98, 8.3, E.outBack);
+  Object.assign(ringS.style, { left: 18 * k + 'px', top: (1080 - 960) * k + 'px', width: 744 * k + 'px', height: 66 * k + 'px', opacity: rs > 0 ? 1 : 0, transform: `scale(${1.1 - 0.1 * rs})` });
+  // sleep → lock screen + notification → wake into the list
+  const sl = K.p(T, T_DAWN - 0.15, T_DAWN + 0.05, E.linear) * (1 - K.p(T, T_LIST - 0.25, T_LIST - 0.05, E.linear));
+  sleep.style.opacity = sl;
+  const lk = K.p(T, T_WAKE - 0.1, T_WAKE + 0.15, E.linear) * (1 - K.p(T, T_LIST - 0.25, T_LIST - 0.05, E.linear));
+  lock.style.opacity = lk;
+  const ni = K.p(T, T_WAKE - 0.05, T_WAKE + 0.3, E.outBack);
+  notif.style.opacity = Math.min(1, ni * 2) * (1 - K.p(T, T_LIST - 0.25, T_LIST - 0.05, E.linear));
+  notif.style.transform = `translateY(${(1 - ni) * -60}px) scale(${0.9 + 0.1 * ni})`;
+  realTag.style.opacity = Math.min(1, phIn * 2) * (1 - phOut) * (1 - lk);
+  if (tall) { realTag.style.left = 'auto'; realTag.style.right = '65px'; realTag.style.top = '346px'; }
+  else { realTag.style.left = L.ph.x + 10 + 'px'; realTag.style.top = L.ph.y + deck.h + 18 + 'px'; }
+  conceptTag.style.opacity = 1 - K.p(T, 12.8, 13, E.linear);
+  conceptTag.style.left = 'auto'; conceptTag.style.right = (tall ? 65 : 60) + 'px'; conceptTag.style.top = (tall ? 300 : 66) + 'px';
+
+  // chips
+  chips.forEach((ch, i) => {
+    const [a, b] = CHIPT[i];
+    const p = K.p(T, a, a + 0.4, E.outBack), o = K.p(T, b - 0.2, b, E.inCubic);
+    ch.style.opacity = Math.min(1, p * 2) * (1 - o);
+    ch.style.visibility = T >= a && T < b ? 'visible' : 'hidden';
+    ch.style.left = L.chip[0] + 'px'; ch.style.top = (tall ? L.ph.y - 92 : L.chip[1]) + 'px';
+    ch.style.transform = `translateX(${tall ? '-50%' : '0'}) scale(${0.75 + 0.25 * p}) rotate(${tall ? -1.5 : 0}deg)`;
+    ch.style.transformOrigin = tall ? '50% 50%' : '0 50%';
+  });
+
+  // ---------- captions ----------
+  caps.forEach((c) => {
+    const vis = T >= c.a - 0.05 && T < c.b + 0.3;
+    c.el.style.visibility = vis ? 'visible' : 'hidden';
+    const o = K.p(T, c.b, c.b + 0.28, E.inCubic);
+    c.parts.forEach((p, i) => {
+      const t = c.w[i][0];
+      const q = K.p(T, t - 0.05, t + 0.4, E.outExpo);
+      p.style.opacity = q * (1 - o);
+      p.style.transform = `translateY(${(1 - q) * 40 - o * 30}px)`;
+      p.style.filter = q < 1 ? `blur(${(1 - q) * 10}px)` : 'none';
+    });
+  });
+
+  // ---------- the split ----------
+  const sp = K.p(T, T_SPLIT, T_SPLIT + 0.6, E.inOutCubic);
+  const show = T >= T_SPLIT;
+  halfN.style.visibility = halfD.style.visibility = seam.style.visibility = show ? 'visible' : 'hidden';
+  // night slides down from the top, morning up from the bottom; both cut on the same diagonal
+  const yA = SPLIT.y0, yB = SPLIT.y1; // seam: left edge y0, right edge y1
+  halfN.style.clipPath = `polygon(0 0, ${W}px 0, ${W}px ${yB}px, 0 ${yA}px)`;
+  halfD.style.clipPath = `polygon(0 ${yA}px, ${W}px ${yB}px, ${W}px ${H}px, 0 ${H}px)`;
+  halfN.style.transform = `translateY(${-(1 - sp) * H * 0.6}px)`;
+  halfD.style.transform = `translateY(${(1 - sp) * H * 0.6}px)`;
+  const cN = cover(W, yA), cD = cover(W, H - yB);
+  const zN = 1.15 + 0.05 * K.p(T, T_SPLIT, 13, E.linear), zD = 1.12 - 0.04 * K.p(T, T_SPLIT, 13, E.linear);
+  Object.assign(hN.style, { width: cN.iw * zN + 'px', height: cN.ih * zN + 'px', left: (W - cN.iw * zN) / 2 + 'px', top: (yA - cN.ih * zN) / 2 + 'px' });
+  Object.assign(hD.style, { width: cD.iw * zD + 'px', height: cD.ih * zD + 'px', left: (W - cD.iw * zD) / 2 + 'px', top: yB + (H - yB - cD.ih * zD) / 2 + 'px' });
+  const ang = Math.atan2(yB - yA, W) * 180 / Math.PI, len = Math.hypot(W, yB - yA);
+  const seamP = K.p(T, T_SPLIT + 0.4, T_SPLIT + 0.9, E.outExpo);
+  Object.assign(seam.style, { left: '0px', top: yA - 3 + 'px', width: len + 'px', transform: `rotate(${ang}deg) scaleX(${seamP})` });
+  const eA = K.p(T, 10.24, 10.7, E.outExpo), eB = K.p(T, 11.29, 11.75, E.outExpo);
+  const capFs = tall ? 104 : 92;
+  Object.assign(endA.style, { left: (tall ? 65 : 60) + 'px', top: (tall ? 470 : 300) + 'px', width: 'auto', opacity: eA, transform: `translateY(${(1 - eA) * 40}px)`, visibility: show ? 'visible' : 'hidden' });
+  Object.assign(endB.style, { left: 'auto', right: (tall ? 65 : 60) + 'px', top: (tall ? 1010 : 760) + 'px', width: 'auto', textAlign: 'right', opacity: eB, transform: `translateY(${(1 - eB) * 40}px)`, visibility: show ? 'visible' : 'hidden' });
+  Object.assign(hlA.style, { left: (tall ? 65 : 60) + 'px', top: (tall ? 470 : 300) - 44 + 'px', opacity: eA, visibility: show ? 'visible' : 'hidden' });
+  Object.assign(hlB.style, { left: 'auto', right: (tall ? 65 : 60) + 'px', top: (tall ? 1010 : 760) + capFs * 1.12 + 'px', opacity: eB, visibility: show ? 'visible' : 'hidden' });
+
+  end(T);
+});
+</script></body></html>
