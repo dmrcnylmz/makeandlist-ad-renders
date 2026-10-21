@@ -217,6 +217,107 @@ def duck(vo, depth=0.32, attack=0.08, release=0.35):
     return np.convolve(gain, np.ones(sm) / sm, mode='same')
 
 
+import tempfile
+
+
+def write_wav(path, x):
+    pcm = (np.clip(x, -1, 1) * 32767).astype(np.int16)
+    with wave.open(path, 'wb') as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes(pcm.tobytes())
+
+
+def ffmpeg_mono(x, af):
+    """Run a mono signal through an ffmpeg filter chain and back (used for the voice's EQ and compression)."""
+    with tempfile.TemporaryDirectory() as d:
+        a, b = os.path.join(d, 'a.wav'), os.path.join(d, 'b.wav')
+        write_wav(a, x)
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', a, '-af', af, '-ar', str(SR), '-ac', '1', b], check=True)
+        return _read_plain(b, len(x))
+
+
+def _read_plain(path, n):
+    with wave.open(path, 'rb') as w:
+        y = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float64) / 32768.0
+    return np.pad(y, (0, max(0, n - len(y))))[:n]
+
+
+def lufs(x):
+    """Integrated loudness (ITU BS.1770 via ffmpeg ebur128); -70 for silence."""
+    if np.max(np.abs(x)) < 1e-5:
+        return -70.0
+    with tempfile.TemporaryDirectory() as d:
+        a = os.path.join(d, 'a.wav')
+        write_wav(a, x / max(1.0, np.max(np.abs(x))))
+        r = subprocess.run(['ffmpeg', '-hide_banner', '-i', a, '-af', 'ebur128', '-f', 'null', '-'], capture_output=True, text=True).stderr
+    import re
+    m = re.findall(r'I:\s+(-?[\d.]+) LUFS', r)
+    v = float(m[-1]) if m else -70.0
+    return v + 20 * np.log10(max(1.0, np.max(np.abs(x))))
+
+
+def to_lufs(x, target):
+    cur = lufs(x)
+    return x if cur <= -69 else x * 10 ** ((target - cur) / 20)
+
+
+def band_carve(x, lo=1000.0, hi=4000.0, depth_db=-6.0):
+    """The same signal with the speech band (lo..hi Hz) lowered by depth_db, soft edges (FFT, whole signal)."""
+    X = np.fft.rfft(x)
+    f = np.fft.rfftfreq(len(x), 1 / SR)
+    g = np.ones_like(f)
+    edge = 0.35  # octaves of fade at each side
+    lf, hf = np.log2(lo), np.log2(hi)
+    lfreq = np.log2(np.maximum(f, 1))
+    t = np.clip(np.minimum((lfreq - (lf - edge)) / edge, ((hf + edge) - lfreq) / edge), 0, 1)
+    g = 10 ** (depth_db * t / 20)
+    return np.fft.irfft(X * g, n=len(x))
+
+
+def speech_env(vo, attack=0.06, release=0.45):
+    """0..1: 1 while the narrator speaks, rising `attack` s before a word and falling `release` s after it."""
+    env = np.abs(vo)
+    w = int(0.03 * SR)
+    env = np.convolve(env, np.ones(w) / w, mode='same')
+    on = (env > 0.004).astype(np.float64)
+    a, r = int(attack * SR), int(release * SR)
+    # extend backwards by attack and forwards by release
+    fwd = np.convolve(on, np.ones(r), mode='full')[:len(on)]
+    back = np.convolve(on[::-1], np.ones(a), mode='full')[:len(on)][::-1]
+    m = np.clip(fwd + back, 0, 1)
+    sm = int(0.08 * SR)
+    return np.clip(np.convolve(m, np.ones(sm) / sm, mode='same'), 0, 1)
+
+
+# Voice-led mix targets (research: voice 16–23 LU over the bed under speech; duck 6–12 dB; carve 1–4 kHz).
+VO_LUFS = -16.0          # the narrator
+BED_GAP_LUFS = -27.0     # music between lines (~11 LU under the voice)
+BED_DUCK_DB = -9.0       # extra dip under speech -> about 20 LU under the voice
+BED_CARVE_DB = -6.0      # speech band 1–4 kHz cut on the bed while she speaks
+SFX_LUFS = -26.0         # effects overall
+SFX_DUCK_DB = -6.0       # effects under speech
+
+
+def voice_led_mix(meta, dur, n, music, sfx, vo):
+    """Stems levelled by loudness, music and effects ducked and carved under the voice, no saturation."""
+    vo = ffmpeg_mono(vo, 'highpass=f=80,equalizer=f=3000:t=q:w=1.1:g=3,equalizer=f=220:t=q:w=1.0:g=-2,'
+                         'acompressor=threshold=-22dB:ratio=3:attack=5:release=120:makeup=2')
+    vo = to_lufs(vo, VO_LUFS)
+    env = speech_env(vo)
+    mode = meta.get('musicMode', 'bed')
+    if music is not None and mode != 'none':
+        music = to_lufs(music, BED_GAP_LUFS + float(meta.get('musicGainDb', 0)))
+        carved = band_carve(music, depth_db=BED_CARVE_DB)
+        music = music * (1 - env) + carved * env
+        music = music * 10 ** (BED_DUCK_DB * env / 20)
+    else:
+        music = np.zeros(n)
+    sfx = to_lufs(sfx, SFX_LUFS) if np.max(np.abs(sfx)) > 1e-5 else sfx
+    sfx = sfx * 10 ** (SFX_DUCK_DB * env / 20)
+    mix = vo + music + sfx
+    peak = np.max(np.abs(mix))
+    return mix / peak * 0.9 if peak > 0.9 else mix
+
+
 def main():
     meta = json.load(open(sys.argv[1]))
     out = sys.argv[2]
@@ -309,16 +410,18 @@ def main():
     else:
         mix = drums * 0.8 + music * 0.75 + sfx * 0.9
     vo = voice_track(meta.get('id', ''), n) if meta.get('vo') else None
-    if vo is not None:
-        # The narrator leads: music and effects dip under every line, the voice sits clearly on top.
-        g = duck(vo)
-        mix = mix * g + vo * 0.9
+    voice_led = vo is not None
+    if voice_led:
+        bedsig = music if bed else drums * 0.8 + music * 0.75
+        mix = voice_led_mix(meta, dur, n, bedsig, sfx, vo)
+        music = np.zeros(n)  # no widening copy: the bed is already levelled inside the mix
     # Fade in/out
     fi = int(0.05 * SR)
     mix[:fi] *= np.linspace(0, 1, fi)
     fo = int(1.0 * SR)
     mix[-fo:] *= np.linspace(1, 0, fo) ** 1.5
-    mix = np.tanh(mix * 0.9)
+    if not voice_led:
+        mix = np.tanh(mix * 0.9)
     # Simple stereo: music widened with a tiny delay, drums centred.
     d = int(0.011 * SR)
     left = mix + np.concatenate([np.zeros(d), music[:-d]]) * 0.08
