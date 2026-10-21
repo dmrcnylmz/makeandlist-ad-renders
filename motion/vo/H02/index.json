@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.19,
+  "text": "Every page gets a plan.",
+  "file": "01-802d71fac5.wav",
+  "dur": 1.67
+ },
+ {
+  "t": 2.03,
+  "text": "What each page needs, and why it's there.",
+  "file": "02-5c971fc932.wav",
+  "dur": 3.11
+ },
+ {
+  "t": 4.71,
+  "text": "New pictures only where they're needed.",
+  "file": "03-2daabe8290.wav",
+  "dur": 2.79
+ },
+ {
+  "t": 8.02,
+  "text": "And the page count is measured from the files that ship.",
+  "file": "04-dd7beac0b3.wav",
+  "dur": 3.95
+ }
+]

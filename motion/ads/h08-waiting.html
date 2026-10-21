@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H08 · Waiting for You</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F6F2E8; }
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .06em; }
+.w { display: inline-block; white-space: pre; }
+.desk { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 45%, #FBF8F0 0%, #F1ECE0 70%, #E8E1D2 100%); }
+.note { position: absolute; z-index: 30; width: 330px; padding: 22px 22px 20px; border-radius: 6px; background: #FFF8D6; box-shadow: 0 26px 34px -22px rgba(31,31,31,.55), 0 1px 0 rgba(0,0,0,.04); }
+.note.b { background: #FFFDF8; }
+.note.c { background: #F3F7E8; }
+.note .tp { position: absolute; left: 50%; top: -16px; width: 120px; height: 32px; margin-left: -60px; background: rgba(223,255,90,.62); transform: rotate(-3deg); }
+.note .lg { height: 30px; display: flex; align-items: center; gap: 10px; font: 600 18px 'IBM Plex Mono', monospace; color: #6B645A; letter-spacing: .04em; }
+.note .lg img { height: 24px; }
+.note b { display: block; margin-top: 12px; font: 700 30px/1.12 'Archivo'; color: #1F1F1F; }
+.note small { display: block; margin-top: 8px; font: 500 20px/1.25 'Archivo'; color: #6B645A; }
+.note .rd { color: #A8322A; }
+img.wx { filter: brightness(0); }
+.threads { position: absolute; inset: 0; z-index: 25; pointer-events: none; }
+.crop { position: absolute; overflow: hidden; border-radius: 24px; background: #FFFDF8; box-shadow: 0 50px 90px -46px rgba(31,31,31,.65), 0 0 0 1px #E2DBCE; }
+.crop .ly { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.crop .ly img { position: absolute; left: 0; top: 0; display: block; max-width: none; }
+.hlb { position: absolute; background: #DFFF5A; mix-blend-mode: multiply; border-radius: 4px; transform-origin: 0 50%; }
+.cnt { position: absolute; z-index: 36; display: flex; align-items: center; gap: 14px; padding: 14px 18px 14px 26px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 700 32px 'Archivo'; white-space: nowrap; box-shadow: 0 24px 40px -20px rgba(31,31,31,.7); }
+.cnt b { display: inline-grid; place-items: center; min-width: 50px; height: 50px; border-radius: 50%; background: #DFFF5A; color: #1F1F1F; font: 800 28px 'Archivo'; }
+.sheet { position: absolute; z-index: 30; border-radius: 22px; background: #FFFDF8; overflow: hidden; box-shadow: 0 70px 120px -50px rgba(31,31,31,.7), 0 0 0 1px #D9D3C9; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H08 — Waiting for you. Loose ends, tied up: sticky notes from different stores drift on a desk, each trailing a loose
+// thread (a draft to publish, an outcome the store never confirmed, a buyer ZIP, a missing category). On "one list"
+// the threads pull taut and every note flies into its row of the real Needs-you list, the count lands, the real phone
+// list scrolls and one row opens its listing — the place where the seller decides. The real desktop page closes on the
+// line that makes it trustworthy: nothing is published from here.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 90, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows measured from the takes (vo.mjs):
+//   L1 0.52–3.25 "Selling in several stores means a lot of loose ends."
+//   L2 3.75–6.94 ("Waiting for you" 3.75–4.81 · "puts every decision in one list." 4.98–6.94)
+//   L3 7.45–10.19 ("Each row opens its listing," 7.45–9.15 · "where you decide." 9.40–10.19)
+const S_B = 3.5, S_C = 7.2, S_D = 10.45;
+const T_FLY = 5.0;                 // notes fly into rows on "puts every decision in one list"
+const T_TAP = 9.22, T_SWIPE = 9.36; // tap in her breath, the row opens its listing on "where you decide"
+
+const L = tall
+  ? { chipX: 65, chipY: 290, capX: 65, capY: 360, capFs: 88, top: 600, bot: 1240, panelW: 820 }
+  : { chipX: 60, chipY: 56, capX: 60, capY: 118, capFs: 74, top: 300, bot: 1290, panelW: 900 };
+
+const desk = K.box(0, 0, W, H, { cls: 'desk' });
+const chip = K.box(L.chipX, L.chipY, null, null, { cls: 'fchip', html: '<b>Feature 08</b><i>/ 16 ·</i><span>Waiting for you</span>', style: { width: 'auto', height: '56px' } });
+
+function capEm(parts) {
+  const el = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  el.innerHTML = parts.map(([t, em]) => (t === '<br>' ? '<br>' : t.split(' ').map((w) => (em ? `<span class="w"><em>${w}</em> </span>` : `<span class="w">${w} </span>`)).join(''))).join('');
+  return { el, ws: [...el.querySelectorAll('.w')] };
+}
+const C = [
+  { c: capEm([['Several stores.', 0], ['<br>'], ['A lot of', 0], ['loose ends.', 1]]), a: 0.45, b: S_B },
+  { c: capEm([['Every decision.', 0], ['<br>'], ['One', 0], ['list.', 1]]), a: 3.7, b: S_C },
+  { c: capEm([['Each row opens', 0], ['<br>'], ['its listing.', 1]]), a: 7.4, b: 9.32 },
+  { c: capEm([['You', 0], ['decide', 1], ['there.', 0]]), a: 9.38, b: S_D },
+  { c: capEm([['Nothing is published', 0], ['<br>'], ['from', 0], ['here.', 1]]), a: 10.6, b: 12.95 },
+];
+
+function crop(src, natW, sx, sy, sw, sh, w, parent, cls) {
+  const k = w / sw;
+  const box = K.box(0, 0, w, sh * k, { cls: cls || 'crop', parent });
+  const ly = K.el('div', { cls: 'ly', parent: box, style: { width: natW + 'px', position: 'absolute', left: 0, top: 0, transformOrigin: '0 0' } });
+  K.el('img', { src, parent: ly, style: { width: natW + 'px', position: 'absolute', left: 0, top: 0, maxWidth: 'none' } });
+  const at = (x, y) => { ly.style.transform = `translate(${-x * k}px, ${-y * k}px) scale(${k})`; };
+  at(sx, sy);
+  return { box, ly, k, at, w, h: sh * k };
+}
+
+// ---------- scene B target: the Needs-you panel of the board (AppWaiting, 2880 wide) ----------
+const PX = 595, PY = 495, PW = 1071, PH = 877;
+const panel = crop(K.canvas('AppWaiting'), 2880, PX, PY, PW, PH, L.panelW);
+panel.box.style.zIndex = 28;
+const ROWC = [702, 891, 1081, 1272]; // row centres (natural y)
+// cover each row until its note lands (the paper becomes the row)
+const covers = ROWC.map((y) => K.el('div', { parent: panel.ly, style: { position: 'absolute', left: '612px', top: y - 92 + 'px', width: '1040px', height: '184px', background: '#FFFDF8' } }));
+const cnt = K.box(0, 0, null, null, { cls: 'cnt', html: 'Waiting for you <b>4</b>', style: { width: 'auto', height: 'auto' } });
+const boardTag = K.demoTag('Product design · sample data', 0, 0);
+
+// ---------- scene A: notes with loose threads ----------
+const NOTES = [
+  { cls: '', logo: 'woocommerce', st: 'WooCommerce', t: 'Draft ready to publish', s: 'Christmas Preschool Pack' },
+  { cls: 'b', logo: 'ikas', st: 'ikas', t: 'Sent, never confirmed', s: 'Look it up — don’t resend', red: 1 },
+  { cls: 'c', logo: 'gumroad', st: 'Gumroad', t: 'Attach the buyer ZIP', s: 'Christmas Preschool Pack' },
+  { cls: '', logo: 'wix', st: 'Wix', t: 'Choose a product category', s: 'Quiet Botanicals Nº01' },
+];
+const notes = NOTES.map((n) => K.box(0, 0, 330, null, { cls: 'note ' + n.cls,
+  html: `<div class="tp"></div><div class="lg"><img class="${n.logo === 'wix' ? 'wx' : ''}" src="${K.pub('platforms/' + n.logo + '.svg')}"></div><b class="${n.red ? 'rd' : ''}">${n.t}</b><small>${n.s}</small>` }));
+// where each note drifts in scene A (centre x, y as fractions of the visual area) and its rotation
+const SCAT = tall
+  ? [[0.30, 0.10, -7], [0.70, 0.30, 6], [0.28, 0.58, 4], [0.68, 0.82, -5]]
+  : [[0.25, 0.14, -7], [0.73, 0.22, 6], [0.30, 0.66, 4], [0.72, 0.76, -5]];
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.createElementNS(NS, 'svg');
+svg.setAttribute('class', 'threads'); svg.setAttribute('width', W); svg.setAttribute('height', H);
+document.getElementById('stage').appendChild(svg);
+const threads = NOTES.map(() => { const p = document.createElementNS(NS, 'path'); p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#C2593B'); p.setAttribute('stroke-width', '4'); p.setAttribute('stroke-linecap', 'round'); svg.appendChild(p); return p; });
+const sampleTag = K.demoTag('Sample to-dos · drawn', 0, 0);
+
+// ---------- scene C: the real phone ----------
+const phW = tall ? 440 : 380;
+const deck = K.phoneDeck(0, 0, phW, ['74-phone-waiting', '72-phone-listing-send'].map((n) => K.screen(n)));
+deck.root.style.zIndex = 32;
+const realTagC = K.demoTag('Real app · demo workspace', 0, 0);
+const cursor = K.cursor();
+
+// ---------- scene D: the real desktop page as a sheet on the desk ----------
+const SX = 270, SW = 770;
+const sheetW = tall ? 950 : 960, sheetH = tall ? 640 : 900;
+const sheet = K.box(0, 0, sheetW, sheetH, { cls: 'sheet' });
+const shot = crop(K.screen('15-publishing'), 1440, SX, 40, SW, 1600, sheetW, sheet, 'crop');
+shot.box.style.borderRadius = '0'; shot.box.style.boxShadow = 'none';
+const hl1 = K.el('div', { parent: shot.ly, cls: 'hlb', style: { left: '283px', top: '166px', width: '356px', height: '22px' } });
+const hl2 = K.el('div', { parent: shot.ly, cls: 'hlb', style: { left: '356px', top: '324px', width: '72px', height: '22px' } });
+const realTagD = K.demoTag('Real app · demo workspace', 0, 0);
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Every decision,<br>in one list.' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+K.run({
+  id: 'H08', title: 'Waiting for You', dur: DUR, bpm: BPM, music: 'ov-strolling-stripes', musicMode: 'none', mood: 'calm', key: 'D', intro: 0.0, cover: 5.6,
+  feature: 'Feature 08 / 16 · Waiting for you',
+  technique: 'Loose ends, tied up: sticky notes from different stores drift on a desk trailing loose threads; on “one list” the threads pull taut and each note flies into its row of the real Needs-you list, the count lands; the real phone list scrolls and a row opens its listing; the real desktop page closes as a sheet on the desk with “Nothing is published from here” highlighted. Voice and effects only.',
+  caption: 'Selling in several stores means a lot of loose ends. Waiting for you puts every decision in one list — drafts to publish, setups to finish, sends to check — and each row opens its listing, where you decide. Start free at makeandlist.com',
+  short: 'Every decision, in one list.',
+  question: 'How do I keep track?', gain: 'Control: one place for everything that needs your yes',
+  vo: [[0.3, 'Selling in several stores means a lot of loose ends.'], [3.09, 'Waiting for you puts every decision in one list.'], [6.74, 'Each row opens its listing, where you decide.']],
+  beats: ['0–3.5 s: sticky notes from four stores drift on a desk, each trailing a loose thread', '3.5–7.2 s: the threads pull taut; each note flies into its row of the real Needs-you list; “Waiting for you 4” lands', '7.2–10.4 s: the real phone list scrolls; a row is tapped and opens its listing (Send, drafts first)', '10.4–13 s: the real desktop page as a sheet: “Nothing is published from here”, 6 need you', '13–15 s: end card'],
+  cues: [[0.1, 'tape'], [0.38, 'paper'], [0.62, 'tape'], [0.86, 'paper'], [S_B - 0.02, 'swish'], [4.86, 'pop'], [+(T_FLY + 0.45).toFixed(2), 'paper'],
+    [+(T_FLY + 0.8).toFixed(2), 'paper'], [6.95, 'ding'], [S_C - 0.02, 'whoosh'], [T_TAP, 'click'], [T_SWIPE, 'swish'], [S_D - 0.02, 'whoosh'], [10.75, 'paper'], [11.35, 'marker'], [12.1, 'marker'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const cp = K.p(T, 0.1, 0.6, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, 12.8, 13.0, E.linear));
+  chip.style.transform = `translateY(${(1 - cp) * -18}px)`;
+
+  C.forEach(({ c, a, b }) => {
+    const o = K.p(T, b - 0.2, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.06, a + 0.5 + j * 0.06, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+      w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+    });
+    c.el.style.visibility = T >= a - 0.05 && T < b + 0.02 ? 'visible' : 'hidden';
+  });
+
+  // ---------- panel geometry (scene B) ----------
+  const gx = (W - L.panelW) / 2, gy = tall ? 590 : 330;
+  const bIn = K.p(T, 4.55, 5.05, E.outExpo), bOut = K.p(T, S_C - 0.28, S_C, E.inCubic);
+  const onB = T >= 4.5 && T < S_C + 0.02;
+  panel.box.style.left = gx + 'px'; panel.box.style.top = gy + 'px';
+  panel.box.style.opacity = bIn * (1 - bOut);
+  panel.box.style.transform = `translateY(${(1 - bIn) * 120 - bOut * 60}px) scale(${0.97 + 0.03 * bIn})`;
+  vis(panel.box, onB);
+  covers.forEach((cv, i) => { cv.style.opacity = 1 - K.p(T, T_FLY + 0.42 + i * 0.12, T_FLY + 0.62 + i * 0.12, E.linear); });
+  const ccp = K.p(T, 6.9, 7.25, E.outBack);
+  cnt.style.left = gx + L.panelW - (tall ? 330 : 340) + 'px'; cnt.style.top = gy - 40 + 'px';
+  cnt.style.opacity = Math.min(1, ccp * 2) * (1 - bOut);
+  cnt.style.transform = `scale(${0.6 + 0.4 * ccp}) rotate(${(1 - ccp) * -8 + 2}deg)`;
+  vis(cnt, onB && T >= 6.9);
+  boardTag.style.left = gx + 'px'; boardTag.style.top = gy - 44 + 'px';
+  boardTag.style.opacity = bIn * (1 - bOut);
+  vis(boardTag, onB);
+
+  // ---------- A → B: notes drift, then fly into their rows ----------
+  const vh = L.bot - L.top;
+  const pts = [];
+  notes.forEach((n, i) => {
+    const [fx, fy, rot] = SCAT[i];
+    const pin = K.p(T, 0.1 + i * 0.24, 0.6 + i * 0.24, E.outBack);
+    const dx = Math.sin(T * 0.7 + i * 1.7) * 18, dy = Math.cos(T * 0.6 + i * 2.1) * 14;
+    const ax = W * fx - 165 + dx, ay = L.top + vh * fy - 90 + dy;
+    // gather: notes line up in a column under the caption (taut threads), then each flies into its row
+    const gather = K.p(T, S_B + 0.05 + i * 0.05, S_B + 0.75 + i * 0.05, E.inOutCubic);
+    const gxN = W / 2 - 165 + (i - 1.5) * 18, gyN = L.top + 40 + i * (tall ? 150 : 140);
+    const fly = K.p(T, T_FLY + i * 0.12, T_FLY + 0.45 + i * 0.12, E.inOutCubic);
+    const tx = gx + L.panelW * 0.08, ty = gy + (ROWC[i] - PY) * panel.k - 50;
+    let x = K.lerp(ax, gxN, gather), y = K.lerp(ay, gyN, gather);
+    x = K.lerp(x, tx, fly); y = K.lerp(y, ty, fly);
+    const r = K.lerp(K.lerp(rot + Math.sin(T * 0.8 + i) * 1.5, (i - 1.5) * 1.2, gather), 0, fly);
+    const sc = K.lerp(1, 0.78, fly);
+    n.style.left = x + 'px'; n.style.top = y + 'px';
+    n.style.opacity = Math.min(1, pin * 2) * (1 - K.p(T, T_FLY + 0.4 + i * 0.12, T_FLY + 0.6 + i * 0.12, E.linear));
+    n.style.transform = `translateY(${(1 - pin) * -80}px) rotate(${r + (1 - pin) * 12}deg) scale(${sc * (0.8 + 0.2 * pin)})`;
+    vis(n, T >= 0.1 + i * 0.24 && T < T_FLY + 0.62 + i * 0.12);
+    pts.push([x + 165, y + 10, pin * (1 - fly)]);
+  });
+  // loose threads: wavy, then pulled straight while the notes gather
+  const taut = K.p(T, S_B, S_B + 0.8, E.inOutCubic);
+  threads.forEach((p, i) => {
+    const [x, y, o] = pts[i];
+    const endX = i % 2 ? W + 60 : -60, endY = y + (i - 1.5) * 90 + 140;
+    const wob = (1 - taut) * 70;
+    const c1x = K.lerp(x, endX, 0.33), c1y = K.lerp(y, endY, 0.33) + Math.sin(T * 1.3 + i) * wob + wob;
+    const c2x = K.lerp(x, endX, 0.66), c2y = K.lerp(y, endY, 0.66) - Math.cos(T * 1.1 + i * 2) * wob - wob * 0.5;
+    p.setAttribute('d', `M${x},${y} C${c1x},${c1y} ${c2x},${c2y} ${endX},${endY}`);
+    const draw = K.p(T, 0.4 + i * 0.24, 1.2 + i * 0.24, E.outCubic);
+    p.setAttribute('stroke-dasharray', '2000'); p.setAttribute('stroke-dashoffset', String(2000 * (1 - draw)));
+    p.style.opacity = o * (1 - K.p(T, 4.4, 4.8, E.linear));
+  });
+  sampleTag.style.left = L.capX + 'px'; sampleTag.style.top = (tall ? 1196 : 1272) + 'px';
+  sampleTag.style.opacity = K.p(T, 0.8, 1.1, E.linear) * (1 - K.p(T, 4.4, 4.6, E.linear));
+  vis(sampleTag, T < 4.7);
+
+  // ---------- C: the real phone ----------
+  const cIn = K.p(T, S_C - 0.05, S_C + 0.5, E.outExpo), cOut = K.p(T, S_D - 0.28, S_D, E.inCubic);
+  const onC = T >= S_C - 0.08 && T < S_D + 0.02;
+  const phX = (W - phW) / 2 + (tall ? 0 : 200), phY = tall ? 600 : 300;
+  if (!tall) C[2].c.el.style.width = C[3].c.el.style.width = '460px';
+  deck.root.style.left = phX + 'px'; deck.root.style.top = phY + 'px';
+  const pos = K.p(T, T_SWIPE, T_SWIPE + 0.45, E.inOutCubic), posPrev = K.p(T - 1 / 30, T_SWIPE, T_SWIPE + 0.45, E.inOutCubic);
+  const scr0 = K.k(T, [[S_C, 0], [7.7, 0.05], [8.9, 0.97]], E.inOutCubic);
+  deck.draw(pos, [scr0, 0.47], pos - posPrev);
+  deck.root.style.opacity = cIn * (1 - cOut);
+  deck.root.style.transform = `translateY(${(1 - cIn) * 300 + cOut * 60}px) rotate(${(tall ? -2 : 2) + Math.sin(T * 0.7) * 0.5}deg)`;
+  vis(deck.root, onC);
+  const k780 = deck.sw / 780;
+  const btnX = phX + 14 + 609 * k780, btnY = phY + 14 + (2965 - 0.97 * (3800 * k780 - deck.sh) / k780) * k780;
+  const mv = K.p(T, 8.6, T_TAP, E.inOutCubic);
+  const press = T >= T_TAP && T < T_TAP + 0.13;
+  cursor.at(btnX + 140 * (1 - mv), btnY + 220 * (1 - mv), press);
+  cursor.hide(onC ? K.p(T, 8.55, 8.75, E.linear) * (1 - K.p(T, T_TAP + 0.3, T_TAP + 0.45, E.linear)) : 0);
+  cursor.ripple(btnX, btnY, T, T_TAP);
+  realTagC.style.left = (tall ? L.capX : 60) + 'px'; realTagC.style.top = (tall ? 1196 : 1272) + 'px';
+  realTagC.style.opacity = cIn * (1 - cOut);
+  vis(realTagC, onC);
+
+  // ---------- D: the real page as a sheet on the desk ----------
+  const dIn = K.p(T, S_D - 0.05, S_D + 0.6, E.outExpo);
+  const onD = T >= S_D - 0.08;
+  const shX = (W - sheetW) / 2, shY = tall ? 600 : 330;
+  sheet.style.left = shX + 'px'; sheet.style.top = shY + 'px';
+  sheet.style.opacity = dIn;
+  sheet.style.transform = `perspective(1800px) translateY(${(1 - dIn) * 260}px) rotateX(${(1 - dIn) * 30 + 6 - (T - S_D) * 1.4}deg) rotateZ(${-1.5 + (T - S_D) * 0.3}deg)`;
+  vis(sheet, onD);
+  const sy = K.k(T, [[S_D, 40], [11.6, 50], [12.5, tall ? 80 : 64], [13, tall ? 86 : 70]]);
+  shot.at(SX, sy);
+  hl1.style.transform = `scaleX(${K.p(T, 11.35, 11.8, E.outCubic)})`;
+  hl2.style.transform = `scaleX(${K.p(T, 12.1, 12.35, E.outCubic)})`;
+  realTagD.style.left = L.capX + 'px'; realTagD.style.top = (tall ? 1196 : 1272) + 'px';
+  realTagD.style.opacity = dIn;
+  vis(realTagD, onD);
+
+  end(T);
+});
+</script></body></html>

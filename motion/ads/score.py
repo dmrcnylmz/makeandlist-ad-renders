@@ -132,6 +132,8 @@ SFX = {
     'paper': dict(gain=0.5, cap=1.0), 'printer': dict(gain=0.45, cap=1.4), 'stamp': dict(gain=0.62, cap=0.8),
     'shutter': dict(gain=0.5, cap=0.9), 'marker': dict(gain=0.45, cap=1.0), 'coin': dict(gain=0.42, cap=1.0),
     'box': dict(gain=0.6, cap=1.0),
+    'pageturn': dict(gain=0.5, cap=1.0), 'sparkle': dict(gain=0.42, cap=1.6), 'ding': dict(gain=0.45, cap=1.4),
+    'tape': dict(gain=0.45, cap=1.2),
 }
 _cache = {}
 

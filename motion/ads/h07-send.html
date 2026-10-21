@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H07 · Send to Your Stores</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .06em; }
+.w { display: inline-block; white-space: pre; }
+.crop { position: absolute; overflow: hidden; border-radius: 24px; background: #FFFDF8; box-shadow: 0 50px 90px -46px rgba(31,31,31,.65), 0 0 0 1px #E2DBCE; }
+.crop .ly { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.crop .ly img { position: absolute; left: 0; top: 0; display: block; max-width: none; }
+.hlb { position: absolute; background: #DFFF5A; mix-blend-mode: multiply; border-radius: 4px; transform-origin: 0 50%; }
+.prod { position: absolute; z-index: 20; }
+.prod img { width: 100%; display: block; }
+.shadow { position: absolute; z-index: 19; border-radius: 50%; background: radial-gradient(closest-side, rgba(31,31,31,.28), rgba(31,31,31,0)); }
+.ltag { position: absolute; z-index: 24; padding: 16px 22px; border-radius: 18px; background: #FFFDF8; box-shadow: 0 24px 40px -24px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.ltag small { display: block; font: 600 17px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #6B645A; }
+.ltag b { display: block; margin-top: 4px; font: 700 27px/1.15 'Archivo'; color: #1F1F1F; }
+.ltag span { display: inline-block; margin-top: 10px; padding: 5px 12px; border-radius: 99px; background: #DFFF5A; font: 700 18px 'Archivo'; }
+.orb { position: absolute; z-index: 22; width: 128px; height: 86px; border-radius: 22px; background: #FFFDF8; display: grid; place-items: center; box-shadow: 0 16px 30px -18px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; }
+.orb img { max-width: 92px; max-height: 38px; }
+img.wx { filter: brightness(0); }
+.cb { position: absolute; width: 44px; height: 44px; border-radius: 6px; background: #FFFDF8; border: 3px solid #1F1F1F; display: grid; place-items: center; }
+.cb svg { width: 32px; height: 32px; }
+.hd { position: absolute; padding: 9px 18px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 700 26px 'Archivo'; white-space: nowrap; box-shadow: 0 0 0 6px #FFFDF8; }
+.hd b { color: #DFFF5A; }
+.dr { position: absolute; z-index: 35; width: 120px; height: 150px; border-radius: 10px; background: #FFFDF8; box-shadow: 0 20px 34px -16px rgba(31,31,31,.55), 0 0 0 1px #D9D3C9; overflow: hidden; }
+.dr img { position: absolute; left: 6px; top: 8px; width: 108px; }
+.dr i { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: #1F1F1F; color: #DFFF5A; font: 700 15px/34px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-align: center; font-style: normal; }
+.rows { position: absolute; z-index: 30; }
+.row { position: relative; display: flex; align-items: center; gap: 22px; padding: 22px 24px; margin-bottom: 18px; border-radius: 24px; background: #FFFDF8; box-shadow: 0 24px 44px -30px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; }
+.row .lg { width: 112px; height: 64px; border-radius: 14px; background: #F4F1EA; display: grid; place-items: center; flex: none; }
+.row .lg img { max-width: 84px; max-height: 32px; }
+.row .nm { flex: 1; min-width: 0; }
+.row .nm b { display: block; font: 700 32px 'Archivo'; color: #1F1F1F; }
+.row .nm small { display: block; margin-top: 4px; font: 500 20px 'IBM Plex Mono', monospace; color: #6B645A; }
+.row .st { position: relative; flex: none; width: 214px; height: 58px; }
+.row .st span { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 99px; font: 700 23px 'Archivo'; white-space: nowrap; }
+.row .st .d { border: 2px dashed #8A8378; color: #45403A; }
+.row .st .p { background: #1F1F1F; color: #FAF7EE; }
+.row .st .l { background: #DFFF5A; color: #1F1F1F; box-shadow: 0 0 0 2px #1F1F1F inset; }
+.row.off { opacity: .45; box-shadow: 0 0 0 1px #E2DBCE; background: transparent; }
+.frame { position: absolute; z-index: 30; border-radius: 26px; background: #FFFDF8; overflow: hidden; box-shadow: 0 60px 110px -50px rgba(31,31,31,.7), 0 0 0 1px #D9D3C9; }
+.frame .bar { position: absolute; left: 0; right: 0; top: 0; height: 50px; display: flex; align-items: center; gap: 9px; padding: 0 20px; background: #EFEADF; border-bottom: 1px solid #D9D3C9; z-index: 2; }
+.frame .bar i { width: 13px; height: 13px; border-radius: 50%; background: #D3CBBE; }
+.frame .bar span { margin-left: 14px; flex: 1; height: 28px; border-radius: 8px; background: #FFFDF8; font: 500 15px/28px 'IBM Plex Mono', monospace; color: #45403A; padding: 0 12px; }
+.frame .vw { position: absolute; left: 0; right: 0; top: 50px; bottom: 0; overflow: hidden; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H07 — Send to your stores. One listing, a sorting desk: the finished listing (concept product) asks "where should it
+// go?" while store badges orbit it; the real Send board then ticks the stores and a paper draft flies into each ticked
+// store, which turns into a "Hidden draft"; drawn store rows show the publish moment store by store (two go live, one
+// still waits); the real Send screen closes it: each store is sent on its own and stays not for sale until you confirm.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 95.7, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows measured from the takes (vo.mjs):
+//   L1 0.38–2.68 ("Your listing's ready." 0.38–1.46 · "Where should it go?" 1.77–2.68)
+//   L2 3.23–5.57 ("Pick your stores," 3.23–4.15 · "and each one gets its own draft." 4.31–5.57)
+//   L3 6.00–9.49 ("Nothing is public" 6.00–7.02 · "until you publish it," 7.21–8.11 · "store by store." 8.62–9.49)
+const S_B = 3.14, S_C = 5.64, S_D = 9.6;           // cuts (B and C on the 95.7 bpm grid)
+const T_CB = [3.42, 3.66, 3.9];                     // boxes ticked while she says "pick your stores"
+const T_DR = [4.42, 4.56, 4.70], T_LAND = 0.42;     // drafts fly on "each one gets its own draft"
+const T_PUB = [7.08, 8.2];                          // publish clicks, in her breaths (ikas, then WooCommerce)
+
+const L = tall
+  ? { chipX: 65, chipY: 290, capX: 65, capY: 360, capFs: 88, vTop: 590, prodW: 640, prodY: 640, tagY: 1188,
+      gridW: 950, gridY: 660, rowsY: 610, rowsW: 950, frY: 560, frH: 680, frW: 950 }
+  : { chipX: 60, chipY: 56, capX: 60, capY: 118, capFs: 74, vTop: 300, prodW: 720, prodY: 380, tagY: 1270,
+      gridW: 900, gridY: 330, rowsY: 330, rowsW: 960, frY: 300, frH: 930, frW: 960 };
+
+// ---------- ambient ----------
+const blobA = K.box(0, 0, 1000, 1000, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.24), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(126,154,126,.15), rgba(126,154,126,0) 62%)' } });
+
+// ---------- series chip ----------
+const chip = K.box(L.chipX, L.chipY, null, null, { cls: 'fchip', html: '<b>Feature 07</b><i>/ 16 ·</i><span>Send to your stores</span>', style: { width: 'auto', height: '56px' } });
+
+// ---------- captions ----------
+function cap(html, y) {
+  const el = K.box(L.capX, y ?? L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  el.innerHTML = html.split('<br>').map((ln) => ln.split(' ').map((w) => `<span class="w">${w} </span>`).join('')).join('<br>');
+  // keep <em> spans whole: words inside em were split already, wrap them back
+  return { el, ws: [...el.querySelectorAll('.w')] };
+}
+function capEm(parts) { // parts: [[text, em?]]
+  const el = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  el.innerHTML = parts.map(([t, em]) => (t === '<br>' ? '<br>' : t.split(' ').map((w) => (em ? `<span class="w"><em>${w}</em> </span>` : `<span class="w">${w} </span>`)).join(''))).join('');
+  return { el, ws: [...el.querySelectorAll('.w')] };
+}
+const C = [
+  { c: capEm([['Your listing’s', 0], ['<br>'], ['ready.', 0]]), a: 0.32, b: 1.62 },
+  { c: capEm([['Where should', 0], ['<br>'], ['it', 0], ['go?', 1]]), a: 1.7, b: S_B },
+  { c: capEm([['Pick', 0], ['your stores.', 1]]), a: 3.2, b: 4.25 },
+  { c: capEm([['Each gets', 0], ['<br>'], ['its own', 0], ['draft.', 1]]), a: 4.28, b: S_C },
+  { c: capEm([['Nothing is', 0], ['public', 1], ['<br>'], ['until you publish.', 0]]), a: 5.95, b: 8.55 },
+  { c: capEm([['Store', 0], ['by store.', 1]]), a: 8.58, b: S_D },
+  { c: capEm([['Each store waits', 0], ['<br>'], ['for', 0], ['your yes.', 1]]), a: 9.75, b: 12.95 },
+];
+
+// ---------- crop helper (natural px coordinates) ----------
+function crop(src, natW, sx, sy, sw, sh, w, parent) {
+  const k = w / sw;
+  const box = K.box(0, 0, w, sh * k, { cls: 'crop', parent });
+  const ly = K.el('div', { cls: 'ly', parent: box, style: { width: natW + 'px' } });
+  K.el('img', { src, parent: ly, style: { width: natW + 'px' } });
+  const at = (x, y) => { ly.style.transform = `translate(${-x * k}px, ${-y * k}px) scale(${k})`; };
+  at(sx, sy);
+  return { box, ly, k, at, w, h: sh * k };
+}
+
+// ---------- scene A: the listing asks where to go (concept product) ----------
+const prodH = L.prodW * 786 / 984;
+const shadowA = K.box(W / 2 - L.prodW * 0.42, L.prodY + prodH * 0.86, L.prodW * 0.84, 70, { cls: 'shadow' });
+const prod = K.box((W - L.prodW) / 2, L.prodY, L.prodW, prodH, { cls: 'prod', html: `<img src="${K.pub('r07/k13-wedding-planner.webp')}">` });
+const ltag = K.box(0, 0, null, null, { cls: 'ltag', style: { width: 'auto', height: 'auto' }, html: '<small>Listing · ready</small><b>Wedding Planner Printable<br>Botanical, 36 pages</b><span>Ready to send</span>' });
+const ORB = ['gumroad', 'woocommerce', 'ikas', 'wix'];
+const orbs = ORB.map((s) => K.box(0, 0, 128, 86, { cls: 'orb', html: `<img class="${s === 'wix' ? 'wx' : ''}" src="${K.pub('platforms/' + s + '.svg')}">` }));
+const conceptTag = K.demoTag('Concept product · AI-generated', 0, 0);
+
+// ---------- scene B: the real Send board ticks the stores, drafts fly in ----------
+// AppRoomSend board (2880 wide): the store grid is x 628–1901, y 893–1620.
+const GX = 628, GY = 893, GW = 1273, GH = 727;
+const grid = crop(K.canvas('AppRoomSend'), 2880, GX, GY, GW, GH, L.gridW);
+grid.box.style.zIndex = 25;
+// the board's own checkboxes (natural px, centres) — ours tick over them in time with the voice
+const CBP = [[1194, 958], [1843, 958], [1194, 1333]], WIX = [1846, 1333];
+const cbs = CBP.map(([x, y]) => K.el('div', { parent: grid.ly, cls: 'cb', style: { left: x - 22 + 'px', top: y - 22 + 'px' },
+  html: '<svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#FAF7EE" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' }));
+// "Will be sent" pills (Gumroad, WooCommerce, ikas) turn into hidden drafts when the paper lands
+const HDP = [[664, 1152], [1315, 1152], [664, 1414]];
+const hds = HDP.map(([x, y]) => K.el('div', { parent: grid.ly, cls: 'hd', style: { left: x + 'px', top: y + 'px' }, html: '<b>✓</b> Hidden draft' }));
+const CARDC = [[939, 1067], [1590, 1067], [939, 1445]];
+const drafts = CARDC.map(() => K.box(0, 0, 120, 150, { cls: 'dr', html: `<img src="${K.pub('r07/k13-wedding-planner.webp')}"><i>DRAFT</i>` }));
+const boardTag = K.demoTag('Product design · sample data', 0, 0);
+const mini = K.box(0, 0, 230, 230 * 786 / 984, { cls: 'prod', html: `<img src="${K.pub('r07/k13-wedding-planner.webp')}">` });
+mini.style.zIndex = 34;
+
+// ---------- scene C: publish, store by store (drawn rows, sample shop) ----------
+const ROWS = [
+  { s: 'gumroad', n: 'Gumroad', sub: 'hidden draft · sample shop' },
+  { s: 'woocommerce', n: 'WooCommerce', sub: 'hidden draft · paperandpines.shop' },
+  { s: 'ikas', n: 'ikas', sub: 'not for sale yet · littlepine' },
+  { s: 'wix', n: 'Wix', sub: 'not picked this time', off: 1 },
+];
+const rows = K.box(L.capX, L.rowsY + (tall ? 300 : 260), L.rowsW, null, { cls: 'rows' });
+const rowEls = ROWS.map((r) => {
+  const el = K.el('div', { parent: rows, cls: 'row' + (r.off ? ' off' : ''), html: `<div class="lg"><img class="${r.s === 'wix' ? 'wx' : ''}" src="${K.pub('platforms/' + r.s + '.svg')}"></div><div class="nm"><b>${r.n}</b><small>${r.sub}</small></div>` +
+    (r.off ? '<div class="st"><span class="d">Not selected</span></div>' : '<div class="st"><span class="d">Draft</span><span class="p">Publish</span><span class="l">✓ Live</span></div>') });
+  return { el, d: el.querySelector('.d'), p: el.querySelector('.p'), l: el.querySelector('.l'), small: el.querySelector('small') };
+});
+const rowsTag = K.demoTag('Illustration · sample shop', 0, 0);
+const cursor = K.cursor();
+
+// ---------- scene D: the real Send screen ----------
+const frame = K.box(L.capX, L.frY + (tall ? 300 : 250), L.frW, L.frH - (tall ? 300 : 250) + (tall ? 300 : 250), { cls: 'frame', html: '<div class="bar"><i></i><i></i><i></i><span>makeandlist.com/listings/…/send</span></div><div class="vw"></div>' });
+frame.style.top = (tall ? 600 : 330) + 'px'; frame.style.height = (tall ? 640 : 900) + 'px';
+const vw = frame.querySelector('.vw');
+const SX = 866, SW = 548;
+const shot = crop(K.screen('30-listing-several-stores'), 1440, SX, 420, SW, 2000, L.frW, vw);
+shot.box.style.borderRadius = '0'; shot.box.style.boxShadow = 'none'; shot.box.style.left = '0px'; shot.box.style.top = '0px';
+// highlights on the real copy (natural px)
+const hl1 = K.el('div', { parent: shot.ly, cls: 'hlb', style: { left: '892px', top: '679px', width: '396px', height: '22px' } });
+const hl2 = K.el('div', { parent: shot.ly, cls: 'hlb', style: { left: '896px', top: '1405px', width: '184px', height: '22px' } });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Drafts first.<br>Public when you say.' });
+
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+K.run({
+  id: 'H07', title: 'Send to Your Stores', dur: DUR, bpm: BPM, music: 'ov-positive-acoustic-guitar-backgro', mood: 'bright', key: 'G', intro: 0.0, cover: 4.9,
+  feature: 'Feature 07 / 16 · Send to your stores',
+  technique: 'A sorting desk: the finished listing asks where it should go while store badges orbit it; the real Send board ticks three stores as she names them and a paper draft flies into each one, landing as a hidden draft; drawn store rows then publish store by store on her breaths (two go live, one still waits); the real Send screen closes it with the lines that matter highlighted',
+  caption: 'Send to your stores: pick the stores you sell in and each one gets its own hidden draft with the files, images and copy. Nothing is public until you publish it, store by store. Start free at makeandlist.com',
+  short: 'Pick stores. Drafts first. Publish when ready.',
+  question: 'How does it reach my stores?', gain: 'Your stores, your yes: one draft per store, published only when you say',
+  vo: [[0.3, "Your listing's ready. Where should it go?"], [3.1, 'Pick your stores, and each one gets its own draft.'], [5.41, 'Nothing is public until you publish it, store by store.']],
+  beats: ['0–3.1 s: the finished listing (concept product) asks “Where should it go?”, store badges orbit it', '3.1–5.6 s: the real Send board: three stores ticked as she names them; a paper draft flies into each, landing as “Hidden draft”', '5.6–9.6 s: store rows: nothing public until you publish — ikas, then WooCommerce go live on her breaths; Gumroad still waits', '9.6–13 s: the real Send screen: each store sent on its own, not for sale until you confirm', '13–15 s: end card'],
+  cues: [[0.05, 'pop'], [0.3, 'paper'], [1.55, 'swish'], [1.72, 'pop'], [S_B - 0.02, 'whoosh'], [T_CB[0], 'click'], [T_CB[1], 'click'], [T_CB[2], 'click'],
+    [T_DR[0], 'swish'], [+(T_DR[0] + T_LAND).toFixed(2), 'paper'], [+(T_DR[2] + T_LAND).toFixed(2), 'pop'], [S_C - 0.02, 'whoosh'], [T_PUB[0], 'click'], [+(T_PUB[0] + 0.12).toFixed(2), 'ding'],
+    [T_PUB[1], 'click'], [+(T_PUB[1] + 0.12).toFixed(2), 'ding'], [S_D - 0.02, 'whoosh'], [10.25, 'marker'], [11.75, 'marker'], [12.6, 'swish'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.62 - 500 + Math.sin(T * 0.5) * 150}px, ${H * 0.42 - 500 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.12 - 450 + Math.cos(T * 0.45) * 110}px, ${H * 0.8 - 450 + Math.sin(T * 0.6) * 90}px)`;
+
+  const cp = K.p(T, 0.1, 0.6, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, 12.8, 13.0, E.linear));
+  chip.style.transform = `translateY(${(1 - cp) * -18}px)`;
+
+  // captions: word entrances, quick exits
+  C.forEach(({ c, a, b }) => {
+    const o = K.p(T, b - 0.2, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.06, a + 0.5 + j * 0.06, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+      w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+    });
+    c.el.style.visibility = T >= a - 0.05 && T < b + 0.02 ? 'visible' : 'hidden';
+  });
+
+  // ---------- A ----------
+  const aIn = K.p(T, 0.0, 0.7, E.outExpo), aOut = K.p(T, S_B - 0.3, S_B, E.inCubic);
+  const onA = T < S_B + 0.02;
+  const float = Math.sin(T * 1.6) * 8;
+  prod.style.opacity = aIn * (1 - aOut);
+  prod.style.transform = `translateY(${(1 - aIn) * 160 + float - aOut * 60}px) rotate(${-3 + (1 - aIn) * -6 + Math.sin(T * 0.9) * 0.6}deg) scale(${0.9 + 0.1 * aIn + T * 0.008 - aOut * 0.3})`;
+  shadowA.style.opacity = aIn * (1 - aOut) * (0.9 - float / 40);
+  vis(prod, onA); vis(shadowA, onA);
+  const lp = K.p(T, 0.5, 1.0, E.outBack);
+  ltag.style.left = (tall ? 120 : 140) + 'px';
+  ltag.style.top = L.prodY + prodH * (tall ? 0.78 : 0.74) + 'px';
+  ltag.style.opacity = Math.min(1, lp * 2) * (1 - aOut);
+  ltag.style.transform = `translateY(${(1 - lp) * 40}px) rotate(-2deg) scale(${0.85 + 0.15 * lp})`;
+  vis(ltag, onA);
+  orbs.forEach((o, i) => {
+    const p = K.p(T, 1.75 + i * 0.1, 2.25 + i * 0.1, E.outBack);
+    const ang = -Math.PI / 2 + (i - 1.5) * 0.62 + Math.sin(T * 0.8 + i) * 0.03 + (T - 1.75) * 0.06;
+    const R = tall ? 380 : 420;
+    const cx = W / 2 + Math.cos(ang) * R * 1.0, cy = L.prodY + prodH * 0.5 + Math.sin(ang) * R * 0.55 + (tall ? 40 : 30);
+    o.style.left = cx - 64 + 'px'; o.style.top = cy - 43 + 'px';
+    o.style.opacity = Math.min(1, p * 2) * (1 - aOut);
+    o.style.transform = `scale(${0.5 + 0.5 * p}) translateY(${Math.sin(T * 2 + i) * 6}px) rotate(${(i - 1.5) * 4}deg)`;
+    vis(o, onA && T >= 1.7);
+  });
+  conceptTag.style.left = L.capX + 'px'; conceptTag.style.top = L.tagY + 'px';
+  conceptTag.style.opacity = K.p(T, 0.6, 0.9, E.linear) * (1 - aOut);
+  vis(conceptTag, onA);
+
+  // ---------- B ----------
+  const bIn = K.p(T, S_B - 0.08, S_B + 0.45, E.outExpo), bOut = K.p(T, S_C - 0.28, S_C, E.inCubic);
+  const onB = T >= S_B - 0.1 && T < S_C + 0.02;
+  const gx = (W - L.gridW) / 2, gy = L.gridY + (tall ? 0 : 140);
+  grid.box.style.left = gx + 'px'; grid.box.style.top = gy + 'px';
+  grid.box.style.opacity = bIn * (1 - bOut);
+  grid.box.style.transform = `translateY(${(1 - bIn) * 220 - bOut * 60}px) scale(${0.96 + 0.04 * bIn + (T - S_B) * 0.006})`;
+  vis(grid.box, onB);
+  cbs.forEach((cb, i) => {
+    const p = K.p(T, T_CB[i], T_CB[i] + 0.22, E.outBack);
+    cb.style.background = p > 0.05 ? '#1F1F1F' : '#FFFDF8';
+    cb.querySelector('svg').style.transform = `scale(${p})`;
+    cb.style.transform = `scale(${T >= T_CB[i] && T < T_CB[i] + 0.12 ? 0.86 : 1})`;
+  });
+  hds.forEach((h, i) => {
+    const p = K.p(T, T_DR[i] + T_LAND - 0.02, T_DR[i] + T_LAND + 0.3, E.outBack);
+    h.style.opacity = Math.min(1, p * 3);
+    h.style.transform = `scale(${0.6 + 0.4 * p})`;
+  });
+  // mini product at the grid's top edge, the drafts leave it
+  const mx = gx + L.gridW - 250, my = gy - (tall ? 210 : 190);
+  const mp = K.p(T, 3.3, 3.8, E.outBack);
+  mini.style.left = mx + 'px'; mini.style.top = my + 'px';
+  mini.style.opacity = Math.min(1, mp * 2) * (1 - bOut);
+  mini.style.transform = `scale(${0.6 + 0.4 * mp}) rotate(${4 + Math.sin(T * 1.5) * 1.5}deg)`;
+  vis(mini, onB && T >= 3.3);
+  drafts.forEach((d, i) => {
+    const t0 = T_DR[i], p = K.p(T, t0, t0 + T_LAND, E.inOutCubic);
+    const [nx, ny] = CARDC[i];
+    const tx = gx + (nx - GX) * grid.k - 60, ty = gy + (ny - GY) * grid.k - 75;
+    const sx = mx + 55, sy = my + 20;
+    const x = K.lerp(sx, tx, p), y = K.lerp(sy, ty, p) - Math.sin(p * Math.PI) * 140;
+    const land = K.p(T, t0 + T_LAND, t0 + T_LAND + 0.25, E.inCubic);
+    d.style.left = x + 'px'; d.style.top = y + 'px';
+    d.style.opacity = (T >= t0 ? 1 : 0) * (1 - land);
+    d.style.transform = `rotate(${(1 - p) * 18 - 8 + i * 4}deg) scale(${1 - 0.35 * p - land * 0.3})`;
+    vis(d, T >= t0 && T < t0 + T_LAND + 0.27);
+  });
+  boardTag.style.left = gx + 'px'; boardTag.style.top = gy + grid.h + 18 + 'px';
+  if (tall) boardTag.style.top = Math.min(gy + grid.h + 18, 1200) + 'px';
+  boardTag.style.opacity = bIn * (1 - bOut);
+  vis(boardTag, onB);
+
+  // ---------- C ----------
+  const cIn = K.p(T, S_C - 0.05, S_C + 0.45, E.outExpo), cOut = K.p(T, S_D - 0.28, S_D, E.inCubic);
+  const onC = T >= S_C - 0.08 && T < S_D + 0.02;
+  vis(rows, onC); vis(rowsTag, onC);
+  rowEls.forEach((r, i) => {
+    const p = K.p(T, S_C + i * 0.09, S_C + 0.5 + i * 0.09, E.outExpo);
+    r.el.style.opacity = p * (1 - cOut) * (ROWS[i].off ? 0.45 : 1);
+    r.el.style.transform = `translateX(${(1 - p) * 120 - cOut * 60}px)`;
+    if (!r.p) return;
+    // ikas (row 2) at T_PUB[0], WooCommerce (row 1) at T_PUB[1]; Gumroad keeps its draft
+    const at = i === 2 ? T_PUB[0] : i === 1 ? T_PUB[1] : null;
+    const hover = at ? K.p(T, at - 0.55, at - 0.3, E.outCubic) : 0;
+    const live = at ? K.p(T, at + 0.05, at + 0.3, E.outBack) : 0;
+    r.d.style.opacity = 1 - hover;
+    r.p.style.opacity = hover * (1 - Math.min(1, live * 2));
+    r.p.style.transform = `scale(${at && T >= at && T < at + 0.12 ? 0.92 : 1})`;
+    r.l.style.opacity = Math.min(1, live * 2);
+    r.l.style.transform = `scale(${0.7 + 0.3 * live})`;
+    if (at) r.small.textContent = T >= at + 0.05 ? (i === 2 ? 'public · published by you' : 'public · published by you') : ROWS[i].sub;
+    else r.small.textContent = T >= 8.62 ? 'still a draft · waiting for you' : ROWS[i].sub;
+  });
+  rows.style.top = (tall ? 600 : 420) + 'px';
+  rowsTag.style.left = L.capX + 'px'; rowsTag.style.top = (tall ? 1190 : 1270) + 'px';
+  rowsTag.style.opacity = cIn * (1 - cOut);
+  // cursor: to ikas, click; to WooCommerce, click; away
+  const rowH = tall ? 126 : 126, btnX = L.capX + L.rowsW - 24 - 107, rowY0 = (tall ? 600 : 420) + 22 + 29;
+  const yIk = rowY0 + 2 * rowH, yWo = rowY0 + rowH;
+  const m1 = K.p(T, 6.35, T_PUB[0], E.inOutCubic), m2 = K.p(T, T_PUB[0] + 0.35, T_PUB[1], E.inOutCubic), m3 = K.p(T, T_PUB[1] + 0.4, 9.2, E.inOutCubic);
+  let cx = K.lerp(W * 0.55, btnX, m1), cy = K.lerp(yIk + 260, yIk, m1);
+  cy = K.lerp(cy, yWo, m2);
+  cx = K.lerp(cx, btnX + 150, m3); cy = K.lerp(cy, yWo + 300, m3);
+  const press = (T >= T_PUB[0] && T < T_PUB[0] + 0.12) || (T >= T_PUB[1] && T < T_PUB[1] + 0.12);
+  cursor.at(cx, cy, press);
+  cursor.hide(onC ? K.p(T, 6.3, 6.5, E.linear) * (1 - K.p(T, 9.0, 9.3, E.linear)) : 0);
+  cursor.ripple(btnX + 23, (T < T_PUB[1] - 0.1 ? yIk : yWo) + 23, T, T < T_PUB[1] - 0.1 ? T_PUB[0] : T_PUB[1]);
+
+  // ---------- D ----------
+  const dIn = K.p(T, S_D - 0.05, S_D + 0.5, E.outExpo);
+  const onD = T >= S_D - 0.08;
+  frame.style.opacity = dIn;
+  frame.style.transform = `translateY(${(1 - dIn) * 200}px) scale(${0.95 + 0.05 * dIn})`;
+  vis(frame, onD);
+  const sy = K.k(T, [[S_D, 560], [10.0, 585], [10.9, 600], [11.55, tall ? 1170 : 1040], [13.0, tall ? 1190 : 1060]]);
+  shot.at(SX, sy);
+  hl1.style.transform = `scaleX(${K.p(T, 10.25, 10.65, E.outCubic)})`;
+  hl2.style.transform = `scaleX(${K.p(T, 11.75, 12.1, E.outCubic)})`;
+  realTag.style.left = L.capX + 'px';
+  realTag.style.top = (tall ? 1190 : 1250) + 'px';
+  if (!tall) { realTag.style.left = L.capX + 16 + 'px'; realTag.style.top = 330 + 900 - 56 + 'px'; }
+  realTag.style.opacity = dIn;
+  vis(realTag, onD);
+
+  end(T);
+});
+</script></body></html>

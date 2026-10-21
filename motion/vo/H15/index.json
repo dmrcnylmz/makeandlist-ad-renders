@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.3,
+  "text": "Is your shop more than just you?",
+  "file": "01-a0856c7747.wav",
+  "dur": 1.72
+ },
+ {
+  "t": 2.2,
+  "text": "Invite them to your workspace by email.",
+  "file": "02-c669a6f60d.wav",
+  "dur": 2.37
+ },
+ {
+  "t": 4.75,
+  "text": "Give each person a role: admin or member.",
+  "file": "03-42530ef1e7.wav",
+  "dur": 3.44
+ },
+ {
+  "t": 8.4,
+  "text": "And see who did what.",
+  "file": "04-6204f66817.wav",
+  "dur": 1.77
+ }
+]

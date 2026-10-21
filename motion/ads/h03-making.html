@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H03 · Making, Live</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R08 series chip — identical in H01–H06 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.crop { position: absolute; overflow: hidden; }
+.crop > img { position: absolute; max-width: none; display: block; }
+.cap { position: absolute; z-index: 40; font: 800 96px/0.98 'Playfair Display'; letter-spacing: -0.035em; color: #1F1F1F; }
+.cap em { font-style: italic; }
+.w { display: inline-block; white-space: pre; }
+.hl { background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / 0% 100%; }
+.photo { position: absolute; inset: 0; z-index: 1; overflow: hidden; }
+.photo img { position: absolute; left: 50%; top: 50%; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 50%; }
+.photo .fade { position: absolute; inset: 0; background: linear-gradient(#FAF7EE 0%, rgba(250,247,238,.92) 30%, rgba(250,247,238,0) 52%); }
+.mon { position: absolute; z-index: 30; border-radius: 34px; background: #EFEADF; overflow: hidden; box-shadow: 0 50px 90px -40px rgba(31,31,31,.6), inset 0 0 0 3px #1F1F1F; transform-origin: 100% 100%; }
+.mon .scan { position: absolute; inset: 0; z-index: 9; pointer-events: none; opacity: .05; background: repeating-linear-gradient(0deg, #1F1F1F 0 2px, transparent 2px 6px); }
+.brk { position: absolute; z-index: 10; width: 44px; height: 44px; border: 0 solid #1F1F1F; }
+.live { position: absolute; z-index: 12; display: flex; align-items: center; gap: 12px; padding: 10px 18px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 700 22px 'IBM Plex Mono', monospace; letter-spacing: .12em; }
+.live i { width: 16px; height: 16px; border-radius: 50%; background: #E8603C; display: inline-block; }
+.tc { position: absolute; z-index: 12; padding: 10px 16px; border-radius: 12px; background: rgba(255,253,248,.9); font: 600 22px 'IBM Plex Mono', monospace; color: #1F1F1F; letter-spacing: .06em; }
+.pg { position: absolute; z-index: 4; border-radius: 6px; background: #FFFDF8; overflow: hidden; box-shadow: 0 20px 36px -18px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; transform-origin: 50% 100%; }
+.pg img { width: 100%; height: 100%; display: block; }
+.card { z-index: 6; border-radius: 22px; box-shadow: 0 30px 50px -28px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; }
+.veil { position: absolute; border-radius: 50%; background: #FFFDF8; box-shadow: inset 0 0 0 3px #D9D3C9; z-index: 2; }
+.pulse { position: absolute; border-radius: 50%; border: 4px solid #DFFF5A; z-index: 3; }
+.lead { position: absolute; z-index: 40; padding: 18px 22px; border-radius: 22px; background: #FFFDF8; box-shadow: 0 30px 50px -28px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.mark { position: absolute; z-index: 3; background: rgba(223,255,90,.45); border-radius: 8px; mix-blend-mode: multiply; transform-origin: 0 50%; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H03 — Making, live. A broadcast monitor ("● LIVE", running timecode) shows the product being made: the owner's real
+// Christmas pack pages drop onto a pile while the real phone's stage list ticks off. When Marian says "You can leave",
+// the monitor shrinks to a picture-in-picture over an empty studio and keeps going (pages still landing). When
+// something stops, the tally light turns amber and the real stopped screen says it plainly: what happened, that it
+// carries on from where it stopped, and that everything made is kept.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 92.3;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows from the takes:
+//   L1 0.50–2.58 ("Watch your product being made," 0.50 · "live." 2.08)
+//   L2 3.13–5.65 · L3 6.25–8.30 ("You can leave." 6.25 · "It keeps going." 7.67) · L4 9.00–11.40 ("If something stops," 9.00 · "it tells you plainly." 10.44)
+const SB = 2.85, SC = 5.85, SD = 8.75;
+
+function crop(src, srcW, sx, sy, sw, sh, w, opts = {}) {
+  const k = w / sw;
+  const b = K.box(0, 0, w, sh * k, { cls: 'crop ' + (opts.cls || ''), parent: opts.parent });
+  K.el('img', { src, parent: b, style: { left: -sx * k + 'px', top: -sy * k + 'px', width: srcW * k + 'px' } });
+  return { el: b, k, h: sh * k };
+}
+function chip(n, name) {
+  const c = K.box(tall ? 65 : 60, tall ? 290 : 56, null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' },
+    html: `<b>Feature ${String(n).padStart(2, '0')}</b><i>/ 16 ·</i><span>${name}</span>` });
+  return (T) => {
+    const p = K.p(T, 0.1, 0.6, E.outExpo);
+    c.style.opacity = p * (1 - K.p(T, 12.85, 13.0, E.linear));
+    c.style.clipPath = `inset(0 ${(1 - p) * 100}% 0 0 round 99px)`;
+    c.style.transform = `translateX(${(1 - p) * -30}px)`;
+  };
+}
+function wrapWords(text) {
+  let on = false;
+  return text.split('\n').map((line) => line.split(' ').map((w) => {
+    const st = w.startsWith('*'), en = w.endsWith('*');
+    if (st) on = true;
+    const clean = w.replace(/\*/g, '');
+    const out = on ? `<span class="w"><em class="hl">${clean} </em></span>` : `<span class="w">${clean} </span>`;
+    if (en) on = false;
+    return out;
+  }).join('')).join('<br>');
+}
+const hlSweep = (hls, T, a, b) => hls.forEach((h, i) => { const n = hls.length; h.style.backgroundSize = `${K.p(T, a + (b - a) * i / n, a + (b - a) * (i + 1) / n, E.linear) * 100}% 100%`; });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+function words(ws, T, a, out, st = 0.07) {
+  ws.forEach((w, i) => {
+    const p = K.p(T, a + i * st, a + 0.5 + i * st, E.outExpo);
+    const o = out ? K.p(T, out - 0.25, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+}
+
+const L = tall
+  ? { capX: 65, capY: 370, capFs: 92, M: { x: 65, y: 600, w: 950, h: 640 }, pip: { s: 0.44, dx: 0, dy: 0 }, leadY: 640, leadW: 950 }
+  : { capX: 60, capY: 130, capFs: 84, M: { x: 60, y: 330, w: 960, h: 920 }, pip: { s: 0.42, dx: 0, dy: 0 }, leadY: 420, leadW: 960 };
+const M = L.M;
+
+const chipDraw = chip(3, 'Making, live');
+
+// ---------- the studio (C): an empty home studio, nobody at the desk ----------
+const photo = K.box(0, 0, W, H, { cls: 'photo', html: `<img src="${K.pub('r05/h06-craft-studio.webp')}"><div class="fade"></div>` });
+const photoImg = photo.querySelector('img');
+const photoTag = K.demoTag('Concept image · AI-generated', 0, 0);
+
+// ---------- captions ----------
+const CAPS = [
+  ['Watch it being made, *live.*', 0.15, SB],
+  ['Each stage *ticks off.*', SB + 0.15, SC],
+  ['You can leave.\n*It keeps going.*', SC + 0.3, SD],
+  ['Stopped? It tells\nyou, *plainly.*', SD + 0.2, null],
+].map(([t, a, b]) => {
+  const el = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html: wrapWords(t) });
+  return { el, ws: [...el.querySelectorAll('.w')], hls: [...el.querySelectorAll('.hl')], a, b };
+});
+const HL = [[2.08, 2.5], [4.0, 4.6], [7.67, 8.25], [10.44, 11.35]];
+
+// ---------- the monitor ----------
+const mon = K.box(M.x, M.y, M.w, M.h, { cls: 'mon' });
+K.el('div', { parent: mon, cls: 'scan' });
+[[0, 0, 'Top', 'Left'], [1, 0, 'Top', 'Right'], [0, 1, 'Bottom', 'Left'], [1, 1, 'Bottom', 'Right']].forEach(([r, b, v, h]) => {
+  K.el('div', { parent: mon, cls: 'brk', style: { [h.toLowerCase()]: '22px', [v.toLowerCase()]: '22px', ['border' + v + 'Width']: '5px', ['border' + h + 'Width']: '5px' } });
+});
+const live = K.el('div', { parent: mon, cls: 'live', html: '<i></i><span>LIVE</span>', style: { left: '36px', top: '34px' } });
+const liveDot = live.querySelector('i'), liveTxt = live.querySelector('span');
+const tc = K.el('div', { parent: mon, cls: 'tc', style: { right: '36px', top: '34px' } });
+
+// the owner's real pages drop onto a pile (cover first)
+const PAGES = ['cover', 'interior-01', 'interior-02', 'interior-03', 'interior-04', 'interior-02', 'interior-01', 'interior-04', 'interior-03', 'interior-02'];
+const PDROP = PAGES.map((_, i) => 0.45 + i * (i < 5 ? 0.45 : 0.72));
+const pgW = tall ? 290 : 380, pgH = pgW * 1164 / 900;
+const pages = PAGES.map((n, i) => K.el('div', { parent: mon, cls: 'pg', html: `<img src="${K.pub('showcase/christmas-preschool-pack/' + n + '.webp')}">`,
+  style: { width: pgW + 'px', height: pgH + 'px' } }));
+const ownerTag = K.demoTag('Example made with MakeAndList by its owner', 0, 0);
+
+// the real phone's stage list (69-phone-making, 780 wide): x 40–740, y 1560–2310
+const stW = tall ? 470 : 470;
+const stage = crop(K.screen('69-phone-making'), 780, 40, 1560, 700, 750, stW, { cls: 'card', parent: mon });
+stage.el.style.left = '36px'; stage.el.style.top = (tall ? 104 : 120) + 'px';
+const ROWS = [1832, 1945, 2050];
+const veils = ROWS.map((y) => K.el('div', { parent: stage.el, cls: 'veil', style: { left: (85 - 40) * stage.k + 'px', top: (y - 30 - 1560) * stage.k + 'px', width: 58 * stage.k + 'px', height: 58 * stage.k + 'px' } }));
+const pulse = K.el('div', { parent: stage.el, cls: 'pulse', style: { left: (85 - 40) * stage.k + 'px', top: (2156 - 30 - 1560) * stage.k + 'px', width: 58 * stage.k + 'px', height: 58 * stage.k + 'px' } });
+const stageTag = K.demoTag('Real app · demo workspace', 0, 0);
+
+// D: the real stopped screen (70-phone-stopped): the amber notice (y 770–1088) and "kept" + Try again (y 2715–2935)
+const amber = crop(K.screen('70-phone-stopped'), 780, 24, 770, 732, 318, tall ? 760 : 880, { cls: 'card', parent: mon });
+amber.el.style.left = (M.w - (tall ? 760 : 880)) / 2 + 'px'; amber.el.style.top = (tall ? 92 : 130) + 'px';
+const kept = crop(K.screen('70-phone-stopped'), 780, 30, 2715, 720, 220, tall ? 640 : 760, { cls: 'card', parent: mon });
+kept.el.style.left = (M.w - (tall ? 640 : 760)) / 2 + 'px'; kept.el.style.top = (tall ? 92 + amber.h + 16 : 130 + amber.h + 40) + 'px';
+const keptMark = K.el('div', { parent: kept.el, cls: 'mark', style: { left: (80 - 30) * kept.k + 'px', top: (2730 - 2715) * kept.k + 'px', width: 490 * kept.k + 'px', height: 38 * kept.k + 'px' } });
+const amberMark = K.el('div', { parent: amber.el, cls: 'mark', style: { left: (126 - 24) * amber.k + 'px', top: (898 - 770) * amber.k + 'px', width: 590 * amber.k + 'px', height: 88 * amber.k + 'px' } });
+
+// C: the real line "You can leave this page. It keeps going…" (69-phone-making y 2385–2462)
+const lead = K.box(L.capX, L.leadY, L.leadW, null, { cls: 'lead' });
+const leaveC = crop(K.screen('69-phone-making'), 780, 50, 2385, 690, 78, L.leadW - 44, { parent: lead });
+leaveC.el.style.position = 'relative';
+const leaveMark = K.el('div', { parent: leaveC.el, cls: 'mark', style: { left: (168 - 50) * leaveC.k + 'px', top: (2391 - 2385) * leaveC.k + 'px', width: 500 * leaveC.k + 'px', height: 32 * leaveC.k + 'px' } });
+const leadTag = K.demoTag('Real app · demo workspace', 0, 0);
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'Made in the open.<br>Stopped? You’ll know.' });
+
+K.run({
+  id: 'H03', title: 'Making, Live', dur: DUR, bpm: BPM, music: 'ov-vanilla-lofi-beat', mood: 'bright', key: 'C', intro: 0, cover: 4.6,
+  series: 'R08', feature: 'Feature 03 / 16 · Making, live',
+  technique: 'A broadcast monitor with a LIVE tally and running timecode: the owner’s real pages drop onto a pile while the real phone’s stage list ticks off; on “You can leave” the monitor shrinks to a picture-in-picture over an empty studio and keeps landing pages; on a stop the tally turns amber and the real stopped screen says plainly what happened and that everything made is kept',
+  caption: 'Watch your product being made, live: each stage ticks off as the pages stack in. You can leave — it keeps going. And if something stops, it tells you plainly and keeps everything already made. Start free at makeandlist.com',
+  short: 'Watch it being made. Live.',
+  question: 'How does it work?', gain: 'Time: it plans, makes and checks while you get on',
+  vo: [[0.43, 'Watch your product being made, live.'], [2.42, 'Each stage ticks off as the pages stack in.'], [6.1, 'You can leave. It keeps going.'], [8.09, 'If something stops, it tells you plainly.']],
+  beats: ['0–2.9 s: “Watch it being made, live.” — a LIVE monitor; the owner’s real pages drop onto a pile', '2.9–5.9 s: the real phone’s stage list ticks off beside the growing pile', '5.9–8.8 s: “You can leave. It keeps going.” — the monitor shrinks to a picture-in-picture over an empty studio and keeps going; the real line from the app', '8.8–13 s: the tally turns amber: the real stopped screen — what happened, try again, everything made is kept', '13–15 s: end card'],
+  cues: [[0.12, 'pop'], [0.45, 'paper'], [1.35, 'paper'], [2.7, 'swish'], [2.95, 'pop'], [3.4, 'click'], [3.95, 'click'], [4.55, 'click'], [5.72, 'whoosh'],
+    [6.95, 'paper'], [8.45, 'notify'], [9.15, 'pop'], [10.1, 'pop'], [11.6, 'ding'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  chipDraw(T);
+
+  // captions
+  CAPS.forEach((c, i) => {
+    words(c.ws, T, c.a, c.b, 0.07);
+    hlSweep(c.hls, T, HL[i][0], HL[i][1]);
+    vis(c.el, T >= c.a - 0.05 && (c.b === null || T < c.b + 0.05));
+  });
+
+  // ---------- the monitor's life: full → PiP (C) → full (D) ----------
+  const mIn = K.p(T, 0.2, 0.8, E.outExpo);
+  const toPip = K.p(T, SC + 0.05, SC + 0.75, E.inOutCubic) * (1 - K.p(T, SD - 0.1, SD + 0.45, E.inOutCubic));
+  const s = 1 - (1 - L.pip.s) * toPip;
+  const pipX = (W - (tall ? 65 : 60)) - (M.x + M.w), pipY = (tall ? 1236 : 1290) - (M.y + M.h);
+  mon.style.transform = `translate(${pipX * toPip}px, ${pipY * toPip + (1 - mIn) * 120}px) scale(${s}) rotate(${toPip * -2}deg)`;
+  mon.style.opacity = mIn;
+  const stopped = T >= SD + 0.1;
+  live.style.background = stopped ? '#FCEBD0' : '#1F1F1F';
+  live.style.color = stopped ? '#7A4A12' : '#FAF7EE';
+  liveDot.style.background = stopped ? '#E2A23B' : '#E8603C';
+  liveDot.style.opacity = stopped ? 1 : 0.35 + 0.65 * (Math.sin(T * 6) * 0.5 + 0.5);
+  liveTxt.textContent = stopped ? 'STOPPED' : 'LIVE';
+  const el = Math.floor(Math.min(T, SD + 0.1) * 4);
+  tc.textContent = `MAKING · ${Math.floor(el / 60)}:${String(el % 60).padStart(2, '0')}`;
+
+  // pages: pile in the middle (A), to the right of the stage list (B/C); hidden in D
+  const pileX = K.k(T, [[SB - 0.1, M.w / 2 - pgW / 2], [SB + 0.5, M.w - pgW - (tall ? 56 : 60)]], E.inOutCubic);
+  const pileY = M.h - pgH - (tall ? 46 : 70) + K.k(T, [[SB - 0.1, 0], [SB + 0.5, tall ? 30 : 10]], E.inOutCubic);
+  const dOut = K.p(T, SD + 0.05, SD + 0.35, E.inCubic);
+  pages.forEach((p, i) => {
+    const t0 = PDROP[i];
+    const d = K.p(T, t0, t0 + 0.42, E.outCubic);
+    const rot = (seed(i + 3) - 0.5) * 9;
+    const settle = K.p(T, t0 + 0.32, t0 + 0.6, E.outBack);
+    p.style.left = pileX + (seed(i) - 0.5) * 30 + 'px';
+    p.style.top = pileY + 'px';
+    p.style.opacity = (T >= t0 ? 1 : 0) * (1 - dOut);
+    p.style.transform = `translateY(${(1 - d) * -(M.h + 100)}px) rotate(${rot * d + (1 - d) * rot * 3}deg) scaleY(${0.96 + 0.04 * settle})`;
+    p.style.zIndex = 4 + i;
+    vis(p, T >= t0 && T < SD + 0.4);
+  });
+  ownerTag.style.left = M.x + 'px'; ownerTag.style.top = (tall ? M.y + M.h + 12 : M.y + M.h + 12) + 'px';
+  ownerTag.style.opacity = K.p(T, 0.6, 0.9, E.linear) * (1 - K.p(T, SC - 0.2, SC, E.linear));
+  if (!tall) { ownerTag.style.top = (M.y - 46) + 'px'; ownerTag.style.left = (W - 560) + 'px'; }
+
+  // stage list (B, continues in C)
+  const sIn = K.p(T, SB, SB + 0.5, E.outExpo);
+  stage.el.style.opacity = sIn * (1 - dOut);
+  stage.el.style.transform = `translateX(${(1 - sIn) * -500}px) rotate(${-1 + Math.sin(T * 0.8) * 0.3}deg)`;
+  vis(stage.el, T >= SB && T < SD + 0.4);
+  [3.4, 3.95, 4.55].forEach((t0, i) => {
+    const p = K.p(T, t0, t0 + 0.22, E.outCubic);
+    veils[i].style.opacity = 1 - p; veils[i].style.transform = `scale(${1 - 0.4 * p})`;
+  });
+  const pp = (T - 4.9) * 1.6 % 1;
+  pulse.style.opacity = T > 4.9 ? (1 - pp) * 0.9 : 0;
+  pulse.style.transform = `scale(${1 + pp * 0.7})`;
+  stageTag.style.left = M.x + 'px'; stageTag.style.top = (tall ? M.y - 44 : M.y + M.h + 14) + 'px';
+  stageTag.style.opacity = sIn * (1 - K.p(T, SC - 0.2, SC, E.linear)); vis(stageTag, T >= SB && T < SC + 0.05);
+
+  // ---------- C: the studio, the real line ----------
+  const cIn = K.p(T, SC, SC + 0.6, E.outCubic), cOut = K.p(T, SD - 0.2, SD + 0.2, E.inCubic);
+  photo.style.opacity = cIn * (1 - cOut);
+  photoImg.style.transform = `translate(-50%, -50%) scale(${1.12 - 0.06 * K.p(T, SC, SD, E.linear)})`;
+  vis(photo, T >= SC && T < SD + 0.25);
+  photoTag.style.left = (tall ? 65 : 60) + 'px'; photoTag.style.top = (tall ? 1200 : 1250) + 'px';
+  photoTag.style.opacity = cIn * (1 - cOut); vis(photoTag, T >= SC && T < SD + 0.25);
+  const lp = K.p(T, 6.35, 6.85, E.outExpo);
+  lead.style.opacity = lp * (1 - cOut);
+  lead.style.transform = `translateY(${(1 - lp) * 40}px)`;
+  vis(lead, T >= 6.3 && T < SD + 0.25);
+  leaveMark.style.transform = `scaleX(${K.p(T, 6.5, 7.2, E.outCubic)})`;
+  leadTag.style.left = L.capX + 'px'; leadTag.style.top = (tall ? L.leadY + 150 : L.leadY + 160) + 'px';
+  leadTag.style.opacity = lp * (1 - cOut); vis(leadTag, T >= 6.3 && T < SD + 0.25);
+
+  // ---------- D: stopped, told plainly ----------
+  const ap = K.p(T, 9.05, 9.55, E.outExpo);
+  amber.el.style.opacity = ap; amber.el.style.transform = `translateY(${(1 - ap) * -60}px)`;
+  vis(amber.el, T >= 9.0);
+  amberMark.style.transform = `scaleX(${K.p(T, 10.45, 11.3, E.outCubic)})`;
+  const kp = K.p(T, 10.0, 10.5, E.outExpo);
+  kept.el.style.opacity = kp; kept.el.style.transform = `translateY(${(1 - kp) * 60}px)`;
+  vis(kept.el, T >= 9.95);
+  keptMark.style.transform = `scaleX(${K.p(T, 11.55, 12.1, E.outCubic)})`;
+
+  end(T);
+});
+</script></body></html>

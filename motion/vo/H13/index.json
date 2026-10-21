@@ -1,0 +1,20 @@
+[
+ {
+  "t": 0.3,
+  "text": "A print order comes in.",
+  "file": "01-6742d552f9.wav",
+  "dur": 2.18
+ },
+ {
+  "t": 2.6,
+  "text": "It waits for you, with what the buyer paid, the partner's cost and your margin.",
+  "file": "02-c808066f58.wav",
+  "dur": 5.48
+ },
+ {
+  "t": 8.1,
+  "text": "An order at a loss needs its own yes.",
+  "file": "03-4e1f841bca.wav",
+  "dur": 3.39
+ }
+]

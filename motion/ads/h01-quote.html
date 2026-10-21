@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H01 · The Quote</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R08 series chip — identical in H01–H06 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.crop { position: absolute; overflow: hidden; }
+.crop > img { position: absolute; max-width: none; display: block; }
+.big { position: absolute; z-index: 40; font: 800 112px/0.98 'Playfair Display'; letter-spacing: -0.035em; color: #1F1F1F; }
+.big em { font-style: italic; }
+.w { display: inline-block; white-space: pre; }
+.hl { background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / 0% 100%; }
+.ghost { position: absolute; z-index: 20; }
+.ghost img { position: absolute; inset: 0; width: 100%; height: 100%; filter: grayscale(1) contrast(.6) brightness(1.1); opacity: .46; }
+.ghost .frame { position: absolute; inset: -26px; border: 3px dashed #8A8378; border-radius: 20px; }
+.ghost .nm { position: absolute; left: 50%; bottom: -84px; transform: translateX(-50%); white-space: nowrap; font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #6B645A; }
+.tag { position: absolute; z-index: 30; transform-origin: 50% -70px; }
+.tag .card { position: relative; padding: 30px 34px 26px 52px; border-radius: 18px 18px 18px 18px; background: #1F1F1F; color: #FAF7EE; box-shadow: 0 30px 50px -26px rgba(31,31,31,.8);
+  clip-path: polygon(30px 0, 100% 0, 100% 100%, 30px 100%, 0 50%); }
+.tag .hole { position: absolute; left: 22px; top: 50%; width: 16px; height: 16px; margin-top: -8px; border-radius: 50%; background: #FAF7EE; }
+.tag small { display: block; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #B9B1A3; }
+.tag strong { display: block; margin-top: 4px; font: 800 64px/1 'Playfair Display'; color: #DFFF5A; white-space: nowrap; }
+.tag strong span { font: 600 28px 'Archivo'; color: #FAF7EE; margin-left: 10px; }
+.tag .s { position: absolute; right: 16px; top: 12px; font: 500 15px 'IBM Plex Mono', monospace; color: #8A8378; }
+.string { position: absolute; z-index: 29; width: 3px; background: #8A8378; transform-origin: 50% 0; }
+.qc { z-index: 30; border-radius: 30px; box-shadow: 0 50px 90px -40px rgba(31,31,31,.75); }
+.dim { position: absolute; left: 0; right: 0; background: #1F1F1F; z-index: 2; }
+.ring { position: absolute; z-index: 3; border: 4px solid #DFFF5A; border-radius: 14px; box-shadow: 0 0 0 6px rgba(223,255,90,.22); }
+.chips { position: absolute; z-index: 40; display: flex; gap: 14px; flex-wrap: wrap; }
+.ck { padding: 14px 24px; border-radius: 99px; font: 700 34px 'Archivo'; color: #1F1F1F; background: #FFFDF8; box-shadow: 0 0 0 2px #D9D3C9; white-space: nowrap; }
+.ck.on { background: #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; }
+.mid { position: absolute; z-index: 40; font: 800 76px/1.02 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.mid em { font-style: italic; }
+.mark { position: absolute; z-index: 6; border: 5px solid #DFFF5A; border-radius: 16px; box-shadow: 0 0 0 7px rgba(31,31,31,.18); }
+.note { position: absolute; z-index: 40; font: 600 32px/1.3 'IBM Plex Mono', monospace; color: #45403A; }
+.note b { color: #1F1F1F; background: #DFFF5A; padding: 0 6px; border-radius: 6px; }
+.ringwrap { position: absolute; z-index: 30; }
+.ringwrap svg { position: absolute; inset: 0; overflow: visible; }
+.rc { position: absolute; left: 0; right: 0; text-align: center; }
+.rc .a { font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #6B645A; }
+.rc .b { margin-top: 6px; font: 800 64px/1 'Playfair Display'; color: #1F1F1F; }
+.lab { position: absolute; z-index: 34; white-space: nowrap; padding: 10px 18px; border-radius: 99px; font: 700 26px 'Archivo'; }
+.lab.ink { background: #1F1F1F; color: #FAF7EE; }
+.lab.lime { background: #DFFF5A; color: #1F1F1F; box-shadow: 0 0 0 2px #1F1F1F; }
+.lab.warn { background: #FCEBD0; color: #7A4A12; box-shadow: 0 0 0 2px #E2B26A; }
+.stopc { z-index: 32; border-radius: 22px; box-shadow: 0 30px 60px -30px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H01 — The quote. "The price comes first": a Forest Friends book that does not exist yet stands as a dashed ghost
+// while its price tag already swings from it. The quote then assembles row by row (pages, pictures, extras) on the
+// Plan board as Marian names each one, the real phone shows the quote and the balance before anything is charged,
+// and a Credits ring shows what happens if making stops: the unused part of the quote flows back to the balance.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 89.1;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows measured from the takes (vo.mjs + an RMS pass):
+//   L1 0.75–3.09 ("Before anything is made," 0.75 · "you see the price." 2.42)
+//   L2 3.54–6.46 ("Pages," 3.54 · "pictures and extras," 4.21 · "counted in Credits." 5.84)
+//   L3 6.96–8.96 · L4 9.46–12.41 ("If making stops," 9.46 · "unused Credits come back." 10.94)
+const SB = 3.3, SC = 6.7, SD = 9.2;
+const ROW_T = [3.5, 4.2, 4.85], TOTAL_T = 5.5;
+
+function crop(src, srcW, sx, sy, sw, sh, w, opts = {}) {
+  const k = w / sw;
+  const b = K.box(0, 0, w, sh * k, { cls: 'crop ' + (opts.cls || '') });
+  K.el('img', { src, parent: b, style: { left: -sx * k + 'px', top: -sy * k + 'px', width: srcW * k + 'px' } });
+  return { el: b, k, h: sh * k };
+}
+function chip(n, name) {
+  const c = K.box(tall ? 65 : 60, tall ? 290 : 56, null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' },
+    html: `<b>Feature ${String(n).padStart(2, '0')}</b><i>/ 16 ·</i><span>${name}</span>` });
+  return (T) => {
+    const p = K.p(T, 0.1, 0.6, E.outExpo);
+    c.style.opacity = p * (1 - K.p(T, 12.85, 13.0, E.linear));
+    c.style.clipPath = `inset(0 ${(1 - p) * 100}% 0 0 round 99px)`;
+    c.style.transform = `translateX(${(1 - p) * -30}px)`;
+  };
+}
+
+const L = tall
+  ? { hookX: 65, hookY: 380, hookFs: 116, gW: 360, gY: 760, gCx: 470, tagX: 610, tagY: 820,
+      qW: 950, qX: 65, qY: 440, qTag: [65, 384], chipsY: 1140,
+      cX: 65, cY: 380, cFs: 80, phX: 300, phY: 640, phW: 520, rtag: [300, 590], noteY: 1110,
+      dX: 65, dY: 370, dFs: 72, rCx: 540, rCy: 800, rR: 190, stX: 65, stY: 1150, stW: 640, stTag: [65, 1110], ill: [760, 1110] }
+  : { hookX: 60, hookY: 150, hookFs: 104, gW: 330, gY: 450, gCx: 400, tagX: 560, tagY: 520,
+      qW: 960, qX: 60, qY: 180, qTag: [60, 126], chipsY: 900,
+      cX: 60, cY: 220, cFs: 74, phX: 610, phY: 150, phW: 410, rtag: [610, 1176], noteY: 760,
+      dX: 60, dY: 150, dFs: 72, rCx: 790, rCy: 580, rR: 200, stX: 60, stY: 1000, stW: 640, stTag: [60, 960], ill: [880, 280] };
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.24), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(126,154,126,.16), rgba(126,154,126,0) 62%)' } });
+const chipDraw = chip(1, 'The quote');
+
+// ---------- A: the ghost product with its price already on it ----------
+const hook = K.box(L.hookX, L.hookY, W - 2 * L.hookX, null, { cls: 'big', style: { fontSize: L.hookFs + 'px' },
+  html: '<span class="w">The </span><span class="w">price </span><br><span class="w">comes </span><span class="w"><em class="hl">first.</em></span>' });
+const hookW = [...hook.querySelectorAll('.w')];
+const hookHl = hook.querySelector('.hl');
+const gH = L.gW * 926 / 656;
+const ghost = K.box(L.gCx - L.gW / 2, L.gY, L.gW, gH, { cls: 'ghost', html: `<div class="frame"></div><img src="${K.pub('r07/k09-kids-book.webp')}"><div class="nm">Not made yet</div>` });
+const gFrame = ghost.querySelector('.frame');
+const string = K.box(0, 0, 3, 10, { cls: 'string' });
+const tag = K.box(L.tagX, L.tagY, null, null, { cls: 'tag', style: { width: 'auto', height: 'auto' },
+  html: '<div class="card"><div class="hole"></div><span class="s">sample</span><small>Your quote</small><strong>110<span>Credits</span></strong></div>' });
+const conceptTag = K.demoTag('Concept product · AI-generated', 0, 0);
+
+// ---------- B: the quote assembles, row by row (Plan board) ----------
+// AppPlan board (2880 wide): the quote card x 1712–2781, y 611–1351.
+const QS = { x: 1712, y: 611, w: 1069, h: 740 };
+const qc = crop(K.canvas('AppPlan'), 2880, QS.x, QS.y, QS.w, QS.h, L.qW, { cls: 'qc' });
+qc.el.style.left = L.qX + 'px'; qc.el.style.top = L.qY + 'px';
+const rowY = [[858, 908], [916, 966], [974, 1024]].map(([a, b]) => [(a - QS.y) * qc.k, (b - QS.y) * qc.k]);
+const totY = [(1046 - QS.y) * qc.k, (1100 - QS.y) * qc.k];
+const headY = [(726 - QS.y) * qc.k, (852 - QS.y) * qc.k];
+// dark veils keep each row hidden until it is named
+const veils = [...rowY, totY, headY].map(([a, b]) => K.el('div', { parent: qc.el, cls: 'dim', style: { top: a + 'px', height: b - a + 'px' } }));
+const rings = [...rowY, totY].map(([a, b]) => K.el('div', { parent: qc.el, cls: 'ring', style: { left: 22 * qc.k + 'px', right: 22 * qc.k + 'px', top: a - 4 + 'px', height: b - a + 8 + 'px' } }));
+const boardTag = K.demoTag('Product design · sample data', L.qTag[0], L.qTag[1]);
+const chips = K.box(L.qX, L.chipsY, L.qW, null, { cls: 'chips', html: ['Pages', 'Pictures', 'Extras', '= Credits'].map((t) => `<div class="ck">${t}</div>`).join('') });
+const ckEls = [...chips.querySelectorAll('.ck')];
+
+// ---------- C: the real phone — the quote and the balance, nothing charged yet ----------
+const cap3 = K.box(L.cX, L.cY, tall ? W - 130 : 520, null, { cls: 'mid', style: { fontSize: L.cFs + 'px' },
+  html: (tall ? '<span class="w">Nothing </span><span class="w">is </span><span class="w">charged </span><br>' : '<span class="w">Nothing </span><br><span class="w">is </span><span class="w">charged </span><br>')
+    + '<span class="w">until </span><span class="w">you </span><span class="w"><em class="hl">confirm.</em></span>' });
+const cap3W = [...cap3.querySelectorAll('.w')];
+const cap3Hl = cap3.querySelector('.hl');
+const deck = K.phoneDeck(L.phX, L.phY, L.phW, [K.screen('65-phone-configure')]);
+deck.root.style.zIndex = 30;
+const k780 = deck.sw / 780;
+const layer = deck.root.querySelector('.screen > div');
+// lime marks over the real quote: the total, then the balance line
+const markTot = K.el('div', { parent: layer, cls: 'mark', style: { left: 26 * k780 + 'px', width: 728 * k780 + 'px' } });
+const markBal = K.el('div', { parent: layer, cls: 'mark', style: { left: 26 * k780 + 'px', width: 728 * k780 + 'px' } });
+const realTag = K.demoTag('Real app · demo workspace', L.rtag[0], L.rtag[1]);
+const note3 = K.box(L.cX, L.noteY, tall ? 236 : 520, null, { cls: 'note', html: tall ? 'Quote first,<br><b>yes</b> second.' : 'The quote comes first.<br>Credits move only on your <b>yes</b>.' });
+
+// ---------- D: if making stops, the unused part comes back ----------
+const cap4 = K.box(L.dX, L.dY, tall ? W - 130 : 460, null, { cls: 'mid', style: { fontSize: L.dFs + 'px' },
+  html: '<span class="w">Stopped? </span><br><span class="w">Unused </span><span class="w">Credits </span>' + (tall ? '' : '<br>') + '<span class="w"><em class="hl">come back.</em></span>' });
+const cap4W = [...cap4.querySelectorAll('.w')];
+const cap4Hl = cap4.querySelector('.hl');
+const R = L.rR, SW = 54, C = 2 * Math.PI * R;
+const ringW = K.box(L.rCx - R - 40, L.rCy - R - 40, 2 * R + 80, 2 * R + 80, { cls: 'ringwrap',
+  html: `<svg viewBox="${-R - 40} ${-R - 40} ${2 * R + 80} ${2 * R + 80}">
+    <circle r="${R}" fill="none" stroke="#E7E1D5" stroke-width="${SW}"/>
+    <circle class="bal" r="${R}" fill="none" stroke="#1F1F1F" stroke-width="${SW}" transform="rotate(-90)"/>
+    <circle class="used" r="${R}" fill="none" stroke="#8A8378" stroke-width="${SW}" transform="rotate(-90)"/>
+    <circle class="res" r="${R}" fill="none" stroke="#DFFF5A" stroke-width="${SW}" transform="rotate(-90)"/>
+    <circle class="back" r="${R}" fill="none" stroke="#DFFF5A" stroke-width="${SW}" transform="rotate(-90)"/>
+  </svg><div class="rc" style="top:${R + 40 - 60}px"><div class="a">Your Credits</div><div class="b">Balance</div></div>` });
+const arc = (sel) => ringW.querySelector(sel);
+const bal = arc('.bal'), used = arc('.used'), res = arc('.res'), back = arc('.back');
+const setArc = (el, from, len) => { el.setAttribute('stroke-dasharray', `${Math.max(0, len) * C} ${C}`); el.setAttribute('stroke-dashoffset', `${-from * C}`); };
+const labRes = K.box(0, 0, null, null, { cls: 'lab lime', html: 'Quote', style: { width: 'auto', height: 'auto' } });
+const labStop = K.box(0, 0, null, null, { cls: 'lab warn', html: '⚠ Stopped', style: { width: 'auto', height: 'auto' } });
+const labBack = K.box(0, 0, null, null, { cls: 'lab ink', html: '↺ Back to your balance', style: { width: 'auto', height: 'auto' } });
+const illTag = K.demoTag('Illustration', 0, 0);
+// AppMaking board: "Stop · unused Credits come back" (x 776–1300, y 244–336 at 2x)
+const stopC = crop(K.canvas('AppMaking'), 2880, 590, 236, 720, 104, L.stW, { cls: 'stopc' });
+stopC.el.style.left = L.stX + 'px'; stopC.el.style.top = L.stY + 'px';
+const stopTag = K.demoTag('Product design · sample data', L.stTag[0], L.stTag[1]);
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'See the price first.' });
+
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+function words(ws, T, a, out, st = 0.07) {
+  ws.forEach((w, i) => {
+    const p = K.p(T, a + i * st, a + 0.5 + i * st, E.outExpo);
+    const o = out ? K.p(T, out - 0.25, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+}
+
+K.run({
+  id: 'H01', title: 'The Quote', dur: DUR, bpm: BPM, music: 'ov-piano-song-loop-4-childhood-by-k', mood: 'bright', key: 'C', intro: 0, cover: 5.8,
+  series: 'R08', feature: 'Feature 01 / 16 · The quote',
+  technique: 'A product that does not exist yet stands as a dashed ghost while its price tag already swings from it; the Plan board’s quote assembles row by row under dark veils lifted as the narrator names pages, pictures and extras; the real phone shows the quote and the balance before any charge; a Credits ring shows the unused part of a stopped quote flowing back to the balance',
+  caption: 'Before anything is made, MakeAndList shows you the quote in Credits — pages, pictures and extras. Nothing is charged until you confirm, and if making stops, unused Credits come back. Start free at makeandlist.com',
+  short: 'See the price before it’s made.',
+  question: 'What does it cost?', gain: 'Know the cost first',
+  vo: [[0.3, 'Before anything is made, you see the price.'], [3.39, 'Pages, pictures and extras, counted in Credits.'], [6.79, 'Nothing is charged until you confirm.'], [9.2, 'If making stops, unused Credits come back.']],
+  beats: ['0–3.3 s: “The price comes first.” — a dashed ghost of a book that is not made yet, its price tag (sample) already swinging from it', '3.3–6.7 s: the quote assembles on the Plan board — pages, pictures, extras, then the total in Credits', '6.7–9.2 s: the real phone: the quote and the balance; nothing is charged until you confirm', '9.2–13 s: if making stops, the unused part of the quote flows back to the balance (illustration + the Making board’s Stop button)', '13–15 s: end card'],
+  cues: [[0.12, 'pop'], [0.95, 'paper'], [2.05, 'ding'], [3.28, 'whoosh'], [ROW_T[0], 'pop'], [ROW_T[1], 'pop'], [ROW_T[2], 'pop'], [TOTAL_T + 0.05, 'coin'],
+    [6.62, 'swish'], [7.15, 'pop'], [9.12, 'whoosh'], [9.55, 'pop'], [10.78, 'click'], [12.48, 'sparkle'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.62 - 550 + Math.sin(T * 0.5) * 160}px, ${H * 0.34 - 550 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.12 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.8 - 450 + Math.sin(T * 0.6) * 100}px)`;
+  chipDraw(T);
+
+  // ---------- A ----------
+  const aOut = K.p(T, SB - 0.25, SB + 0.1, E.inCubic);
+  hookW.forEach((w, i) => {
+    const p = K.p(T, 0.15 + i * 0.1, 0.7 + i * 0.1, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - aOut);
+    w.style.transform = `translateY(${(1 - p) * 70 - aOut * 50}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 10}px)` : 'none';
+  });
+  hookHl.style.backgroundSize = `${K.p(T, 2.45, 2.85, E.outCubic) * 100}% 100%`;
+  hook.style.transform = `scale(${1 + 0.012 * T})`;
+  vis(hook, T < SB + 0.15);
+  const gp = K.p(T, 0.7, 1.4, E.outExpo);
+  ghost.style.opacity = gp * (1 - aOut);
+  ghost.style.transform = `translateY(${(1 - gp) * 80 + Math.sin(T * 1.3) * 6 - aOut * 60}px) rotate(${-3 + Math.sin(T * 0.9) * 0.6}deg)`;
+  gFrame.style.borderColor = `rgba(138,131,120,${0.6 + 0.4 * Math.sin(T * 4)})`;
+  vis(ghost, T < SB + 0.15);
+  // the tag drops on a string from the ghost's corner and swings to rest
+  const tp = K.p(T, 1.75, 2.1, E.outCubic);
+  const sw = (1 - K.p(T, 2.1, 3.3, E.linear)) * Math.sin((T - 2.1) * 9) * 9 * (T > 2.1 ? 1 : 0) + Math.sin(T * 1.6) * 1.2;
+  tag.style.opacity = Math.min(1, tp * 3) * (1 - aOut);
+  tag.style.transform = `translateY(${(1 - tp) * -240 - aOut * 60}px) rotate(${sw}deg)`;
+  vis(tag, T >= 1.75 && T < SB + 0.15);
+  const anchorX = L.gCx + L.gW / 2 - 30, anchorY = L.gY + 40;
+  const tx = L.tagX + 40, ty = L.tagY + (1 - tp) * -240 + 40;
+  const len = Math.hypot(tx - anchorX, ty - anchorY);
+  string.style.left = anchorX + 'px'; string.style.top = anchorY + 'px'; string.style.height = len + 'px';
+  string.style.transform = `translateY(${-aOut * 60}px) rotate(${-Math.atan2(tx - anchorX, ty - anchorY) * 180 / Math.PI}deg)`;
+  string.style.opacity = tag.style.opacity; vis(string, T >= 1.75 && T < SB + 0.15);
+  conceptTag.style.left = (tall ? 65 : 60) + 'px'; conceptTag.style.top = (tall ? L.gY + gH + 120 : 1250) + 'px';
+  conceptTag.style.opacity = K.p(T, 1.0, 1.3, E.linear) * (1 - aOut);
+
+  // ---------- B ----------
+  const bIn = K.p(T, SB - 0.05, SB + 0.5, E.outExpo), bOut = K.p(T, SC - 0.25, SC + 0.05, E.inCubic);
+  qc.el.style.opacity = Math.min(1, bIn * 2) * (1 - bOut);
+  qc.el.style.transform = `translateY(${(1 - bIn) * 200 - bOut * 80}px) rotate(${(1 - bIn) * 3 + Math.sin(T * 0.8) * 0.3}deg) scale(${0.94 + 0.06 * bIn + 0.01 * (T - SB)})`;
+  vis(qc.el, T >= SB - 0.05 && T < SC + 0.05);
+  const veilT = [ROW_T[0], ROW_T[1], ROW_T[2], TOTAL_T, TOTAL_T];
+  veils.forEach((v, i) => { v.style.opacity = 0.9 * (1 - K.p(T, veilT[i], veilT[i] + 0.3, E.outCubic)); });
+  rings.forEach((r, i) => {
+    const a = veilT[i], b = i < 3 ? veilT[i + 1] : SC - 0.3;
+    r.style.opacity = K.p(T, a, a + 0.15, E.linear) * (1 - K.p(T, b, b + 0.2, E.linear));
+    r.style.transform = `scale(${1.04 - 0.04 * K.p(T, a, a + 0.35, E.outBack)})`;
+  });
+  ckEls.forEach((c, i) => {
+    const t0 = i < 3 ? ROW_T[i] : TOTAL_T;
+    const p = K.p(T, t0 - 0.1, t0 + 0.35, E.outBack);
+    c.style.opacity = Math.min(1, p * 2) * (1 - bOut);
+    c.style.transform = `translateY(${(1 - p) * 40}px) scale(${0.8 + 0.2 * p})`;
+    c.className = 'ck' + (T >= t0 && (i === 3 ? true : T < (i < 2 ? ROW_T[i + 1] : TOTAL_T)) ? ' on' : '');
+  });
+  vis(chips, T >= SB && T < SC + 0.05);
+  boardTag.style.opacity = bIn * (1 - bOut); vis(boardTag, T >= SB && T < SC + 0.05);
+
+  // ---------- C ----------
+  const cIn = K.p(T, SC - 0.1, SC + 0.5, E.outExpo), cOut = K.p(T, SD - 0.25, SD + 0.05, E.inCubic);
+  words(cap3W, T, SC + 0.15, SD, 0.06);
+  cap3Hl.style.backgroundSize = `${K.p(T, 8.45, 8.85, E.outCubic) * 100}% 100%`;
+  vis(cap3, T >= SC && T < SD + 0.05);
+  // scroll the real phone down to its quote (the shot's last screenful, y ≈ 2150–3800 of the 780-wide shot)
+  const nh = 3800 * k780, maxS = nh - deck.sh;
+  const maxTop = maxS / k780;
+  const top780 = Math.min(maxTop, K.k(T, [[SC, 1750], [SC + 0.9, maxTop - 60], [SD, maxTop]], E.inOutCubic));
+  deck.draw(0, [top780 * k780 / maxS], 0);
+  deck.root.style.opacity = cIn * (1 - cOut);
+  deck.root.style.transform = `translateY(${(1 - cIn) * 300 + cOut * 60}px) rotate(${2 - 2 * cIn + Math.sin(T * 0.7) * 0.4}deg)`;
+  vis(deck.root, T >= SC - 0.1 && T < SD + 0.05);
+  markTot.style.top = (3262 - top780) * k780 - 14 + 'px'; markTot.style.height = 170 * k780 + 'px';
+  markTot.style.opacity = K.p(T, 7.15, 7.35, E.linear) * (1 - K.p(T, 8.05, 8.25, E.linear));
+  markBal.style.top = (3512 - top780) * k780 + 'px'; markBal.style.height = 60 * k780 + 'px';
+  markBal.style.opacity = K.p(T, 8.1, 8.3, E.linear);
+  realTag.style.opacity = cIn * (1 - cOut); vis(realTag, T >= SC && T < SD + 0.05);
+  const np = K.p(T, 7.9, 8.4, E.outExpo);
+  note3.style.opacity = np * (1 - cOut); note3.style.transform = `translateY(${(1 - np) * 30}px)`;
+  vis(note3, T >= SC && T < SD + 0.05);
+
+  // ---------- D ----------
+  const dIn = K.p(T, SD - 0.05, SD + 0.5, E.outExpo);
+  words(cap4W, T, SD + 0.1, null, 0.08);
+  cap4Hl.style.backgroundSize = `${K.p(T, 11.6, 12.0, E.outCubic) * 100}% 100%`;
+  vis(cap4, T >= SD);
+  ringW.style.opacity = dIn;
+  ringW.style.transform = `scale(${0.85 + 0.15 * dIn}) rotate(${(1 - dIn) * -20}deg)`;
+  vis(ringW, T >= SD - 0.05);
+  // balance 0..0.72, the quote reserved 0.72..0.9; making uses part of it, stops; the rest flows back
+  const RES0 = 0.70, RES = 0.2;
+  const grow = K.p(T, SD + 0.15, SD + 0.9, E.outCubic);
+  const usedP = K.p(T, 9.9, 10.7, E.inOutCubic) * 0.38;           // part of the quote used before the stop
+  const backP = K.p(T, 11.0, 12.2, E.inOutCubic);                   // the unused part returns
+  setArc(bal, 0, RES0 * grow + (RES - usedP * RES) * backP);
+  setArc(used, RES0, usedP * RES * grow);
+  setArc(res, RES0 + usedP * RES, (RES - usedP * RES) * (1 - backP) * grow);
+  // a bright sweep travels from the quote back into the balance
+  const sweep = Math.sin(Math.PI * backP);
+  setArc(back, RES0 + (RES - usedP * RES) * (1 - backP), 0.05 * sweep);
+  back.style.opacity = sweep;
+  const ang = (a) => (a * 360 - 90) * Math.PI / 180;
+  const at = (a, r) => [L.rCx + Math.cos(ang(a)) * r, L.rCy + Math.sin(ang(a)) * r];
+  const [rx, ry] = at(RES0 + RES / 2, R + 70);
+  labRes.style.left = rx - 50 + 'px'; labRes.style.top = ry - 24 + 'px';
+  labRes.style.opacity = K.p(T, SD + 0.6, SD + 0.9, E.linear) * (1 - K.p(T, 11.0, 11.3, E.linear));
+  const [sx, sy] = at(RES0 + 0.05, R + 90);
+  labStop.style.left = sx - 160 + 'px'; labStop.style.top = sy - 30 + 'px';
+  const sp = K.p(T, 10.7, 11.0, E.outBack);
+  labStop.style.opacity = Math.min(1, sp * 2) * (1 - K.p(T, 12.3, 12.6, E.linear)); labStop.style.transform = `scale(${0.7 + 0.3 * sp})`;
+  labBack.style.left = L.rCx - 170 + 'px'; labBack.style.top = L.rCy + R + 44 + 'px';
+  const bp = K.p(T, 11.55, 11.95, E.outBack);
+  labBack.style.opacity = Math.min(1, bp * 2); labBack.style.transform = `translateY(${(1 - bp) * 30}px) scale(${0.8 + 0.2 * bp})`;
+  [labRes, labStop, labBack].forEach((l) => vis(l, T >= SD));
+  illTag.style.left = L.ill[0] + 'px'; illTag.style.top = L.ill[1] + 'px';
+  illTag.style.opacity = dIn; vis(illTag, T >= SD);
+  const stp = K.p(T, 10.0, 10.5, E.outExpo);
+  stopC.el.style.opacity = stp; stopC.el.style.transform = `translateY(${(1 - stp) * 60}px)`;
+  vis(stopC.el, T >= 9.9);
+  stopTag.style.opacity = stp; vis(stopTag, T >= 9.9);
+
+  end(T);
+});
+</script></body></html>

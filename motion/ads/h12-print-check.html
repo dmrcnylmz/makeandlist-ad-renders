@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H12 · The Print Check</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F3EEE4; }
+.wall { position: absolute; inset: 0; background: radial-gradient(80% 55% at 50% 30%, #FBF8F1 0%, #F1EBDF 60%, #E6DECF 100%); }
+.wash { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(40px); }
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.cap { position: absolute; z-index: 40; font: 800 84px/0.98 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; font-weight: 600; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .04em; }
+.side { position: absolute; z-index: 10; }
+.frame { position: absolute; z-index: 12; transform-origin: 50% 100%; }
+.frame img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.fshadow { position: absolute; z-index: 11; background: rgba(60,48,32,.28); filter: blur(22px); border-radius: 8px; }
+.ruler { position: absolute; z-index: 13; height: 30px; border-left: 2px solid #45403A; border-right: 2px solid #45403A; }
+.ruler::before { content: ''; position: absolute; left: 0; right: 0; top: 14px; height: 2px; background: #45403A; }
+.ruler span { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); background: #F7F2E8; padding: 0 12px; font: 600 24px 'IBM Plex Mono', monospace; color: #1F1F1F; white-space: nowrap; }
+.loupe { position: absolute; z-index: 30; border-radius: 50%; overflow: hidden; background: #fff; box-shadow: 0 0 0 10px #1F1F1F, 0 0 0 13px #DFFF5A, 0 40px 70px -30px rgba(31,31,31,.7); }
+.loupe canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.lead { position: absolute; z-index: 29; height: 3px; background: #1F1F1F; transform-origin: 0 50%; }
+.ldot { position: absolute; z-index: 29; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 3px #1F1F1F; }
+.read { position: absolute; z-index: 31; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.read .sz { font: 800 46px/1 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.read .pp { font: 600 26px 'IBM Plex Mono', monospace; color: #45403A; white-space: nowrap; }
+.st { display: inline-flex; align-items: center; gap: 10px; padding: 9px 18px; border-radius: 99px; font: 700 24px 'Archivo'; white-space: nowrap; }
+.st i { width: 12px; height: 12px; border-radius: 50%; display: block; background: currentColor; }
+.st.ok { background: #E2EEDD; color: #2F6A3A; }
+.st.rv { background: #F7EBC9; color: #8A5A00; }
+.st.no { background: #F9DEDA; color: #A5281B; }
+.stamp { position: absolute; z-index: 34; padding: 18px 30px; border: 7px solid #C2321F; border-radius: 16px; color: #C2321F; font: 900 46px/1.02 'Archivo'; letter-spacing: .02em; text-transform: uppercase; text-align: center; background: rgba(255,248,244,.82); white-space: nowrap; }
+.panel { position: absolute; z-index: 20; border-radius: 26px; background: #FFFFFF; overflow: hidden; box-shadow: 0 50px 90px -40px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; }
+.cropbox { position: absolute; overflow: hidden; }
+.cropbox img { position: absolute; left: 0; top: 0; display: block; transform-origin: 0 0; }
+.hl { position: absolute; z-index: 22; border-radius: 14px; box-shadow: 0 0 0 4px #1F1F1F, 0 0 0 10px rgba(223,255,90,.75); pointer-events: none; }
+.warn { position: absolute; z-index: 26; border-radius: 22px; overflow: hidden; box-shadow: 0 40px 70px -30px rgba(120,30,20,.55), 0 0 0 4px #C2321F; background: #fff; }
+.kick { position: absolute; z-index: 40; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #6B645A; white-space: nowrap; }
+.pill { position: absolute; z-index: 41; white-space: nowrap; font: 700 28px 'Archivo'; padding: 14px 26px; border-radius: 99px; display: flex; gap: 12px; align-items: center; box-shadow: 0 20px 40px -20px rgba(31,31,31,.6); }
+.pill.ink { background: #1F1F1F; color: #FAF7EE; }
+.pill.lime { background: #DFFF5A; color: #1F1F1F; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H12 — The print check (Feature 12 / 16). A concept framed print hangs over a sideboard; the camera pulls back as
+// it is printed bigger — 8 × 10 in up to 40 × 50 in — while a loupe shows the real pixels thinning out (the artwork is
+// redrawn at that size's pixels per inch). At 40 × 50 in it goes soft and is stamped "too small for this size". Proof:
+// the size list from the Make-it-physical board (pass / needs review / too small) and the real try-on screen's
+// "Prints sharp at this size". Voice + effects only (musicMode 'none'): a calm close-up.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 100, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian, fitted to her takes (speech ≈ 0.95–2.77 · 3.17–5.85 · 6.53–9.76 · 10.37–11.82); impacts in the breaths.
+const VO = [[0.3, 'How big can this print go?'], [2.95, 'MakeAndList measures the real pixels at each size.'],
+  [6.0, 'Sizes that would print soft are flagged before you sell.'], [10.0, 'You decide what to offer.']];
+const SZ = [ // from the board: the same artwork, each size's effective pixels per inch
+  { w: 8, h: 10, lab: '8 × 10 in', ppi: 600, st: 'ok', stl: 'Pass', t: 0 },
+  { w: 12, h: 15, lab: '12 × 15 in', ppi: 400, st: 'ok', stl: 'Pass', t: 3.2 },
+  { w: 16, h: 20, lab: '16 × 20 in', ppi: 300, st: 'ok', stl: 'Pass', t: 3.95 },
+  { w: 24, h: 30, lab: '24 × 30 in', ppi: 200, st: 'rv', stl: 'Needs review', t: 4.7 },
+  { w: 40, h: 50, lab: '40 × 50 in', ppi: 120, st: 'no', stl: 'Too small for this size', t: 5.6 },
+];
+const T_STAMP = 6.2, T_B = 6.45, T_C = 9.95;
+
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 370, capFs: 86, cx: 420, fb: 1160, kc: [40, 12.6], loupe: [660, 590, 330], read: [668, 950],
+      tagY: 1196, kickY: 372, capBY: 412, panel: [140, 600, 800], warn: [100, 690, 880], capCY: 370, tee: [65, 570, 950], card: [65, 1010, 950], pillY: 1150 }
+  : { chip: [60, 56], capX: 60, capY: 130, capFs: 76, cx: 330, fb: 1150, kc: [38, 16.5], loupe: [650, 400, 300], read: [656, 730],
+      tagY: 1278, kickY: 130, capBY: 170, panel: [160, 330, 760], warn: [470, 790, 550], capCY: 130, tee: [60, 330, 960], card: [300, 800, 720], pillY: 1170 };
+
+// ---------- the room ----------
+K.box(0, 0, W, H, { cls: 'wall' });
+const washes = [0, 1].map((i) => K.box(0, 0, 900, 900, { cls: 'wash', style: { background: ['rgba(255,236,206,.55)', 'rgba(223,255,90,.14)'][i] } }));
+// sideboard (32 in tall, 64 in wide), drawn line art; a vase with a sprig
+const side = K.box(0, 0, 640, 320, { cls: 'side', html: `<svg width="100%" height="100%" viewBox="0 0 640 320" preserveAspectRatio="none">
+  <rect x="6" y="22" width="628" height="250" rx="10" fill="#E4D6BF" stroke="#45403A" stroke-width="3"/>
+  <rect x="6" y="10" width="628" height="18" rx="6" fill="#D8C7AA" stroke="#45403A" stroke-width="3"/>
+  <line x1="215" y1="40" x2="215" y2="262" stroke="#45403A" stroke-width="2.5"/><line x1="425" y1="40" x2="425" y2="262" stroke="#45403A" stroke-width="2.5"/>
+  <circle cx="190" cy="150" r="6" fill="#45403A"/><circle cx="450" cy="150" r="6" fill="#45403A"/>
+  <line x1="40" y1="272" x2="34" y2="318" stroke="#45403A" stroke-width="5"/><line x1="600" y1="272" x2="606" y2="318" stroke="#45403A" stroke-width="5"/></svg>` });
+const vase = K.box(0, 0, 120, 200, { cls: 'side', html: `<svg width="100%" height="100%" viewBox="0 0 120 200">
+  <path d="M60 120 C 52 80, 40 50, 22 18 M60 120 C 66 76, 82 46, 104 26 M60 120 C 60 84, 58 50, 62 6" fill="none" stroke="#5E7A5E" stroke-width="3.5" stroke-linecap="round"/>
+  <g fill="#7E9A7E" stroke="#45403A" stroke-width="1.6"><ellipse cx="30" cy="34" rx="11" ry="5" transform="rotate(-50 30 34)"/><ellipse cx="96" cy="36" rx="11" ry="5" transform="rotate(40 96 36)"/><ellipse cx="61" cy="16" rx="5" ry="11"/><ellipse cx="44" cy="66" rx="10" ry="4.5" transform="rotate(-30 44 66)"/><ellipse cx="78" cy="66" rx="10" ry="4.5" transform="rotate(30 78 66)"/></g>
+  <path d="M38 120 h44 c6 22 10 48 2 72 h-48 c-8-24-4-50 2-72z" fill="#E8603C" stroke="#45403A" stroke-width="3"/></svg>` });
+const fshadow = K.box(0, 0, 10, 10, { cls: 'fshadow' });
+const frame = K.box(0, 0, 10, 10, { cls: 'frame', html: `<img src="${K.pub('r07/k02-framed-print.webp')}">` });
+const frameImg = frame.querySelector('img');
+const ruler = K.box(0, 0, 10, 30, { cls: 'ruler', html: '<span></span>' });
+const rulerLab = ruler.querySelector('span');
+
+// ---------- loupe: the artwork redrawn at the size's real pixel density ----------
+const SRC = K.el('img', { src: K.pub('r07/k02-framed-print.webp'), style: { position: 'absolute', left: '-9999px', top: 0, width: '10px' } });
+const loupe = K.box(L.loupe[0], L.loupe[1], L.loupe[2], L.loupe[2], { cls: 'loupe', html: '<canvas></canvas>' });
+const cv = loupe.querySelector('canvas'), cx2 = cv.getContext('2d');
+let cvKey = '';
+function paintLoupe(n) {
+  const key = String(n);
+  if (key === cvKey) return; cvKey = key;
+  cv.width = n; cv.height = n; cx2.imageSmoothingEnabled = true; cx2.imageSmoothingQuality = 'high';
+  // the protea's head (natural px of the cut-out): a 200 × 200 window
+  cx2.drawImage(SRC, 190, 250, 200, 200, 0, 0, n, n);
+}
+const lead = K.box(0, 0, 10, 3, { cls: 'lead' });
+const ldot = K.box(0, 0, 22, 22, { cls: 'ldot' });
+const read = K.box(L.read[0], L.read[1], null, null, { cls: 'read', style: { width: 'auto', height: 'auto' }, html: '<div class="sz"></div><div class="pp"></div><div class="st"><i></i><span></span></div>' });
+const rSz = read.querySelector('.sz'), rPp = read.querySelector('.pp'), rSt = read.querySelector('.st'), rStl = read.querySelector('.st span');
+const stamp = K.box(0, 0, null, null, { cls: 'stamp', style: { width: 'auto', height: 'auto' }, html: 'Too small<br>for this size' });
+
+// captions, scene A
+const capA = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+const capAW = K.words(capA, 'How big can\nthis print go?');
+capAW[capAW.length - 1].innerHTML = '<em>go?</em>';
+const capA2 = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+const capA2W = K.words(capA2, tall ? 'Real pixels,\nat every size.' : 'Real pixels,\nevery size.');
+capA2W[capA2W.length - 1].innerHTML = '<em>size.</em>';
+const conceptTag = K.demoTag('Concept product · AI-generated', tall ? 640 : 640, tall ? 1100 : 900);
+
+// ---------- scene B: the size list (Make-it-physical board) ----------
+const coverB = K.box(0, 0, W, H, { style: { zIndex: 18, background: '#FAF7EE' } });
+const kickB = K.box(L.capX, L.kickY, null, null, { cls: 'kick', html: 'Make it physical · sizes', style: { width: 'auto', height: 'auto', zIndex: 41 } });
+const capB = K.box(L.capX, L.capBY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: (tall ? 84 : 70) + 'px', zIndex: 41 } });
+const capBW = K.words(capB, tall ? 'Soft sizes,\nflagged first.' : 'Soft sizes,\nflagged first.');
+capBW[capBW.length - 2].innerHTML = '<em>flagged</em> '; capBW[capBW.length - 1].innerHTML = '<em>first.</em>';
+// crop of the board: sizes panel, natural 2880 wide (rows 8 × 10 … 40 × 50)
+const RX = 2192, RY = 390, RW = 590, RH = 548;
+const pS = L.panel[2] / RW;
+const panel = K.box(L.panel[0], L.panel[1], L.panel[2], RH * pS, { cls: 'panel', html: `<div class="cropbox" style="left:0;top:0;width:100%;height:100%"><img src="${K.canvas('MakePhysical')}" style="width:${2880 * pS}px;transform:translate(${-RX * pS}px,${-RY * pS}px)"></div>` });
+const ROWS = [400, 510, 620, 730, 840].map((y) => (y - RY) * pS); // row tops (natural y), 100 px rows
+const hl = K.box(0, 0, (RW - 14) * pS, 98 * pS, { cls: 'hl' });
+const boardTag = K.demoTag('Product design · sample data', 0, 0);
+const WX = 2195, WY = 965, WW = 580, WH = 265, wS = L.warn[2] / WW;
+const warn = K.box(L.warn[0], L.warn[1], L.warn[2], WH * wS, { cls: 'warn', html: `<div class="cropbox" style="left:0;top:0;width:100%;height:100%"><img src="${K.canvas('MakePhysical')}" style="width:${2880 * wS}px;transform:translate(${-WX * wS}px,${-WY * wS}px)"></div>` });
+
+// ---------- scene C: the real try-on screen ----------
+const coverC = K.box(0, 0, W, H, { style: { zIndex: 50, background: '#F4F1EA' } });
+const capC = K.box(L.capX, L.capCY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: (tall ? 84 : 70) + 'px', zIndex: 56 } });
+const capCW = K.words(capC, 'You decide\nwhat to offer.');
+capCW[capCW.length - 1].innerHTML = '<em>offer.</em>';
+const tS = L.tee[2] / 830;
+const tee = K.box(L.tee[0], L.tee[1], L.tee[2], (tall ? 500 : 470) * tS, { cls: 'panel', style: { zIndex: 52 }, html: `<div class="cropbox" style="left:0;top:0;width:100%;height:100%"><img src="${K.screen('46-try-on')}" style="width:${1440 * tS}px;transform:translate(${-296 * tS}px,${-96 * tS}px)"></div>` });
+const cS = L.card[2] / 426;
+const card = K.box(L.card[0], L.card[1], L.card[2], 136 * cS, { cls: 'panel', style: { zIndex: 54, boxShadow: '0 40px 70px -30px rgba(31,31,31,.6), 0 0 0 4px #1F1F1F' }, html: `<div class="cropbox" style="left:0;top:0;width:100%;height:100%"><img src="${K.screen('46-try-on')}" style="width:${1440 * cS}px;transform:translate(${-958 * cS}px,${-974 * cS}px)"></div>` });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0); realTag.style.zIndex = 61;
+
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>Feature 12</b><i>/ 16 ·</i><span>The print check</span>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Checked before you sell.' });
+
+// camera (px per inch on screen) eases between the size steps
+const kcAt = (T) => {
+  const ks = SZ.map((s, i) => [s.t, K.lerp(L.kc[0], L.kc[1], [0, 0.2, 0.42, 0.68, 1][i])]);
+  let v = ks[0][1];
+  for (let i = 1; i < ks.length; i++) v = K.lerp(v, ks[i][1], K.p(T, ks[i][0], ks[i][0] + 0.55, E.inOutCubic));
+  return v;
+};
+const dimAt = (T, key) => { let v = SZ[0][key]; for (let i = 1; i < SZ.length; i++) v = K.lerp(v, SZ[i][key], K.p(T, SZ[i].t, SZ[i].t + 0.55, E.inOutCubic)); return v; };
+
+K.run({
+  id: 'H12', title: 'The Print Check', dur: DUR, bpm: BPM, musicMode: 'none', mood: 'calm', key: 'C', intro: 0, cover: 6.4,
+  technique: 'Close-up camera pull-back: a concept framed print over a drawn sideboard is printed bigger step by step (8 × 10 in to 40 × 50 in) while a loupe redraws the artwork at that size’s real pixels per inch, so it visibly thins into blocks; the largest size goes soft and is stamped; then crops of the size list (pass / needs review / too small, with its warning) and the real try-on screen’s sharpness estimate',
+  caption: 'The print check: before you sell a printed size, MakeAndList measures the artwork’s real pixels at that size — sizes that would print soft are flagged, and you decide what to offer. Start free at makeandlist.com',
+  short: 'Soft sizes, flagged before you sell.',
+  vo: VO,
+  beats: ['0–3 s: “How big can this print go?” — a concept framed print over a sideboard; the loupe shows crisp pixels', '3–6.4 s: printed bigger, 8 × 10 to 40 × 50 in; px/in falls 600 → 120; the largest goes soft and is stamped “too small for this size”', '6.4–10 s: the size list — pass, pass, pass, needs review, too small — and its warning (design board, sample data)', '10–13 s: the real try-on screen: “Prints sharp at this size”; you decide what to offer', '13–15 s: end card'],
+  cues: [[0.05, 'swish'], [0.5, 'pop'], [2.85, 'sparkle'], [SZ[1].t, 'click'], [SZ[2].t, 'click'], [SZ[3].t, 'click'], [SZ[4].t - 0.1, 'whoosh'], [T_STAMP, 'stamp'],
+    [T_B - 0.05, 'swish'], [6.95, 'pop'], [7.45, 'pop'], [7.95, 'pop'], [8.45, 'pop'], [8.95, 'pop'], [9.3, 'paper'], [T_C - 0.05, 'whoosh'], [T_C + 0.2, 'paper'], [11.95, 'chime'], [13.0, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  washes[0].style.transform = `translate(${W * 0.6 - 450 + Math.sin(T * 0.4) * 120}px, ${H * 0.2 - 450 + Math.cos(T * 0.35) * 80}px)`;
+  washes[1].style.transform = `translate(${W * 0.2 - 450 + Math.cos(T * 0.5) * 100}px, ${H * 0.7 - 450 + Math.sin(T * 0.45) * 90}px)`;
+
+  // chip: lands first, stays until the end card
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, 12.85, 13.0, E.linear)); chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`; chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  // ---------- scene A ----------
+  const kc = kcAt(T) * (1 + 0.012 * Math.sin(T * 0.8));
+  const fw = dimAt(T, 'w'), fh = dimAt(T, 'h');
+  const sideW = 64 * kc, sideH = 32 * kc, sideTop = L.fb + 7 * kc;
+  side.style.left = L.cx - sideW / 2 + 'px'; side.style.top = sideTop + 'px'; side.style.width = sideW + 'px'; side.style.height = sideH + 'px';
+  vase.style.width = 12 * kc + 'px'; vase.style.height = 20 * kc + 'px';
+  vase.style.left = L.cx - sideW * 0.36 + 'px'; vase.style.top = sideTop - 20 * kc + 2 * kc * 0.4 + 'px';
+  // the frame keeps the cut-out's own proportions; its height is the print's height
+  const dh = fh * kc, dw = dh * (608 / 897);
+  const fBottom = L.fb, fTop = fBottom - dh;
+  frame.style.left = L.cx - dw / 2 + 'px'; frame.style.top = fTop + 'px'; frame.style.width = dw + 'px'; frame.style.height = dh + 'px';
+  fshadow.style.left = L.cx - dw / 2 + 14 + 'px'; fshadow.style.top = fTop + 26 + 'px'; fshadow.style.width = dw + 'px'; fshadow.style.height = dh + 'px';
+  const soft = K.p(T, SZ[4].t + 0.2, SZ[4].t + 0.7, E.outCubic);
+  frameImg.style.filter = soft > 0.01 ? `blur(${soft * 3.2}px)` : 'none';
+  ruler.style.left = L.cx - dw / 2 + 'px'; ruler.style.width = dw + 'px'; ruler.style.top = fBottom + 22 + 'px';
+  const si = (T >= SZ[4].t + 0.25 ? 4 : T >= SZ[3].t + 0.25 ? 3 : T >= SZ[2].t + 0.25 ? 2 : T >= SZ[1].t + 0.25 ? 1 : 0);
+  rulerLab.innerHTML = SZ[si].lab;
+  const aIn = K.p(T, 0.1, 0.7, E.outExpo);
+  [side, vase, frame, fshadow].forEach((el) => { el.style.opacity = aIn; });
+  ruler.style.opacity = K.p(T, 0.8, 1.2, E.linear);
+
+  // loupe: the pixel window, drawn at the size's pixels per inch (600 → 240 px across the window)
+  const n = Math.max(12, Math.round(240 * SZ[si].ppi / 600 * (si === 4 ? 0.5 : 1)));
+  paintLoupe(n);
+  const lp = K.p(T, 0.55, 1.15, E.outBack);
+  const pulse = 1 + 0.06 * Math.exp(-6 * Math.max(0, T - SZ[si].t)) * (si > 0 ? 1 : 0);
+  loupe.style.transform = `scale(${lp * pulse})`; loupe.style.opacity = Math.min(1, lp * 2);
+  // leader from the protea head on the frame to the loupe
+  const hx = L.cx - dw / 2 + dw * (290 / 608), hy = fTop + dh * (350 / 897);
+  const lx = L.loupe[0] + L.loupe[2] / 2, ly = L.loupe[1] + L.loupe[2] / 2;
+  const len = Math.hypot(lx - hx, ly - hy), ang = Math.atan2(ly - hy, lx - hx);
+  lead.style.left = hx + 'px'; lead.style.top = hy + 'px'; lead.style.width = len * K.p(T, 0.9, 1.4, E.outCubic) + 'px'; lead.style.transform = `rotate(${ang}rad)`;
+  ldot.style.left = hx + 'px'; ldot.style.top = hy + 'px'; ldot.style.transform = `scale(${K.p(T, 0.8, 1.1, E.outBack)})`;
+  // readout
+  const rp = K.p(T, 1.1, 1.6, E.outExpo);
+  read.style.opacity = rp; read.style.transform = `translateY(${(1 - rp) * 20}px)`;
+  rSz.innerHTML = SZ[si].lab;
+  rPp.innerHTML = Math.round(K.lerp(si ? SZ[si - 1].ppi : 600, SZ[si].ppi, si ? K.p(T, SZ[si].t, SZ[si].t + 0.5, E.outCubic) : 1)) + ' px/in effective';
+  rSt.className = 'st ' + SZ[si].st; rStl.innerHTML = SZ[si].stl;
+  const rsP = K.p(T, SZ[si].t + 0.25, SZ[si].t + 0.6, E.outBack);
+  rSt.style.transform = `scale(${si ? 0.8 + 0.2 * rsP : 1})`;
+  // stamp, in the breath
+  const sp = K.p(T, T_STAMP, T_STAMP + 0.18, E.outCubic);
+  stamp.style.left = L.cx + 'px'; stamp.style.top = (fTop + dh * 0.42) + 'px';
+  stamp.style.opacity = sp; stamp.style.transform = `translate(-50%, -50%) rotate(-8deg) scale(${K.lerp(1.6, 1, sp)})`;
+
+  const aVis = T < T_B + 0.55 ? 'visible' : 'hidden';
+  [loupe, read, stamp, lead, ldot, ruler, frame, fshadow, side, vase].forEach((el) => { el.style.visibility = aVis; });
+  // captions A
+  K.reveal(capAW, T, 0.25, { kind: 'up', stagger: 0.07, dur: 0.5, out: 2.85 });
+  capA.style.visibility = T < 3.3 ? 'visible' : 'hidden';
+  K.reveal(capA2W, T, 3.05, { kind: 'up', stagger: 0.06, dur: 0.5, out: 6.2 });
+  capA2.style.visibility = T >= 3 && T < 6.6 ? 'visible' : 'hidden';
+  conceptTag.style.opacity = K.p(T, 0.6, 1.0, E.linear) * (1 - K.p(T, T_B, T_B + 0.2, E.linear));
+
+  // ---------- scene B ----------
+  const bIn = K.p(T, T_B, T_B + 0.5, E.inOutCubic);
+  coverB.style.transform = `translateY(${(1 - bIn) * 100}%)`;
+  coverB.style.visibility = T >= T_B ? 'visible' : 'hidden';
+  const pIn = K.p(T, T_B + 0.15, T_B + 0.75, E.outExpo);
+  panel.style.opacity = pIn; panel.style.transform = `translateY(${(1 - pIn) * 120}px) rotate(${-1 + Math.sin(T * 0.6) * 0.3}deg)`;
+  panel.style.visibility = T >= T_B && T < T_C + 0.4 ? 'visible' : 'hidden';
+  kickB.style.opacity = K.p(T, T_B + 0.2, T_B + 0.6, E.linear);
+  kickB.style.visibility = panel.style.visibility;
+  K.reveal(capBW, T, T_B + 0.25, { kind: 'up', stagger: 0.06, dur: 0.5 });
+  capB.style.visibility = panel.style.visibility;
+  // the highlight walks down the rows, one per beat-ish, ending red on 40 × 50
+  const rowT = [6.95, 7.45, 7.95, 8.45, 8.95];
+  let ry = ROWS[0];
+  rowT.forEach((t, i) => { if (i) ry = K.lerp(ry, ROWS[i], K.p(T, t - 0.2, t, E.inOutCubic)); });
+  hl.style.left = L.panel[0] + 7 * pS + 'px'; hl.style.top = L.panel[1] + ry + 'px';
+  hl.style.transform = panel.style.transform;
+  const red = K.p(T, 8.85, 9.0, E.linear);
+  hl.style.boxShadow = red > 0.5 ? '0 0 0 4px #C2321F, 0 0 0 10px rgba(194,50,31,.25)' : '0 0 0 4px #1F1F1F, 0 0 0 10px rgba(223,255,90,.75)';
+  hl.style.opacity = K.p(T, 6.75, 6.95, E.linear);
+  hl.style.visibility = panel.style.visibility;
+  const wp = K.p(T, 9.2, 9.65, E.outBack);
+  warn.style.opacity = Math.min(1, wp * 2); warn.style.transform = `translateY(${(1 - wp) * 80}px) rotate(${-2 + (1 - wp) * 4}deg) scale(${0.9 + 0.1 * wp})`;
+  warn.style.visibility = T >= 9.2 && T < T_C + 0.4 ? 'visible' : 'hidden';
+  boardTag.style.left = L.panel[0] + 'px'; boardTag.style.top = L.panel[1] + RH * pS + 16 + 'px';
+  boardTag.style.opacity = pIn * (T < T_C + 0.3 ? 1 : 0);
+
+  // ---------- scene C ----------
+  const cIn = K.p(T, T_C, T_C + 0.5, E.inOutCubic);
+  coverC.style.clipPath = `circle(${cIn * 140}% at 50% 60%)`;
+  coverC.style.visibility = T >= T_C ? 'visible' : 'hidden';
+  const tp = K.p(T, T_C + 0.15, T_C + 0.8, E.outExpo);
+  tee.style.opacity = tp; tee.style.transform = `translateY(${(1 - tp) * 100}px) scale(${1 + 0.03 * K.p(T, T_C, 13, E.linear)})`;
+  tee.style.visibility = T >= T_C ? 'visible' : 'hidden';
+  const kp = K.p(T, T_C + 0.55, T_C + 1.1, E.outBack);
+  card.style.opacity = Math.min(1, kp * 2); card.style.transform = `translateY(${(1 - kp) * 60}px) rotate(${1.5 - (1 - kp) * 3}deg)`;
+  card.style.visibility = tee.style.visibility;
+  K.reveal(capCW, T, T_C + 0.3, { kind: 'up', stagger: 0.06, dur: 0.5 });
+  capC.style.visibility = tee.style.visibility;
+  realTag.style.left = L.card[0] + 'px'; realTag.style.top = L.card[1] + 136 * cS + 18 + 'px';
+  realTag.style.opacity = tp * (T >= T_C ? 1 : 0);
+
+  end(T);
+});
+</script></body></html>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H16 · Credits and Your Own Key</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F5F0E6; }
+.bg { position: absolute; inset: 0; background: radial-gradient(85% 60% at 50% 38%, #FCF9F2 0%, #F2ECE0 62%, #E6DDCD 100%); }
+.wash { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(50px); }
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.cap { position: absolute; z-index: 40; font: 800 80px/0.98 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; font-weight: 600; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .04em; }
+.tok { position: absolute; z-index: 20; width: 150px; height: 46px; margin-left: -75px; }
+.prod { position: absolute; z-index: 18; }
+.prod img { width: 100%; display: block; filter: drop-shadow(0 30px 26px rgba(31,31,31,.35)); }
+.q { position: absolute; z-index: 30; text-align: center; }
+.q .n { font: 800 96px/1 'Archivo'; letter-spacing: -0.03em; color: #1F1F1F; white-space: nowrap; }
+.q .u { font: 700 30px 'Archivo'; color: #1F1F1F; margin-top: 4px; }
+.q .s { font: 600 18px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #6B645A; margin-top: 8px; }
+.pill { position: absolute; z-index: 31; white-space: nowrap; font: 700 26px 'Archivo'; padding: 13px 24px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; box-shadow: 0 20px 40px -20px rgba(31,31,31,.7); }
+.panel { position: absolute; z-index: 26; border-radius: 22px; background: #FFFDF8; overflow: hidden; box-shadow: 0 40px 70px -34px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.cropbox { position: absolute; overflow: hidden; }
+.cropbox img { position: absolute; left: 0; top: 0; display: block; }
+.slab { position: absolute; z-index: 30; text-align: center; font: 800 40px/1 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.slab small { display: block; font: 600 18px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #6B645A; margin-top: 8px; }
+.dial { position: absolute; z-index: 30; }
+.key { position: absolute; z-index: 40; transform-origin: 18% 50%; }
+.glow { position: absolute; z-index: 25; border-radius: 30px; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H16 — Credits and your own key (Feature 16 / 16). Credits as physical tokens: they stack beside a concept product
+// while its quote counts up (a sample) — the price comes first. The stack splits in two: a monthly plan (a dial refills
+// the stack each month) and one-time packs (500 · 2,000 · 5,000, the real pack sizes), over the real "How paying works"
+// cards. Then a brass key slides in and turns: the real AI settings card shows "Your key", and the real line says that
+// provider bills you directly. Voice + effects only (musicMode 'none'): calm and explanatory.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 96, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian (speech ≈ 0.45–3.26 · 3.96–7.11 · 8.01–11.94); impacts in the breaths.
+const VO = [[0.3, 'Every product shows its price in Credits first.'], [3.6, 'A plan adds Credits each month; packs top up once.'],
+  [7.35, 'Or add your own AI key, and that provider bills you directly.']];
+const T_S2 = 3.5, T_S3 = 7.25, T_TURN = 7.95;
+
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 370, capFs: 80, prod: [70, 650, 540], stackX: 815, stackY: 1150, q: [815, 620], pillY: 1170,
+      cards: [[65, 585, 460], [555, 585, 460]], plan: [250, 1130], packs: [600, 770, 940], packY: 1130, ai: [170, 620, 800], line: [65, 1080, 950], tagY: 1196 }
+  : { chip: [60, 56], capX: 60, capY: 130, capFs: 70, prod: [60, 360, 520], stackX: 800, stackY: 880, q: [800, 330], pillY: 960,
+      cards: [[60, 330, 470], [550, 330, 470]], plan: [250, 930], packs: [600, 770, 940], packY: 930, ai: [220, 330, 680], line: [60, 760, 960], tagY: 1278 };
+
+K.box(0, 0, W, H, { cls: 'bg' });
+const washes = [0, 1].map((i) => K.box(0, 0, 900, 900, { cls: 'wash', style: { background: ['rgba(255,236,206,.6)', 'rgba(223,255,90,.18)'][i] } }));
+const stage = document.getElementById('stage');
+function crop(parent, src, nat, sx, sy, sw, sh, x, y, dw, cls) {
+  const s = dw / sw;
+  const box = K.el('div', { parent, cls: (cls || '') + ' cropbox', style: { left: x + 'px', top: y + 'px', width: dw + 'px', height: sh * s + 'px' } });
+  K.el('img', { parent: box, src, style: { width: nat * s + 'px', transform: `translate(${-sx * s}px, ${-sy * s}px)` } });
+  return { box, s, h: sh * s };
+}
+// a Credit token (a lime disc seen at an angle)
+const TOK = `<svg width="150" height="46" viewBox="0 0 150 46"><ellipse cx="75" cy="28" rx="72" ry="16" fill="#9DB52A" stroke="#1F1F1F" stroke-width="3"/><rect x="3" y="18" width="144" height="10" fill="#9DB52A"/><ellipse cx="75" cy="18" rx="72" ry="16" fill="#DFFF5A" stroke="#1F1F1F" stroke-width="3"/><path d="M3 18v10M147 18v10" stroke="#1F1F1F" stroke-width="3"/><ellipse cx="75" cy="18" rx="44" ry="9" fill="none" stroke="#1F1F1F" stroke-width="2" opacity=".5"/></svg>`;
+const POOL = 40;
+const DH = tall ? 22 : 20;  // token spacing
+const toks = Array.from({ length: POOL }, () => K.box(0, 0, 150, 46, { cls: 'tok', html: TOK }));
+
+// ---------- scene 1: the quote ----------
+const prod = K.box(L.prod[0], L.prod[1], L.prod[2], null, { cls: 'prod', html: `<img src="${K.pub('r07/k13-wedding-planner.webp')}">` });
+const conceptTag = K.demoTag('Concept product · AI-generated', L.prod[0], L.prod[1] + L.prod[2] * 0.8 + 20);
+const q = K.box(L.q[0] - 200, L.q[1], 400, null, { cls: 'q', html: '<div class="n">0</div><div class="u">Credits</div><div class="s">Sample quote</div>' });
+const qn = q.querySelector('.n');
+const pill1 = K.box(0, L.pillY, null, null, { cls: 'pill', style: { width: 'auto', height: 'auto' }, html: 'Shown before anything is made' });
+
+// ---------- scene 2: plan and packs ----------
+const B17 = K.screen('17-billing');
+const cards = [[329, 534, 333, 126], [676, 534, 333, 126]].map(([sx, sy, sw, sh], i) => crop(stage, B17, 1440, sx, sy, sw, sh, L.cards[i][0], L.cards[i][1], L.cards[i][2], 'panel'));
+const dial = K.box(L.plan[0] - 80, L.plan[1] - 6 * DH - 190, 160, 160, { cls: 'dial', html: `<svg width="160" height="160" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#FFFDF8" stroke="#1F1F1F" stroke-width="4"/><circle id="dr" cx="50" cy="50" r="34" fill="none" stroke="#DFFF5A" stroke-width="16" pathLength="1" stroke-dasharray="0 1" transform="rotate(-90 50 50)"/><text x="50" y="57" text-anchor="middle" font-family="Archivo" font-weight="800" font-size="20" fill="#1F1F1F">MONTH</text></svg>` });
+const dr = dial.querySelector('#dr');
+const planLab = K.box(L.plan[0] - 150, L.plan[1] + 62, 300, null, { cls: 'slab', html: 'Plan<small>Credits each month</small>' });
+const PACKS = [['500', 4], ['2,000', 9], ['5,000', 15]];
+const packLabs = PACKS.map(([n], i) => K.box(L.packs[i] - 90, L.packY + 62, 180, null, { cls: 'slab', html: n + '<small>' + (i === 1 ? 'packs · once' : '&nbsp;') + '</small>' }));
+const tag2 = K.demoTag('Real app · demo workspace', L.cards[0][0], L.cards[0][1] - 44);
+
+// ---------- scene 3: your own key ----------
+const S19 = K.screen('19-settings-ai');
+const ai = crop(stage, S19, 1440, 551, 1232, 406, 242, L.ai[0], L.ai[1], L.ai[2], 'panel');
+const glow = K.box(L.ai[0] - 10, L.ai[1] - 10, L.ai[2] + 20, ai.h + 20, { cls: 'glow' });
+const line = crop(stage, S19, 1440, 548, 842, 512, 64, L.line[0], L.line[1], L.line[2], 'panel');
+line.box.style.padding = '0';
+const tag3 = K.demoTag('Real app · demo workspace', L.ai[0], L.ai[1] - 44);
+const key = K.box(0, 0, 300, 120, { cls: 'key', html: `<svg width="300" height="120" viewBox="0 0 300 120"><defs><linearGradient id="kg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3D27A"/><stop offset=".55" stop-color="#C99A2E"/><stop offset="1" stop-color="#9A7215"/></linearGradient></defs>
+  <circle cx="58" cy="60" r="50" fill="url(#kg)" stroke="#1F1F1F" stroke-width="5"/><circle cx="58" cy="60" r="20" fill="#F5F0E6" stroke="#1F1F1F" stroke-width="5"/>
+  <path d="M104 50 H288 a6 6 0 0 1 6 6 v8 a6 6 0 0 1-6 6 H262 v22 h-18 v-22 h-14 v14 h-18 v-14 H104 z" fill="url(#kg)" stroke="#1F1F1F" stroke-width="5" stroke-linejoin="round"/></svg>` });
+
+// captions
+const mkCap = (txt, em) => {
+  const c = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  const w = K.words(c, txt);
+  em.forEach((i) => { const j = i < 0 ? w.length + i : i; w[j].innerHTML = `<em>${w[j].innerHTML.trim()}</em> `; });
+  return { c, w };
+};
+const caps = [mkCap('See the price\nin Credits first.', [-2]), mkCap('Monthly plan.\nOne-time packs.', [-1]), mkCap('Or use your\nown AI key.', [-2, -1])];
+const capT = [[0.3, T_S2], [T_S2 + 0.2, T_S3], [T_S3 + 0.25, 99]];
+
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>Feature 16</b><i>/ 16 ·</i><span>Credits and your own key</span>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Price first. Your key, if you like.' });
+
+// token placement: scene 1 one stack (grows with the quote) → scene 2 a plan stack + three pack stacks
+const QUOTE = 286, ST1 = 12; // tokens in the quote stack
+function tokAt(i, T) {
+  // scene 1 target
+  const n1 = Math.round(ST1 * K.p(T, 1.0, 3.0, E.outCubic));
+  let s1 = i < n1 ? { x: L.stackX, y: L.stackY - i * DH, o: 1 } : { x: L.stackX, y: L.stackY - i * DH - 260, o: 0 };
+  // scene 2 targets: plan stack (6) + packs 4 / 9 / 15
+  const plan = 6;
+  let s2;
+  if (i < plan) s2 = { x: L.plan[0], y: L.plan[1] - i * DH, o: 1 };
+  else {
+    let k = i - plan, j = 0; while (j < 3 && k >= PACKS[j][1]) { k -= PACKS[j][1]; j++; }
+    s2 = j < 3 ? { x: L.packs[j], y: L.packY - k * DH, o: 1 } : { x: W / 2, y: -100, o: 0 };
+  }
+  // packs drop in one stack at a time
+  let p2 = K.p(T, T_S2 + 0.2 + i * 0.02, T_S2 + 0.75 + i * 0.02, E.outCubic);
+  if (i >= plan) { const j = i < plan + 4 ? 0 : i < plan + 13 ? 1 : 2; p2 = K.p(T, 5.0 + j * 0.35 + (i % 5) * 0.03, 5.55 + j * 0.35 + (i % 5) * 0.03, E.outBack); }
+  if (i >= plan && T < 5.0) { const from = { x: s2.x, y: s2.y - 500, o: 0 }; s2 = { ...s2 }; return { x: from.x, y: K.lerp(s1.y, from.y, K.p(T, T_S2, T_S2 + 0.4, E.inCubic)) , o: s1.o * (1 - K.p(T, T_S2, T_S2 + 0.3, E.linear)), xx: s1.x, mix: K.p(T, T_S2, T_S2 + 0.4, E.inCubic) }; }
+  const x = K.lerp(s1.x, s2.x, i < plan ? p2 : 1), y = K.lerp(i < plan ? s1.y : s2.y - 500, s2.y, p2);
+  return { x, y, o: i < plan ? Math.max(s1.o, p2) : p2 };
+}
+
+K.run({
+  id: 'H16', title: 'Credits and Your Own Key', dur: DUR, bpm: BPM, musicMode: 'none', mood: 'calm', key: 'F', intro: 0, cover: 5.9,
+  technique: 'Credits as physical lime tokens: they stack beside a concept product while its sample quote counts up (price first); the stack splits into a monthly plan whose dial refills it and three one-time pack stacks (500 · 2,000 · 5,000) over the real “How paying works” cards; then a brass key slides in and turns on the real AI settings card (“Your key”) above the real line “that provider bills you directly”',
+  caption: 'Credits and your own key: every product shows its price in Credits before anything is made; a plan adds Credits each month and packs top up once. You can also add your own AI key — that provider bills you directly. Printing is never paid in Credits. Start free at makeandlist.com',
+  short: 'Price first. Plans, packs, or your own key.',
+  vo: VO,
+  beats: ['0–3.5 s: “See the price in Credits first” — tokens stack by a concept product as a sample quote counts to 286', '3.5–7.2 s: the stack splits: a monthly plan (a dial refills it) and one-time packs of 500 · 2,000 · 5,000, over the real “How paying works” cards', '7.2–12 s: a key slides in and turns — the real AI card shows “Your key”; “that provider bills you directly”', '13–15 s: end card'],
+  cues: [[0.05, 'swish'], [0.35, 'pop'], [1.2, 'coin'], [1.9, 'coin'], [2.6, 'coin'], [3.35, 'ding'], [T_S2 + 0.1, 'whoosh'], [4.2, 'pop'], [5.0, 'coin'], [5.35, 'coin'], [5.7, 'coin'],
+    [T_S3 - 0.05, 'whoosh'], [7.55, 'swish'], [T_TURN, 'click'], [T_TURN + 0.1, 'sparkle'], [11.1, 'pop'], [12.15, 'chime'], [13.0, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  washes[0].style.transform = `translate(${W * 0.65 - 450 + Math.sin(T * 0.4) * 120}px, ${H * 0.25 - 450 + Math.cos(T * 0.35) * 80}px)`;
+  washes[1].style.transform = `translate(${W * 0.2 - 450 + Math.cos(T * 0.5) * 100}px, ${H * 0.7 - 450 + Math.sin(T * 0.45) * 90}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, 12.85, 13.0, E.linear)); chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`; chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  // ---------- tokens ----------
+  const tOut = K.p(T, T_S3 - 0.15, T_S3 + 0.35, E.inCubic);
+  toks.forEach((tk, i) => {
+    const a = tokAt(i, T);
+    const x = a.mix !== undefined ? a.xx : a.x;
+    tk.style.left = x + 'px'; tk.style.top = a.y + Math.sin(T * 1.5 + i) * 0.8 + tOut * 400 + 'px';
+    tk.style.opacity = a.o * (1 - tOut);
+    tk.style.zIndex = 20 + i;
+    tk.style.visibility = a.o * (1 - tOut) > 0.01 ? 'visible' : 'hidden';
+  });
+
+  // ---------- scene 1 ----------
+  const s1Out = K.p(T, T_S2 - 0.1, T_S2 + 0.35, E.inCubic);
+  const pp = K.p(T, 0.3, 1.0, E.outExpo);
+  prod.style.opacity = pp * (1 - s1Out);
+  prod.style.transform = `translateY(${(1 - pp) * 80 + Math.sin(T * 0.9) * 6}px) rotate(${-3 + Math.sin(T * 0.6)}deg) translateX(${-s1Out * 200}px)`;
+  conceptTag.style.opacity = K.p(T, 0.7, 1.1, E.linear) * (1 - s1Out);
+  const qp = K.p(T, 0.8, 1.2, E.outExpo);
+  q.style.opacity = qp * (1 - s1Out); q.style.transform = `translateY(${(1 - qp) * 20}px)`;
+  qn.innerHTML = K.count(T, 1.0, 3.0, 0, QUOTE);
+  q.style.top = L.q[1] + 'px';
+  const p1 = K.p(T, 3.3, 3.6, E.outBack);
+  pill1.style.left = W / 2 + 'px';
+  pill1.style.opacity = Math.min(1, p1 * 2) * (1 - K.p(T, T_S2 + 0.5, T_S2 + 0.8, E.linear));
+  pill1.style.transform = `translateX(-50%) scale(${0.7 + 0.3 * p1})`;
+  [prod, q, pill1, conceptTag].forEach((el) => { el.style.visibility = T < T_S2 + 0.85 ? 'visible' : 'hidden'; });
+
+  // ---------- scene 2 ----------
+  const s2Out = K.p(T, T_S3 - 0.15, T_S3 + 0.3, E.inCubic);
+  cards.forEach((c, i) => {
+    const p = K.p(T, T_S2 + 0.3 + i * 0.6, T_S2 + 0.8 + i * 0.6, E.outExpo);
+    c.box.style.opacity = p * (1 - s2Out); c.box.style.transform = `translateY(${(1 - p) * 60 - s2Out * 60}px) rotate(${i ? 1 : -1}deg)`;
+    c.box.style.visibility = T >= T_S2 && T < T_S3 + 0.35 ? 'visible' : 'hidden';
+  });
+  tag2.style.opacity = K.p(T, T_S2 + 0.4, T_S2 + 0.8, E.linear) * (1 - s2Out);
+  const dp = K.p(T, T_S2 + 0.5, T_S2 + 0.9, E.outBack);
+  dial.style.opacity = Math.min(1, dp * 2) * (1 - s2Out); dial.style.transform = `scale(${dp})`;
+  // the month dial fills; at the end of the month the plan stack is topped up (a pulse)
+  const m = K.p(T, T_S2 + 0.6, 6.4, E.inOutCubic);
+  dr.setAttribute('stroke-dasharray', `${m} 1`);
+  planLab.style.opacity = K.p(T, T_S2 + 0.5, T_S2 + 0.9, E.linear) * (1 - s2Out);
+  packLabs.forEach((pl, i) => { pl.style.opacity = K.p(T, 5.2 + i * 0.35, 5.6 + i * 0.35, E.linear) * (1 - s2Out); });
+  [dial, planLab, ...packLabs].forEach((el) => { el.style.visibility = T >= T_S2 && T < T_S3 + 0.35 ? 'visible' : 'hidden'; });
+
+  // ---------- scene 3 ----------
+  const aIn = K.p(T, T_S3 + 0.05, T_S3 + 0.6, E.outExpo);
+  ai.box.style.opacity = aIn; ai.box.style.transform = `translateY(${(1 - aIn) * 80}px)`;
+  ai.box.style.visibility = T >= T_S3 ? 'visible' : 'hidden';
+  tag3.style.opacity = aIn * (T >= T_S3 ? 1 : 0);
+  // the key slides in from the left and turns at the card's edge
+  const kx = L.ai[0] - 110, ky = L.ai[1] - 80;
+  const ks = K.p(T, 7.35, T_TURN, E.outCubic), kt = K.p(T, T_TURN, T_TURN + 0.35, E.outBack);
+  const kOut = K.p(T, 9.6, 10.1, E.inCubic);
+  key.style.left = kx + 'px'; key.style.top = ky + 'px';
+  key.style.opacity = K.p(T, 7.35, 7.5, E.linear) * (1 - kOut);
+  key.style.transform = `translate(${(1 - ks) * -520 - kOut * 80}px, ${(1 - ks) * 200}px) rotate(${-25 + (1 - ks) * -30 + kt * 90}deg) scale(${tall ? 1.15 : 1})`;
+  key.style.visibility = T >= 7.3 && T < 10.2 ? 'visible' : 'hidden';
+  const g = K.p(T, T_TURN + 0.1, T_TURN + 0.5, E.outCubic) * (1 - 0.6 * K.p(T, 9.5, 10.5, E.linear));
+  glow.style.boxShadow = `0 0 0 ${g * 6}px #DFFF5A, 0 0 ${g * 70}px rgba(223,255,90,.6)`;
+  glow.style.visibility = ai.box.style.visibility;
+  const lp = K.p(T, 10.9, 11.4, E.outExpo);
+  line.box.style.opacity = lp; line.box.style.transform = `translateY(${(1 - lp) * 40}px)`;
+  line.box.style.boxShadow = '0 30px 60px -30px rgba(31,31,31,.5), 0 0 0 3px #1F1F1F';
+  line.box.style.visibility = T >= 10.8 ? 'visible' : 'hidden';
+
+  caps.forEach((c, i) => {
+    const [a, b] = capT[i];
+    K.reveal(c.w, T, a, { kind: 'up', stagger: 0.06, dur: 0.45, out: b < 90 ? b - 0.3 : undefined });
+    c.c.style.visibility = T >= a - 0.05 && T < b + 0.1 ? 'visible' : 'hidden';
+  });
+
+  end(T);
+});
+</script></body></html>

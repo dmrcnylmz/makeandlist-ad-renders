@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H14 · Your Print Partner</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1A1917; }
+.bg { position: absolute; inset: 0; background: radial-gradient(80% 60% at 40% 40%, #2C2A26 0%, #1C1B19 60%, #121110 100%); }
+.dots { position: absolute; inset: -40px; opacity: .22; background-image: radial-gradient(circle, #6B645A 1.4px, transparent 1.6px); background-size: 34px 34px; }
+.glow { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(60px); }
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7), 0 0 0 1.5px rgba(250,247,238,.55); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.cap { position: absolute; z-index: 40; font: 800 80px/0.98 'Playfair Display'; letter-spacing: -0.03em; color: #FAF7EE; }
+.cap em { font-style: italic; font-weight: 600; color: #DFFF5A; }
+.node { position: absolute; z-index: 30; border-radius: 50%; background: #FAF7EE; display: grid; place-items: center; box-shadow: 0 0 0 6px rgba(223,255,90,.0), 0 30px 60px -20px rgba(0,0,0,.8); }
+.node img { width: 62%; }
+.nlab { position: absolute; z-index: 30; font: 600 19px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #A89F90; white-space: nowrap; text-align: center; }
+.card { position: absolute; z-index: 24; border-radius: 20px; overflow: hidden; background: #FFFDF8; box-shadow: 0 30px 60px -26px rgba(0,0,0,.9); }
+.cropbox { position: absolute; overflow: hidden; }
+.cropbox img { position: absolute; left: 0; top: 0; display: block; }
+.sock { position: absolute; z-index: 26; width: 26px; height: 40px; margin: -20px 0 0 -13px; border-radius: 8px; background: #3A3733; box-shadow: inset 0 0 0 3px #6B645A; }
+svg.cable { position: absolute; left: 0; top: 0; z-index: 27; overflow: visible; pointer-events: none; }
+.plug { position: absolute; z-index: 28; width: 54px; height: 34px; margin: -17px 0 0 -50px; border-radius: 9px; background: #DFFF5A; box-shadow: 0 0 0 3px #1F1F1F, 0 0 26px rgba(223,255,90,.6); }
+.spark { position: absolute; z-index: 29; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #F4FFB8; box-shadow: 0 0 12px 3px rgba(223,255,90,.8); }
+.toast { position: absolute; z-index: 34; border-radius: 18px; overflow: hidden; box-shadow: 0 30px 60px -20px rgba(0,0,0,.9), 0 0 0 3px #DFFF5A; background: #FFFDF8; }
+.acct { position: absolute; z-index: 24; border-radius: 30px; padding: 30px 30px; }
+.acct .k { font: 600 19px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; }
+.acct .t { font: 800 48px/1.02 'Playfair Display'; letter-spacing: -0.02em; margin-top: 12px; }
+.acct .d { font: 600 25px/1.3 'Archivo'; margin-top: 12px; }
+.acct.p { background: #DFFF5A; color: #1F1F1F; box-shadow: 0 40px 70px -30px rgba(0,0,0,.9); }
+.acct.p .k { color: #45403A; }
+.acct.c { background: #2E2C28; color: #FAF7EE; box-shadow: inset 0 0 0 2px #4A463F; }
+.acct.c .k { color: #A89F90; }
+.acct.c .d { color: #CFC8BA; }
+.no { position: absolute; z-index: 26; padding: 10px 20px; border-radius: 12px; border: 5px solid #E8603C; color: #E8603C; font: 900 30px 'Archivo'; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; background: rgba(46,44,40,.9); }
+.coin { position: absolute; z-index: 25; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFF6C8, #E9C44A 55%, #B38A1C); box-shadow: 0 0 0 3px #1F1F1F; display: grid; place-items: center; font: 800 24px 'Archivo'; color: #1F1F1F; }
+.prod { position: absolute; z-index: 23; }
+.prod img { width: 100%; display: block; filter: drop-shadow(0 24px 24px rgba(0,0,0,.55)); }
+.demoD { position: absolute; z-index: 60; font: 500 19px 'IBM Plex Mono', monospace; color: #E9E2D4; background: rgba(31,31,31,.75); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; white-space: nowrap; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .06;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H14 — Your print partner (Feature 14 / 16). A dark patch bay: MakeAndList is a socket on the left, the partners are
+// the real cards from the Partners screen on the right (Printful and Prodigi "Adapter built", Simulated "For trying the
+// flow"). A lime cable draws out and plugs into Printful — the real "Done · Connected" lands — then re-plugs into the
+// simulated partner. Then the money: printing is paid from your partner account (coins drop in under concept printed
+// products); Credits are for designs and print files — never printing. The real Production header proves it.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian (speech ≈ 0.52–2.09 · 2.92–5.67 · 6.21–9.21); plugs and impacts in the breaths.
+const VO = [[0.3, 'Connect your own print partner account.'], [2.6, 'Or try the flow with a simulated partner first.'],
+  [6.0, 'Printing is paid from your partner account, never from Credits.']];
+const T_PLUG1 = 2.3, T_UN = 3.5, T_PLUG2 = 5.8, T_S3 = 6.15;
+
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 370, capFs: 80, node: [80, 760, 170], cardX: 430, cardW: 585, cardY: [560, 745, 930], toast: [150, 1120, 780],
+      accP: [65, 740, 560, 330], accC: [655, 740, 360, 330], prodY: 548, hdr: [65, 1094, 950], tagY: 1196 }
+  : { chip: [60, 56], capX: 60, capY: 130, capFs: 70, node: [70, 560, 150], cardX: 400, cardW: 620, cardY: [300, 480, 660], toast: [200, 950, 760],
+      accP: [60, 500, 560, 320], accC: [640, 500, 380, 320], prodY: 300, hdr: [60, 860, 960], tagY: 1278 };
+
+K.box(0, 0, W, H, { cls: 'bg' });
+const dots = K.box(0, 0, W + 80, H + 80, { cls: 'dots' });
+const glow = K.box(0, 0, 800, 800, { cls: 'glow', style: { background: 'rgba(223,255,90,.10)' } });
+
+function crop(parent, src, nat, sx, sy, sw, sh, x, y, dw, cls) {
+  const s = dw / sw;
+  const box = K.el('div', { parent, cls: (cls || '') + ' cropbox', style: { left: x + 'px', top: y + 'px', width: dw + 'px', height: sh * s + 'px' } });
+  K.el('img', { parent: box, src, style: { width: nat * s + 'px', transform: `translate(${-sx * s}px, ${-sy * s}px)` } });
+  return { box, s, h: sh * s };
+}
+const stage = document.getElementById('stage');
+
+// ---------- the patch bay ----------
+const node = K.box(L.node[0], L.node[1] - L.node[2] / 2, L.node[2], L.node[2], { cls: 'node', html: `<img src="${K.brand('makeandlist-icon.svg')}">` });
+const nlab = K.box(L.node[0] - 30, L.node[1] + L.node[2] / 2 + 18, L.node[2] + 60, null, { cls: 'nlab', html: 'MakeAndList' });
+const P28 = K.screen('28-production-partners');
+const CARDS = [[303, 838, 345, 98], [669, 838, 345, 98], [1036, 1518, 345, 102]]; // Printful · Prodigi · Simulated (header + when money moves)
+const cards = CARDS.map(([sx, sy, sw, sh], i) => {
+  const c = crop(stage, P28, 1440, sx, sy, sw, sh, L.cardX, L.cardY[i], L.cardW, 'card');
+  c.box.style.zIndex = 24; return c;
+});
+const socks = cards.map((c, i) => K.box(L.cardX, L.cardY[i] + c.h / 2, 26, 40, { cls: 'sock' }));
+const cable = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); cable.setAttribute('class', 'cable'); stage.appendChild(cable);
+cable.setAttribute('width', W); cable.setAttribute('height', H);
+cable.innerHTML = '<path id="cb" fill="none" stroke="#DFFF5A" stroke-width="12" stroke-linecap="round"/><path id="cb2" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3" stroke-linecap="round"/>';
+const cb = cable.querySelector('#cb'), cb2 = cable.querySelector('#cb2');
+const plug = K.box(0, 0, 54, 34, { cls: 'plug' });
+const sparks = Array.from({ length: 16 }, () => K.box(0, 0, 10, 10, { cls: 'spark' }));
+const done = crop(stage, K.screen('31-partner-connected'), 1440, 323, 386, 600, 78, L.toast[0], L.toast[1], L.toast[2], 'toast');
+const realTag = K.box(0, 0, null, null, { cls: 'demoD', style: { width: 'auto', height: 'auto' }, html: 'Real app · demo workspace' });
+
+// ---------- scene 3: who pays for printing ----------
+const accP = K.box(L.accP[0], L.accP[1], L.accP[2], L.accP[3], { cls: 'acct p', html: '<div class="k">Your partner account</div><div class="t">Prints &amp; ships<br>each order</div><div class="d">The partner bills your own account.</div>' });
+const accC = K.box(L.accC[0], L.accC[1], L.accC[2], L.accC[3], { cls: 'acct c', html: '<div class="k">Credits</div><div class="t">Designs &amp;<br>print files</div><div class="d">Never printing.</div>' });
+const noP = K.box(0, 0, null, null, { cls: 'no', style: { width: 'auto', height: 'auto' }, html: 'Not printing' });
+const coins = [0, 1, 2].map(() => K.box(0, 0, 54, 54, { cls: 'coin', html: '€' }));
+const PRODS = [['k03-tee', 0.32], ['k01-mug', 0.25], ['k02-framed-print', 0.2]];
+const prods = PRODS.map(([id, wf]) => K.box(0, 0, L.accP[2] * wf * (tall ? 1.15 : 1), null, { cls: 'prod', html: `<img src="${K.pub('r07/' + id + '.webp')}">` }));
+const conceptTag = K.box(0, 0, null, null, { cls: 'demoD', style: { width: 'auto', height: 'auto' }, html: 'Concept products · AI-generated' });
+const hdr = crop(stage, P28, 1440, 300, 142, 516, 44, L.hdr[0], L.hdr[1], L.hdr[2], 'card');
+hdr.box.style.zIndex = 30; hdr.box.style.borderRadius = '16px';
+const hdrTag = K.box(0, 0, null, null, { cls: 'demoD', style: { width: 'auto', height: 'auto' }, html: 'Real app · demo workspace' });
+
+// captions
+const mkCap = (txt, em) => {
+  const c = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  const w = K.words(c, txt);
+  em.forEach((i) => { const j = i < 0 ? w.length + i : i; w[j].innerHTML = `<em>${w[j].innerHTML.trim()}</em> `; });
+  return { c, w };
+};
+const cap1 = mkCap('Your printer.\nYour account.', [-2, -1]);
+const cap2 = mkCap('Or try a\nsimulated partner.', [-2]);
+const cap3 = mkCap('Printing never\ncosts Credits.', [-1]);
+
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>Feature 14</b><i>/ 16 ·</i><span>Your print partner</span>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your partner. Your account.' });
+
+// the cable's free end: out of the node → Printful socket → back out → Simulated socket
+const nodeOut = [L.node[0] + L.node[2], L.node[1]];
+const sockAt = (i) => [L.cardX - 2, L.cardY[i] + cards[i].h / 2];
+function endAt(T) {
+  const a = K.p(T, 0.9, T_PLUG1, E.inOutCubic);
+  const s1 = sockAt(0), s3 = sockAt(2);
+  const loose = [L.cardX - 150, (s1[1] + s3[1]) / 2 + 60];
+  let x = K.lerp(nodeOut[0] + 20, s1[0], a), y = K.lerp(nodeOut[1], s1[1], a) - Math.sin(a * Math.PI) * 120;
+  const u = K.p(T, T_UN, T_UN + 0.6, E.inOutCubic), v = K.p(T, 4.6, T_PLUG2, E.inOutCubic);
+  if (T >= T_UN) { x = K.lerp(s1[0], loose[0], u); y = K.lerp(s1[1], loose[1], u); }
+  if (T >= 4.6) { x = K.lerp(loose[0], s3[0], v); y = K.lerp(loose[1], s3[1], v); }
+  return [x, y];
+}
+
+K.run({
+  id: 'H14', title: 'Your Print Partner', dur: DUR, bpm: BPM, music: 'ov-corporate-company-introduction-v', mood: 'calm', key: 'A', intro: 0, cover: 2.6,
+  technique: 'A dark patch bay: MakeAndList is a socket, the real partner cards (Printful and Prodigi “Adapter built”, Simulated “For trying the flow”) are the outlets; a lime cable draws out on a sagging curve and plugs into Printful with sparks and the real “Done · Connected” toast, then re-plugs into the simulated partner; the bay clears to two accounts — coins drop into your partner account under concept printed products, Credits are stamped “not printing” — over the real Production header',
+  caption: 'Your print partner: connect your own partner account (Printful or Prodigi), or try the whole flow first with a simulated partner where no money moves. Printing is paid from your partner account, never from Credits — Credits pay for designs and print files. Start free at makeandlist.com',
+  short: 'Your printer. Your account. Never Credits.',
+  vo: VO,
+  beats: ['0–2.3 s: “Your printer. Your account.” — a cable from MakeAndList plugs into the real Printful card', '2.3–3.5 s: the real “Done · Connected Little Pine Studio prints.”', '3.5–6 s: the cable re-plugs into the simulated partner — for trying the flow, no money moves', '6–9.5 s: your partner account prints and ships each order (coins drop in); Credits — designs and print files, not printing', '9.5–13 s: the real Production header: paid from your partner account, never from Credits', '13–15 s: end card'],
+  cues: [[0.05, 'swish'], [0.35, 'pop'], [B(1.2), 'swish'], [T_PLUG1, 'click'], [T_PLUG1 + 0.25, 'chime'], [T_UN, 'swish'], [T_PLUG2, 'click'], [T_PLUG2 + 0.15, 'sparkle'],
+    [T_S3, 'whoosh'], [6.6, 'pop'], [7.2, 'coin'], [7.8, 'coin'], [8.4, 'coin'], [8.9, 'stamp'], [9.45, 'pop'], [11.9, 'ding'], [13.0, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  dots.style.transform = `translate(${-20 + Math.sin(T * 0.3) * 18}px, ${-20 - T * 4}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, 12.85, 13.0, E.linear)); chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`; chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  const out3 = K.p(T, T_S3 - 0.1, T_S3 + 0.45, E.inCubic); // the bay leaves
+  const bayVis = T < T_S3 + 0.5 ? 'visible' : 'hidden';
+  // node
+  const np = K.p(T, 0.3, 0.8, E.outBack);
+  node.style.transform = `scale(${np}) translateX(${-out3 * 300}px)`;
+  node.style.boxShadow = `0 0 0 ${6 + 10 * Math.max(0, Math.sin(T * 3))}px rgba(223,255,90,${0.12 * (1 - out3)}), 0 30px 60px -20px rgba(0,0,0,.8)`;
+  nlab.style.opacity = K.p(T, 0.6, 1.0, E.linear) * (1 - out3);
+  [node, nlab].forEach((el) => { el.style.visibility = bayVis; });
+  // cards
+  cards.forEach((c, i) => {
+    const p = K.p(T, 0.25 + i * 0.12, 0.85 + i * 0.12, E.outExpo);
+    const lit = i === 0 ? K.p(T, T_PLUG1, T_PLUG1 + 0.2, E.linear) * (1 - K.p(T, T_UN, T_UN + 0.3, E.linear)) : i === 2 ? K.p(T, T_PLUG2, T_PLUG2 + 0.2, E.linear) : 0;
+    c.box.style.opacity = p * (0.55 + 0.45 * (lit > 0 || T < T_PLUG1 ? 1 : 0.5 + 0.5 * lit));
+    c.box.style.boxShadow = `0 30px 60px -26px rgba(0,0,0,.9), 0 0 0 ${lit * 4}px #DFFF5A, 0 0 ${lit * 40}px rgba(223,255,90,.35)`;
+    c.box.style.transform = `translateX(${(1 - p) * 160 + out3 * (W * 0.7)}px) translateY(${Math.sin(T * 0.8 + i) * 3}px)`;
+    c.box.style.visibility = bayVis;
+    socks[i].style.opacity = p * (1 - out3); socks[i].style.visibility = bayVis;
+    socks[i].style.transform = `translateX(${(1 - p) * 160}px)`;
+  });
+  // cable
+  const [ex, ey] = endAt(T);
+  const sx = nodeOut[0] - 10, sy = nodeOut[1];
+  const sag = 120 + 40 * Math.sin(T * 1.3);
+  const d = `M ${sx} ${sy} C ${sx + 160} ${sy + sag}, ${ex - 200} ${ey + sag}, ${ex - 46} ${ey}`;
+  cb.setAttribute('d', d); cb2.setAttribute('d', d);
+  const cIn = K.p(T, 0.75, 1.0, E.linear);
+  cable.style.opacity = cIn * (1 - out3); cable.style.visibility = bayVis;
+  cable.style.transform = `translateX(${-out3 * 200}px)`;
+  plug.style.left = ex + 'px'; plug.style.top = ey + 'px'; plug.style.opacity = cIn * (1 - out3); plug.style.visibility = bayVis;
+  const plugged = (T >= T_PLUG1 && T < T_UN) || T >= T_PLUG2;
+  plug.style.transform = `rotate(${plugged ? 0 : Math.sin(T * 5) * 6}deg)`;
+  // sparks at each plug-in
+  sparks.forEach((s, i) => {
+    const t0 = i < 8 ? T_PLUG1 : T_PLUG2, at = i < 8 ? sockAt(0) : sockAt(2);
+    const u = K.clamp((T - t0) / 0.5), a = seed(i * 3) * Math.PI * 2, r = 30 + seed(i * 5 + 1) * 90;
+    s.style.left = at[0] + Math.cos(a) * r * E.outCubic(u) + 'px'; s.style.top = at[1] + Math.sin(a) * r * E.outCubic(u) + 'px';
+    s.style.opacity = T >= t0 && u < 1 ? 1 - u : 0;
+  });
+  // the real Done toast
+  const tp = K.p(T, T_PLUG1 + 0.15, T_PLUG1 + 0.55, E.outBack), to = K.p(T, T_UN - 0.1, T_UN + 0.2, E.inCubic);
+  done.box.style.opacity = Math.min(1, tp * 2) * (1 - to);
+  done.box.style.transform = `translateY(${(1 - tp) * -30 - to * 20}px) rotate(${-1.5 + (1 - tp) * -3}deg) scale(${0.85 + 0.15 * tp})`;
+  done.box.style.visibility = T >= T_PLUG1 && T < T_UN + 0.25 ? 'visible' : 'hidden';
+  realTag.style.left = L.capX + 'px'; realTag.style.top = (tall ? 1050 : L.cardY[2] + cards[2].h + 18) + 'px';
+  realTag.style.opacity = K.p(T, 0.9, 1.3, E.linear) * (1 - out3); realTag.style.visibility = bayVis;
+
+  // ---------- scene 3 ----------
+  const s3 = K.p(T, T_S3 + 0.1, T_S3 + 0.7, E.outExpo);
+  accP.style.opacity = s3; accP.style.transform = `translateY(${(1 - s3) * 120}px)`;
+  const s3c = K.p(T, T_S3 + 0.3, T_S3 + 0.9, E.outExpo);
+  accC.style.opacity = s3c; accC.style.transform = `translateY(${(1 - s3c) * 120}px)`;
+  [accP, accC].forEach((el) => { el.style.visibility = T >= T_S3 ? 'visible' : 'hidden'; });
+  // concept products ride above the partner account, coins drop in
+  prods.forEach((p, i) => {
+    const pp = K.p(T, 6.5 + i * 0.15, 7.1 + i * 0.15, E.outBack);
+    const x = L.accP[0] + 30 + i * L.accP[2] * 0.32;
+    p.style.left = x + 'px';
+    p.style.top = L.prodY + (tall ? 0 : 0) + (1 - pp) * 80 + Math.sin(T * 1.2 + i) * 5 + 'px';
+    p.style.opacity = Math.min(1, pp * 2); p.style.transform = `rotate(${(i - 1) * 4}deg)`;
+    p.style.visibility = T >= 6.4 ? 'visible' : 'hidden';
+  });
+  conceptTag.style.left = L.accC[0] + 'px'; conceptTag.style.top = L.accC[1] - 50 + 'px';
+  conceptTag.style.opacity = K.p(T, 6.8, 7.2, E.linear) * (1 - K.p(T, 12.7, 12.95, E.linear));
+  coins.forEach((c, i) => {
+    const t0 = 7.15 + i * 0.6, u = K.clamp((T - t0) / 0.5);
+    c.style.left = L.accP[0] + L.accP[2] * (0.72 + 0.08 * (i - 1)) + 'px';
+    c.style.top = K.lerp(L.accP[1] - 120, L.accP[1] + L.accP[3] - 60, E.inCubic(u)) + 'px';
+    c.style.opacity = T >= t0 && u < 1 ? 1 : 0;
+    c.style.transform = `rotateY(${u * 540}deg)`;
+  });
+  accP.style.boxShadow = `0 40px 70px -30px rgba(0,0,0,.9), 0 0 0 ${4 * Math.max(0, ...[7.65, 8.25, 8.85].map((t) => 1 - Math.abs(T - t) * 5))}px #FAF7EE`;
+  const np2 = K.p(T, 8.9, 9.05, E.outCubic);
+  noP.style.left = L.accC[0] + 26 + 'px'; noP.style.top = L.accC[1] + L.accC[3] - 70 + 'px';
+  noP.style.opacity = np2; noP.style.transform = `rotate(-7deg) scale(${K.lerp(1.6, 1, np2)})`;
+  // the real header
+  const hp = K.p(T, 9.4, 9.9, E.outExpo);
+  hdr.box.style.opacity = hp; hdr.box.style.transform = `translateY(${(1 - hp) * 60}px)`;
+  hdr.box.style.boxShadow = '0 30px 60px -26px rgba(0,0,0,.9), 0 0 0 3px #DFFF5A';
+  hdrTag.style.left = L.hdr[0] + 'px'; hdrTag.style.top = L.hdr[1] + hdr.h + 16 + 'px'; hdrTag.style.opacity = hp;
+
+  // captions
+  K.reveal(cap1.w, T, 0.3, { kind: 'up', stagger: 0.08, dur: 0.5, out: 2.75 });
+  cap1.c.style.visibility = T < 3.2 ? 'visible' : 'hidden';
+  K.reveal(cap2.w, T, 3.0, { kind: 'up', stagger: 0.07, dur: 0.5, out: T_S3 - 0.1 });
+  cap2.c.style.visibility = T >= 2.95 && T < T_S3 + 0.4 ? 'visible' : 'hidden';
+  K.reveal(cap3.w, T, T_S3 + 0.25, { kind: 'up', stagger: 0.07, dur: 0.5 });
+  cap3.c.style.visibility = T >= T_S3 + 0.2 ? 'visible' : 'hidden';
+  glow.style.transform = `translate(${W * 0.6 - 400 + Math.sin(T * 0.5) * 120}px, ${H * 0.45 - 400 + Math.cos(T * 0.4) * 100}px)`;
+
+  end(T);
+});
+</script></body></html>

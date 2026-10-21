@@ -1,0 +1,20 @@
+[
+ {
+  "t": 0.3,
+  "text": "Every product shows its price in Credits first.",
+  "file": "01-f925097e22.wav",
+  "dur": 3.16
+ },
+ {
+  "t": 3.6,
+  "text": "A plan adds Credits each month; packs top up once.",
+  "file": "02-b6122d09fe.wav",
+  "dur": 3.58
+ },
+ {
+  "t": 7.35,
+  "text": "Or add your own AI key, and that provider bills you directly.",
+  "file": "03-ac0aef0cc1.wav",
+  "dur": 4.74
+ }
+]

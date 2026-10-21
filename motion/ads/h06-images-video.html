@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H06 · Images and Video</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R08 series chip — identical in H01–H06 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.crop { position: absolute; overflow: hidden; }
+.crop > img { position: absolute; max-width: none; display: block; }
+.cap { position: absolute; z-index: 40; font: 800 88px/0.98 'Playfair Display'; letter-spacing: -0.035em; color: #1F1F1F; }
+.cap em { font-style: italic; }
+.w { display: inline-block; white-space: pre; }
+.hl { background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / 0% 100%; }
+.slot { position: absolute; z-index: 20; border-radius: 16px; overflow: hidden; background: rgba(255,253,248,.7); box-shadow: inset 0 0 0 3px #CFC8BB; }
+.slot .ph { position: absolute; inset: 0; display: grid; place-items: center; font: 600 22px 'IBM Plex Mono', monospace; color: #B9B1A3; border-radius: 16px; border: 3px dashed #B9B1A3; }
+.slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.slot .flash { position: absolute; inset: 0; background: #FFFDF8; }
+.slot .n { position: absolute; left: 8px; top: 8px; padding: 2px 8px; border-radius: 8px; background: rgba(31,31,31,.8); color: #DFFF5A; font: 600 15px 'IBM Plex Mono', monospace; }
+.count { position: absolute; z-index: 40; font: 600 26px 'IBM Plex Mono', monospace; color: #45403A; white-space: nowrap; }
+.count b { color: #1F1F1F; font-size: 34px; }
+.src { position: absolute; z-index: 21; background: #FFFDF8; border-radius: 6px; overflow: hidden; box-shadow: 0 16px 28px -16px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; }
+.src img { width: 100%; height: 100%; display: block; }
+.lane { position: absolute; z-index: 40; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #6B645A; white-space: nowrap; }
+.spark { position: absolute; z-index: 25; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 3px #1F1F1F; }
+.player { position: absolute; z-index: 30; border-radius: 34px; overflow: hidden; background: #1F1F1F; box-shadow: 0 50px 90px -40px rgba(31,31,31,.75), 0 0 0 8px #1F1F1F; }
+.player .shot { position: absolute; inset: 0; overflow: hidden; }
+.player .shot img { position: absolute; left: 50%; top: 50%; height: 100%; width: auto; max-width: none; transform-origin: 50% 50%; }
+.player .ui { position: absolute; left: 22px; right: 22px; bottom: 22px; z-index: 3; }
+.player .bar { height: 8px; border-radius: 4px; background: rgba(250,247,238,.35); overflow: hidden; }
+.player .bar b { display: block; height: 100%; background: #DFFF5A; }
+.player .tm { margin-top: 10px; display: flex; justify-content: space-between; font: 600 20px 'IBM Plex Mono', monospace; color: #FAF7EE; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+.player .play { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; background: rgba(250,247,238,.92); z-index: 4; display: grid; place-items: center; }
+.player .play::after { content: ''; margin-left: 10px; border-left: 40px solid #1F1F1F; border-top: 26px solid transparent; border-bottom: 26px solid transparent; }
+.player .grad { position: absolute; left: 0; right: 0; bottom: 0; height: 30%; z-index: 2; background: linear-gradient(transparent, rgba(31,31,31,.6)); }
+.big15 { position: absolute; z-index: 40; font: 800 200px/0.9 'Playfair Display'; letter-spacing: -0.04em; color: #1F1F1F; white-space: nowrap; }
+.big15 small { font: 600 30px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #6B645A; margin-left: 10px; vertical-align: 120px; text-transform: uppercase; }
+.card { z-index: 30; border-radius: 22px; box-shadow: 0 30px 50px -28px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; background: #FFFDF8; }
+.mark { position: absolute; z-index: 3; border: 4px solid #DFFF5A; border-radius: 12px; box-shadow: 0 0 0 6px rgba(31,31,31,.12); }
+.mini { position: absolute; z-index: 24; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 28px -16px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; }
+.mini img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.stamp { position: absolute; z-index: 36; padding: 14px 26px; border: 6px solid #1F1F1F; border-radius: 14px; color: #1F1F1F; font: 800 44px/1 'Archivo'; letter-spacing: .04em; white-space: nowrap; background: #DFFF5A; box-shadow: 0 20px 34px -18px rgba(31,31,31,.7); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H06 — Images and video. Ten empty listing-image slots wait; the owner's real pages light up below and each slot
+// develops into the real listing image MakeAndList made from them (a flash, then the picture). A vertical player then
+// runs a 15-second listing video in miniature over those images (an illustration, labelled), with the Making board's
+// two real-sounding steps beside it; finally the real phone shows the product's listing images and video tabs, and the
+// whole set is stamped "Reviewed by you".
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 99.4;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows from the takes:
+//   L1 0.60–2.51 · L2 3.11–5.59 ("Listing images are made" 3.11 · "from your real pages." 4.47)
+//   L3 6.14–9.10 ("Plus a short product video," 6.14 · "fifteen seconds." 8.23) · L4 9.70–12.33 ("Made for the listing." 9.70 · "Reviewed by you." 11.73)
+const SB = 2.8, SC = 5.85, SD = 9.45;
+
+function crop(src, srcW, sx, sy, sw, sh, w, opts = {}) {
+  const k = w / sw;
+  const b = K.box(0, 0, w, sh * k, { cls: 'crop ' + (opts.cls || ''), parent: opts.parent });
+  K.el('img', { src, parent: b, style: { left: -sx * k + 'px', top: -sy * k + 'px', width: srcW * k + 'px' } });
+  return { el: b, k, h: sh * k };
+}
+function chip(n, name) {
+  const c = K.box(tall ? 65 : 60, tall ? 290 : 56, null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' },
+    html: `<b>Feature ${String(n).padStart(2, '0')}</b><i>/ 16 ·</i><span>${name}</span>` });
+  return (T) => {
+    const p = K.p(T, 0.1, 0.6, E.outExpo);
+    c.style.opacity = p * (1 - K.p(T, 12.85, 13.0, E.linear));
+    c.style.clipPath = `inset(0 ${(1 - p) * 100}% 0 0 round 99px)`;
+    c.style.transform = `translateX(${(1 - p) * -30}px)`;
+  };
+}
+function wrapWords(text) {
+  let on = false;
+  return text.split('\n').map((line) => line.split(' ').map((w) => {
+    const st = w.startsWith('*'), en = w.endsWith('*');
+    if (st) on = true;
+    const clean = w.replace(/\*/g, '');
+    const out = on ? `<span class="w"><em class="hl">${clean} </em></span>` : `<span class="w">${clean} </span>`;
+    if (en) on = false;
+    return out;
+  }).join('')).join('<br>');
+}
+const hlSweep = (hls, T, a, b) => hls.forEach((h, i) => { const n = hls.length; h.style.backgroundSize = `${K.p(T, a + (b - a) * i / n, a + (b - a) * (i + 1) / n, E.linear) * 100}% 100%`; });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+function words(ws, T, a, out, st = 0.07) {
+  ws.forEach((w, i) => {
+    const p = K.p(T, a + i * st, a + 0.5 + i * st, E.outExpo);
+    const o = out ? K.p(T, out - 0.25, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+}
+const PACK = (n) => K.pub('showcase/christmas-preschool-pack/' + n + '.webp');
+
+const L = tall
+  ? { capX: 65, capY: 370, capFs: 86, sq: 170, gap: 16, gY: 640, srcY: 1050, srcW: 140, countY: 588,
+      plX: 65, plY: 600, plW: 360, rX: 470, rW: 545, phX: 545, phY: 600, phW: 470, miniX: 65, miniY: 640, miniW: 440 }
+  : { capX: 60, capY: 130, capFs: 80, sq: 176, gap: 16, gY: 390, srcY: 840, srcW: 150, countY: 336,
+      plX: 60, plY: 340, plW: 400, rX: 500, rW: 520, phX: 610, phY: 330, phW: 410, miniX: 60, miniY: 380, miniW: 500 };
+const PX = L.capX;
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.22), rgba(223,255,90,0) 62%)' } });
+const chipDraw = chip(6, 'Images and video');
+
+const CAPS = [
+  ['Your listing needs *pictures.*', 0.15, SB],
+  ['Made from your\n*real pages.*', SB + 0.2, SC],
+  ['Plus a short video —\n*fifteen seconds.*', SC + 0.15, SD],
+  ['Made for the listing.\n*Reviewed by you.*', SD + 0.1, null],
+].map(([t, a, b]) => {
+  const el = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html: wrapWords(t) });
+  return { el, ws: [...el.querySelectorAll('.w')], hls: [...el.querySelectorAll('.hl')], a, b };
+});
+const HL = [[2.0, 2.5], [4.47, 5.5], [8.23, 9.05], [11.73, 12.3]];
+
+// ---------- A/B: ten slots develop into the owner's real listing images ----------
+const gridW = 5 * L.sq + 4 * L.gap, gX = (W - gridW) / 2;
+const SLOT_T = Array.from({ length: 10 }, (_, i) => 3.3 + i * 0.22);
+const slots = Array.from({ length: 10 }, (_, i) => {
+  const c = i % 5, r = Math.floor(i / 5);
+  const el = K.box(gX + c * (L.sq + L.gap), L.gY + r * (L.sq + L.gap), L.sq, L.sq, { cls: 'slot',
+    html: `<div class="ph">${i + 1}</div><img src="${PACK('listing-' + String(i + 1).padStart(2, '0'))}"><div class="flash"></div><span class="n">${i + 1}</span>` });
+  return { el, img: el.querySelector('img'), ph: el.querySelector('.ph'), flash: el.querySelector('.flash'), n: el.querySelector('.n'), c, r };
+});
+const count = K.box(gX, L.countY, null, null, { cls: 'count', style: { width: 'auto', height: 'auto' } });
+const SRC = ['cover', 'interior-02', 'interior-03', 'interior-01', 'interior-04'];
+const srcH = L.srcW * 1164 / 900, srcGap = (gridW - 5 * L.srcW) / 4;
+const srcs = SRC.map((n, i) => K.box(gX + i * (L.srcW + srcGap), L.srcY, L.srcW, srcH, { cls: 'src', html: `<img src="${PACK(n)}">` }));
+const lane = K.box(gX, L.srcY - 40, null, null, { cls: 'lane', html: 'Your real pages ↑', style: { width: 'auto', height: 'auto' } });
+const sparks = Array.from({ length: 10 }, () => K.box(0, 0, 14, 14, { cls: 'spark' }));
+const ownerTag = K.demoTag('Example made with MakeAndList by its owner', 0, 0);
+
+// ---------- C: a 15-second listing video, in miniature (illustration) ----------
+const plH = L.plW * 16 / 9;
+const player = K.box(L.plX, L.plY, L.plW, plH, { cls: 'player' });
+const SHOTS = ['listing-hero', 'listing-05', 'listing-03', 'listing-07'];
+const shots = SHOTS.map((n) => {
+  const s = K.el('div', { parent: player, cls: 'shot', html: `<img src="${PACK(n)}">` });
+  return { s, img: s.querySelector('img') };
+});
+K.el('div', { parent: player, cls: 'grad' });
+const ui = K.el('div', { parent: player, cls: 'ui', html: '<div class="bar"><b></b></div><div class="tm"><span>0:00</span><span>0:15</span></div>' });
+const barB = ui.querySelector('.bar b'), tmNow = ui.querySelector('.tm span');
+const play = K.el('div', { parent: player, cls: 'play' });
+const plTag = K.demoTag('Illustration · owner’s images', 0, 0);
+const big15 = K.box(L.rX, L.plY + (tall ? 40 : 30), null, null, { cls: 'big15', html: '15<small>sec</small>', style: { width: 'auto', height: 'auto', fontSize: (tall ? 200 : 190) + 'px' } });
+// the Making board's two steps: "Making listing images · 10 images from the real pages" / "Cutting the listing video · 15 seconds"
+const steps = crop(K.canvas('AppMaking'), 2880, 1740, 1118, 1020, 248, L.rW, { cls: 'card' });
+steps.el.style.left = L.rX + 'px'; steps.el.style.top = L.plY + (tall ? 300 : 280) + 'px';
+const stepsTag = K.demoTag('Product design · sample data', 0, 0);
+
+// ---------- D: the real phone — listing images and video; reviewed by you ----------
+const deck = K.phoneDeck(L.phX, L.phY, L.phW, [K.screen('24-phone-product')]);
+deck.root.style.zIndex = 30;
+const k780 = deck.sw / 780;
+const layer = deck.root.querySelector('.screen > div');
+const mark = K.el('div', { parent: layer, cls: 'mark' });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+const miniS = (L.miniW - 2 * 14) / 3;
+const minis = Array.from({ length: 9 }, (_, i) => K.box(L.miniX + (i % 3) * (miniS + 14), L.miniY + Math.floor(i / 3) * (miniS + 14), miniS, miniS, { cls: 'mini',
+  html: `<img src="${PACK('listing-' + String(i + 1).padStart(2, '0'))}">` }));
+const stamp = K.box(0, 0, null, null, { cls: 'stamp', html: '✓ Reviewed by you', style: { width: 'auto', height: 'auto' } });
+const miniTag = K.demoTag('Example made with MakeAndList by its owner', 0, 0);
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'Pictures and a video,<br>made for the listing.' });
+
+K.run({
+  id: 'H06', title: 'Images and Video', dur: DUR, bpm: BPM, music: 'ov-the-lucky-ticket', mood: 'bright', key: 'C', intro: 0, cover: 5.4,
+  series: 'R08', feature: 'Feature 06 / 16 · Images and video',
+  technique: 'Ten empty listing-image slots wait above the owner’s real pages; as the narrator says “made from your real pages” light sparks travel up and each slot flashes and develops into the real listing image MakeAndList made from them; a vertical player runs a 15-second listing video in miniature (labelled illustration) beside a giant 15 and the Making board’s steps; the real phone shows the listing images and video tabs and the set is stamped “Reviewed by you”',
+  caption: 'MakeAndList makes the listing images from your real pages, plus a short 15-second product video — made for the listing, and reviewed by you before anything goes live. Start free at makeandlist.com',
+  short: 'Listing images and a video, made for you.',
+  question: 'What do I get?', gain: 'What you get: listing images and a short video',
+  vo: [[0.38, 'Your listing needs pictures.'], [2.47, 'Listing images are made from your real pages.'], [5.94, 'Plus a short product video, fifteen seconds.'], [9.63, 'Made for the listing. Reviewed by you.']],
+  beats: ['0–2.8 s: “Your listing needs pictures.” — ten empty image slots', '2.8–5.9 s: the owner’s real pages light up; each slot develops into the real listing image made from them', '5.9–9.5 s: a 15-second listing video plays in miniature (illustration) beside the Making board’s steps', '9.5–13 s: the real phone: listing images and video on the product; the set is stamped “Reviewed by you”', '13–15 s: end card'],
+  cues: [[0.12, 'pop'], [0.4, 'swish'], [2.7, 'swish'], [3.0, 'sparkle'], [SLOT_T[0], 'shutter'], [SLOT_T[3], 'pop'], [SLOT_T[6], 'pop'], [SLOT_T[9], 'shutter'],
+    [5.7, 'whoosh'], [6.0, 'click'], [7.95, 'swish'], [9.25, 'whoosh'], [10.95, 'pop'], [11.45, 'stamp'], [12.45, 'chime'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.5 - 550 + Math.sin(T * 0.5) * 160}px, ${H * 0.45 - 550 + Math.cos(T * 0.4) * 120}px)`;
+  chipDraw(T);
+  CAPS.forEach((c, i) => {
+    words(c.ws, T, c.a, c.b, 0.07);
+    hlSweep(c.hls, T, HL[i][0], HL[i][1]);
+    vis(c.el, T >= c.a - 0.05 && (c.b === null || T < c.b + 0.05));
+  });
+
+  // ---------- A/B ----------
+  const abOut = K.p(T, SC - 0.3, SC + 0.05, E.inCubic);
+  slots.forEach((s, i) => {
+    const pin = K.p(T, 0.35 + (s.c + s.r) * 0.06, 0.85 + (s.c + s.r) * 0.06, E.outBack);
+    const t0 = SLOT_T[i];
+    const dev = K.p(T, t0, t0 + 0.5, E.outCubic);
+    s.el.style.opacity = Math.min(1, pin * 2) * (1 - abOut);
+    s.el.style.transform = `translateY(${(1 - pin) * 40 - abOut * 40}px) scale(${(0.85 + 0.15 * pin) * (1 + 0.06 * Math.sin(Math.PI * K.p(T, t0, t0 + 0.35, E.linear)))})`;
+    s.img.style.opacity = dev;
+    s.img.style.filter = dev < 1 ? `grayscale(${1 - dev}) blur(${(1 - dev) * 6}px)` : 'none';
+    s.img.style.transform = `scale(${1.15 - 0.15 * dev})`;
+    s.flash.style.opacity = T >= t0 ? Math.max(0, 1 - (T - t0) / 0.25) * 0.9 : 0;
+    s.ph.style.opacity = 1 - dev;
+    s.ph.style.borderColor = `rgba(185,177,163,${0.5 + 0.5 * Math.sin(T * 5 + i)})`;
+    s.n.style.opacity = dev;
+    s.el.style.boxShadow = dev > 0 ? '0 20px 34px -18px rgba(31,31,31,.55)' : 'inset 0 0 0 3px #CFC8BB';
+    vis(s.el, T < SC + 0.1);
+  });
+  const made = SLOT_T.filter((t) => T >= t + 0.1).length;
+  count.innerHTML = `Listing images <b>${made}</b> / 10`;
+  count.style.opacity = K.p(T, 0.6, 0.9, E.linear) * (1 - abOut); vis(count, T < SC + 0.1);
+  srcs.forEach((s, i) => {
+    const p = K.p(T, 2.9 + i * 0.07, 3.35 + i * 0.07, E.outBack);
+    const glow = Math.sin(Math.PI * K.p(T, 3.2 + i * 0.25, 3.8 + i * 0.25, E.linear));
+    s.style.opacity = Math.min(1, p * 2) * (1 - abOut);
+    s.style.transform = `translateY(${(1 - p) * 80}px) rotate(${(i - 2) * 2}deg) scale(${1 + 0.05 * glow})`;
+    s.style.boxShadow = `0 16px 28px -16px rgba(31,31,31,.5), 0 0 0 ${1 + 4 * glow}px ${glow > 0.05 ? '#DFFF5A' : '#E2DBCE'}`;
+    vis(s, T >= 2.9 && T < SC + 0.1);
+  });
+  lane.style.opacity = K.p(T, 3.0, 3.3, E.linear) * (1 - abOut); vis(lane, T >= 3.0 && T < SC + 0.1);
+  // a spark rises from a page into each slot just before it develops
+  sparks.forEach((sp, i) => {
+    const t0 = SLOT_T[i];
+    const p = K.p(T, t0 - 0.35, t0, E.inOutCubic);
+    const s = srcs[i % 5];
+    const x0 = parseFloat(s.style.left) + L.srcW / 2, y0 = L.srcY;
+    const sl = slots[i];
+    const x1 = gX + sl.c * (L.sq + L.gap) + L.sq / 2, y1 = L.gY + sl.r * (L.sq + L.gap) + L.sq / 2;
+    sp.style.left = K.lerp(x0, x1, p) + Math.sin(p * Math.PI) * 40 * (i % 2 ? 1 : -1) + 'px';
+    sp.style.top = K.lerp(y0, y1, p) + 'px';
+    sp.style.opacity = T >= t0 - 0.35 && T < t0 ? 1 : 0;
+  });
+  ownerTag.style.left = gX + 'px'; ownerTag.style.top = L.srcY + srcH + 18 + 'px';
+  ownerTag.style.opacity = K.p(T, 3.3, 3.6, E.linear) * (1 - abOut); vis(ownerTag, T >= 3.3 && T < SC + 0.1);
+
+  // ---------- C: the player ----------
+  const cIn = K.p(T, SC - 0.05, SC + 0.5, E.outExpo), cOut = K.p(T, SD - 0.3, SD + 0.05, E.inCubic);
+  player.style.opacity = cIn * (1 - cOut);
+  player.style.transform = `translateY(${(1 - cIn) * 200 - cOut * 60}px) rotate(${(1 - cIn) * -4 - 1 + Math.sin(T * 0.7) * 0.3}deg)`;
+  vis(player, T >= SC - 0.05 && T < SD + 0.05);
+  const V0 = 6.1, V1 = 9.3;                       // the 15 s video, shown in 3.2 s
+  const vp = K.p(T, V0, V1, E.linear);
+  const vt = Math.floor(vp * 15);
+  barB.style.width = vp * 100 + '%';
+  tmNow.textContent = `0:${String(vt).padStart(2, '0')}`;
+  play.style.opacity = 1 - K.p(T, 6.0, 6.25, E.linear);
+  play.style.transform = `scale(${1 + 0.3 * K.p(T, 6.0, 6.25, E.outCubic)})`;
+  shots.forEach((s, i) => {
+    const a = V0 + i * 0.8, b = a + 0.8;
+    const o = i === 0 ? 1 - K.p(T, b - 0.12, b + 0.12, E.linear) : K.p(T, a - 0.12, a + 0.12, E.linear) * (i === 3 ? 1 : 1 - K.p(T, b - 0.12, b + 0.12, E.linear));
+    s.s.style.opacity = o;
+    const kb = K.p(T, a - 0.2, b + 0.2, E.linear);
+    s.img.style.transform = `translate(${-50 + (i % 2 ? -8 : 8) * (kb - 0.5)}%, -50%) scale(${1.05 + 0.12 * kb})`;
+    s.s.style.zIndex = i;
+  });
+  plTag.style.left = L.plX + 'px'; plTag.style.top = L.plY + plH + 24 + 'px';
+  plTag.style.opacity = cIn * (1 - cOut); vis(plTag, T >= SC && T < SD + 0.05);
+  if (tall) { plTag.style.left = L.rX + 'px'; plTag.style.top = L.plY + plH - 30 + 'px'; }
+  const bp = K.p(T, 8.05, 8.45, E.outBack);
+  big15.style.opacity = Math.min(1, bp * 2) * (1 - cOut);
+  big15.style.transform = `translateY(${(1 - bp) * 50}px) scale(${0.8 + 0.2 * bp})`;
+  vis(big15, T >= 8.0 && T < SD + 0.05);
+  const sp2 = K.p(T, 6.5, 7.0, E.outExpo);
+  steps.el.style.opacity = sp2 * (1 - cOut); steps.el.style.transform = `translateX(${(1 - sp2) * 80}px)`;
+  vis(steps.el, T >= 6.5 && T < SD + 0.05);
+  stepsTag.style.left = L.rX + 'px'; stepsTag.style.top = parseFloat(steps.el.style.top) + steps.h + 14 + 'px';
+  stepsTag.style.opacity = steps.el.style.opacity; vis(stepsTag, T >= 6.5 && T < SD + 0.05);
+
+  // ---------- D ----------
+  const pIn = K.p(T, SD - 0.05, SD + 0.5, E.outExpo);
+  const maxS = 3800 * k780 - deck.sh;
+  const top780 = K.k(T, [[SD, 1060], [10.6, 1110], [11.3, 1500]], E.inOutCubic);
+  deck.draw(0, [Math.min(1, top780 * k780 / maxS)], 0);
+  deck.root.style.opacity = pIn;
+  deck.root.style.transform = `translateY(${(1 - pIn) * 300}px) rotate(${2 - 2 * pIn + Math.sin(T * 0.7) * 0.4}deg)`;
+  vis(deck.root, T >= SD - 0.05);
+  // marks: the "Listing images · Video" tabs, then the thumbnails under the main image
+  const mk = T < 10.9 ? [1150, 100] : [1800, 230];
+  mark.style.left = 16 * k780 + 'px'; mark.style.width = 748 * k780 + 'px';
+  mark.style.top = (mk[0] - top780) * k780 + 'px'; mark.style.height = mk[1] * k780 + 'px';
+  mark.style.opacity = K.p(T, 9.9, 10.1, E.linear) * (T > 10.75 && T < 11.05 ? 0 : 1);
+  realTag.style.left = L.phX + 'px'; realTag.style.top = L.phY - 44 + 'px';
+  realTag.style.opacity = pIn; vis(realTag, T >= SD);
+  minis.forEach((m, i) => {
+    const p = K.p(T, 9.6 + i * 0.06, 10.1 + i * 0.06, E.outBack);
+    m.style.opacity = Math.min(1, p * 2);
+    m.style.transform = `translateY(${(1 - p) * 60}px) rotate(${(seed(i) - 0.5) * 4}deg) scale(${0.8 + 0.2 * p})`;
+    vis(m, T >= 9.6);
+  });
+  const stp = K.p(T, 11.45, 11.7, E.outCubic);
+  stamp.style.left = L.miniX + (tall ? 20 : 40) + 'px'; stamp.style.top = L.miniY + L.miniW * 0.5 - 40 + 'px';
+  stamp.style.opacity = Math.min(1, stp * 3);
+  stamp.style.transform = `rotate(-8deg) scale(${1.8 - 0.8 * stp})`;
+  vis(stamp, T >= 11.45);
+  miniTag.style.left = L.miniX + 'px'; miniTag.style.top = L.miniY + 3 * (miniS + 14) + 6 + 'px';
+  miniTag.style.opacity = pIn; vis(miniTag, T >= SD);
+
+  end(T);
+});
+</script></body></html>

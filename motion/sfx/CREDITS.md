@@ -88,3 +88,20 @@ Universal UI Soundpack (CC BY 4.0). Files were converted to 48 kHz WAV, leading 
 | box/box-02.wav | Freesound | Box Falling Down | danlucaz | CC0 1.0 | https://freesound.org/people/danlucaz/sounds/500283/ |
 | box/box-03.wav | Kenney · Impact Sounds | impactWood_heavy_000.ogg | Kenney (kenney.nl) | CC0 1.0 | https://kenney.nl/assets/impact-sounds |
 | box/box-04.wav | Kenney · Impact Sounds | impactSoft_heavy_001.ogg | Kenney (kenney.nl) | CC0 1.0 | https://kenney.nl/assets/impact-sounds |
+| pageturn/pageturn-01.wav | Freesound via Openverse | Page Turn | davidbain | CC0 1.0 | https://freesound.org/people/davidbain/sounds/136778 |
+| pageturn/pageturn-02.wav | Freesound via Openverse | Page Turn 02.wav | MATRIXXX_ | CC0 1.0 | https://freesound.org/people/MATRIXXX_/sounds/397549 |
+| pageturn/pageturn-03.wav | Freesound via Openverse | Page Turn (2) | OwlStorm | CC0 1.0 | https://freesound.org/people/OwlStorm/sounds/151221 |
+| sparkle/sparkle-01.wav | Freesound via Openverse | Fantasy_ui_Button_3.wav | ZenithInfinitiveStudios | CC0 1.0 | https://freesound.org/people/ZenithInfinitiveStudios/sounds/376745 |
+| sparkle/sparkle-02.wav | Freesound via Openverse | Fantasy_ui_Button_6.wav | ZenithInfinitiveStudios | CC0 1.0 | https://freesound.org/people/ZenithInfinitiveStudios/sounds/376748 |
+| sparkle/sparkle-03.wav | Freesound via Openverse | Fantasy_ui_Button_2.wav | ZenithInfinitiveStudios | CC0 1.0 | https://freesound.org/people/ZenithInfinitiveStudios/sounds/376746 |
+| ding/ding-01.wav | Freesound via Openverse | bell ding 1.wav | 5ro4 | CC0 1.0 | https://freesound.org/people/5ro4/sounds/611113 |
+| ding/ding-02.wav | Freesound via Openverse | Soft-Notifications - Bell - Ding-Dong.mp3 | LegitCheese | CC0 1.0 | https://freesound.org/people/LegitCheese/sounds/571513 |
+| ding/ding-03.wav | Freesound via Openverse | correct | ertfelda | CC0 1.0 | https://freesound.org/people/ertfelda/sounds/243701 |
+| tape/tape-01.wav | Freesound via Openverse | Packing tape; quick_1-2.aif | domrodrig | CC0 1.0 | https://freesound.org/people/domrodrig/sounds/119094 |
+| tape/tape-02.wav | Freesound via Openverse | Button 14.mp3 | Coral_Island_Studios | CC0 1.0 | https://freesound.org/people/Coral_Island_Studios/sounds/277643 |
+| tape/tape-03.wav | Freesound via Openverse | Button 10.mp3 | Coral_Island_Studios | CC0 1.0 | https://freesound.org/people/Coral_Island_Studios/sounds/277645 |
+| swish/swish-07.wav | Freesound via Openverse | Swishes_11_gentle.wav | videofueralle | CC0 1.0 | https://freesound.org/people/videofueralle/sounds/614153 |
+| swish/swish-08.wav | Freesound via Openverse | Swishes_13_fast.wav | videofueralle | CC0 1.0 | https://freesound.org/people/videofueralle/sounds/614151 |
+| swish/swish-09.wav | Freesound via Openverse | Swishes_16_soft_slower.wav | videofueralle | CC0 1.0 | https://freesound.org/people/videofueralle/sounds/614156 |
+| marker/marker-04.wav | Freesound via Openverse | PEN SIGNATURE SIGNING 2.wav | ListenTonyBoy | CC0 1.0 | https://freesound.org/people/ListenTonyBoy/sounds/326961 |
+| marker/marker-05.wav | Freesound via Openverse | scribbling_1-2.aif | acrober | CC0 1.0 | https://freesound.org/people/acrober/sounds/86116 |

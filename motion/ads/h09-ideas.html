@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H09 · Ideas</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .06em; }
+.w { display: inline-block; white-space: pre; }
+.blank { position: absolute; z-index: 20; background: #FFFDF8; border-radius: 6px; box-shadow: 0 50px 80px -40px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; }
+.blank i { position: absolute; left: 70px; top: 90px; width: 4px; height: 56px; background: #1F1F1F; }
+.blank s { position: absolute; left: 70px; height: 10px; border-radius: 5px; background: #EFEADF; }
+.wheel { position: absolute; z-index: 26; perspective: 2200px; }
+.card { position: absolute; left: 50%; top: 0; border-radius: 26px; overflow: hidden; background: #FFFDF8; box-shadow: 0 40px 70px -40px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; backface-visibility: hidden; transform-origin: 50% 50%; }
+.card .ly { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.card .ly img { position: absolute; left: 0; top: 0; max-width: none; display: block; }
+.tabs { position: absolute; z-index: 34; display: flex; gap: 12px; flex-wrap: nowrap; }
+.tab { padding: 12px 22px; border-radius: 99px; background: #FFFDF8; color: #1F1F1F; font: 700 27px 'Archivo'; white-space: nowrap; box-shadow: 0 0 0 1.5px #D9D3C9 inset; }
+.tab small { font: 600 20px 'Archivo'; color: #8A8378; margin-left: 6px; }
+.tab.on { background: #1F1F1F; color: #FAF7EE; box-shadow: none; }
+.tab.on small { color: #DFFF5A; }
+.drawer { position: absolute; z-index: 24; border-radius: 30px; background: linear-gradient(180deg, #E9E1CF 0%, #DED3BC 100%); box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 50px 80px -50px rgba(31,31,31,.6); }
+.drawer .lip { position: absolute; left: 0; right: 0; bottom: 0; height: 120px; border-radius: 0 0 30px 30px; background: linear-gradient(180deg, #C9B994, #B9A781); box-shadow: inset 0 3px 0 rgba(255,255,255,.35); }
+.drawer .lip b { position: absolute; left: 50%; top: 30px; width: 220px; height: 58px; margin-left: -110px; border-radius: 10px; background: #F2E6C2; box-shadow: inset 0 0 0 4px #A88F5A; font: 600 19px/58px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-align: center; color: #5E4D2C; }
+.crop { position: absolute; overflow: hidden; border-radius: 22px; background: #FFFDF8; box-shadow: 0 40px 80px -46px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.crop .ly { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.crop .ly img { position: absolute; left: 0; top: 0; max-width: none; display: block; }
+.hlb { position: absolute; background: #DFFF5A; mix-blend-mode: multiply; border-radius: 4px; transform-origin: 0 50%; }
+.badge { position: absolute; z-index: 30; display: flex; align-items: center; gap: 22px; }
+.badge .bx { position: relative; overflow: hidden; border-radius: 12px; flex: none; }
+.badge .bx .ly { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.badge .bx img { position: absolute; left: 0; top: 0; max-width: none; }
+.badge span { font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; color: #45403A; white-space: nowrap; }
+.prod { position: absolute; z-index: 36; }
+.prod img { width: 100%; display: block; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H09 — Ideas. A card-catalogue drawer for the seller who doesn't know what to make next: a blank page with a blinking
+// cursor gives way to a drawer of real idea cards that riffle on a wheel; as Marian names each category (wedding, kids
+// and learning, planners) its tab lights and its real card turns to face us. Then the honest part: each idea says
+// plainly if it can be made today — the app's own header ("no trend scores, no sales promises") and its three real
+// status labels (made today / needs your own artwork / not yet). Finally the real phone: pick one, tap "Create this".
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 89.1, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), measured from the takes (vo.mjs):
+//   L1 0.93–2.05 "Not sure what to make next?"
+//   L2 2.45–7.85 ("Browse ideas by category:" 2.45–4.3 · "wedding," 4.8 · "kids and learning," 5.8 · "planners." 7.45)
+//   L3 8.55–12.75 ("Each says plainly if it can be made today." 8.55–10.55 · "Pick one," 11.5 · "and make it." 12.2)
+const S_B = 2.02, S_C = 8.08, S_D = 10.77;                   // cuts on the 89.1 bpm grid (3, 12, 16 beats)
+const T_CAT = [4.75, 5.75, 7.4];                              // wedding · kids and learning · planners
+const T_BADGE = [9.25, 9.65, 10.05];
+const T_TAP = 11.35, T_MAKE = 12.2;
+
+const L = tall
+  ? { chipX: 65, chipY: 290, capX: 65, capY: 360, capFs: 88, cardH: 560, wheelY: 660, tabsY: 580, drawerY: 610 }
+  : { chipX: 60, chipY: 56, capX: 60, capY: 118, capFs: 74, cardH: 740, wheelY: 410, tabsY: 316, drawerY: 352 };
+
+const blobA = K.box(0, 0, 1000, 1000, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.22), rgba(223,255,90,0) 62%)' } });
+const chip = K.box(L.chipX, L.chipY, null, null, { cls: 'fchip', html: '<b>Feature 09</b><i>/ 16 ·</i><span>Ideas</span>', style: { width: 'auto', height: '56px' } });
+
+function capEm(parts, y) {
+  const el = K.box(L.capX, y ?? L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  el.innerHTML = parts.map(([t, em]) => (t === '<br>' ? '<br>' : t.split(' ').map((w) => (em ? `<span class="w"><em>${w}</em> </span>` : `<span class="w">${w} </span>`)).join(''))).join('');
+  return { el, ws: [...el.querySelectorAll('.w')] };
+}
+const C = [
+  { c: capEm([['Not sure what', 0], ['<br>'], ['to make', 0], ['next?', 1]]), a: 0.45, b: S_B },
+  { c: capEm([['Browse ideas', 0], ['<br>'], ['by', 0], ['category.', 1]]), a: 2.4, b: S_C },
+  { c: capEm([['It says plainly', 0], ['<br>'], ['what it can', 0], ['make.', 1]]), a: 8.3, b: S_D },
+  { c: capEm([['Pick one.', 0], ['<br>'], ['Make', 0], ['it.', 1]]), a: 11.45, b: 12.95 },
+];
+
+// ---------- scene A: the blank page ----------
+const blankW = tall ? 600 : 560, blankH = blankW * 1.3;
+const blank = K.box((W - blankW) / 2, tall ? 600 : 360, blankW, blankH, { cls: 'blank', html: '<i></i>' });
+const caret = blank.querySelector('i');
+
+// ---------- scene B: drawer, tabs, a wheel of real idea cards ----------
+const drawerW = tall ? 980 : 980, drawerH = tall ? 640 : 900;
+const drawer = K.box((W - drawerW) / 2, L.drawerY, drawerW, drawerH, { cls: 'drawer', html: '<div class="lip"><b>IDEAS</b></div>' });
+const TABS = [['Wedding', 2], ['Kids & learning', 4], ['Planners', 3], ['Party', 2]];
+const tabs = K.box(L.capX, L.tabsY, null, null, { cls: 'tabs', style: { width: 'auto', height: 'auto' },
+  html: TABS.map(([t, n]) => `<div class="tab">${t}<small>${n}</small></div>`).join('') });
+const tabEls = [...tabs.querySelectorAll('.tab')];
+// real cards: AppIdeas board (2880) and the phone Wedding category (780)
+const CARDS = [
+  { src: K.canvas('AppIdeas'), nat: 2880, r: [1337, 1330, 700, 718] },   // Thanksgiving kids table
+  { src: K.canvas('AppIdeas'), nat: 2880, r: [2081, 1330, 700, 718] },   // Halloween bingo night
+  { src: K.canvas('AppIdeas'), nat: 2880, r: [594, 2089, 700, 722] },    // Winter colouring book
+  { src: K.screen('67-phone-ideas-category'), nat: 780, r: [32, 830, 714, 884], real: 1 }, // Wedding Planner (real)
+  { src: K.canvas('AppIdeas'), nat: 2880, r: [594, 1330, 700, 718] },    // Halloween learning pack
+  { src: K.canvas('AppIdeas'), nat: 2880, r: [594, 2851, 700, 718] },    // Undated weekly planner (not yet)
+];
+const wheel = K.box(0, L.wheelY, W, L.cardH, { cls: 'wheel' });
+const cards = CARDS.map((c) => {
+  const h = L.cardH, k = h / c.r[3], w = c.r[2] * k;
+  const el = K.el('div', { parent: wheel, cls: 'card', style: { width: w + 'px', height: h + 'px', marginLeft: -w / 2 + 'px' } });
+  const ly = K.el('div', { parent: el, cls: 'ly', style: { width: c.nat + 'px' } });
+  K.el('img', { parent: ly, src: c.src, style: { width: c.nat + 'px' } });
+  ly.style.transform = `translate(${-c.r[0] * k}px, ${-c.r[1] * k}px) scale(${k})`;
+  return { el, w };
+});
+const boardTagB = K.demoTag('Product design · sample data', 0, 0);
+const realTagB = K.demoTag('Real app · demo workspace', 0, 0);
+
+// ---------- scene C: plainly — the app's header + its three status labels ----------
+function crop(src, natW, sx, sy, sw, sh, w) {
+  const k = w / sw;
+  const box = K.box(0, 0, w, sh * k, { cls: 'crop' });
+  const ly = K.el('div', { cls: 'ly', parent: box, style: { width: natW + 'px' } });
+  K.el('img', { src, parent: ly, style: { width: natW + 'px' } });
+  ly.style.transform = `translate(${-sx * k}px, ${-sy * k}px) scale(${k})`;
+  return { box, ly, k, w, h: sh * k };
+}
+const hdrW = tall ? 950 : 960;
+const hdr = crop(K.screen('07-ideas'), 1440, 270, 70, 600, 165, hdrW);
+hdr.box.style.zIndex = 30;
+const hl = K.el('div', { parent: hdr.ly, cls: 'hlb', style: { left: '415px', top: '203px', width: '290px', height: '22px' } });
+const BADGES = [
+  { r: [594, 1998, 372, 46], t: 'ready to make today' },
+  { r: [2079, 2756, 320, 50], t: 'bring your own artwork' },
+  { r: [592, 3513, 402, 52], t: 'not yet — it says why' },
+];
+const badges = BADGES.map((b) => {
+  const k = 1.15, w = b.r[2] * k, h = b.r[3] * k;
+  const el = K.box(0, 0, null, null, { cls: 'badge', style: { width: 'auto', height: 'auto' },
+    html: `<div class="bx" style="width:${w}px;height:${h}px"><div class="ly" style="width:2880px"><img src="${K.canvas('AppIdeas')}" style="width:2880px"></div></div><span>${b.t}</span>` });
+  el.querySelector('.ly').style.transform = `translate(${-b.r[0] * k}px, ${-b.r[1] * k}px) scale(${k})`;
+  return el;
+});
+const realTagC = K.demoTag('Real app · demo workspace', 0, 0);
+const boardTagC = K.demoTag('Labels: product design · sample data', 0, 0);
+
+// ---------- scene D: the real phone, "Create this", and the made thing ----------
+const phW = tall ? 440 : 400;
+const phone = K.phoneDeck(0, 0, phW, [K.screen('67-phone-ideas-category')]);
+phone.root.style.zIndex = 32;
+const kP = phone.sw / 780;
+const prodW = tall ? 470 : 440;
+const prod = K.box(0, 0, prodW, prodW * 786 / 984, { cls: 'prod', html: `<img src="${K.pub('r07/k13-wedding-planner.webp')}">` });
+const conceptTag = K.demoTag('Concept product · AI-generated', 0, 0);
+const realTagD = K.demoTag('Real app · demo workspace', 0, 0);
+const cursor = K.cursor();
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Ideas, not<br>a blank page.' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+K.run({
+  id: 'H09', title: 'Ideas', dur: DUR, bpm: BPM, music: 'ov-piano-song-loop-4-childhood-by-k', mood: 'bright', key: 'C', intro: 0.0, cover: 5.9,
+  feature: 'Feature 09 / 16 · Ideas',
+  technique: 'A card-catalogue drawer: a blank page with a blinking cursor gives way to a drawer of real idea cards riffling on a 3D wheel; as each category is spoken its tab lights and its card turns to face us; then the app’s own header (“no trend scores, no sales promises”) and its three real status labels stamp in; the real phone ends it with a tap on “Create this”',
+  caption: 'Not sure what to make next? Browse ideas by category — wedding, kids and learning, planners — and each one says plainly whether it can be made today. No trend scores, no sales promises. Pick one and make it. Start free at makeandlist.com',
+  short: 'Ideas, not a blank page.',
+  question: 'What should I make?', gain: 'Ideas: start from a real, makeable idea instead of a blank page',
+  vo: [[0.3, 'Not sure what to make next?'], [1.55, 'Browse ideas by category: wedding, kids and learning, planners.'], [7.8, 'Each says plainly if it can be made today. Pick one, and make it.']],
+  beats: ['0–2 s: a blank page, a blinking cursor: “Not sure what to make next?”', '2–8 s: a drawer of real idea cards riffles; Wedding, Kids & learning, Planners light as she names them and their cards turn to face us', '8–10.8 s: the app says plainly what it can make: its header (“no trend scores, no sales promises”) and three real labels', '10.8–13 s: the real phone: Wedding ideas, tap “Create this”, the planner appears (concept product)', '13–15 s: end card'],
+  cues: [[0.1, 'paper'], [S_B - 0.02, 'swish'], [2.3, 'paper'], [2.9, 'pageturn'], [3.6, 'pageturn'], [4.3, 'pageturn'], [4.68, 'pop'], [5.68, 'pop'], [6.6, 'pageturn'], [7.33, 'pop'],
+    [S_C - 0.02, 'whoosh'], [T_BADGE[0], 'stamp'], [T_BADGE[1], 'stamp'], [T_BADGE[2], 'stamp'], [10.5, 'marker'], [S_D - 0.02, 'whoosh'], [T_TAP, 'click'], [+(T_TAP + 0.3).toFixed(2), 'sparkle'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.5 - 500 + Math.sin(T * 0.5) * 180}px, ${H * 0.45 - 500 + Math.cos(T * 0.4) * 140}px)`;
+  const cp = K.p(T, 0.1, 0.6, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, 12.8, 13.0, E.linear));
+  chip.style.transform = `translateY(${(1 - cp) * -18}px)`;
+
+  C.forEach(({ c, a, b }) => {
+    const o = K.p(T, b - 0.2, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.06, a + 0.5 + j * 0.06, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+      w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+    });
+    c.el.style.visibility = T >= a - 0.05 && T < b + 0.02 ? 'visible' : 'hidden';
+  });
+
+  // ---------- A ----------
+  const aIn = K.p(T, 0, 0.6, E.outExpo), aOut = K.p(T, S_B - 0.25, S_B + 0.1, E.inCubic);
+  blank.style.opacity = aIn * (1 - aOut);
+  blank.style.transform = `translateY(${(1 - aIn) * 80 + aOut * -40}px) rotate(${-2 + aOut * -14}deg) scale(${1 + T * 0.02 - aOut * 0.2})`;
+  caret.style.opacity = Math.floor(T * 2.2) % 2 === 0 ? 1 : 0;
+  vis(blank, T < S_B + 0.12);
+
+  // ---------- B: drawer + wheel ----------
+  const bIn = K.p(T, S_B - 0.05, S_B + 0.55, E.outExpo), bOut = K.p(T, S_C - 0.3, S_C, E.inCubic);
+  const onB = T >= S_B - 0.08 && T < S_C + 0.02;
+  drawer.style.opacity = bIn * (1 - bOut);
+  drawer.style.transform = `translateY(${(1 - bIn) * 500 + bOut * 80}px)`;
+  vis(drawer, onB);
+  tabs.style.top = L.tabsY + 'px';
+  tabs.style.opacity = K.p(T, 2.4, 2.8, E.linear) * (1 - bOut);
+  tabs.style.transform = `translateX(${(1 - K.p(T, 2.4, 3.0, E.outExpo)) * 80}px)`;
+  vis(tabs, onB);
+  const active = T >= T_CAT[2] - 0.05 ? 2 : T >= T_CAT[1] - 0.05 ? 1 : T >= T_CAT[0] - 0.05 ? 0 : -1;
+  tabEls.forEach((t, i) => {
+    t.classList.toggle('on', i === active);
+    const pp = i === active ? K.p(T, T_CAT[i] - 0.05, T_CAT[i] + 0.25, E.outBack) : 1;
+    t.style.transform = `scale(${i === active ? 0.9 + 0.1 * pp : 1})`;
+  });
+  // wheel position: riffle through the first three, then land on each named category
+  const pos = K.k(T, [[S_B, -1.2], [4.55, 2.6], [T_CAT[0], 3], [T_CAT[1] - 0.15, 3], [T_CAT[1] + 0.25, 4], [T_CAT[2] - 0.15, 4], [T_CAT[2] + 0.25, 5]], E.inOutCubic);
+  cards.forEach((c, i) => {
+    const d = i - pos;
+    const ang = d * 52;
+    const show = Math.abs(d) < 1.6;
+    c.el.style.transform = `translateY(${(1 - bIn) * 300}px) rotateX(${-ang}deg) translateZ(${-60 + 0}px) translateY(${d * (tall ? 40 : 30)}px) scale(${1 - Math.min(1, Math.abs(d)) * 0.12})`;
+    c.el.style.opacity = (show ? 1 - Math.max(0, Math.abs(d) - 0.6) : 0) * (1 - bOut);
+    c.el.style.zIndex = String(100 - Math.round(Math.abs(d) * 10));
+    c.el.style.filter = Math.abs(d) > 0.08 ? `brightness(${1 - Math.min(0.25, Math.abs(d) * 0.2)})` : 'none';
+    vis(c.el, onB && show);
+  });
+  const near = Math.round(pos);
+  boardTagB.style.left = L.capX + 'px'; boardTagB.style.top = (tall ? 1196 : 1272) + 'px';
+  realTagB.style.left = L.capX + 'px'; realTagB.style.top = (tall ? 1196 : 1272) + 'px';
+  boardTagB.style.opacity = realTagB.style.opacity = K.p(T, 2.6, 2.9, E.linear) * (1 - bOut);
+  vis(boardTagB, onB && near !== 3); vis(realTagB, onB && near === 3);
+
+  // ---------- C ----------
+  const cIn = K.p(T, S_C - 0.05, S_C + 0.5, E.outExpo), cOut = K.p(T, S_D - 0.28, S_D, E.inCubic);
+  const onC = T >= S_C - 0.08 && T < S_D + 0.02;
+  const hx = (W - hdrW) / 2, hy = tall ? 590 : 330;
+  hdr.box.style.left = hx + 'px'; hdr.box.style.top = hy + 'px';
+  hdr.box.style.opacity = cIn * (1 - cOut);
+  hdr.box.style.transform = `translateY(${(1 - cIn) * 160 - cOut * 50}px) rotate(${-1 + Math.sin(T * 0.6) * 0.3}deg)`;
+  vis(hdr.box, onC);
+  hl.style.transform = `scaleX(${K.p(T, 8.75, 9.2, E.outCubic)})`;
+  badges.forEach((b, i) => {
+    const p = K.p(T, T_BADGE[i], T_BADGE[i] + 0.3, E.outCubic);
+    b.style.left = (tall ? 90 : 90) + 'px';
+    b.style.top = hy + hdr.h + (tall ? 70 : 110) + i * (tall ? 100 : 150) + 'px';
+    b.style.opacity = Math.min(1, p * 3) * (1 - cOut);
+    b.style.transform = `scale(${1.5 - 0.5 * p}) rotate(${(1 - p) * -4 + (i - 1) * 0.8}deg)`;
+    b.style.transformOrigin = '0 50%';
+    vis(b, onC && T >= T_BADGE[i]);
+  });
+  realTagC.style.left = hx + 'px'; realTagC.style.top = hy + hdr.h + 14 + 'px';
+  realTagC.style.opacity = cIn * (1 - cOut); vis(realTagC, onC);
+  boardTagC.style.left = 90 + 'px'; boardTagC.style.top = hy + hdr.h + (tall ? 70 : 110) + 3 * (tall ? 100 : 150) + 10 + 'px';
+  boardTagC.style.opacity = K.p(T, T_BADGE[2] + 0.2, T_BADGE[2] + 0.5, E.linear) * (1 - cOut); vis(boardTagC, onC);
+
+  // ---------- D ----------
+  const dIn = K.p(T, S_D - 0.05, S_D + 0.5, E.outExpo);
+  const onD = T >= S_D - 0.08;
+  const phX = tall ? 80 : 120, phY = tall ? 600 : 300;
+  phone.root.style.left = phX + 'px'; phone.root.style.top = phY + 'px';
+  const scr = K.k(T, [[S_D, 0.08], [11.1, 0.187]], E.outCubic);
+  phone.draw(0, [scr], 0);
+  phone.root.style.opacity = dIn;
+  phone.root.style.transform = `translateY(${(1 - dIn) * 300}px) rotate(${-2 + Math.sin(T * 0.7) * 0.5}deg)`;
+  vis(phone.root, onD);
+  const maxS = 3800 * kP - phone.sh;
+  const bx = phX + 14 + 621 * kP, by = phY + 14 + 1645 * kP - 0.187 * maxS;
+  const mv = K.p(T, 10.95, T_TAP, E.inOutCubic);
+  const press = T >= T_TAP && T < T_TAP + 0.13;
+  cursor.at(bx + 160 * (1 - mv), by + 200 * (1 - mv), press);
+  cursor.hide(onD ? K.p(T, 10.9, 11.05, E.linear) * (1 - K.p(T, T_TAP + 0.35, T_TAP + 0.5, E.linear)) : 0);
+  cursor.ripple(bx, by, T, T_TAP);
+  // the made thing springs out of the button (concept product)
+  const mp = K.p(T, T_TAP + 0.15, T_TAP + 0.85, E.outBack);
+  const px = tall ? W - prodW - 40 : W - prodW - 60, py = tall ? 760 : 500;
+  prod.style.left = K.lerp(bx - prodW / 2, px, K.p(T, T_TAP + 0.15, T_TAP + 0.7, E.outCubic)) + 'px';
+  prod.style.top = K.lerp(by - 120, py, K.p(T, T_TAP + 0.15, T_TAP + 0.7, E.outCubic)) + 'px';
+  prod.style.opacity = Math.min(1, mp * 3);
+  prod.style.transform = `scale(${0.2 + 0.8 * mp}) rotate(${(1 - mp) * -20 + 4 + Math.sin(T * 1.4) * 1.2}deg) translateY(${Math.sin(T * 1.6) * 6}px)`;
+  vis(prod, onD && T >= T_TAP + 0.15);
+  conceptTag.style.left = px + 'px'; conceptTag.style.top = py + prodW * 0.8 + 20 + 'px';
+  conceptTag.style.opacity = K.p(T, T_TAP + 0.6, T_TAP + 0.9, E.linear); vis(conceptTag, onD);
+  realTagD.style.left = phX + 'px'; realTagD.style.top = phY + phone.h + 24 + 'px';
+  if (tall) realTagD.style.top = '552px';
+  realTagD.style.opacity = dIn; vis(realTagD, onD);
+
+  end(T);
+});
+</script></body></html>

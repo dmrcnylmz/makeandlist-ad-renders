@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.25,
+  "text": "Before anything is sold, you review it.",
+  "file": "01-ed384ed025.wav",
+  "dur": 2.88
+ },
+ {
+  "t": 3.22,
+  "text": "The real files. Every page, on a filmstrip.",
+  "file": "02-327cb739c5.wav",
+  "dur": 3.11
+ },
+ {
+  "t": 6.52,
+  "text": "Checks that pass, or flag what needs a look.",
+  "file": "03-4b26a15459.wav",
+  "dur": 2.46
+ },
+ {
+  "t": 8.58,
+  "text": "Looks right? Then write the listing.",
+  "file": "04-8e3b9089db.wav",
+  "dur": 3.58
+ }
+]

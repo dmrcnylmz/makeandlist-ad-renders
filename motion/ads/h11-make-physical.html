@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H11 · Make It Physical</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .06em; }
+.w { display: inline-block; white-space: pre; }
+.crop { position: absolute; overflow: hidden; border-radius: 24px; background: #FFFDF8; box-shadow: 0 50px 90px -46px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.crop .ly { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.crop .ly img { position: absolute; left: 0; top: 0; display: block; max-width: none; }
+.file { position: absolute; z-index: 30; border-radius: 22px; background: #FFFDF8; box-shadow: 0 50px 80px -40px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; overflow: hidden; }
+.file .bar { position: absolute; left: 0; right: 0; top: 0; height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 20px; background: #1F1F1F; color: #FAF7EE; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .04em; }
+.file .bar b { padding: 3px 10px; border-radius: 6px; background: #DFFF5A; color: #1F1F1F; font-weight: 700; }
+.file .art { position: absolute; left: 0; right: 0; top: 58px; bottom: 0; overflow: hidden; }
+.file .px { position: absolute; inset: 58px 0 0 0; background-image: linear-gradient(rgba(31,31,31,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(31,31,31,.06) 1px, transparent 1px); background-size: 22px 22px; }
+.co { position: absolute; z-index: 32; }
+.co img { width: 100%; display: block; }
+.shadow { position: absolute; z-index: 29; border-radius: 50%; background: radial-gradient(closest-side, rgba(31,31,31,.26), rgba(31,31,31,0)); }
+.ring { position: absolute; border: 6px solid #1F1F1F; border-radius: 20px; box-shadow: 0 0 0 6px #DFFF5A; }
+.ctl { position: absolute; z-index: 34; display: flex; flex-direction: column; gap: 16px; }
+.ctl div { display: flex; align-items: center; gap: 16px; padding: 16px 22px; border-radius: 18px; background: #FFFDF8; box-shadow: 0 18px 30px -20px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; font: 700 30px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.ctl div i { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; font: 800 20px 'Archivo'; font-style: normal; }
+.ctl div small { font: 500 20px 'IBM Plex Mono', monospace; color: #6B645A; }
+.scan { position: absolute; left: 0; right: 0; height: 90px; background: linear-gradient(180deg, rgba(223,255,90,0), rgba(223,255,90,.55) 70%, #C8E83A 100%); mix-blend-mode: multiply; }
+.rowglow { position: absolute; border-radius: 18px; box-shadow: 0 0 0 5px var(--c) inset; }
+.pay { position: absolute; z-index: 36; padding: 18px 26px; border-radius: 20px; background: #1F1F1F; color: #FAF7EE; font: 600 28px/1.3 'Archivo'; }
+.pay b { color: #DFFF5A; }
+.floor { position: absolute; z-index: 20; left: 0; right: 0; background: linear-gradient(180deg, #EFE9DC, #E6DFCF); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H11 — Make it physical. A file becomes things: the digital artwork (a pixel-gridded file card) splits into a fan of
+// physical concept products; the real print catalogue (simulated partner) is browsed and the tee is picked; the design
+// board's try-on shows the artwork on the drawn tee as the controls tick (colour, size, artwork size, print area); a scan
+// bar runs down the sharpness check (pass, pass, pass, needs review, too small) with the real "prints sharp at this size"
+// card beside it; it closes on the products on a shelf: printed per order, paid from your own partner account.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 99.4, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), measured from the takes (vo.mjs):
+//   L1 0.90–3.25 "Your design can be a printed product too." ("printed product" ~2.1)
+//   L2 3.70–7.80 ("Choose a real product" 3.70–4.55 · "from your print partner," 4.70–6.15 · "and try your artwork on it." 6.55–7.80)
+//   L3 8.60–10.50 ("Then check" 8.60 · "it prints sharp." 9.25–10.50)
+const S_B = 3.62, S_C = 6.34, S_D = 8.45, S_E = 10.86;   // cuts on the 99.4 bpm grid (6, 10.5, 14, 18 beats)
+const T_SPLIT = 2.15, T_PICK = 6.12;
+const T_CTL = [6.75, 7.1, 7.45, 7.8];
+const T_SCAN = [8.75, 10.2];
+
+const L = tall
+  ? { chipX: 65, chipY: 290, capX: 65, capY: 360, capFs: 88 }
+  : { chipX: 60, chipY: 56, capX: 60, capY: 118, capFs: 74 };
+
+const blobA = K.box(0, 0, 1000, 1000, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(232,96,60,.12), rgba(232,96,60,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.22), rgba(223,255,90,0) 62%)' } });
+const chip = K.box(L.chipX, L.chipY, null, null, { cls: 'fchip', html: '<b>Feature 11</b><i>/ 16 ·</i><span>Make it physical</span>', style: { width: 'auto', height: '56px' } });
+
+function capEm(parts, w) {
+  const el = K.box(L.capX, L.capY, w || W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  el.innerHTML = parts.map(([t, em]) => (t === '<br>' ? '<br>' : t.split(' ').map((x) => (em ? `<span class="w"><em>${x}</em> </span>` : `<span class="w">${x} </span>`)).join(''))).join('');
+  return { el, ws: [...el.querySelectorAll('.w')] };
+}
+const C = [
+  { c: capEm([['Your design.', 0], ['<br>'], ['Now', 0], ['printed.', 1]]), a: 0.7, b: S_B },
+  { c: capEm([['A real product', 0], ['<br>'], ['from your', 0], ['partner.', 1]]), a: 3.6, b: S_C },
+  { c: capEm([['Try your', 0], ['<br>'], ['artwork', 0], ['on it.', 1]]), a: 6.4, b: S_D },
+  { c: capEm([['Check it', 0], ['<br>'], ['prints', 0], ['sharp.', 1]]), a: 8.55, b: S_E },
+  { c: capEm([['Printed per order.', 0], ['<br>'], ['Your', 0], ['partner.', 1]]), a: 10.95, b: 12.95 },
+];
+
+function crop(src, natW, sx, sy, sw, sh, w) {
+  const k = w / sw;
+  const box = K.box(0, 0, w, sh * k, { cls: 'crop' });
+  const ly = K.el('div', { cls: 'ly', parent: box, style: { width: natW + 'px' } });
+  K.el('img', { src, parent: ly, style: { width: natW + 'px' } });
+  ly.style.transform = `translate(${-sx * k}px, ${-sy * k}px) scale(${k})`;
+  return { box, ly, k, w, h: sh * k };
+}
+
+// ---------- A: the digital file, then the things it becomes (concept products) ----------
+const fileW = tall ? 520 : 470, fileH = fileW * 1.25;
+const file = K.box(0, 0, fileW, fileH, { cls: 'file', html: '<div class="bar"><b>PNG</b>quiet-botanicals-01</div><div class="art"></div><div class="px"></div>' });
+const artBox = file.querySelector('.art');
+{ // the artwork itself, cropped from the Make-physical board (2880 wide): 1146,380–1416,717
+  const k = fileW / 270;
+  const ly = K.el('div', { parent: artBox, style: { position: 'absolute', left: 0, top: 0, width: '2880px', transformOrigin: '0 0', transform: `translate(${-1146 * k}px, ${-370 * k}px) scale(${k})` } });
+  K.el('img', { parent: ly, src: K.canvas('MakePhysical'), style: { position: 'absolute', left: 0, top: 0, width: '2880px', maxWidth: 'none' } });
+}
+const FAN = [
+  { id: 'k02-framed-print', w: 0.62, ar: 897 / 608 },
+  { id: 'k03-tee', w: 0.92, ar: 901 / 977 },
+  { id: 'k01-mug', w: 0.66, ar: 804 / 852 },
+  { id: 'k05-tote', w: 0.58, ar: 961 / 595 },
+];
+const unit = tall ? 330 : 300;
+const fan = FAN.map((p) => {
+  const w = unit * p.w * 1.25;
+  const el = K.box(0, 0, w, w * p.ar, { cls: 'co', html: `<img src="${K.pub('r07/' + p.id + '.webp')}">` });
+  const sh = K.box(0, 0, w * 0.9, 40, { cls: 'shadow' });
+  return { el, sh, w, h: w * p.ar };
+});
+const conceptTag = K.demoTag('Concept products · AI-generated', 0, 0);
+
+// ---------- B: the real print catalogue (simulated partner) ----------
+const hdrW = tall ? 760 : 700;
+const hdr = crop(K.screen('45-catalogue'), 1440, 300, 296, 680, 126, hdrW);
+const catW = tall ? 950 : 960;
+const cat = crop(K.screen('45-catalogue'), 1440, 300, 527, 1084, 418, catW);
+const ring = K.el('div', { parent: cat.ly, cls: 'ring', style: { left: '850px', top: '529px', width: '258px', height: '414px', opacity: 0 } });
+const realTagB = K.demoTag('Real app · demo workspace · simulated partner', 0, 0);
+const cursor = K.cursor();
+
+// ---------- C: try-on (design board) + the controls it has ----------
+const teeW = tall ? 640 : 640;
+const tee = crop(K.canvas('AppTryOn'), 2880, 595, 330, 1285, 1284, teeW);
+const ctl = K.box(0, 0, null, null, { cls: 'ctl', style: { width: 'auto', height: 'auto' },
+  html: [['Colour', 'on screen'], ['Size', 'S–3XL'], ['Artwork size', 'slider'], ['Print area', 'shown']].map(([a, b]) => `<div><i>✓</i>${a} <small>${b}</small></div>`).join('') });
+const ctlEls = [...ctl.querySelectorAll('div')];
+const boardTagC = K.demoTag('Product design · sample data', 0, 0);
+
+// ---------- D: the sharpness check ----------
+const szW = tall ? 720 : 660;
+const sizes = crop(K.canvas('MakePhysical'), 2880, 2190, 395, 590, 545, szW);
+const scan = K.el('div', { parent: sizes.box, cls: 'scan' });
+const ROWY = [7, 117, 227, 336, 446], ROWC = ['#2E8B57', '#2E8B57', '#2E8B57', '#C08A00', '#C0392B'];
+const glows = ROWY.map((y, i) => K.el('div', { parent: sizes.box, cls: 'rowglow', style: { left: 4 * sizes.k + 'px', top: y * sizes.k + 'px', width: 582 * sizes.k + 'px', height: 98 * sizes.k + 'px', '--c': ROWC[i] } }));
+glows.forEach((g, i) => g.style.setProperty('--c', ROWC[i]));
+const sharpW = tall ? 470 : 560;
+const sharp = crop(K.screen('46-try-on'), 1440, 958, 974, 426, 136, sharpW);
+sharp.box.style.zIndex = 35;
+const boardTagD = K.demoTag('Product design · sample data', 0, 0);
+const realTagD = K.demoTag('Real app · demo workspace', 0, 0);
+
+// ---------- E: on the shelf, printed per order ----------
+const floor = K.box(0, 0, W, 10, { cls: 'floor' });
+const shelfTag = K.demoTag('Concept products · AI-generated', 0, 0);
+const pay = K.box(0, 0, tall ? 950 : 960, null, { cls: 'pay', html: 'Printing and shipping are paid from <b>your own partner account</b> — never from Credits. Listed only after you confirm.' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your design,<br>printed per order.' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+K.run({
+  id: 'H11', title: 'Make It Physical', dur: DUR, bpm: BPM, music: 'ov-the-lucky-ticket', mood: 'bright', key: 'D', intro: 0.0, cover: 7.4,
+  feature: 'Feature 11 / 16 · Make it physical',
+  technique: 'A file becomes things: a pixel-gridded artwork file splits into a fan of physical concept products; the real print catalogue (simulated partner) is browsed and the tee picked; the design board’s try-on holds the artwork on the drawn tee while the controls tick in; a scan bar runs down the sharpness check (pass, needs review, too small) beside the real “prints sharp at this size” card; it closes on the products on a shelf with who pays for printing',
+  caption: 'Make it physical: add a printed edition of your design. Choose a real product from your print partner’s catalogue, try your artwork on it, and check it prints sharp at each size. Printing is paid from your own partner account, never from Credits. Start free at makeandlist.com',
+  short: 'Your design, printed per order.',
+  question: 'Can I sell physical products too?', gain: 'Physical products without stock, from your own print partner',
+  vo: [[0.4, 'Your design can be a printed product too.'], [2.85, 'Choose a real product from your print partner, and try your artwork on it.'], [8.25, 'Then check it prints sharp.']],
+  beats: ['0–3.6 s: a digital artwork file splits into a fan of printed concept products', '3.6–6.3 s: the real print catalogue (simulated partner): the tee is picked', '6.3–8.45 s: try-on on the design board: the artwork on the tee, controls tick (colour, size, artwork size, print area)', '8.45–10.9 s: the sharpness check scans each size: pass, needs review, too small; the real “prints sharp at this size” card', '10.9–13 s: the products on a shelf; printing paid from your own partner account, never Credits', '13–15 s: end card'],
+  cues: [[0.1, 'pop'], [1.5, 'shutter'], [T_SPLIT + 0.05, 'whoosh'], [2.5, 'pop'], [2.75, 'pop'], [S_B - 0.02, 'swish'], [4.3, 'swish'], [T_PICK, 'click'], [S_C - 0.02, 'whoosh'],
+    [T_CTL[0], 'pop'], [T_CTL[1], 'pop'], [T_CTL[2], 'pop'], [T_CTL[3], 'pop'], [S_D - 0.02, 'whoosh'], [T_SCAN[0], 'printer'], [10.25, 'ding'], [S_E - 0.02, 'swish'], [11.1, 'box'], [11.9, 'coin'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.7 - 500 + Math.sin(T * 0.5) * 160}px, ${H * 0.4 - 500 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.2 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.7 - 450 + Math.sin(T * 0.6) * 100}px)`;
+  const cp = K.p(T, 0.1, 0.6, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, 12.8, 13.0, E.linear));
+  chip.style.transform = `translateY(${(1 - cp) * -18}px)`;
+
+  C.forEach(({ c, a, b }) => {
+    const o = K.p(T, b - 0.2, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.06, a + 0.5 + j * 0.06, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+      w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+    });
+    c.el.style.visibility = T >= a - 0.05 && T < b + 0.02 ? 'visible' : 'hidden';
+  });
+
+  const top = tall ? 590 : 320, bot = tall ? 1240 : 1290, mid = (top + bot) / 2;
+
+  // ---------- A ----------
+  const aIn = K.p(T, 0, 0.6, E.outExpo), split = K.p(T, T_SPLIT, T_SPLIT + 0.4, E.inCubic), aOut = K.p(T, S_B - 0.25, S_B, E.inCubic);
+  const onA = T < S_B + 0.02;
+  file.style.left = (W - fileW) / 2 + 'px'; file.style.top = mid - fileH / 2 + 'px';
+  file.style.opacity = aIn * (1 - split);
+  file.style.transform = `translateY(${(1 - aIn) * 120}px) rotate(${-2 + Math.sin(T * 0.8) * 0.6}deg) scale(${(1 + T * 0.02) * (1 - split * 0.4)})`;
+  vis(file, onA && T < T_SPLIT + 0.42);
+  fan.forEach((p, i) => {
+    const pp = K.p(T, T_SPLIT + 0.1 + i * 0.12, T_SPLIT + 0.75 + i * 0.12, E.outBack);
+    const spread = tall ? 205 : 230;
+    const cx = W / 2 + (i - 1.5) * spread, by = mid + (tall ? 210 : 230) - Math.abs(i - 1.5) * 20;
+    const x = K.lerp(W / 2, cx, pp), y = K.lerp(mid + 50, by, pp);
+    p.el.style.left = x - p.w / 2 + 'px'; p.el.style.top = y - p.h + 'px';
+    p.el.style.opacity = Math.min(1, pp * 3) * (1 - aOut);
+    p.el.style.transform = `rotate(${(i - 1.5) * 5 * pp + Math.sin(T * 1.2 + i) * 1}deg) scale(${0.3 + 0.7 * pp}) translateY(${Math.sin(T * 1.6 + i) * 5 - aOut * 40}px)`;
+    p.el.style.transformOrigin = '50% 100%';
+    p.el.style.zIndex = String(32 + (i === 1 ? 3 : i === 2 ? 2 : 1));
+    p.sh.style.left = x - p.w * 0.45 + 'px'; p.sh.style.top = by - 22 + 'px';
+    p.sh.style.opacity = pp * (1 - aOut) * 0.9;
+    vis(p.el, onA && T >= T_SPLIT + 0.1); vis(p.sh, onA && T >= T_SPLIT + 0.1);
+  });
+  conceptTag.style.left = L.capX + 'px'; conceptTag.style.top = (tall ? 1196 : 1272) + 'px';
+  conceptTag.style.opacity = K.p(T, 2.6, 2.9, E.linear) * (1 - aOut); vis(conceptTag, onA);
+
+  // ---------- B ----------
+  const bIn = K.p(T, S_B - 0.05, S_B + 0.5, E.outExpo), bOut = K.p(T, S_C - 0.25, S_C, E.inCubic);
+  const onB = T >= S_B - 0.08 && T < S_C + 0.02;
+  hdr.box.style.left = (tall ? 65 : 60) + 'px'; hdr.box.style.top = top + 'px';
+  hdr.box.style.opacity = bIn * (1 - bOut);
+  hdr.box.style.transform = `translateY(${(1 - bIn) * 100}px)`;
+  vis(hdr.box, onB);
+  const catY = top + hdr.h + (tall ? 36 : 50);
+  cat.box.style.left = (W - catW) / 2 + 'px'; cat.box.style.top = catY + 'px';
+  const cIn2 = K.p(T, S_B + 0.1, S_B + 0.65, E.outExpo);
+  cat.box.style.opacity = cIn2 * (1 - bOut);
+  cat.box.style.transform = `translateY(${(1 - cIn2) * 160}px) scale(${1 + (T - S_B) * 0.012})`;
+  vis(cat.box, onB);
+  const rp = K.p(T, T_PICK, T_PICK + 0.25, E.outBack);
+  ring.style.opacity = Math.min(1, rp * 2);
+  ring.style.transform = `scale(${1.08 - 0.08 * rp})`;
+  const teeCx = (W - catW) / 2 + (979 - 300) * cat.k, teeCy = catY + (870 - 527) * cat.k;
+  const mv = K.p(T, 5.2, T_PICK, E.inOutCubic);
+  const press = T >= T_PICK && T < T_PICK + 0.13;
+  cursor.at(teeCx + 180 * (1 - mv), teeCy + 260 * (1 - mv), press);
+  cursor.hide(onB ? K.p(T, 5.15, 5.3, E.linear) * (1 - K.p(T, 6.15, 6.3, E.linear)) : 0);
+  cursor.ripple(teeCx, teeCy, T, T_PICK);
+  realTagB.style.left = (tall ? 65 : 60) + 'px'; realTagB.style.top = catY + cat.h + 20 + 'px';
+  realTagB.style.opacity = bIn * (1 - bOut); vis(realTagB, onB);
+
+  // ---------- C ----------
+  const ccIn = K.p(T, S_C - 0.05, S_C + 0.5, E.outExpo), cOut = K.p(T, S_D - 0.25, S_D, E.inCubic);
+  const onC = T >= S_C - 0.08 && T < S_D + 0.02;
+  const teeX = tall ? 65 : 60, teeY = top;
+  tee.box.style.left = teeX + 'px'; tee.box.style.top = teeY + 'px';
+  tee.box.style.opacity = ccIn * (1 - cOut);
+  tee.box.style.transform = `translateY(${(1 - ccIn) * 160}px) scale(${1 + (T - S_C) * 0.02})`;
+  tee.box.style.transformOrigin = '50% 40%';
+  vis(tee.box, onC);
+  ctl.style.left = (tall ? W - 65 - 380 : W - 60 - 340) + 'px';
+  ctl.style.top = (tall ? top + 360 : top + 380) + 'px';
+  if (!tall) ctl.style.top = top + 680 + 'px', ctl.style.left = '60px', ctl.style.flexDirection = 'row', ctl.style.flexWrap = 'wrap', ctl.style.width = '960px';
+  ctlEls.forEach((el, i) => {
+    const p = K.p(T, T_CTL[i], T_CTL[i] + 0.35, E.outBack);
+    el.style.opacity = Math.min(1, p * 2) * (1 - cOut);
+    el.style.transform = `translateX(${(1 - p) * 60}px) scale(${0.85 + 0.15 * p})`;
+  });
+  vis(ctl, onC);
+  boardTagC.style.left = teeX + 'px'; boardTagC.style.top = teeY + tee.h + 16 + 'px';
+  if (tall) boardTagC.style.top = Math.min(1204, teeY + tee.h + 16) + 'px';
+  boardTagC.style.opacity = ccIn * (1 - cOut); vis(boardTagC, onC);
+
+  // ---------- D ----------
+  const dIn = K.p(T, S_D - 0.05, S_D + 0.5, E.outExpo), dOut = K.p(T, S_E - 0.25, S_E, E.inCubic);
+  const onD = T >= S_D - 0.08 && T < S_E + 0.02;
+  const szX = tall ? 65 : 60;
+  sizes.box.style.left = szX + 'px'; sizes.box.style.top = top + 'px';
+  sizes.box.style.opacity = dIn * (1 - dOut);
+  sizes.box.style.transform = `translateY(${(1 - dIn) * 140}px)`;
+  vis(sizes.box, onD);
+  const sp = K.p(T, T_SCAN[0], T_SCAN[1], E.linear);
+  scan.style.top = (sp * (sizes.h + 90) - 90) + 'px';
+  scan.style.opacity = T >= T_SCAN[0] && T < T_SCAN[1] + 0.1 ? 1 : 0;
+  glows.forEach((g, i) => {
+    const at = T_SCAN[0] + (ROWY[i] + 70) / 545 * (T_SCAN[1] - T_SCAN[0]);
+    const p = K.p(T, at, at + 0.2, E.outCubic);
+    g.style.opacity = p * (0.75 + 0.25 * Math.sin(T * 5 + i));
+  });
+  const shIn = K.p(T, 9.6, 10.1, E.outBack);
+  sharp.box.style.left = (tall ? W - 65 - sharpW : W - 60 - sharpW) + 'px';
+  sharp.box.style.top = (tall ? top + 30 : top + sizes.h + 60) + 'px';
+  sharp.box.style.opacity = Math.min(1, shIn * 2) * (1 - dOut);
+  sharp.box.style.transform = `translateY(${(1 - shIn) * 80}px) rotate(${(1 - shIn) * 4 + 1}deg)`;
+  vis(sharp.box, onD && T >= 9.6);
+  boardTagD.style.left = szX + 'px'; boardTagD.style.top = top - 40 + 'px';
+  boardTagD.style.opacity = dIn * (1 - dOut); vis(boardTagD, onD);
+  realTagD.style.left = (tall ? W - 65 - sharpW : W - 60 - sharpW) + 'px';
+  realTagD.style.top = (tall ? top + 30 + sharp.h + 12 : top + sizes.h + 60 + sharp.h + 14) + 'px';
+  realTagD.style.opacity = shIn * (1 - dOut); vis(realTagD, onD && T >= 9.6);
+
+  // ---------- E: the shelf ----------
+  const eIn = K.p(T, S_E - 0.05, S_E + 0.5, E.outExpo);
+  const onE = T >= S_E - 0.08;
+  const shelfY = tall ? 1010 : 930;
+  floor.style.top = shelfY + 'px'; floor.style.height = (tall ? 70 : 70) + 'px';
+  floor.style.opacity = eIn; vis(floor, onE);
+  if (onE) {
+    fan.forEach((p, i) => {
+      const pp = K.p(T, S_E + 0.05 + i * 0.1, S_E + 0.6 + i * 0.1, E.outBack);
+      const cx = W / 2 + (i - 1.5) * (tall ? 240 : 250);
+      p.el.style.left = cx - p.w / 2 + 'px'; p.el.style.top = shelfY + 22 - p.h + 'px';
+      p.el.style.opacity = Math.min(1, pp * 2);
+      p.el.style.transform = `translateY(${(1 - pp) * -200}px) rotate(${(1 - pp) * (i % 2 ? 8 : -8)}deg) scale(${1 + (T - S_E) * 0.01})`;
+      p.el.style.transformOrigin = '50% 100%';
+      p.sh.style.left = cx - p.w * 0.45 + 'px'; p.sh.style.top = shelfY + 2 + 'px';
+      p.sh.style.opacity = pp * 0.9;
+      vis(p.el, true); vis(p.sh, true);
+    });
+  }
+  shelfTag.style.left = L.capX + 'px'; shelfTag.style.top = (tall ? 562 : shelfY + 90) + 'px';
+  shelfTag.style.opacity = eIn; vis(shelfTag, onE);
+  const pIn = K.p(T, 11.6, 12.1, E.outExpo);
+  pay.style.left = (W - (tall ? 950 : 960)) / 2 + 'px'; pay.style.top = (tall ? 1110 : 1100) + 'px';
+  pay.style.opacity = pIn;
+  pay.style.transform = `translateY(${(1 - pIn) * 40}px)`;
+  vis(pay, onE);
+
+  end(T);
+});
+</script></body></html>

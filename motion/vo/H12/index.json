@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.3,
+  "text": "How big can this print go?",
+  "file": "01-83ad358f09.wav",
+  "dur": 2.55
+ },
+ {
+  "t": 2.95,
+  "text": "MakeAndList measures the real pixels at each size.",
+  "file": "02-7588d90dd0.wav",
+  "dur": 2.93
+ },
+ {
+  "t": 6,
+  "text": "Sizes that would print soft are flagged before you sell.",
+  "file": "03-9e2c5b3cf0.wav",
+  "dur": 3.85
+ },
+ {
+  "t": 10,
+  "text": "You decide what to offer.",
+  "file": "04-a9a71fa5f2.wav",
+  "dur": 1.95
+ }
+]

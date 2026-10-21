@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H04 · The Review Room</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F3EEE2; }
+/* R08 series chip — identical in H01–H06 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+/* the light table */
+.table { position: absolute; inset: 0; z-index: 0; background: radial-gradient(ellipse at 50% 55%, #FFFEF8 0%, #FBF7EC 38%, #EFE8D9 78%, #E6DECC 100%); }
+.table .lines { position: absolute; inset: 0; opacity: .5; background-image: linear-gradient(90deg, rgba(31,31,31,.04) 1px, transparent 1px), linear-gradient(rgba(31,31,31,.04) 1px, transparent 1px); background-size: 90px 90px; }
+.crop { position: absolute; overflow: hidden; }
+.crop > img { position: absolute; max-width: none; display: block; }
+.cap { position: absolute; z-index: 40; font: 800 92px/0.98 'Playfair Display'; letter-spacing: -0.035em; color: #1F1F1F; }
+.cap em { font-style: italic; }
+.w { display: inline-block; white-space: pre; }
+.hl { background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / 0% 100%; }
+.page { position: absolute; z-index: 20; background: #FFFDF8; box-shadow: 0 40px 70px -34px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; }
+.page img { width: 100%; height: 100%; display: block; }
+.loupe { position: absolute; z-index: 30; border-radius: 50%; overflow: hidden; box-shadow: 0 30px 50px -20px rgba(31,31,31,.6), 0 0 0 10px #1F1F1F, 0 0 0 12px #45403A; background: #FFFDF8; }
+.loupe img { position: absolute; max-width: none; }
+.loupe .glint { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.45), rgba(255,255,255,0) 40%); }
+.handle { position: absolute; z-index: 29; width: 34px; height: 200px; border-radius: 17px; background: linear-gradient(90deg, #1F1F1F, #45403A); transform-origin: 50% 0; }
+.stamp { position: absolute; z-index: 35; padding: 10px 24px; border: 6px solid #B8442A; border-radius: 12px; color: #B8442A; font: 800 52px/1 'Archivo'; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; background: rgba(250,247,238,.7); }
+.stamp small { display: block; margin-top: 4px; font: 600 17px 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: none; }
+.card { z-index: 25; border-radius: 24px; box-shadow: 0 40px 70px -36px rgba(31,31,31,.65), 0 0 0 1px #E2DBCE; background: #FFFDF8; }
+.film { position: absolute; z-index: 22; left: 0; background: #1F1F1F; box-shadow: 0 30px 50px -24px rgba(31,31,31,.7); overflow: hidden; }
+.film .holes { position: absolute; left: 0; right: 0; height: 22px; background: repeating-linear-gradient(90deg, transparent 0 18px, #F3EEE2 18px 40px, transparent 40px 56px); opacity: .85; }
+.film .row { position: absolute; left: 0; top: 0; height: 100%; }
+.fr { position: absolute; background: #FFFDF8; overflow: hidden; border-radius: 4px; }
+.fr img { width: 100%; height: 100%; display: block; }
+.fr.gap { background: transparent; border: 2px dashed #6B645A; display: grid; place-items: center; color: #B9B1A3; font: 600 20px/1.3 'IBM Plex Mono', monospace; text-align: center; }
+.fn { position: absolute; font: 600 18px 'IBM Plex Mono', monospace; color: #DFFF5A; letter-spacing: .08em; white-space: nowrap; }
+.mark { position: absolute; z-index: 3; border-radius: 10px; }
+.mk-ok { background: rgba(223,255,90,.35); mix-blend-mode: multiply; }
+.mk-flag { background: rgba(232,170,80,.32); mix-blend-mode: multiply; box-shadow: inset 4px 0 0 #D48A1E; }
+.veil { position: absolute; z-index: 2; background: #FFFDF8; }
+.note { position: absolute; z-index: 40; font: 600 28px/1.3 'IBM Plex Mono', monospace; color: #45403A; white-space: nowrap; }
+.note b { color: #1F1F1F; background: #DFFF5A; padding: 0 8px; border-radius: 6px; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H04 — The review room, on a light table. The owner's real cover lies under a loupe with a "Draft · not listed" stamp;
+// the real files arrive (two PDFs on the real phone); a 35 mm filmstrip carries every page past — the owner's real
+// pages at their true page numbers, the pages between shown as counted gaps; the checks light up (passes in lime, a
+// note flagged in amber); and the real phone's bar asks the question: looks right? Write the listing. Nothing is sent.
+// Voice + effects only (musicMode 'none'): a quiet, close-up film.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows from the takes:
+//   L1 0.55–2.93 ("Before anything is sold," 0.55 · "you review it." 2.13)
+//   L2 3.48–6.18 ("The real files." 3.48 · "Every page, on a filmstrip." 4.85)
+//   L3 6.73–8.76 ("Checks that pass," 6.73 · "or flag what needs a look." 7.95)
+//   L4 9.31–12.04 ("Looks right?" 9.31 · "Then write the listing." 10.72)
+const SB = 3.15, SC = 6.45, SD = 9.0, T_FILM = 4.7;
+
+function crop(src, srcW, sx, sy, sw, sh, w, opts = {}) {
+  const k = w / sw;
+  const b = K.box(0, 0, w, sh * k, { cls: 'crop ' + (opts.cls || ''), parent: opts.parent });
+  K.el('img', { src, parent: b, style: { left: -sx * k + 'px', top: -sy * k + 'px', width: srcW * k + 'px' } });
+  return { el: b, k, h: sh * k };
+}
+function chip(n, name) {
+  const c = K.box(tall ? 65 : 60, tall ? 290 : 56, null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' },
+    html: `<b>Feature ${String(n).padStart(2, '0')}</b><i>/ 16 ·</i><span>${name}</span>` });
+  return (T) => {
+    const p = K.p(T, 0.1, 0.6, E.outExpo);
+    c.style.opacity = p * (1 - K.p(T, 12.85, 13.0, E.linear));
+    c.style.clipPath = `inset(0 ${(1 - p) * 100}% 0 0 round 99px)`;
+    c.style.transform = `translateX(${(1 - p) * -30}px)`;
+  };
+}
+function wrapWords(text) {
+  let on = false;
+  return text.split('\n').map((line) => line.split(' ').map((w) => {
+    const st = w.startsWith('*'), en = w.endsWith('*');
+    if (st) on = true;
+    const clean = w.replace(/\*/g, '');
+    const out = on ? `<span class="w"><em class="hl">${clean} </em></span>` : `<span class="w">${clean} </span>`;
+    if (en) on = false;
+    return out;
+  }).join('')).join('<br>');
+}
+const hlSweep = (hls, T, a, b) => hls.forEach((h, i) => { const n = hls.length; h.style.backgroundSize = `${K.p(T, a + (b - a) * i / n, a + (b - a) * (i + 1) / n, E.linear) * 100}% 100%`; });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+function words(ws, T, a, out, st = 0.07) {
+  ws.forEach((w, i) => {
+    const p = K.p(T, a + i * st, a + 0.5 + i * st, E.outExpo);
+    const o = out ? K.p(T, out - 0.25, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+}
+
+const L = tall
+  ? { capX: 65, capY: 370, capFs: 90, pgW: 470, pgY: 610, lR: 150, filesW: 700, filesY: 610, filmY: 660, filmH: 340, filmDY: 650, chkW: 950, chkY: 620, barY: 940, barW: 900, noteY: 584 }
+  : { capX: 60, capY: 130, capFs: 84, pgW: 520, pgY: 360, lR: 160, filesW: 720, filesY: 380, filmY: 520, filmH: 380, filmDY: 420, chkW: 960, chkY: 440, barY: 780, barW: 960, noteY: 340 };
+const PX = tall ? 65 : 60;
+
+const table = K.box(0, 0, W, H, { cls: 'table', html: '<div class="lines"></div>' });
+const chipDraw = chip(4, 'The review room');
+
+const CAPS = [
+  ['Review it before\nit’s *sold.*', 0.15, SB],
+  ['The *real files.*', SB + 0.2, T_FILM],
+  ['Every page, on\na *filmstrip.*', T_FILM + 0.05, SC],
+  ['Checks that pass —\nor *flag a look.*', SC + 0.15, SD],
+  ['Looks right?\n*Write the listing.*', SD + 0.15, null],
+].map(([t, a, b]) => {
+  const el = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html: wrapWords(t) });
+  return { el, ws: [...el.querySelectorAll('.w')], hls: [...el.querySelectorAll('.hl')], a, b };
+});
+const HL = [[1.85, 2.4], [3.6, 4.3], [5.5, 6.1], [7.95, 8.7], [10.72, 11.9]];
+
+// ---------- A: the cover under a loupe ----------
+const COVER = K.pub('showcase/christmas-preschool-pack/cover.webp');
+const pgH = L.pgW * 1164 / 900, pgX = (W - L.pgW) / 2;
+const page = K.box(pgX, L.pgY, L.pgW, pgH, { cls: 'page', html: `<img src="${COVER}">` });
+const LZ = 2.3, lD = 2 * L.lR;
+const loupe = K.box(0, 0, lD, lD, { cls: 'loupe', html: `<img src="${COVER}" style="width:${L.pgW * LZ}px;height:${pgH * LZ}px"><div class="glint"></div>` });
+const loupeImg = loupe.querySelector('img');
+const handle = K.box(0, 0, 34, 200, { cls: 'handle' });
+const stamp = K.box(pgX + L.pgW - 260, L.pgY + 40, null, null, { cls: 'stamp', html: 'Draft<small>not listed · yours to review</small>', style: { width: 'auto', height: 'auto' } });
+const ownerTag = K.demoTag('Example made with MakeAndList by its owner', 0, 0);
+
+// ---------- B: the real files (24-phone-product, x 30–750, y 2535–3110: two PDFs) ----------
+const files = crop(K.screen('24-phone-product'), 780, 30, 2535, 720, 575, L.filesW, { cls: 'card' });
+files.el.style.left = (W - L.filesW) / 2 + 'px'; files.el.style.top = L.filesY + 'px';
+const filesTag = K.demoTag('Real app · demo workspace', 0, 0);
+
+// ---------- B2: every page on a filmstrip (the owner's real pages at their page numbers) ----------
+const film = K.box(0, L.filmY, W, L.filmH, { cls: 'film', html: '<div class="holes" style="top:12px"></div><div class="holes" style="bottom:12px"></div><div class="row"></div>' });
+const row = film.querySelector('.row');
+const frH = L.filmH - 120, frW = frH * 900 / 1164, gapW = frW * 0.55, FG = 30;
+const FRAMES = [[1, 'cover'], ['2–3'], [4, 'interior-02'], ['5–8'], [9, 'interior-03'], ['10–13'], [14, 'interior-01'], ['15–31'], [32, 'interior-04'], ['33–37']];
+let fx = 60;
+const frEls = FRAMES.map(([n, img]) => {
+  const w = img ? frW : gapW;
+  const el = K.el('div', { parent: row, cls: 'fr' + (img ? '' : ' gap'), html: img ? `<img src="${K.pub('showcase/christmas-preschool-pack/' + img + '.webp')}">` : `pages<br>${n}`,
+    style: { left: fx + 'px', top: '50px', width: w + 'px', height: frH + 'px' } });
+  K.el('div', { parent: row, cls: 'fn', html: img ? `p. ${n} / 37` : '', style: { left: fx + 'px', top: 50 + frH + 8 + 'px' } });
+  const r = { el, x: fx, w };
+  fx += w + FG;
+  return r;
+});
+const rowW = fx;
+const filmTag = K.demoTag('Example made with MakeAndList by its owner · pages between not shown', 0, 0);
+
+// ---------- C: checks that pass, or flag (AppRoomReview board: x 1964–2791, y 724–1076) ----------
+const chk = crop(K.canvas('AppRoomReview'), 2880, 1950, 716, 850, 370, L.chkW, { cls: 'card' });
+chk.el.style.left = (W - L.chkW) / 2 + 'px'; chk.el.style.top = L.chkY + 'px';
+const cy = (y) => (y - 716) * chk.k;
+// rows (board px): pass 1 y 832–882, pass 2 y 888–940, the note y 944–1030
+const chkRows = [[832, 884, 'ok'], [888, 940, 'ok'], [944, 1032, 'flag']].map(([a, b, kind]) => ({
+  veil: K.el('div', { parent: chk.el, cls: 'veil', style: { left: 30 * chk.k + 'px', right: 20 * chk.k + 'px', top: cy(a) + 'px', height: cy(b) - cy(a) + 'px' } }),
+  mark: K.el('div', { parent: chk.el, cls: 'mark mk-' + kind, style: { left: 26 * chk.k + 'px', right: 26 * chk.k + 'px', top: cy(a) - 4 + 'px', height: cy(b) - cy(a) + 8 + 'px', transformOrigin: '0 50%' } }),
+}));
+const chkTag = K.demoTag('Product design · sample data', 0, 0);
+// the real app says the same thing on the real product: "Checks — Nothing blocking" (11-product x 974–1378, y 420–490)
+const realChk = crop(K.screen('11-product'), 1440, 974, 420, 404, 70, tall ? 600 : 560, { cls: 'card' });
+const realChkTag = K.demoTag('Real app · demo workspace', 0, 0);
+
+// ---------- D: the real bar — looks right? write the listing (24-phone-product x 22–758, y 3418–3660) ----------
+const bar = crop(K.screen('24-phone-product'), 780, 22, 3418, 736, 242, L.barW, { cls: 'card' });
+bar.el.style.left = (W - L.barW) / 2 + 'px'; bar.el.style.top = L.barY + 'px';
+bar.el.style.background = 'transparent'; bar.el.style.boxShadow = '0 40px 70px -36px rgba(31,31,31,.65)';
+const barTag = K.demoTag('Real app · demo workspace', 0, 0);
+const cursor = K.cursor();
+const note = K.box(PX, L.noteY, W - 2 * PX, null, { cls: 'note', html: 'Writing the listing sends <b>nothing</b>.' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'See every page<br>before it’s sold.' });
+
+const filmX = (T) => {
+  // the strip scrolls right-to-left through every frame, eases to a stop on the cover in D
+  const max = rowW - W + 60;
+  if (T < SC) return -K.k(T, [[T_FILM, -W * 0.15], [SC, max * 0.78]], E.inOutCubic);
+  return -K.k(T, [[SD - 0.2, max * 0.78], [SD + 0.9, max * 0.38], [12.9, max * 0.3]], E.inOutCubic);
+};
+
+K.run({
+  id: 'H04', title: 'The Review Room', dur: DUR, bpm: 90, musicMode: 'none', mood: 'calm', key: 'C', intro: 0, cover: 5.6,
+  series: 'R08', feature: 'Feature 04 / 16 · The review room',
+  technique: 'A light table: the owner’s real cover under a glass loupe with a Draft stamp; the real files arrive on the real phone; a 35 mm filmstrip carries every page past at its true page number (pages between shown as counted gaps); the checks light row by row — passes in lime, a note flagged in amber; the real phone’s bar asks “Looks right?” and the listing is next, with nothing sent',
+  caption: 'Before anything is sold, you review it: the real files, every page on a filmstrip, and checks that pass — or flag what needs a look. Looks right? Then write the listing. Nothing is sent until you choose. Start free at makeandlist.com',
+  short: 'See every page before it’s sold.',
+  question: 'Can I trust it?', gain: 'Control and quality: you review real files',
+  vo: [[0.25, 'Before anything is sold, you review it.'], [3.22, 'The real files. Every page, on a filmstrip.'], [6.52, 'Checks that pass, or flag what needs a look.'], [8.58, 'Looks right? Then write the listing.']],
+  beats: ['0–3.2 s: the owner’s real cover on a light table under a loupe; “Draft · not listed”', '3.2–4.7 s: the real files on the real phone (two PDFs)', '4.7–6.5 s: a filmstrip of every page — the owner’s pages at their real page numbers', '6.5–9 s: checks light up: passes in lime, a note flagged in amber (board) — the real app: “Nothing blocking”', '9–13 s: the real phone bar: looks right? Write the listing — writing it sends nothing', '13–15 s: end card'],
+  cues: [[0.12, 'pop'], [0.3, 'paper'], [1.92, 'stamp'], [3.08, 'whoosh'], [3.3, 'pop'], [4.5, 'swish'], [4.62, 'tape'], [6.32, 'whoosh'], [6.6, 'pop'],
+    [7.72, 'pop'], [8.85, 'ding'], [10.2, 'swish'], [12.12, 'click'], [12.4, 'chime'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  table.style.transform = `scale(${1.04 + 0.02 * Math.sin(T * 0.3)})`;
+  chipDraw(T);
+  CAPS.forEach((c, i) => {
+    words(c.ws, T, c.a, c.b, 0.07);
+    hlSweep(c.hls, T, HL[i][0], HL[i][1]);
+    vis(c.el, T >= c.a - 0.05 && (c.b === null || T < c.b + 0.05));
+  });
+
+  // ---------- A ----------
+  const aIn = K.p(T, 0.2, 0.8, E.outExpo), aOut = K.p(T, SB - 0.25, SB + 0.1, E.inCubic);
+  page.style.opacity = aIn * (1 - aOut);
+  page.style.transform = `translateY(${(1 - aIn) * 120 - aOut * 80}px) rotate(${-2 + Math.sin(T * 0.6) * 0.4}deg) scale(${1 + 0.02 * T})`;
+  vis(page, T < SB + 0.15);
+  // the loupe glides over the title, then the gingerbread
+  const lx = K.k(T, [[0.6, 0.3], [1.6, 0.62], [2.6, 0.45], [SB, 0.5]], E.inOutCubic) * L.pgW;
+  const ly = K.k(T, [[0.6, 0.18], [1.6, 0.22], [2.6, 0.55], [SB, 0.6]], E.inOutCubic) * pgH;
+  const lp = K.p(T, 0.7, 1.2, E.outBack);
+  const lcx = pgX + lx, lcy = L.pgY + ly;
+  loupe.style.left = lcx - L.lR + 'px'; loupe.style.top = lcy - L.lR + 'px';
+  loupe.style.opacity = Math.min(1, lp * 2) * (1 - aOut);
+  loupe.style.transform = `scale(${0.6 + 0.4 * lp})`;
+  loupeImg.style.left = L.lR - lx * LZ + 'px'; loupeImg.style.top = L.lR - ly * LZ + 'px';
+  handle.style.left = lcx + L.lR * 0.62 - 17 + 'px'; handle.style.top = lcy + L.lR * 0.62 + 'px';
+  handle.style.transform = `rotate(-45deg)`;
+  handle.style.opacity = loupe.style.opacity;
+  vis(loupe, T >= 0.7 && T < SB + 0.15); vis(handle, T >= 0.7 && T < SB + 0.15);
+  const sp = K.p(T, 1.88, 2.12, E.outCubic);
+  stamp.style.opacity = Math.min(1, sp * 3) * (1 - aOut);
+  stamp.style.transform = `rotate(-8deg) scale(${1.7 - 0.7 * sp})`;
+  vis(stamp, T >= 1.88 && T < SB + 0.15);
+  ownerTag.style.left = PX + 'px'; ownerTag.style.top = (tall ? L.pgY + pgH + 20 : 1250) + 'px';
+  ownerTag.style.opacity = aIn * (1 - aOut);
+  if (tall && L.pgY + pgH + 20 > 1230) ownerTag.style.top = L.pgY - 46 + 'px';
+
+  // ---------- B: files ----------
+  const bIn = K.p(T, SB, SB + 0.5, E.outExpo), bOut = K.p(T, T_FILM - 0.15, T_FILM + 0.2, E.inCubic);
+  files.el.style.opacity = bIn * (1 - bOut);
+  files.el.style.transform = `translateY(${(1 - bIn) * 160 - bOut * 120}px) rotate(${(1 - bIn) * 4 + Math.sin(T) * 0.3}deg)`;
+  vis(files.el, T >= SB && T < T_FILM + 0.25);
+  filesTag.style.left = (W - L.filesW) / 2 + 'px'; filesTag.style.top = L.filesY + files.h + 16 + 'px';
+  filesTag.style.opacity = bIn * (1 - bOut); vis(filesTag, T >= SB && T < T_FILM + 0.25);
+
+  // ---------- filmstrip (B2, back in D) ----------
+  const fIn = K.p(T, T_FILM - 0.1, T_FILM + 0.4, E.outExpo), fOut = K.p(T, SC - 0.25, SC + 0.05, E.inCubic);
+  const fBack = K.p(T, SD - 0.1, SD + 0.45, E.outExpo);
+  const inD = T >= SD - 0.1;
+  const fo = inD ? fBack : fIn * (1 - fOut);
+  film.style.opacity = fo;
+  const sc = inD ? (tall ? 0.78 : 0.8) : 1;
+  film.style.transform = `translateY(${inD ? 0 : (1 - fIn) * 80}px) scaleY(${sc}) rotate(${inD ? -1 : -2}deg)`;
+  film.style.transformOrigin = '50% 0';
+  film.style.top = (inD ? L.filmDY : L.filmY) + 'px';
+  const x = filmX(T), v = filmX(T) - filmX(T - 1 / 30);
+  row.style.transform = `translateX(${x}px) scaleX(${1 / sc}) scaleY(${1})`;
+  row.style.transformOrigin = '0 0';
+  row.style.filter = Math.abs(v) > 8 ? `blur(${Math.min(2.5, Math.abs(v) * 0.08)}px)` : 'none';
+  vis(film, (T >= T_FILM - 0.1 && T < SC + 0.05) || inD);
+  filmTag.style.left = PX + 'px'; filmTag.style.top = (inD ? L.filmY + L.filmH * sc - (tall ? 40 : 70) : L.filmY + L.filmH + 26) + 'px';
+  filmTag.style.opacity = fo; vis(filmTag, film.style.visibility === 'visible' && !inD);
+
+  // ---------- C: checks ----------
+  const cIn = K.p(T, SC, SC + 0.5, E.outExpo), cOut = K.p(T, SD - 0.25, SD + 0.05, E.inCubic);
+  chk.el.style.opacity = cIn * (1 - cOut);
+  chk.el.style.transform = `translateY(${(1 - cIn) * 120 - cOut * 60}px) scale(${0.95 + 0.05 * cIn})`;
+  vis(chk.el, T >= SC && T < SD + 0.05);
+  const RT = [6.75, 7.3, 7.95];
+  chkRows.forEach((r, i) => {
+    const p = K.p(T, RT[i], RT[i] + 0.3, E.outCubic);
+    r.veil.style.opacity = 1 - p;
+    r.mark.style.transform = `scaleX(${K.p(T, RT[i] + 0.05, RT[i] + 0.45, E.outCubic)})`;
+  });
+  chkTag.style.left = (W - L.chkW) / 2 + 'px'; chkTag.style.top = L.chkY - 44 + 'px';
+  chkTag.style.opacity = cIn * (1 - cOut); vis(chkTag, T >= SC && T < SD + 0.05);
+  const rp = K.p(T, 8.3, 8.7, E.outBack);
+  realChk.el.style.left = (W - (tall ? 600 : 560)) / 2 + 'px'; realChk.el.style.top = L.chkY + chk.h + (tall ? 70 : 60) + 'px';
+  realChk.el.style.opacity = Math.min(1, rp * 2) * (1 - cOut);
+  realChk.el.style.transform = `translateY(${(1 - rp) * 40}px) scale(${0.85 + 0.15 * rp})`;
+  vis(realChk.el, T >= 8.3 && T < SD + 0.05);
+  realChkTag.style.left = (W - (tall ? 600 : 560)) / 2 + 'px'; realChkTag.style.top = L.chkY + chk.h + (tall ? 70 : 60) + realChk.h + 14 + 'px';
+  realChkTag.style.opacity = realChk.el.style.opacity; vis(realChkTag, T >= 8.3 && T < SD + 0.05);
+
+  // ---------- D: the bar ----------
+  const dIn = K.p(T, 9.6, 10.15, E.outExpo);
+  bar.el.style.opacity = dIn;
+  bar.el.style.transform = `translateY(${(1 - dIn) * 120}px)`;
+  vis(bar.el, T >= 9.6);
+  barTag.style.left = W - PX - 330 + 'px'; barTag.style.top = L.noteY + 4 + 'px';
+  barTag.style.opacity = dIn; vis(barTag, T >= 9.6);
+  // a finger-cursor glides to "Write the listing" and taps after she says it
+  const btnX = (W - L.barW) / 2 + (390 - 22) * bar.k, btnY = L.barY + (3589 - 3418) * bar.k;
+  const cp = K.p(T, 11.2, 12.05, E.inOutCubic);
+  const press = T >= 12.12 && T < 12.3;
+  cursor.at(btnX + 220 * (1 - cp), btnY + 200 * (1 - cp), press);
+  cursor.hide(K.p(T, 11.1, 11.3, E.linear) * (1 - K.p(T, 12.75, 12.95, E.linear)));
+  cursor.ripple(btnX, btnY, T, 12.12);
+  const np = K.p(T, 12.25, 12.6, E.outExpo);
+  note.style.opacity = np; note.style.transform = `translateY(${(1 - np) * 24}px)`;
+  vis(note, T >= 12.2);
+
+  end(T);
+});
+</script></body></html>

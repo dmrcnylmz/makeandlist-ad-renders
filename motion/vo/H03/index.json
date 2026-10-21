@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.43,
+  "text": "Watch your product being made, live.",
+  "file": "01-bc4318814f.wav",
+  "dur": 2.23
+ },
+ {
+  "t": 2.42,
+  "text": "Each stage ticks off as the pages stack in.",
+  "file": "02-3f267d1244.wav",
+  "dur": 3.3
+ },
+ {
+  "t": 6.1,
+  "text": "You can leave. It keeps going.",
+  "file": "03-964b0bd360.wav",
+  "dur": 2.32
+ },
+ {
+  "t": 8.09,
+  "text": "If something stops, it tells you plainly.",
+  "file": "04-e12150db5f.wav",
+  "dur": 3.39
+ }
+]

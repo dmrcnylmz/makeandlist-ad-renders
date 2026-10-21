@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H05 · Listing Copy</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R08 series chip — identical in H01–H06 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.cap { position: absolute; z-index: 40; font: 800 88px/0.98 'Playfair Display'; letter-spacing: -0.035em; color: #1F1F1F; }
+.cap em { font-style: italic; }
+.w { display: inline-block; white-space: pre; }
+.hl { background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / 0% 100%; }
+.doc { position: absolute; z-index: 20; border-radius: 30px; background: #FFFDF8; box-shadow: 0 50px 90px -44px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; }
+.doc .lab { position: absolute; font: 600 19px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #8A8378; }
+.doc .lab b { color: #1F1F1F; background: #EFEADF; padding: 3px 10px; border-radius: 99px; letter-spacing: .08em; font-weight: 600; margin-left: 10px; }
+.doc .cnt { position: absolute; font: 500 18px 'IBM Plex Mono', monospace; color: #8A8378; }
+.title { position: absolute; font: 700 40px/1.2 'Archivo'; color: #1F1F1F; letter-spacing: -0.01em; }
+.desc { position: absolute; font: 400 27px/1.45 'Archivo'; color: #45403A; }
+.caret { display: inline-block; width: 3px; height: 1em; background: #1F1F1F; vertical-align: -0.12em; margin-left: 1px; }
+.sel { background: #DFFF5A; box-shadow: 0 0 0 3px #DFFF5A; border-radius: 3px; }
+.ed { background: rgba(223,255,90,.5); border-radius: 4px; }
+.tags { position: absolute; display: flex; flex-wrap: wrap; gap: 10px; }
+.tg { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 99px; background: #EFEADF; font: 600 22px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.tg i { font-style: normal; color: #8A8378; font-size: 20px; }
+.cover { position: absolute; z-index: 22; border-radius: 10px; overflow: hidden; box-shadow: 0 20px 34px -18px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.cover img { width: 100%; height: 100%; display: block; }
+.idea { position: absolute; z-index: 30; padding: 22px 24px; background: #FFF2A8; color: #1F1F1F; font: 600 24px/1.3 'Archivo'; box-shadow: 0 24px 40px -22px rgba(31,31,31,.6); }
+.idea small { display: block; font: 600 16px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #7A6A2A; margin-bottom: 8px; }
+.badge { position: absolute; z-index: 32; white-space: nowrap; padding: 12px 20px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 700 26px 'Archivo'; }
+.badge b { color: #DFFF5A; }
+.save { position: absolute; z-index: 31; padding: 12px 22px; border-radius: 14px; background: #FFFDF8; box-shadow: 0 0 0 2px #1F1F1F; font: 700 24px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.store { position: absolute; z-index: 30; display: flex; align-items: center; gap: 18px; padding: 16px 20px; border-radius: 22px; background: #FFFDF8; box-shadow: 0 20px 34px -22px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; }
+.store .lg { width: 120px; height: 46px; display: grid; place-items: center; }
+.store .lg img { max-width: 120px; max-height: 40px; }
+.store .st { font: 600 20px 'IBM Plex Mono', monospace; color: #6B645A; white-space: nowrap; }
+.store .st b { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #8A8378; margin-right: 8px; vertical-align: 0; }
+.you { position: absolute; z-index: 32; padding: 18px 28px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 32px 'Archivo'; box-shadow: 0 0 0 3px #1F1F1F, 0 20px 34px -18px rgba(31,31,31,.7); white-space: nowrap; }
+.mark { position: absolute; z-index: 3; border: 4px solid #DFFF5A; border-radius: 12px; box-shadow: 0 0 0 6px rgba(31,31,31,.12); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H05 — Listing copy, written live on a proof sheet. A blank listing draft with a blinking caret; the title types
+// itself, the description writes in, the tags pop — all drawn from the seller's own idea (a sticky note pinned to the
+// sheet). Then the seller's hand takes over: a word is selected and retyped, a tag is removed, Save. Finally the real
+// phone scrolls the real listing — title, description, and "Saved. Nothing has gone to a store yet." — while the
+// seller's stores wait, unsent, for a choice.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 95.7;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows from the takes:
+//   L1 0.60–2.37 · L2 3.07–6.17 ("A title," 3.07 · "a description" 3.5 · "and tags," 4.16 · "from your own idea." 4.65)
+//   L3 6.77–8.51 ("Every word" 6.77 · "is yours to edit." 7.65) · L4 9.50–11.56
+const SB = 2.75, SC = 6.45, SD = 9.0;
+
+function chip(n, name) {
+  const c = K.box(tall ? 65 : 60, tall ? 290 : 56, null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' },
+    html: `<b>Feature ${String(n).padStart(2, '0')}</b><i>/ 16 ·</i><span>${name}</span>` });
+  return (T) => {
+    const p = K.p(T, 0.1, 0.6, E.outExpo);
+    c.style.opacity = p * (1 - K.p(T, 12.85, 13.0, E.linear));
+    c.style.clipPath = `inset(0 ${(1 - p) * 100}% 0 0 round 99px)`;
+    c.style.transform = `translateX(${(1 - p) * -30}px)`;
+  };
+}
+function wrapWords(text) {
+  let on = false;
+  return text.split('\n').map((line) => line.split(' ').map((w) => {
+    const st = w.startsWith('*'), en = w.endsWith('*');
+    if (st) on = true;
+    const clean = w.replace(/\*/g, '');
+    const out = on ? `<span class="w"><em class="hl">${clean} </em></span>` : `<span class="w">${clean} </span>`;
+    if (en) on = false;
+    return out;
+  }).join('')).join('<br>');
+}
+const hlSweep = (hls, T, a, b) => hls.forEach((h, i) => { const n = hls.length; h.style.backgroundSize = `${K.p(T, a + (b - a) * i / n, a + (b - a) * (i + 1) / n, E.linear) * 100}% 100%`; });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+function words(ws, T, a, out, st = 0.07) {
+  ws.forEach((w, i) => {
+    const p = K.p(T, a + i * st, a + 0.5 + i * st, E.outExpo);
+    const o = out ? K.p(T, out - 0.25, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+}
+const esc = (t) => t.replace(/&/g, '&amp;');
+
+const L = tall
+  ? { capX: 65, capY: 370, capFs: 86, doc: { x: 65, y: 600, w: 950, h: 640 }, titleW: 730, titleFs: 40, descFs: 28, coverW: 160,
+      phX: 545, phY: 600, phW: 470, storesX: 65, storesY: 640, storeW: 450 }
+  : { capX: 60, capY: 130, capFs: 80, doc: { x: 60, y: 360, w: 960, h: 800 }, titleW: 720, titleFs: 40, descFs: 29, coverW: 170,
+      phX: 610, phY: 330, phW: 410, storesX: 60, storesY: 400, storeW: 500 };
+const D0 = L.doc;
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.22), rgba(223,255,90,0) 62%)' } });
+const chipDraw = chip(5, 'Listing copy');
+
+const CAPS = [
+  ['The listing, *written for you.*', 0.15, SB],
+  ['Title. Description.\nTags. *From your idea.*', SB + 0.2, SC],
+  ['Every word is\n*yours to edit.*', SC + 0.15, SD],
+  ['Nothing goes to a store\n*until you choose.*', SD + 0.15, null],
+].map(([t, a, b]) => {
+  const el = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html: wrapWords(t) });
+  return { el, ws: [...el.querySelectorAll('.w')], hls: [...el.querySelectorAll('.hl')], a, b };
+});
+const HL = [[1.2, 2.2], [4.65, 6.0], [7.65, 8.45], [10.4, 11.5]];
+
+// ---------- the proof sheet: a listing draft (copy from the List board, sample) ----------
+const doc = K.box(D0.x, D0.y, D0.w, D0.h, { cls: 'doc' });
+const pad = 40;
+const lab1 = K.el('div', { parent: doc, cls: 'lab', html: 'Listing<b>Draft</b>', style: { left: pad + 'px', top: '34px' } });
+const cnt1 = K.el('div', { parent: doc, cls: 'cnt', style: { left: pad + 230 + 'px', top: '38px' } });
+const TITLE_A = 'Christmas Preschool Learning Pack — Counting, Tracing & ', TITLE_B = 'Matching', TITLE_B2 = 'Colouring', TITLE_C = ', 37 Pages with Answer Keys';
+const title = K.el('div', { parent: doc, cls: 'title', style: { left: pad + 'px', top: '78px', width: L.titleW + 'px', fontSize: L.titleFs + 'px' } });
+const titleH = L.titleFs * 1.2 * 3;
+const lab2 = K.el('div', { parent: doc, cls: 'lab', html: 'Description', style: { left: pad + 'px', top: 78 + titleH + 26 + 'px' } });
+const DESC = 'A 37-page Christmas learning pack for ages 3–5: count the ornaments, trace festive letters, match the pairs and colour by number. Answer keys for every puzzle are included at the back.';
+const desc = K.el('div', { parent: doc, cls: 'desc', style: { left: pad + 'px', top: 78 + titleH + 62 + 'px', width: D0.w - 2 * pad + 'px', fontSize: L.descFs + 'px' } });
+const descH = L.descFs * 1.45 * (tall ? 3.3 : 4);
+const lab3 = K.el('div', { parent: doc, cls: 'lab', html: 'Tags', style: { left: pad + 'px', top: 78 + titleH + 62 + descH + 22 + 'px' } });
+const TAGS = ['christmas worksheets', 'preschool printable', 'counting practice', 'tracing letters', 'matching game', 'holiday activity', 'kids learning pack', 'answer key included', 'ages 3 to 5', 'color by number', 'busy book'].slice(0, tall ? 9 : 11);
+const tags = K.el('div', { parent: doc, cls: 'tags', style: { left: pad + 'px', top: 78 + titleH + 62 + descH + 58 + 'px', width: D0.w - 2 * pad + 'px' },
+  html: TAGS.map((t) => `<span class="tg">${t}<i>×</i></span>`).join('') });
+const tgEls = [...tags.querySelectorAll('.tg')];
+const REMOVED = 4; // "matching game" goes when the seller edits
+const cover = K.el('div', { parent: doc, cls: 'cover', html: `<img src="${K.pub('showcase/christmas-preschool-pack/cover.webp')}">`,
+  style: { right: pad + 'px', top: '34px', width: L.coverW + 'px', height: L.coverW * 1164 / 900 + 'px' } });
+const docTag = K.demoTag('Copy from the List board · sample data', 0, 0);
+const ownerTag = K.demoTag('Cover: example made with MakeAndList by its owner', 0, 0);
+// the seller's idea, pinned to the sheet
+const idea = K.box(0, 0, tall ? 330 : 360, null, { cls: 'idea', html: '<small>Your idea</small>A Christmas pack for ages 3–5: counting, tracing, colouring.' });
+const editBadge = K.box(0, 0, null, null, { cls: 'badge', html: '<b>✎</b> Edited by you', style: { width: 'auto', height: 'auto' } });
+const save = K.box(0, 0, null, null, { cls: 'save', html: 'Save title', style: { width: 'auto', height: 'auto' } });
+const cursor = K.cursor();
+
+// ---------- D: the real listing on the real phone; the stores wait ----------
+const deck = K.phoneDeck(L.phX, L.phY, L.phW, [K.screen('51-phone-listing')]);
+deck.root.style.zIndex = 30;
+const k780 = deck.sw / 780;
+const layer = deck.root.querySelector('.screen > div');
+const mark = K.el('div', { parent: layer, cls: 'mark' });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+const STORES = [['ikas', 'ikas'], ['woocommerce', 'WooCommerce'], ['wix', 'Wix']];
+const stores = STORES.map(([s], i) => K.box(L.storesX, L.storesY + i * 128, L.storeW, null, { cls: 'store',
+  html: `<div class="lg"><img src="${K.pub('platforms/' + s + '.svg')}"${s === 'wix' ? ' style="filter:brightness(0)"' : ''}></div><div class="st"><b></b>Not sent · waiting</div>` }));
+const you = K.box(0, 0, null, null, { cls: 'you', html: 'You choose when.', style: { width: 'auto', height: 'auto' } });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: tall ? 160 : 0, line: 'Written for you.<br>Yours to edit.' });
+
+const T_TITLE = [3.05, 4.0], T_DESC = [3.55, 5.2], T_TAGS = 4.2;
+const T_SEL = 7.0, T_DEL = 7.45, T_RETYPE = [7.55, 8.05], T_TAGX = 8.3, T_SAVE = 8.7;
+
+K.run({
+  id: 'H05', title: 'Listing Copy', dur: DUR, bpm: BPM, music: 'ov-positive-acoustic-guitar-backgro', mood: 'bright', key: 'C', intro: 0, cover: 5.2,
+  series: 'R08', feature: 'Feature 05 / 16 · Listing copy',
+  technique: 'A proof sheet that writes itself: a blank listing draft with a blinking caret, the title typed letter by letter, the description written in, tags popping, all tied to the seller’s own idea on a sticky note; then the seller’s hand takes over — a word selected and retyped, a tag removed, Save; the real phone scrolls the real listing to “Saved. Nothing has gone to a store yet.” while the stores wait unsent',
+  caption: 'MakeAndList writes the listing for you — title, description and tags, from your own idea — and every word is yours to edit. Nothing goes to a store until you choose. Start free at makeandlist.com',
+  short: 'Written for you. Yours to edit.',
+  question: 'What do I get?', gain: 'Time: the listing copy is written; control: you edit and choose',
+  vo: [[0.21, 'The listing is written for you.'], [2.41, 'A title, a description and tags, from your own idea.'], [6.69, 'Every word is yours to edit.'], [9.0, 'Nothing goes to a store until you choose.']],
+  beats: ['0–2.8 s: “The listing, written for you.” — a blank listing draft, a blinking caret, the owner’s real cover', '2.8–6.5 s: the title types, the description writes in, the tags pop; the seller’s idea is pinned to the sheet', '6.5–9 s: the seller edits: a word selected and retyped, a tag removed, Save title', '9–13 s: the real phone scrolls the real listing to “Saved. Nothing has gone to a store yet.”; ikas, WooCommerce and Wix wait, not sent', '13–15 s: end card'],
+  cues: [[0.12, 'pop'], [0.55, 'paper'], [2.55, 'swish'], [T_TITLE[0], 'type'], [3.75, 'type'], [T_TAGS, 'pop'], [4.62, 'pop'], [4.85, 'paper'], [6.3, 'swish'],
+    [T_SEL, 'click'], [T_RETYPE[0], 'type'], [T_TAGX, 'click'], [T_SAVE, 'click'], [8.85, 'ding'], [8.95, 'whoosh'], [11.7, 'chime'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.55 - 550 + Math.sin(T * 0.5) * 160}px, ${H * 0.45 - 550 + Math.cos(T * 0.4) * 120}px)`;
+  chipDraw(T);
+  CAPS.forEach((c, i) => {
+    words(c.ws, T, c.a, c.b, 0.07);
+    hlSweep(c.hls, T, HL[i][0], HL[i][1]);
+    vis(c.el, T >= c.a - 0.05 && (c.b === null || T < c.b + 0.05));
+  });
+
+  // ---------- the sheet (A–C) ----------
+  const dIn = K.p(T, 0.35, 0.95, E.outExpo), dOut = K.p(T, SD - 0.3, SD + 0.05, E.inCubic);
+  doc.style.opacity = dIn * (1 - dOut);
+  doc.style.transform = `translateY(${(1 - dIn) * 140 - dOut * 80}px) rotate(${(1 - dIn) * 3 + Math.sin(T * 0.6) * 0.25}deg)`;
+  vis(doc, T >= 0.3 && T < SD + 0.1);
+  const blink = Math.floor(T * 2.6) % 2 === 0 ? '<span class="caret"></span>' : '<span class="caret" style="opacity:0"></span>';
+  // title: typed, then edited (Matching → Colouring)
+  const full = TITLE_A + TITLE_B + TITLE_C;
+  let tHtml;
+  if (T < T_SEL) {
+    const n = Math.round(full.length * K.p(T, T_TITLE[0], T_TITLE[1], E.linear));
+    tHtml = esc(full.slice(0, n)) + (T < T_TITLE[1] + 0.3 || T < T_TITLE[0] ? blink : '');
+  } else if (T < T_DEL) {
+    tHtml = esc(TITLE_A) + `<span class="sel">${TITLE_B}</span>` + esc(TITLE_C);
+  } else {
+    const n = Math.round(TITLE_B2.length * K.p(T, T_RETYPE[0], T_RETYPE[1], E.linear));
+    const ed = TITLE_B2.slice(0, n);
+    tHtml = esc(TITLE_A) + `<span class="ed">${ed}</span>` + (T < T_SAVE ? blink : '') + esc(TITLE_C);
+  }
+  title.innerHTML = tHtml;
+  const shown = T < T_SEL ? Math.round(full.length * K.p(T, T_TITLE[0], T_TITLE[1], E.linear)) : (TITLE_A + TITLE_B2 + TITLE_C).length;
+  cnt1.textContent = `${shown} / 140`;
+  cnt1.style.opacity = K.p(T, T_TITLE[0], T_TITLE[0] + 0.2, E.linear);
+  // description writes in word by word
+  const dw = DESC.split(' ');
+  const nd = Math.round(dw.length * K.p(T, T_DESC[0], T_DESC[1], E.inOutCubic));
+  desc.innerHTML = esc(dw.slice(0, nd).join(' ')) + (T >= T_DESC[0] && T < T_DESC[1] + 0.2 ? ' <span class="caret" style="width:2px"></span>' : '');
+  [lab2, lab3].forEach((l, i) => { l.style.opacity = K.p(T, [T_DESC[0], T_TAGS][i] - 0.2, [T_DESC[0], T_TAGS][i], E.linear); });
+  tgEls.forEach((t, i) => {
+    const p = K.p(T, T_TAGS + i * 0.08, T_TAGS + 0.35 + i * 0.08, E.outBack);
+    const gone = i === REMOVED ? K.p(T, T_TAGX, T_TAGX + 0.25, E.inCubic) : 0;
+    t.style.opacity = Math.min(1, p * 2) * (1 - gone);
+    t.style.transform = `scale(${(0.6 + 0.4 * p) * (1 - 0.4 * gone)})`;
+    t.style.maxWidth = i === REMOVED ? (1 - gone) * 400 + 'px' : 'none';
+    t.style.padding = i === REMOVED ? `8px ${16 * (1 - gone)}px` : '';
+    t.style.background = i === REMOVED && T >= T_TAGX - 0.3 && T < T_TAGX ? '#FCEBD0' : '';
+  });
+  const cp = K.p(T, 0.6, 1.0, E.outBack);
+  cover.style.opacity = Math.min(1, cp * 2); cover.style.transform = `rotate(${4 + Math.sin(T * 0.8)}deg) scale(${0.7 + 0.3 * cp})`;
+  docTag.style.left = D0.x + 'px'; docTag.style.top = D0.y + D0.h + 14 + 'px';
+  docTag.style.opacity = K.p(T, 3.2, 3.5, E.linear) * (1 - dOut); vis(docTag, T < SD + 0.1);
+  if (tall) docTag.style.top = D0.y - 44 + 'px';
+  ownerTag.style.left = (tall ? D0.x + D0.w - 560 : D0.x + D0.w - 560) + 'px'; ownerTag.style.top = (tall ? D0.y + D0.h + 12 : D0.y - 44) + 'px';
+  ownerTag.style.opacity = dIn * (1 - dOut) * (1 - K.p(T, 3.0, 3.2, E.linear)); vis(ownerTag, T < 3.25);
+  // the idea note flies in on "from your own idea" and pins over the cover's corner
+  const ip = K.p(T, 4.6, 5.1, E.outBack);
+  const ix = D0.x + D0.w - (tall ? 330 : 360) - 10, iy = D0.y + L.coverW * 1164 / 900 - 10;
+  idea.style.left = ix + 'px'; idea.style.top = iy + 'px';
+  idea.style.opacity = Math.min(1, ip * 2) * (1 - K.p(T, SC + 0.1, SC + 0.35, E.linear)) * (1 - dOut);
+  idea.style.transform = `translate(${(1 - ip) * 260}px, ${(1 - ip) * -180}px) rotate(${-4 + (1 - ip) * 20}deg)`;
+  vis(idea, T >= 4.6 && T < SC + 0.4);
+
+  // the seller's edit: the cursor selects "Matching", retypes it, removes a tag, saves
+  const selX = D0.x + pad + L.titleW * 0.55, selY = D0.y + 78 + L.titleFs * 1.2 * 1.6;
+  const tagEl = tgEls[REMOVED];
+  const tagX = D0.x + pad + tagEl.offsetLeft + tagEl.offsetWidth - 22, tagY = D0.y + tags.offsetTop + tagEl.offsetTop + 22;
+  const saveX = D0.x + D0.w - 200, saveY = D0.y + 78 + titleH - 6;
+  save.style.left = saveX + 'px'; save.style.top = saveY + 'px';
+  const svp = K.p(T, 8.1, 8.4, E.outBack);
+  save.style.opacity = Math.min(1, svp * 2) * (1 - K.p(T, SD - 0.3, SD, E.linear));
+  save.style.transform = `scale(${(0.8 + 0.2 * svp) * (T >= T_SAVE && T < T_SAVE + 0.15 ? 0.92 : 1)})`;
+  save.style.background = T >= T_SAVE ? '#DFFF5A' : '#FFFDF8';
+  save.innerHTML = T >= T_SAVE + 0.1 ? 'Saved ✓' : 'Save title';
+  vis(save, T >= 8.1 && T < SD + 0.05);
+  const path = [[SC + 0.3, selX + 260, selY + 160], [T_SEL, selX + 60, selY + 10], [T_DEL + 0.4, selX + 80, selY + 20], [T_TAGX, tagX, tagY], [T_SAVE, saveX + 70, saveY + 26]];
+  const cxp = K.k(T, path.map(([t, x]) => [t, x]), E.inOutCubic), cyp = K.k(T, path.map(([t, , y]) => [t, y]), E.inOutCubic);
+  const press = [T_SEL, T_TAGX, T_SAVE].some((t) => T >= t && T < t + 0.14);
+  cursor.at(cxp, cyp, press);
+  cursor.hide(K.p(T, SC + 0.3, SC + 0.5, E.linear) * (1 - K.p(T, SD - 0.2, SD, E.linear)));
+  const lastPress = [T_SEL, T_TAGX, T_SAVE].filter((t) => T >= t).pop();
+  if (lastPress === undefined) cursor.ripple(0, 0, T, -10);
+  else cursor.ripple(lastPress === T_SEL ? selX + 60 : lastPress === T_TAGX ? tagX : saveX + 70, lastPress === T_SEL ? selY + 10 : lastPress === T_TAGX ? tagY : saveY + 26, T, lastPress);
+  const bp = K.p(T, 7.8, 8.2, E.outBack);
+  editBadge.style.left = D0.x + D0.w - 300 + 'px'; editBadge.style.top = (tall ? D0.y - 34 : D0.y + D0.h - 80) + 'px';
+  editBadge.style.opacity = Math.min(1, bp * 2) * (1 - K.p(T, SD - 0.3, SD, E.linear));
+  editBadge.style.transform = `scale(${0.7 + 0.3 * bp}) rotate(-2deg)`;
+  vis(editBadge, T >= 7.8 && T < SD + 0.05);
+
+  // ---------- D ----------
+  const pIn = K.p(T, SD - 0.05, SD + 0.5, E.outExpo);
+  const nh = 3800 * k780, maxS = nh - deck.sh, maxTop = maxS / k780;
+  const top780 = K.k(T, [[SD, 1180], [9.9, 1260], [10.5, 2300], [11.2, maxTop]], E.inOutCubic);
+  deck.draw(0, [Math.min(1, top780 * k780 / maxS)], 0);
+  deck.root.style.opacity = pIn;
+  deck.root.style.transform = `translateY(${(1 - pIn) * 300}px) rotate(${2 - 2 * pIn + Math.sin(T * 0.7) * 0.4}deg)`;
+  vis(deck.root, T >= SD - 0.05);
+  // the mark: the title field, then the description, then the saved bar
+  const mk = T < 10.3 ? [1424, 98] : T < 11.15 ? [2546, 446] : [3452, 206];
+  mark.style.left = 20 * k780 + 'px'; mark.style.width = 740 * k780 + 'px';
+  mark.style.top = (mk[0] - top780) * k780 + 'px'; mark.style.height = mk[1] * k780 + 'px';
+  mark.style.opacity = K.p(T, 9.5, 9.7, E.linear) * (T > 10.15 && T < 10.45 ? 0 : 1) * (T > 11.0 && T < 11.3 ? 0 : 1);
+  realTag.style.left = L.phX + 'px'; realTag.style.top = L.phY - 44 + 'px';
+  realTag.style.opacity = pIn; vis(realTag, T >= SD);
+  stores.forEach((s, i) => {
+    const p = K.p(T, 9.4 + i * 0.12, 9.85 + i * 0.12, E.outExpo);
+    s.style.opacity = p; s.style.transform = `translateX(${(1 - p) * -80}px)`;
+    vis(s, T >= 9.4);
+  });
+  const yp = K.p(T, 11.6, 12.0, E.outBack);
+  you.style.left = L.storesX + 'px'; you.style.top = L.storesY + 3 * 128 + 20 + 'px';
+  you.style.opacity = Math.min(1, yp * 2); you.style.transform = `scale(${0.7 + 0.3 * yp}) rotate(-2deg)`;
+  vis(you, T >= 11.6);
+
+  end(T);
+});
+</script></body></html>

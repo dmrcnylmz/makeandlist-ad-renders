@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>H13 · Approve Print Orders</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EDE7DB; }
+.bg { position: absolute; inset: 0; background: linear-gradient(180deg, #F6F1E7 0%, #ECE5D8 70%, #E3DACA 100%); }
+.wash { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(50px); }
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.cap { position: absolute; z-index: 40; font: 800 80px/0.98 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; font-weight: 600; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .04em; }
+.cap em.red { background: linear-gradient(transparent 62%, #F6C6BE 62%, #F6C6BE 92%, transparent 92%); }
+.rail { position: absolute; z-index: 20; left: -40px; right: -40px; height: 26px; border-radius: 13px; background: linear-gradient(180deg, #D9D2C4, #9C9486 55%, #7D7568); box-shadow: 0 14px 20px -12px rgba(31,31,31,.55), inset 0 2px 0 rgba(255,255,255,.6); }
+.tk { position: absolute; z-index: 22; transform-origin: 50% 0; }
+.tk .paper { position: absolute; inset: 0; background: #FFFDF8; box-shadow: 0 50px 80px -40px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), 96% 100%, 92% calc(100% - 14px), 88% 100%, 84% calc(100% - 14px), 80% 100%, 76% calc(100% - 14px), 72% 100%, 68% calc(100% - 14px), 64% 100%, 60% calc(100% - 14px), 56% 100%, 52% calc(100% - 14px), 48% 100%, 44% calc(100% - 14px), 40% 100%, 36% calc(100% - 14px), 32% 100%, 28% calc(100% - 14px), 24% 100%, 20% calc(100% - 14px), 16% 100%, 12% calc(100% - 14px), 8% 100%, 4% calc(100% - 14px), 0 100%); }
+.tk .clip { position: absolute; left: 50%; top: -30px; width: 120px; height: 52px; margin-left: -60px; border-radius: 10px; background: linear-gradient(180deg, #C8C0B2, #8D8577); box-shadow: 0 6px 10px -4px rgba(31,31,31,.5); z-index: 3; }
+.tk .in { position: absolute; left: 34px; right: 34px; top: 44px; }
+.tk .k { font: 600 19px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #6B645A; }
+.tk .n { font: 800 64px/1 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; margin-top: 10px; }
+.tk .d { font: 500 24px/1.3 'Archivo'; color: #45403A; margin-top: 10px; }
+.tk .pl { display: inline-flex; align-items: center; gap: 10px; margin-top: 16px; padding: 9px 18px; border-radius: 99px; font: 700 23px 'Archivo'; white-space: nowrap; }
+.tk .pl i { width: 12px; height: 12px; border-radius: 50%; background: currentColor; display: block; }
+.pl.wait { background: #E9EFE3; color: #2F6A3A; box-shadow: inset 0 0 0 1.5px #BFD3B6; }
+.pl.loss { background: #F9DEDA; color: #A5281B; box-shadow: inset 0 0 0 1.5px #E7A99F; }
+.tk .rule { height: 0; border-top: 2px dashed #D9D3C9; margin: 22px 0 18px; }
+.cropbox { position: absolute; overflow: hidden; }
+.cropbox img { position: absolute; left: 0; top: 0; display: block; }
+.mark { position: absolute; z-index: 2; background: #DFFF5A; mix-blend-mode: multiply; border-radius: 6px; }
+.stamp { position: absolute; z-index: 30; padding: 14px 26px; border: 7px solid #C2321F; border-radius: 14px; color: #C2321F; font: 900 44px/1 'Archivo'; letter-spacing: .04em; text-transform: uppercase; background: rgba(255,248,244,.7); white-space: nowrap; }
+.toast { position: absolute; z-index: 45; display: flex; align-items: center; gap: 14px; padding: 18px 28px; border-radius: 20px; background: #1F1F1F; color: #FAF7EE; font: 700 27px/1.25 'Archivo'; box-shadow: 0 30px 50px -24px rgba(31,31,31,.8); white-space: nowrap; }
+.toast b { color: #DFFF5A; }
+.foot { position: absolute; z-index: 44; white-space: nowrap; font: 700 25px 'Archivo'; padding: 13px 24px; border-radius: 99px; background: #FFFDF8; color: #1F1F1F; box-shadow: 0 0 0 2px #1F1F1F; }
+.prod { position: absolute; z-index: 24; }
+.prod img { width: 100%; display: block; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// H13 — Approve print orders (Feature 13 / 16). An order rail, like a kitchen's: a print order slides onto it as a paper
+// ticket and waits. The ticket's money block is the real order screen (demo workspace), revealed line by line as Marian
+// names buyer paid → the partner's price → what the sale leaves. The rail slides on to a second ticket: a loss, stamped,
+// with the real "Approve 1 and send · Also approve 1 at a loss…" choice — the loss stays out unless it gets its own yes.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 99.4, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian (speech ≈ 1.10–2.45 · 2.73–7.93 · 8.91–11.45); impacts in the breaths.
+const VO = [[0.3, 'A print order comes in.'], [2.6, "It waits for you, with what the buyer paid, the partner's cost and your margin."],
+  [8.1, 'An order at a loss needs its own yes.']];
+const T_IN = 0.25, T_ST = 2.5, T_R = [5.25, 6.35, 7.3], T_PAN = 7.95, T_STAMP = 8.5, T_TAP = 11.55;
+
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 370, capFs: 80, railY: 560, tkX: 170, tkY: 590, tkW: 740, tkH: 680, tkBH: 560, foot: 1170, tagY: 1196 }
+  : { chip: [60, 56], capX: 60, capY: 130, capFs: 70, railY: 300, tkX: 220, tkY: 330, tkW: 640, tkH: 640, tkBH: 540, foot: 1000, tagY: 1278 };
+
+K.box(0, 0, W, H, { cls: 'bg' });
+const washes = [0, 1].map((i) => K.box(0, 0, 900, 900, { cls: 'wash', style: { background: ['rgba(255,240,214,.7)', 'rgba(223,255,90,.16)'][i] } }));
+const rail = K.box(0, L.railY, W, 26, { cls: 'rail' });
+
+// crop helper: a window onto a real screen (natural width nat), scaled to width dw
+function crop(parent, src, nat, sx, sy, sw, sh, x, y, dw) {
+  const s = dw / sw;
+  const box = K.el('div', { parent, cls: 'cropbox', style: { left: x + 'px', top: y + 'px', width: dw + 'px', height: sh * s + 'px' } });
+  K.el('img', { parent: box, src, style: { width: nat * s + 'px', transform: `translate(${-sx * s}px, ${-sy * s}px)` } });
+  return { box, s, h: sh * s };
+}
+
+// ---------- ticket A: #1088, the real order's money block ----------
+const tkA = K.box(L.tkX, L.tkY, L.tkW, L.tkH, { cls: 'tk', html: '<div class="paper"></div><div class="clip"></div>' });
+const inA = K.el('div', { parent: tkA, cls: 'in', html: `<div class="k">Production order · WooCommerce → DE</div><div class="n">Order #1088</div>
+  <div class="d">1 × art print 40 × 50 cm · paid by the buyer</div><div class="pl wait"><i></i>Waiting for your approval</div><div class="rule"></div>` });
+const plA = inA.querySelector('.pl');
+const iw = L.tkW - 68;
+const ghost = crop(tkA, K.screen('35-production-order-shipping'), 1440, 938, 330, 420, 238, 34, tall ? 280 : 270, L.tkW - 68);
+ghost.box.style.filter = 'blur(5px) grayscale(1)';
+const money = crop(tkA, K.screen('35-production-order-shipping'), 1440, 938, 330, 420, 238, 34, tall ? 280 : 270, iw);
+const ROWY = [[351 - 330 - 12, 26], [379 - 330 - 12, 26], [407 - 330 - 12, 26], [500 - 330 - 14, 56]]; // buyer paid · partner price · shipping · what it leaves
+const marks = ROWY.map(([y, h]) => K.el('div', { parent: money.box, cls: 'mark', style: { left: '8px', top: y * money.s + 'px', height: h * money.s + 'px', width: '0px' } }));
+
+// ---------- ticket B: #1090, a loss ----------
+const tkB = K.box(L.tkX, L.tkY, L.tkW, L.tkBH, { cls: 'tk', html: '<div class="paper"></div><div class="clip"></div>' });
+const inB = K.el('div', { parent: tkB, cls: 'in', html: `<div class="k">Production order · WooCommerce → FR</div><div class="n">Order #1090</div>
+  <div class="d">The partner’s price is more than the buyer paid.</div><div class="pl loss"><i></i>Loss · −€4.39</div><div class="rule"></div>` });
+const choice = crop(tkB, K.screen('34-production-approve-several'), 1440, 318, 860, 372, 48, 34, tall ? 300 : 290, iw);
+K.el('div', { parent: tkB, cls: 'in', style: { top: (tall ? 300 : 290) + choice.h + 22 + 'px' }, html: '<div class="d" style="margin:0">Left out unless you approve at a loss.</div>' });
+const stampB = K.box(0, 0, null, null, { cls: 'stamp', parent: tkB, style: { width: 'auto', height: 'auto' }, html: 'Its own yes' });
+const cursor = K.cursor();
+
+// ---------- captions ----------
+const mkCap = (txt, em, red) => {
+  const c = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  const w = K.words(c, txt);
+  em.forEach((i) => { const j = i < 0 ? w.length + i : i; w[j].innerHTML = `<em${red ? ' class="red"' : ''}>${w[j].innerHTML.trim()}</em> `; });
+  return { c, w };
+};
+const cap1 = mkCap('A print order\ncomes in.', [-1]);
+const cap2 = mkCap('See the margin\nbefore you approve.', [-1]);
+const cap3 = mkCap('A loss needs\nits own yes.', [-2, -1], true);
+
+const realTag = K.demoTag('Real app · demo workspace · sample figures', 0, 0); realTag.style.zIndex = 61;
+const toast = K.box(0, 0, null, null, { cls: 'toast', style: { width: 'auto', height: 'auto' }, html: '<svg width="30" height="30" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#DFFF5A" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>#1088 approved · sent to your partner<br><b>#1090 waits for its own yes</b></span>' });
+const foot = K.box(0, L.foot, null, null, { cls: 'foot', style: { width: 'auto', height: 'auto' }, html: 'Printing is paid from your partner account · never Credits' });
+const parcel = K.box(0, 0, tall ? 300 : 240, null, { cls: 'prod', html: `<img src="${K.pub('r07/k11-parcel.webp')}">` });
+const tube = K.box(0, 0, tall ? 330 : 270, null, { cls: 'prod', html: `<img src="${K.pub('r07/k12-poster-tube.webp')}">` });
+const conceptTag = K.demoTag('Concept products · AI-generated', 0, 0);
+
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>Feature 13</b><i>/ 16 ·</i><span>Approve print orders</span>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Every print order waits for you.' });
+
+// the rail's travel: A arrives from the right, then the rail slides on to B
+const railX = (T) => K.lerp(W, 0, K.p(T, T_IN, T_IN + 0.75, E.outExpo)) - W * K.p(T, T_PAN, T_PAN + 0.6, E.inOutCubic);
+const swing = (T, t0) => { const u = Math.max(0, T - t0); return 7 * Math.exp(-u * 2.6) * Math.cos(u * 7.5) + Math.sin(T * 1.1 + t0) * 0.6; };
+
+K.run({
+  id: 'H13', title: 'Approve Print Orders', dur: DUR, bpm: BPM, music: 'ov-the-lucky-ticket', mood: 'bright', key: 'D', intro: 0, cover: 7.6,
+  technique: 'A kitchen-style order rail: each print order clips on as a paper ticket and swings to rest; ticket one holds the real order screen’s money block, highlighted line by line as she names buyer paid, the partner’s price and what the sale leaves; the rail slides on to a loss ticket, stamped, holding the real “Approve 1 and send · Also approve 1 at a loss…” choice; a tap approves only the profitable one',
+  caption: 'Approve print orders: every order from your stores waits for you with what the buyer paid, the partner’s cost and what the sale leaves — and an order that would lose money needs its own yes. Printing is paid from your own partner account, never from Credits. Start free at makeandlist.com',
+  short: 'Every print order waits for your yes.',
+  vo: VO,
+  beats: ['0–2.6 s: a print order clips onto the rail — #1088, paid by the buyer, waiting for your approval', '2.6–8 s: the real order screen: buyer paid, partner price and shipping, what the sale leaves (sample figures)', '8–11.5 s: the rail moves on — #1090 is a loss; stamped “its own yes”; the real approve / approve-at-a-loss choice', '11.5–13 s: tap “Approve 1 and send” — #1088 goes to your partner, #1090 waits; paid from your partner account', '13–15 s: end card'],
+  cues: [[0.05, 'swish'], [T_IN, 'paper'], [0.6, 'notify'], [T_ST, 'pop'], [T_R[0], 'pop'], [T_R[1], 'pop'], [T_R[2], 'coin'], [T_PAN, 'whoosh'], [T_PAN + 0.3, 'paper'], [T_STAMP, 'stamp'],
+    [T_TAP, 'click'], [T_TAP + 0.2, 'chime'], [12.2, 'box'], [13.0, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  washes[0].style.transform = `translate(${W * 0.7 - 450 + Math.sin(T * 0.4) * 120}px, ${H * 0.25 - 450 + Math.cos(T * 0.35) * 80}px)`;
+  washes[1].style.transform = `translate(${W * 0.15 - 450 + Math.cos(T * 0.5) * 100}px, ${H * 0.75 - 450 + Math.sin(T * 0.45) * 90}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, 12.85, 13.0, E.linear)); chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`; chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  const rx = railX(T);
+  rail.style.transform = `translateY(${Math.sin(T * 0.9) * 1.5}px)`;
+  // ticket A
+  tkA.style.transform = `translateX(${rx}px) rotate(${swing(T, T_IN + 0.5) * (1 - K.p(T, T_PAN, T_PAN + 0.3, E.linear)) + K.p(T, T_PAN, T_PAN + 0.6, E.inOutCubic) * -6}deg)`;
+  tkA.style.visibility = rx > -W + 10 ? 'visible' : 'hidden';
+  const sp = K.p(T, T_ST, T_ST + 0.35, E.outBack);
+  plA.style.transform = `scale(${0.6 + 0.4 * sp})`; plA.style.opacity = Math.min(1, sp * 2);
+  // reveal the money block line by line (clip from the bottom), a marker sweeps each line
+  const rev = [ROWY[0][0] + 30, ROWY[2][0] + 30, 238];
+  let clipTo = 0;
+  if (T >= T_R[0] - 0.05) clipTo = K.lerp(0, rev[0], K.p(T, T_R[0] - 0.05, T_R[0] + 0.25, E.outCubic));
+  if (T >= T_R[1] - 0.05) clipTo = K.lerp(rev[0], rev[1], K.p(T, T_R[1] - 0.05, T_R[1] + 0.3, E.outCubic));
+  if (T >= T_R[2] - 0.05) clipTo = K.lerp(rev[1], rev[2], K.p(T, T_R[2] - 0.05, T_R[2] + 0.35, E.outCubic));
+  money.box.style.clipPath = `inset(0 0 ${Math.max(0, money.h - clipTo * money.s)}px 0)`;
+  ghost.box.style.opacity = 0.35 * K.p(T, 3.3, 3.9, E.linear);
+  const mt = [T_R[0], T_R[1], T_R[1] + 0.25, T_R[2]];
+  marks.forEach((m, i) => { m.style.width = (iw - 16) * K.p(T, mt[i] + 0.1, mt[i] + 0.5, E.outCubic) + 'px'; m.style.opacity = 0.55; });
+
+  // ticket B
+  tkB.style.transform = `translateX(${rx + W}px) rotate(${swing(T, T_PAN + 0.5)}deg)`;
+  tkB.style.visibility = rx + W < W - 10 ? 'visible' : 'hidden';
+  const st = K.p(T, T_STAMP, T_STAMP + 0.16, E.outCubic);
+  stampB.style.left = iw * 0.42 + 'px'; stampB.style.top = (tall ? 452 : 440) + 'px';
+  stampB.style.opacity = st * (1 - K.p(T, T_TAP + 0.05, T_TAP + 0.25, E.linear)); stampB.style.transform = `rotate(-9deg) scale(${K.lerp(1.7, 1, st)})`;
+  // the tap on "Approve 1 and send" (inside the choice crop)
+  const bx = L.tkX + 34 + (405 - 318) * choice.s, by = L.tkY + (tall ? 300 : 290) + (883 - 860) * choice.s;
+  const cIn = K.p(T, 10.6, 11.4, E.inOutCubic);
+  cursor.at(K.lerp(W * 0.85, bx, cIn), K.lerp(H * 0.85, by, cIn), T >= T_TAP && T < T_TAP + 0.15);
+  cursor.hide(K.p(T, 10.5, 10.7, E.linear) * (1 - K.p(T, 12.6, 12.9, E.linear)));
+  cursor.ripple(bx + 10, by + 8, T, T_TAP);
+
+  // captions
+  K.reveal(cap1.w, T, 0.35, { kind: 'up', stagger: 0.07, dur: 0.5, out: 2.65 });
+  cap1.c.style.visibility = T < 3.1 ? 'visible' : 'hidden';
+  K.reveal(cap2.w, T, 2.85, { kind: 'up', stagger: 0.06, dur: 0.5, out: T_PAN - 0.1 });
+  cap2.c.style.visibility = T >= 2.8 && T < T_PAN + 0.4 ? 'visible' : 'hidden';
+  K.reveal(cap3.w, T, T_PAN + 0.4, { kind: 'up', stagger: 0.06, dur: 0.5 });
+  cap3.c.style.visibility = T >= T_PAN + 0.35 ? 'visible' : 'hidden';
+
+  realTag.style.left = L.tkX + 'px'; realTag.style.top = L.tkY + L.tkH + 18 + 'px';
+  realTag.style.opacity = K.p(T, T_R[0], T_R[0] + 0.4, E.linear) * (1 - K.p(T, 11.6, 11.8, E.linear));
+
+  // pay-off
+  const tp = K.p(T, T_TAP + 0.2, T_TAP + 0.6, E.outBack);
+  toast.style.left = W / 2 + 'px'; toast.style.top = L.tkY + (tall ? 446 : 432) + 'px';
+  toast.style.opacity = Math.min(1, tp * 2); toast.style.transform = `translateX(-50%) translateY(${(1 - tp) * 30}px) scale(${0.85 + 0.15 * tp})`;
+  const fp = K.p(T, 12.0, 12.4, E.outExpo);
+  foot.style.left = W / 2 + 'px'; foot.style.opacity = fp; foot.style.transform = `translateX(-50%) translateY(${(1 - fp) * 20}px)`;
+  const pp = K.p(T, 12.1, 12.6, E.outBack);
+  parcel.style.left = W - (tall ? 330 : 270) + 'px'; parcel.style.top = (tall ? 1290 : 1080) + (1 - pp) * 200 + 'px'; parcel.style.opacity = Math.min(1, pp * 2);
+  parcel.style.transform = `rotate(${(1 - pp) * 10 - 3}deg)`;
+  tube.style.left = (tall ? 40 : 40) + 'px'; tube.style.top = (tall ? 1340 : 1130) + (1 - pp) * 200 + 'px'; tube.style.opacity = Math.min(1, pp * 2);
+  tube.style.transform = `rotate(${(1 - pp) * -10 + 4}deg)`;
+  conceptTag.style.left = (tall ? 65 : 60) + 'px'; conceptTag.style.top = (tall ? 1262 : 1290) + 'px'; conceptTag.style.opacity = pp;
+
+  end(T);
+});
+</script></body></html>
