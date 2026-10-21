@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D15 · Tiny Shop, Big Catalogue</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #E9E2D3; }
+.world { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
+.tile { position: absolute; overflow: hidden; background: #FFFDF8; border-radius: 6px; box-shadow: 0 14px 22px -12px rgba(50,36,20,.55), 0 0 0 5px #FFFDF8; }
+.tile img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.tile .dimT { position: absolute; inset: 0; background: #E9E2D3; opacity: 0; }
+.tile .ring { position: absolute; inset: -5px; border-radius: 8px; box-shadow: inset 0 0 0 7px #DFFF5A; opacity: 0; }
+.shopLbl { position: absolute; font: 600 9px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #45403A; white-space: nowrap; }
+.panel { position: absolute; z-index: 40; border-radius: 30px; background: rgba(255,253,248,.94); box-shadow: 0 40px 80px -40px rgba(50,36,20,.55); overflow: hidden; }
+.line { position: absolute; left: 0; right: 0; text-align: center; font: 800 76px/1.02 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; white-space: nowrap; }
+.line em { font-style: italic; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); padding: 0 .05em; }
+.kick { position: absolute; left: 0; right: 0; text-align: center; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #6B645A; }
+.hookTop { position: absolute; z-index: 41; text-align: center; font: 800 112px/0.96 'Playfair Display'; letter-spacing: -0.025em; color: #FFFDF8; text-shadow: 0 6px 40px rgba(30,20,10,.55); }
+.topShade { position: absolute; left: 0; right: 0; top: 0; z-index: 39; background: linear-gradient(180deg, rgba(25,18,10,.55), rgba(25,18,10,0)); pointer-events: none; }
+.appBg { position: absolute; inset: 0; z-index: 50; background: #F4EFE4; }
+.cap { position: absolute; z-index: 60; font: 800 58px/1.04 'Playfair Display'; letter-spacing: -0.015em; color: #1F1F1F; }
+.cap em { font-style: normal; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); }
+.step { position: absolute; z-index: 60; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #6B645A; }
+.badges { position: absolute; z-index: 61; display: flex; flex-wrap: wrap; gap: 12px; }
+.badges span { display: flex; align-items: center; height: 64px; padding: 0 20px; border-radius: 16px; background: #FFFDF8; box-shadow: 0 16px 30px -18px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; }
+.badges img { height: 30px; width: auto; display: block; }
+.chipD { position: absolute; z-index: 62; white-space: nowrap; font: 700 28px 'Archivo'; color: #1F1F1F; background: #DFFF5A; padding: 14px 24px; border-radius: 99px; }
+.fin { position: absolute; z-index: 60; text-align: center; font: 800 104px/0.98 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.fin em { font-style: italic; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D15 — "A tiny shop with a big catalogue." We start on the window of a small (fictional) stationery shop; the camera
+// pulls back in one continuous logarithmic zoom and the shop becomes one frame on a wall of products — prints,
+// planners, tees, mugs, cards. Categories light up on the beat, then the wall hands over to the real app: every product
+// in one library, sent to the seller's own stores as drafts.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 107.7, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const T_ZOOM0 = B(1.5), T_ZOOM1 = B(8), T_CAT = B(9), T_APP = B(14.5), T_STORES = B(18.5), T_FIN = B(22);
+const OTHERS = ['g01-botanical-print', 'g02-sunset-tee', 'g03-slow-mornings-mug', 'g04-monstera-tote', 'g05-kids-activity-book', 'g06-wedding-planner',
+  'g07-sticker-sheet', 'g08-gallery-wall', 'g09-mountain-hoodie', 'g10-greeting-cards', 'g11-lemon-notebook', 'g12-nursery-art', 'g13-recipe-cards',
+  'g14-calendar', 'g15-halloween-sheets', 'g16-christmas-tags', 'g17-sketch-to-print', 'g22-tee-rack', 'g23-mug-set', 'g24-colouring-book', 'g18-creator-desk', 'g21-packing', 'g20-parcel'];
+const CATS = [
+  { nm: 'Prints', ids: ['g01', 'g08', 'g12', 'g17'] },
+  { nm: 'Planners', ids: ['g06', 'g13', 'g14', 'g11'] },
+  { nm: 'Kids’ packs', ids: ['g05', 'g15', 'g24'] },
+  { nm: 'Tees', ids: ['g02', 'g09', 'g22'] },
+  { nm: 'Mugs & totes', ids: ['g03', 'g23', 'g04'] },
+  { nm: 'Cards', ids: ['g10', 'g16', 'g07'] },
+];
+const COLS = 9, ROWS = 11, CC = 4, CR = 5, TW = 200, TH = 300, G = 26;
+
+const L = tall
+  ? { s0: 6.9, s1: 0.78, panelY: 286, panelH: 190, hookY: 300, oy: 120, phX: 250, phY: 470, phW: 580, capY: 300, finY: 420 }
+  : { s0: 5.6, s1: 0.62, panelY: 60, panelH: 170, hookY: 70, oy: 70, phX: 60, phY: 330, phW: 960, capY: 70, finY: 420 };
+
+// ---------- the wall ----------
+const world = K.box(0, 0, 0, 0, { cls: 'world' });
+const tiles = [];
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  const centre = r === CR && c === CC;
+  const id = centre ? 'g19-boutique' : OTHERS[(r * 7 + c * 3 + 11) % OTHERS.length];
+  const x = (c - CC) * (TW + G) - TW / 2, y = (r - CR) * (TH + G) - TH / 2;
+  const t = K.box(x, y, TW, TH, { parent: world, cls: 'tile', html: `<img src="${K.pub('r04/' + id + '.webp')}" style="object-position:${centre ? '50% 50%' : 30 + seed(r * 13 + c) * 40 + '% ' + (35 + seed(c * 7 + r) * 30) + '%'}"><div class="dimT"></div><div class="ring"></div>` });
+  tiles.push({ t, id: id.slice(0, 3), r, c, centre, dim: t.querySelector('.dimT'), ring: t.querySelector('.ring'), x, y });
+}
+const shopLbl = K.box(-TW / 2, TH / 2 + 12, TW, null, { parent: world, cls: 'shopLbl', html: 'Paper & Pines · a fictional shop' });
+
+const topShade = K.box(0, H * 0.4, W, H * 0.6, { cls: 'topShade', style: { background: 'linear-gradient(0deg, rgba(25,18,10,.7), rgba(25,18,10,0))' } });
+const hookTop = K.box(65, tall ? 1010 : 1110, W - 130, null, { cls: 'hookTop', style: { fontSize: (tall ? 112 : 96) + 'px' } });
+const hookTopW = K.words(hookTop, 'A tiny shop');
+
+const panel = K.box(65, L.panelY, W - 130, L.panelH, { cls: 'panel' });
+const kick = K.el('div', { parent: panel, cls: 'kick', style: { top: '30px' } });
+const lineA = K.el('div', { parent: panel, cls: 'line', html: 'with a <em>big catalogue.</em>', style: { top: (tall ? 72 : 64) + 'px', fontSize: (tall ? 68 : 66) + 'px' } });
+const lineB = K.el('div', { parent: panel, cls: 'line', style: { top: (tall ? 72 : 64) + 'px', fontSize: (tall ? 76 : 70) + 'px' } });
+const conceptTag = K.demoTag('Concept images · AI-generated', 65, tall ? 1196 : 1268);
+
+// ---------- the real app ----------
+const appBg = K.box(0, 0, W, H, { cls: 'appBg' });
+let shotA, shotB, deck = null, brA = null, brB = null;
+if (tall) {
+  deck = K.phoneDeck(L.phX, L.phY, L.phW, [K.screen('23-phone-products'), K.screen('25-phone-stores')]);
+  deck.root.style.zIndex = 58;
+} else {
+  brA = K.browser(L.phX, L.phY - 40, L.phW, 800, K.screen('10-products'), 'makeandlist.com/products');
+  brB = K.browser(L.phX, L.phY - 40, L.phW, 800, K.screen('12-stores'), 'makeandlist.com/stores');
+  [brA, brB].forEach((b) => { b.root.style.zIndex = 58; b.img.style.width = '1296px'; b.img.style.left = '-262px'; });
+}
+const step = K.box(65, L.capY - 40, W - 130, null, { cls: 'step' });
+const caps = [tall ? 'Every product,<br><em>one library.</em>' : 'Every product, <em>one library.</em>', tall ? 'Sent to <em>your</em> stores,<br>after your yes.' : 'Sent to <em>your</em> stores, after your yes.']
+  .map((t) => K.box(65, L.capY, W - 130, null, { cls: 'cap', html: t, style: { fontSize: (tall ? 64 : 56) + 'px' } }));
+const STORES = ['ikas', 'woocommerce', 'shopware', 'gumroad', 'salla'];
+const badges = K.box(65, tall ? 1100 : 1100, W - 130, null, { cls: 'badges', html: STORES.map((s) => `<span><img src="${K.pub('platforms/' + s + '.svg')}"></span>`).join('') });
+const badgeEls = [...badges.querySelectorAll('span')];
+const draft = K.box(0, 0, null, null, { cls: 'chipD', html: 'Draft until you say yes', style: { width: 'auto', height: 'auto' } });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0); realTag.style.zIndex = 70;
+
+const fin = K.box(65, L.finY, W - 130, null, { cls: 'fin', style: { fontSize: (tall ? 104 : 96) + 'px' } });
+const finW = K.words(fin, 'Small shop.\nBig catalogue.');
+finW[2].innerHTML = '<em>Big</em> ';
+const finImg = K.box((W - (tall ? 300 : 240)) / 2, L.finY + (tall ? 280 : 250), tall ? 300 : 240, (tall ? 300 : 240) * 1.4, { cls: 'tile', html: `<img src="${K.pub('r04/g19-boutique.webp')}">` });
+finImg.style.zIndex = 60;
+const finTag = K.demoTag('Concept image · fictional shop', 0, 0); finTag.style.zIndex = 61;
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'One place for<br>every product.' });
+
+K.run({
+  id: 'D15', title: 'Tiny Shop, Big Catalogue', dur: DUR, bpm: BPM, music: 'blue-skies', mood: 'warm', key: 'F', intro: 0.0, cover: 4.6,
+  technique: 'One continuous logarithmic pull-back: the window of a small fictional shop becomes one frame on a wall of ninety-nine concept product frames; categories light up on the beat with lime rings while the rest of the wall dims, then the wall gives way to the real Products library and the Stores screen',
+  caption: 'A small shop can carry a big catalogue: prints, planners, kids’ packs, tees, mugs and cards, every product in one library, sent to your own stores as drafts — nothing goes live without your yes. Products shown are concept images; the shop is fictional. Start free at makeandlist.com',
+  short: 'A tiny shop with a big catalogue.',
+  beats: ['0–0.8 s: “A tiny shop” — a small shop window', '0.8–4.5 s: pull back: “…with a big catalogue.” — a wall of products', '5–7.8 s: prints, planners, kids’ packs, tees, mugs, cards light up on the beat', '8–10.3 s: the real Products library', '10.3–12.3 s: your own stores — drafts until your yes', '12.3–13 s: “Small shop. Big catalogue.” · 13–15 s end card'],
+  cues: [[0.0, 'hit'], [T_ZOOM0 - 0.1, 'riser'], [T_ZOOM0 + 0.2, 'whoosh'], [B(4), 'pop'], ...CATS.map((_, i) => [B(9 + i * 0.833), 'pop']).map(([t, k]) => [+t.toFixed(3), k]),
+    [T_APP - 0.05, 'whoosh'], [B(15.5), 'pop'], [T_STORES, 'swish'], ...STORES.map((_, i) => [+(B(19.5) + i * 0.08).toFixed(3), i % 2 ? 'click' : 'pop']).slice(0, 3), [B(21), 'chime'], [T_FIN - 0.05, 'whoosh'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // ---------- the pull-back (log scale, so the speed feels constant) ----------
+  const zp = K.p(T, T_ZOOM0, T_ZOOM1, E.inOutCubic);
+  const pre = K.p(T, 0, T_ZOOM0, E.linear);
+  const s = Math.exp(K.lerp(Math.log(L.s0 * (1.0 + 0.04 * pre)), Math.log(L.s1), zp)) * (1 - 0.03 * K.p(T, T_ZOOM1, T_APP, E.linear));
+  const drift = K.p(T, T_ZOOM1 - 1, T_APP, E.inOutCubic);
+  const oy = K.lerp(0, L.oy, zp) + drift * 30;
+  world.style.transform = `translate(${W / 2 + Math.sin(T * 0.35) * 12 * zp}px, ${H / 2 + oy}px) rotate(${-1.2 * zp + Math.sin(T * 0.3) * 0.3}deg) scale(${s})`;
+  shopLbl.style.opacity = K.p(T, T_ZOOM0 + 1, T_ZOOM0 + 1.6, E.linear);
+
+  // hook
+  K.reveal(hookTopW, T, 0.0, { kind: 'up', stagger: 0.08, dur: 0.5, out: T_ZOOM0 + 0.3 });
+  topShade.style.opacity = 1 - K.p(T, T_ZOOM0, T_ZOOM0 + 1, E.linear);
+
+  // panel: "with a big catalogue." then the categories
+  const pIn = K.p(T, T_ZOOM0 + 0.5, T_ZOOM0 + 1.1, E.outExpo), pOut = K.p(T, T_APP - 0.3, T_APP, E.inCubic);
+  panel.style.opacity = pIn * (1 - pOut);
+  panel.style.transform = `translateY(${(1 - pIn) * -40}px)`;
+  let ci = -1; CATS.forEach((_, i) => { if (T >= B(9 + i * 0.833)) ci = i; });
+  const allOn = T >= B(14) - 0.05;
+  if (ci < 0) { kick.innerHTML = 'Paper & Pines · fictional'; lineA.style.opacity = 1; lineB.style.opacity = 0; }
+  else {
+    lineA.style.opacity = 0; lineB.style.opacity = 1;
+    lineB.innerHTML = allOn ? 'All in <em>one place.</em>' : `<em>${CATS[ci].nm}.</em>`;
+    kick.innerHTML = allOn ? 'Six kinds of product' : `${String(ci + 1).padStart(2, '0')} / 06`;
+    const a = allOn ? B(14) : B(9 + ci * 0.833), lp = K.p(T, a - 0.05, a + 0.3, E.outExpo);
+    lineB.style.transform = `translateY(${(1 - lp) * 40}px)`;
+  }
+
+  // category highlight: the matching frames ring in lime, the rest dim
+  tiles.forEach((tl, k) => {
+    const on = ci >= 0 && !allOn && CATS[ci].ids.includes(tl.id);
+    const dimOn = ci >= 0 && !allOn && !on;
+    tl.dim.style.opacity = dimOn ? 0.62 : 0;
+    tl.ring.style.opacity = on ? 1 : allOn && !tl.centre ? 0 : 0;
+    tl.t.style.transform = on ? `scale(${1.08})` : 'none';
+    tl.t.style.boxShadow = on ? '0 0 0 12px #DFFF5A, 0 30px 40px -12px rgba(50,36,20,.7)' : '';
+    tl.t.style.zIndex = on ? 2 : 1;
+    if (tl.centre) tl.ring.style.opacity = T > T_ZOOM0 + 0.8 && ci < 0 ? K.p(T, T_ZOOM0 + 0.8, T_ZOOM0 + 1.2, E.linear) : 0;
+  });
+  conceptTag.style.opacity = 1 - K.p(T, T_APP - 0.2, T_APP, E.linear);
+
+  // ---------- the real app ----------
+  const aIn = K.p(T, T_APP - 0.1, T_APP + 0.45, E.outExpo), aOut = K.p(T, T_FIN - 0.3, T_FIN + 0.05, E.inCubic);
+  appBg.style.opacity = Math.min(1, aIn * 1.5);
+  appBg.style.visibility = aIn > 0 ? 'visible' : 'hidden';
+  const sw = K.p(T, T_STORES - 0.15, T_STORES + 0.4, E.inOutCubic);
+  if (deck) {
+    const posAt = (t) => K.p(t, T_STORES - 0.15, T_STORES + 0.4, E.inOutCubic);
+    deck.draw(posAt(T), [K.p(T, T_APP + 0.5, T_STORES, E.inOutCubic) * 0.08, 0.16], posAt(T) - posAt(T - 1 / 30));
+    deck.root.style.opacity = aIn * (1 - aOut);
+    deck.root.style.visibility = aIn > 0 && aOut < 1 ? 'visible' : 'hidden';
+    deck.root.style.transform = `translateY(${(1 - aIn) * 260}px) rotate(${Math.sin(T * 0.8) * 0.4}deg)`;
+  } else {
+    brA.scroll(K.p(T, T_APP + 0.5, T_STORES, E.inOutCubic) * 120);
+    brB.scroll(60);
+    brA.root.style.opacity = aIn * (1 - sw) * (1 - aOut);
+    brB.root.style.opacity = sw * (1 - aOut);
+    brA.root.style.transform = `translateY(${(1 - aIn) * 200}px) translateX(${-sw * 120}px)`;
+    brB.root.style.transform = `translateX(${(1 - sw) * 160}px)`;
+    brA.root.style.visibility = aIn > 0 && sw < 1 && aOut < 1 ? 'visible' : 'hidden';
+    brB.root.style.visibility = sw > 0 && aOut < 1 ? 'visible' : 'hidden';
+  }
+  caps.forEach((c, k) => {
+    const a = k === 0 ? T_APP + 0.1 : T_STORES + 0.1, b = k === 0 ? T_STORES - 0.1 : T_FIN - 0.2;
+    const p = K.p(T, a, a + 0.45, E.outExpo), o = K.p(T, b - 0.15, b + 0.1, E.inCubic);
+    c.style.opacity = p * (1 - o); c.style.transform = `translateY(${(1 - p) * 30}px)`;
+    c.style.visibility = T >= a && T < b + 0.1 ? 'visible' : 'hidden';
+  });
+  step.innerHTML = T < T_STORES ? 'Products' : 'Stores';
+  step.style.opacity = aIn * (1 - aOut);
+  // store badges + the draft chip during the stores beat
+  badgeEls.forEach((b, i) => {
+    const p = K.p(T, B(19.5) + i * 0.08, B(19.5) + i * 0.08 + 0.4, E.outBack) * (1 - aOut);
+    b.style.opacity = Math.min(1, p * 2); b.style.transform = `translateY(${(1 - p) * 30}px) scale(${0.8 + 0.2 * p})`;
+  });
+  badges.style.top = (tall ? 1060 : 1150) + 'px';
+  badges.style.visibility = !tall && T >= B(19.5) && aOut < 1 ? 'visible' : 'hidden';
+  const dp = K.p(T, B(21), B(21) + 0.4, E.outBack) * (1 - aOut);
+  draft.style.opacity = Math.min(1, dp * 2);
+  draft.style.left = (tall ? W - 65 : W - 60) + 'px'; draft.style.top = (tall ? 436 : 300) + 'px';
+  draft.style.transform = `translateX(-100%) rotate(-3deg) scale(${0.7 + 0.3 * dp})`;
+  realTag.style.left = (tall ? L.phX + 24 : L.phX + 20) + 'px'; realTag.style.top = (tall ? 1000 : L.phY + 776) + 'px';
+  if (tall) { realTag.style.left = '65px'; realTag.style.top = '448px'; }
+  realTag.style.opacity = aIn * (1 - aOut);
+
+  // ---------- close ----------
+  K.reveal(finW, T, T_FIN, { kind: 'up', stagger: 0.07, dur: 0.5 });
+  fin.style.visibility = T >= T_FIN - 0.05 ? 'visible' : 'hidden';
+  const fi = K.p(T, T_FIN + 0.15, T_FIN + 0.7, E.outBack);
+  finImg.style.opacity = K.p(T, T_FIN + 0.15, T_FIN + 0.3, E.linear);
+  finImg.style.transform = `translateY(${(1 - fi) * 60}px) rotate(${-3 * fi + Math.sin(T * 1.5)}deg) scale(${0.85 + 0.15 * fi})`;
+  finTag.style.opacity = finImg.style.opacity;
+  finTag.style.left = (W - 330) / 2 + 'px'; finTag.style.top = L.finY + (tall ? 280 : 250) + (tall ? 300 : 240) * 1.4 + 24 + 'px';
+
+  end(T);
+});
+</script></body></html>

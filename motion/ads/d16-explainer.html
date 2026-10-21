@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D16 · How MakeAndList Works</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+.bgA { position: absolute; border-radius: 50%; pointer-events: none; }
+.kick { position: absolute; z-index: 30; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #6B645A; white-space: nowrap; }
+.stepper { position: absolute; z-index: 30; height: 70px; }
+.stepper .track { position: absolute; left: 0; right: 0; top: 17px; height: 4px; border-radius: 2px; background: #E2DBCE; }
+.stepper .fill { position: absolute; left: 0; top: 17px; height: 4px; border-radius: 2px; background: #1F1F1F; }
+.stepper .dot { position: absolute; top: 0; width: 38px; height: 38px; margin-left: -19px; border-radius: 50%; display: grid; place-items: center; font: 800 18px 'Archivo'; background: #FAF7EE; color: #8A8378; box-shadow: inset 0 0 0 3px #D9D3C9; }
+.stepper .lb { position: absolute; top: 48px; transform: translateX(-50%); font: 700 22px 'Archivo'; color: #8A8378; white-space: nowrap; }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 120px/0.96 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.hook em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); padding: 0 .04em; }
+.watch { position: absolute; z-index: 40; }
+.num { position: absolute; z-index: 31; font: 800 30px 'IBM Plex Mono', monospace; color: #1F1F1F; background: #DFFF5A; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; }
+.ttl { position: absolute; z-index: 31; font: 800 92px/0.98 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; white-space: nowrap; }
+.sen { position: absolute; z-index: 31; font: 600 36px/1.22 'Archivo'; color: #45403A; }
+.sen b { color: #1F1F1F; font-weight: 800; background: linear-gradient(transparent 62%, #DFFF5A 62%); }
+.icon { position: absolute; z-index: 31; }
+.pcard { position: absolute; z-index: 25; overflow: hidden; border-radius: 26px; background: #FFFDF8; box-shadow: 0 50px 90px -40px rgba(31,31,31,.6), 0 0 0 8px #FFFDF8, 0 0 0 9px #E2DBCE; }
+.pcard img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.plab { position: absolute; z-index: 26; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #45403A; white-space: nowrap; }
+.chipD { position: absolute; z-index: 40; white-space: nowrap; font: 700 26px 'Archivo'; padding: 12px 22px; border-radius: 99px; display: flex; gap: 10px; align-items: center; box-shadow: 0 20px 40px -20px rgba(31,31,31,.6); }
+.chipD.lime { background: #DFFF5A; color: #1F1F1F; }
+.chipD.ink { background: #1F1F1F; color: #FAF7EE; }
+.typ { position: absolute; font: 500 15px/1.35 'Archivo'; color: #1F1F1F; background: #FFFDF8; border-radius: 6px; padding: 6px 8px; }
+.typ i { display: inline-block; width: 2px; height: 16px; background: #1F1F1F; vertical-align: -3px; margin-left: 1px; }
+.recap { position: absolute; z-index: 45; display: flex; justify-content: space-between; }
+.recap .it { text-align: center; width: 30%; }
+.recap .ic { width: 150px; height: 150px; margin: 0 auto; border-radius: 40px; background: #FFFDF8; box-shadow: 0 30px 60px -30px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; display: grid; place-items: center; }
+.recap .t { margin-top: 20px; font: 800 38px/1.05 'Playfair Display'; color: #1F1F1F; }
+.recap .ar { position: absolute; top: 60px; font: 800 40px 'Archivo'; color: #8A8378; }
+.finl { position: absolute; z-index: 45; text-align: center; font: 800 64px/1.04 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.finl em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D16 — the definitive explainer. A stopwatch hook, then one stepper across the top and one phone that never leaves:
+// 1 Describe (type one sentence, see the Credit quote first) · 2 Review (the finished product, a draft) · 3 Sell & print
+// (send to your own stores as a draft; your print partner prints each order). Each step: a numbered title, one sentence,
+// an icon that morphs from the last one, the real screen swiping in the phone, a concept product image beside it.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 103.4, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const S = [B(3), B(9), B(15)];  // 1.741, 5.222, 8.704 each step starts
+const T_RECAP = B(21);          // 12.186
+const T_QUOTE = B(6.5);         // step 1: the phone swipes from the sentence to the quote
+
+const L = tall
+  ? { kickY: 282, stY: 330, stX: 150, stW: 780, ttlY: 450, ttlFs: 92, numX: 65, senY: 560, senW: 950, iconX: 890, iconY: 440, iconS: 120,
+      phX: 90, phY: 690, phW: 470, pcX: 600, pcY: 760, pcW: 390, pcH: 450, hookY: 520, watchY: 330, watchS: 170, recapY: 520, finY: 820 }
+  : { kickY: 54, stY: 96, stX: 220, stW: 640, ttlY: 200, ttlFs: 84, numX: 60, senY: 302, senW: 900, iconX: 900, iconY: 196, iconS: 110,
+      phX: 110, phY: 420, phW: 400, pcX: 580, pcY: 470, pcW: 400, pcH: 520, hookY: 380, watchY: 120, watchS: 160, recapY: 330, finY: 760 };
+
+// ambient: two soft blobs drifting
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'bgA', style: { background: 'radial-gradient(circle, rgba(223,255,90,.28), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'bgA', style: { background: 'radial-gradient(circle, rgba(126,154,126,.18), rgba(126,154,126,0) 62%)' } });
+
+// ---------- hook: stopwatch + title ----------
+const watch = K.box((W - L.watchS) / 2, L.watchY, L.watchS, L.watchS, { cls: 'watch', html: `<svg width="${L.watchS}" height="${L.watchS}" viewBox="0 0 100 100">
+  <rect x="44" y="2" width="12" height="8" rx="2" fill="#1F1F1F"/><circle cx="50" cy="55" r="38" fill="#FFFDF8" stroke="#1F1F1F" stroke-width="5"/>
+  <circle id="wr" cx="50" cy="55" r="29" fill="none" stroke="#DFFF5A" stroke-width="14" pathLength="1" stroke-dasharray="1 1" transform="rotate(-90 50 55)"/>
+  <line id="wh" x1="50" y1="55" x2="50" y2="26" stroke="#1F1F1F" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="55" r="4" fill="#1F1F1F"/></svg>` });
+const wr = watch.querySelector('#wr'), wh = watch.querySelector('#wh');
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'hook', style: { fontSize: (tall ? 120 : 104) + 'px' } });
+const hookW = K.words(hook, tall ? 'How it works,\nin 15\nseconds.' : 'How it works,\nin 15 seconds.');
+hookW[hookW.length - 1].innerHTML = '<em>seconds.</em>';
+
+// ---------- persistent header ----------
+const kick = K.box(65, L.kickY, W - 130, null, { cls: 'kick', html: 'How MakeAndList works' });
+const stepper = K.box(L.stX, L.stY, L.stW, 70, { cls: 'stepper', html: '<div class="track"></div><div class="fill"></div>' });
+const fill = stepper.querySelector('.fill');
+const NAMES = ['Describe', 'Review', 'Sell & print'];
+const dots = NAMES.map((n, i) => {
+  const x = (L.stW * i) / 2;
+  const d = K.el('div', { parent: stepper, cls: 'dot', html: String(i + 1), style: { left: x + 'px' } });
+  const lb = K.el('div', { parent: stepper, cls: 'lb', html: n, style: { left: x + 'px' } });
+  return { d, lb };
+});
+
+// ---------- step text ----------
+const STEPS = [
+  { ttl: 'Describe it.', sen: tall ? 'One sentence. You see the plan<br>and the <b>Credit quote first.</b>' : 'One sentence. You see the plan and the <b>Credit quote first.</b>' },
+  { ttl: 'Review it.', sen: tall ? 'Pages, images, listing copy.<br><b>You check every file.</b>' : 'Pages, images, listing copy. <b>You check every file.</b>' },
+  { ttl: 'Sell & print.', sen: tall ? 'Drafts to <b>your own stores.</b><br>Your print partner prints each order.' : 'Drafts to <b>your own stores.</b> Your print partner prints each order.' },
+];
+const numEl = K.box(L.numX, L.ttlY + 12, 64, 64, { cls: 'num' });
+const ttls = STEPS.map((s) => K.box(L.numX + 88, L.ttlY - 6, null, null, { cls: 'ttl', html: s.ttl, style: { fontSize: L.ttlFs + 'px', width: 'auto', height: 'auto' } }));
+const sens = STEPS.map((s) => K.box(L.numX, L.senY, L.senW, null, { cls: 'sen', html: s.sen, style: { fontSize: (tall ? 36 : 32) + 'px' } }));
+
+// icons (crossfade with a twist = the morph)
+const IC = [
+  `<path d="M9 9h30a5 5 0 0 1 5 5v15a5 5 0 0 1-5 5H22l-9 7v-7H9a5 5 0 0 1-5-5V14a5 5 0 0 1 5-5z" fill="#DFFF5A" stroke="#1F1F1F" stroke-width="2.6" stroke-linejoin="round"/><path d="M13 18h22M13 25h14" stroke="#1F1F1F" stroke-width="2.6" stroke-linecap="round"/>`,
+  `<path d="M3 24s8-13 21-13 21 13 21 13-8 13-21 13S3 24 3 24z" fill="#DFFF5A" stroke="#1F1F1F" stroke-width="2.6" stroke-linejoin="round"/><circle cx="24" cy="24" r="7.5" fill="#FFFDF8" stroke="#1F1F1F" stroke-width="2.6"/><path d="M20.5 24l2.5 2.5 4.5-5" fill="none" stroke="#1F1F1F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`,
+  `<path d="M7 17l17-8 17 8v17l-17 8-17-8z" fill="#DFFF5A" stroke="#1F1F1F" stroke-width="2.6" stroke-linejoin="round"/><path d="M7 17l17 8 17-8M24 25v17" fill="none" stroke="#1F1F1F" stroke-width="2.6" stroke-linejoin="round"/><path d="M15.5 13l17 8" stroke="#1F1F1F" stroke-width="2.2"/>`,
+];
+const icons = IC.map((p) => K.box(L.iconX - L.iconS / 2, L.iconY, L.iconS, L.iconS, { cls: 'icon', html: `<svg width="${L.iconS}" height="${L.iconS}" viewBox="0 0 48 48">${p}</svg>` }));
+
+// ---------- the phone (real screens) ----------
+const SCR = ['22-phone-create', '65-phone-configure', '24-phone-product', '72-phone-listing-send'];
+const deck = K.phoneDeck(L.phX, L.phY, L.phW, SCR.map((n) => K.screen(n)));
+deck.root.style.zIndex = 20;
+const k780 = deck.sw / 780;
+const layer0 = deck.root.querySelectorAll('.screen > div')[0];
+const typ = K.el('div', { parent: layer0, cls: 'typ', style: { left: 70 * k780 + 'px', top: 594 * k780 + 'px', width: 636 * k780 + 'px', height: 172 * k780 + 'px', fontSize: Math.round(26 * k780 * 1.0) + 'px' } });
+const TYPED = 'A botanical wedding planner, 36 printable pages, for couples who like calm.';
+const realTag = K.demoTag('Real app · demo workspace', 0, 0); realTag.style.zIndex = 40;
+
+// ---------- product images ----------
+const PRODS = [
+  { id: 'g17-sketch-to-print', lab: 'Your idea', pos: '50% 45%' },
+  { id: 'g06-wedding-planner', lab: 'The product', pos: '50% 40%' },
+  { id: 'g20-parcel', lab: 'Printed per order', pos: '50% 60%' },
+];
+const pcards = PRODS.map((p) => K.box(L.pcX, L.pcY, L.pcW, L.pcH, { cls: 'pcard', html: `<img src="${K.pub('r04/' + p.id + '.webp')}" style="object-position:${p.pos}">` }));
+const plab = K.box(L.pcX, L.pcY + L.pcH + 22, L.pcW, null, { cls: 'plab' });
+const conceptTag = K.demoTag('Concept image · AI-generated', 0, 0); conceptTag.style.zIndex = 40;
+const chips = [
+  K.box(0, 0, null, null, { cls: 'chipD ink', html: 'Nothing made until you approve', style: { width: 'auto', height: 'auto' } }),
+  K.box(0, 0, null, null, { cls: 'chipD lime', html: 'Draft · waiting for you', style: { width: 'auto', height: 'auto' } }),
+  K.box(0, 0, null, null, { cls: 'chipD ink', html: 'Printing paid from your partner account', style: { width: 'auto', height: 'auto' } }),
+];
+
+// ---------- recap ----------
+const recapBg = K.box(0, 0, W, H, { style: { zIndex: 44, background: '#FAF7EE', opacity: 0 } });
+const recap = K.box(65, L.recapY, W - 130, null, { cls: 'recap', html: IC.map((p, i) => `<div class="it"><div class="ic"><svg width="96" height="96" viewBox="0 0 48 48">${p}</svg></div><div class="t">${NAMES[i]}</div></div>`).join('') });
+const recapIts = [...recap.querySelectorAll('.it')];
+const finl = K.box(65, L.finY, W - 130, null, { cls: 'finl', style: { fontSize: (tall ? 64 : 60) + 'px' } });
+const finW = K.words(finl, 'Nothing goes live\nwithout your yes.');
+finW[finW.length - 2].innerHTML = '<em>your</em> '; finW[finW.length - 1].innerHTML = '<em>yes.</em>';
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Describe. Review.<br>Sell &amp; print.' });
+
+const curStep = (T) => (T >= S[2] ? 2 : T >= S[1] ? 1 : T >= S[0] ? 0 : -1);
+// phone position: 0 create → 1 quote (inside step 1) → 2 product → 3 send
+const posAt = (t) => K.p(t, T_QUOTE - 0.2, T_QUOTE + 0.3, E.inOutCubic) + K.p(t, S[1] - 0.15, S[1] + 0.35, E.inOutCubic) + K.p(t, S[2] - 0.15, S[2] + 0.35, E.inOutCubic);
+
+K.run({
+  id: 'D16', title: 'How MakeAndList Works', dur: DUR, bpm: BPM, music: 'earth', mood: 'bright', key: 'D', intro: 0.0, cover: 6.4,
+  technique: 'Clean SaaS explainer: a stopwatch hook shrinks into a persistent three-dot stepper; one phone stays on screen and swipes through four real screens (typed sentence, Credit quote, finished product, send to your stores) while a numbered title, one sentence, a twisting icon morph and a concept product image change on each step, closing on a three-icon recap',
+  caption: 'How MakeAndList works: describe your product in one sentence and see the Credit quote first; it makes the pages, images and listing copy and you review every file; then send it to your own stores as a draft — and for printed products your own print partner prints each order. Start free at makeandlist.com',
+  short: 'Describe. Review. Sell & print.',
+  beats: ['0–1.7 s: “How it works, in 15 seconds.” — a stopwatch starts', '1.7–5.2 s: 1 Describe — type one sentence; the Credit quote comes first', '5.2–8.7 s: 2 Review — the finished product as a draft; you check every file', '8.7–12.2 s: 3 Sell & print — drafts to your own stores; your partner prints each order', '12.2–13 s: recap — nothing goes live without your yes', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [0.1, 'click'], [B(2.5), 'swish'], [S[0], 'pop'], [B(3.6), 'type'], [B(5), 'type'], [T_QUOTE - 0.1, 'swish'], [B(7.5), 'coin'],
+    [S[1] - 0.05, 'whoosh'], [S[1] + 0.3, 'pop'], [B(12.5), 'chime'], [S[2] - 0.05, 'whoosh'], [S[2] + 0.3, 'pop'], [B(18), 'click'], [B(19), 'box'],
+    [T_RECAP - 0.05, 'whoosh'], [T_RECAP + 0.05, 'pop'], [T_RECAP + 0.17, 'pop'], [T_RECAP + 0.45, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.55 - 550 + Math.sin(T * 0.5) * 160}px, ${H * 0.35 - 550 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.1 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.8 - 450 + Math.sin(T * 0.6) * 100}px)`;
+
+  // ---------- hook ----------
+  const hOut = K.p(T, B(2.4), B(3), E.inCubic);
+  K.reveal(hookW, T, 0.0, { kind: 'up', stagger: 0.06, dur: 0.5, out: B(2.4) });
+  const wp = K.p(T, 0, 0.45, E.outBack);
+  const run = K.clamp(T / 13);
+  wr.setAttribute('stroke-dasharray', `${run} 1`);
+  wh.setAttribute('transform', `rotate(${run * 360} 50 55)`);
+  // the watch shrinks into the kicker's place
+  const wm = K.p(T, B(2.4), B(3.1), E.inOutCubic);
+  const wS = K.lerp(1, 0.28, wm);
+  watch.style.transform = `translate(${K.lerp(0, W - 65 - L.watchS * 0.28 - (W - L.watchS) / 2, wm)}px, ${K.lerp(0, L.kickY - 14 - L.watchY, wm)}px) scale(${wS * (0.6 + 0.4 * wp)})`;
+  watch.style.transformOrigin = '0 0';
+  watch.style.opacity = Math.min(1, wp * 2) * (1 - K.p(T, T_RECAP - 0.2, T_RECAP, E.linear));
+
+  // ---------- header ----------
+  const hdr = K.p(T, B(2.6), B(3.3), E.outExpo);
+  kick.style.opacity = hdr * (1 - K.p(T, T_RECAP - 0.2, T_RECAP, E.linear) * 0);
+  stepper.style.opacity = hdr; stepper.style.transform = `translateY(${(1 - hdr) * -20}px)`;
+  const cur = curStep(T);
+  const fp = K.p(T, S[1] - 0.2, S[1] + 0.3, E.inOutCubic) * 0.5 + K.p(T, S[2] - 0.2, S[2] + 0.3, E.inOutCubic) * 0.5;
+  fill.style.width = fp * L.stW + 'px';
+  dots.forEach((d, i) => {
+    const on = cur >= i || T >= T_RECAP;
+    const now = cur === i && T < T_RECAP;
+    const pop = K.p(T, S[i] - 0.1, S[i] + 0.25, E.outBack);
+    d.d.style.background = now ? '#DFFF5A' : on ? '#1F1F1F' : '#FAF7EE';
+    d.d.style.color = now ? '#1F1F1F' : on ? '#DFFF5A' : '#8A8378';
+    d.d.style.boxShadow = now ? 'inset 0 0 0 3px #1F1F1F, 0 0 0 8px rgba(223,255,90,.45)' : on ? 'none' : 'inset 0 0 0 3px #D9D3C9';
+    d.d.style.transform = `scale(${now ? 0.8 + 0.25 * pop : 1})`;
+    d.d.innerHTML = on && !now ? '✓' : String(i + 1);
+    d.lb.style.color = now ? '#1F1F1F' : on ? '#45403A' : '#8A8378';
+  });
+
+  // ---------- step text ----------
+  ttls.forEach((el, i) => {
+    const a = S[i], b = i < 2 ? S[i + 1] : T_RECAP;
+    const p = K.p(T, a - 0.05, a + 0.45, E.outExpo), o = K.p(T, b - 0.25, b, E.inCubic);
+    el.style.opacity = p * (1 - o);
+    el.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+    el.style.clipPath = `inset(-20px ${(1 - p) * 100}% -20px 0)`;
+    el.style.visibility = T >= a - 0.05 && T < b ? 'visible' : 'hidden';
+    const sp = K.p(T, a + 0.2, a + 0.7, E.outExpo);
+    sens[i].style.opacity = sp * (1 - o);
+    sens[i].style.transform = `translateY(${(1 - sp) * 30}px)`;
+    sens[i].style.visibility = el.style.visibility;
+  });
+  numEl.innerHTML = cur >= 0 ? String(cur + 1) : '';
+  const np = cur >= 0 ? K.p(T, S[cur] - 0.05, S[cur] + 0.35, E.outBack) : 0;
+  numEl.style.transform = `scale(${np}) rotate(${(1 - np) * -90}deg)`;
+  numEl.style.opacity = T < T_RECAP - 0.1 ? 1 : 0;
+
+  // icon morph: the old one twists out as the new one twists in
+  icons.forEach((ic, i) => {
+    const a = S[i], b = i < 2 ? S[i + 1] : T_RECAP;
+    const p = K.p(T, a - 0.1, a + 0.4, E.outBack), o = K.p(T, b - 0.2, b + 0.1, E.inCubic);
+    ic.style.opacity = Math.min(1, p * 1.5) * (1 - o);
+    ic.style.transform = `rotate(${(1 - p) * -120 + o * 120 + Math.sin(T * 2) * 3}deg) scale(${(0.4 + 0.6 * p) * (1 - 0.6 * o)})`;
+  });
+
+  // ---------- phone ----------
+  const phIn = K.p(T, S[0] - 0.2, S[0] + 0.5, E.outExpo), phOut = K.p(T, T_RECAP - 0.3, T_RECAP, E.inCubic);
+  const pos = posAt(T);
+  deck.draw(pos, [0, 1, 0.07, 0.43 + 0.04 * K.p(T, S[2], T_RECAP, E.linear)], pos - posAt(T - 1 / 30));
+  deck.root.style.opacity = phIn * (1 - phOut);
+  deck.root.style.transform = `translateY(${(1 - phIn) * 300 + phOut * 80}px) rotate(${-2 + Math.sin(T * 0.7) * 0.5}deg)`;
+  deck.root.style.visibility = phIn > 0 && phOut < 1 ? 'visible' : 'hidden';
+  // typing into the real text box
+  const n = Math.round(TYPED.length * K.p(T, B(3.6), B(6), E.linear));
+  typ.innerHTML = TYPED.slice(0, n) + (Math.floor(T * 4) % 2 === 0 || n < TYPED.length ? '<i></i>' : '');
+  realTag.style.left = L.phX + 20 + 'px'; realTag.style.top = (tall ? 1196 : L.phY + deck.h - 60) + 'px';
+  realTag.style.opacity = phIn * (1 - phOut);
+
+  // ---------- product images ----------
+  pcards.forEach((pc, i) => {
+    const a = S[i] + 0.15, b = i < 2 ? S[i + 1] : T_RECAP;
+    const p = K.p(T, a, a + 0.6, E.outExpo), o = K.p(T, b - 0.3, b, E.inCubic);
+    pc.style.opacity = p * (1 - o);
+    pc.style.transform = `translate(${(1 - p) * 120 - o * 60}px, ${Math.sin(T * 0.9 + i) * 6}px) rotate(${3 - (1 - p) * 6 + o * -4}deg) scale(${1 + 0.03 * K.p(T, a, b, E.linear)})`;
+    pc.style.visibility = T >= a && T < b ? 'visible' : 'hidden';
+    pc.style.zIndex = 25 + i;
+  });
+  const pi = cur;
+  plab.innerHTML = pi >= 0 ? PRODS[pi].lab : '';
+  plab.style.opacity = (pi >= 0 ? K.p(T, S[pi] + 0.4, S[pi] + 0.8, E.linear) : 0) * (1 - phOut);
+  conceptTag.style.left = L.pcX + 16 + 'px'; conceptTag.style.top = L.pcY + L.pcH - 50 + 'px';
+  conceptTag.style.opacity = (cur >= 0 ? K.p(T, S[0] + 0.4, S[0] + 0.8, E.linear) : 0) * (1 - phOut);
+
+  // chips: one promise per step, on the beat
+  chips.forEach((c, i) => {
+    const at = [B(7.5), B(12.5), B(18)][i], b = i < 2 ? S[i + 1] : T_RECAP;
+    const p = K.p(T, at, at + 0.45, E.outBack), o = K.p(T, b - 0.25, b, E.inCubic);
+    c.style.opacity = Math.min(1, p * 2) * (1 - o);
+    c.style.visibility = T >= at && T < b ? 'visible' : 'hidden';
+    const cx = tall ? W - 65 : W - 60, cy = tall ? L.pcY - 70 : L.pcY - 66;
+    c.style.left = cx + 'px'; c.style.top = cy + 'px';
+    c.style.transform = `translateX(-100%) scale(${0.7 + 0.3 * p}) rotate(-2deg)`;
+    c.style.transformOrigin = '100% 50%';
+  });
+
+  // ---------- recap ----------
+  const rIn = K.p(T, T_RECAP - 0.15, T_RECAP + 0.3, E.outCubic);
+  recapBg.style.opacity = rIn;
+  recapIts.forEach((it, i) => {
+    const p = K.p(T, T_RECAP + 0.05 + i * 0.12, T_RECAP + 0.45 + i * 0.12, E.outBack);
+    it.style.opacity = Math.min(1, p * 2); it.style.transform = `translateY(${(1 - p) * 60}px) scale(${0.8 + 0.2 * p})`;
+  });
+  recap.style.visibility = T >= T_RECAP - 0.15 ? 'visible' : 'hidden';
+  K.reveal(finW, T, T_RECAP + 0.2, { kind: 'up', stagger: 0.04, dur: 0.35 });
+  finl.style.visibility = T >= T_RECAP ? 'visible' : 'hidden';
+  // the stepper stays over the recap: all three ticked
+  stepper.style.zIndex = 46; kick.style.zIndex = 46;
+
+  end(T);
+});
+</script></body></html>

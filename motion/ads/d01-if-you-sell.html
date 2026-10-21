@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D01 · If You Sell Printables</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1A1917; }
+.shot { position: absolute; inset: 0; overflow: hidden; }
+.shot img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 45%; }
+.shade { position: absolute; inset: 0; pointer-events: none; z-index: 5;
+  background: linear-gradient(180deg, rgba(20,18,16,.38) 0, rgba(20,18,16,0) 26%, rgba(20,18,16,0) 55%, rgba(20,18,16,.45) 100%); }
+.flash { position: absolute; inset: 0; background: #FFFDF8; z-index: 80; pointer-events: none; }
+/* native "text on screen" boxes, the look of a creator's caption */
+.cap { position: absolute; z-index: 40; text-align: center; }
+.tk { position: relative; display: inline-block; max-width: 100%; padding: 12px 26px 14px; border-radius: 18px; background: #FFFDF8; color: #1F1F1F;
+  font: 800 60px/1.08 'Archivo'; letter-spacing: -0.015em; box-shadow: 0 18px 40px -18px rgba(0,0,0,.55); transform-origin: 50% 100%; }
+.tk.lime { background: #DFFF5A; }
+.tk.ink { background: #1F1F1F; color: #FAF7EE; }
+.tk small { display: block; margin-bottom: 6px; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #45403A; }
+.tk.ink small { color: #DFFF5A; }
+.strike { position: absolute; left: 10px; right: 10px; top: 50%; height: 12px; margin-top: -4px; border-radius: 6px; background: #E8603C; transform-origin: 0 50%; }
+.pill { position: absolute; z-index: 40; display: inline-flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 999px; white-space: nowrap;
+  background: #FFFDF8; color: #1F1F1F; font: 700 28px 'Archivo'; box-shadow: 0 20px 40px -20px rgba(31,31,31,.55), 0 0 0 1.5px #E2DBCE; }
+.pill i { width: 30px; height: 30px; border-radius: 50%; background: #DFFF5A; display: grid; place-items: center; font: 800 18px 'Archivo'; font-style: normal; }
+.typed { position: absolute; z-index: 4; background: #FFFDF8; color: #1F1F1F; font: 400 26px/1.35 'Archivo'; padding: 14px 18px; border-radius: 12px; }
+.typed b { display: inline-block; width: 3px; height: 1.05em; margin-left: 2px; vertical-align: -3px; background: #1F1F1F; }
+.room { position: absolute; inset: 0; background: radial-gradient(120% 80% at 30% 30%, #FBF8F0 0, #EFE9DC 60%, #E2DACB 100%); }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.count { position: absolute; z-index: 45; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .12em; color: #FAF7EE; text-transform: uppercase; }
+.count b { color: #DFFF5A; font-weight: 600; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D01 — creator-native: fast lifestyle B-roll of printables, captions in the look of a seller's own video. Three pains
+// land in white boxes and get struck through in red marker; each answer lands in lime. Then the one proof: a sentence
+// typed into the real Create screen and the finished product it became (files, listing, images, video), under review.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 129.2, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// shots: [image, start beat, end beat, focus x%, focus y%]
+const SHOTS = [
+  ['g05-kids-activity-book', 0, 3, 50, 55],
+  ['g06-wedding-planner', 3, 7, 46, 40],
+  ['g13-recipe-cards', 7, 11, 40, 58],
+  ['g14-calendar', 11, 15, 55, 42],
+  ['g06-wedding-planner', 24, 32.4, 62, 30],
+];
+const PAINS = [
+  ['Hours on every page', 'Describe it once.\nThe pages get made.'],
+  ['Listings at midnight', 'Title, description,\ntags: written.'],
+  ['Photos for every store', 'Listing images,\nmade from your pages.'],
+];
+const PROOF = B(15), CLOSE = B(24);
+const L = tall
+  ? { hookY: 520, painY: 640, ansY: 800, fs: 64, tagY: 1182, cntY: 300, phX: 60, phY: 440, phW: 560, phH: 1010, pillX: 650, pillY: 560, pillGap: 104, pTopY: 290, closeY: 560 }
+  : { hookY: 360, painY: 380, ansY: 540, fs: 58, tagY: 1240, cntY: 70, phX: 110, phY: 150, phW: 430, phH: 1130, pillX: 600, pillY: 420, pillGap: 110, pTopY: 160, closeY: 420 };
+
+const shots = SHOTS.map(([src, , , fx, fy]) => {
+  const s = K.box(0, 0, W, H, { cls: 'shot', style: { zIndex: 2 } });
+  const img = K.el('img', { src: K.pub('r04/' + src + '.webp'), parent: s, style: { objectPosition: `${fx}% ${fy}%` } });
+  return { s, img };
+});
+const shade = K.box(0, 0, W, H, { cls: 'shade' });
+const conceptTag = K.demoTag('Concept image · AI-generated', 65, L.tagY);
+conceptTag.style.zIndex = 60;
+const counter = K.box(65, L.cntY, 600, null, { cls: 'count' });
+
+// hook
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'cap' });
+const hookA = K.el('div', { cls: 'tk', parent: hook, html: 'If you sell printables,', style: { fontSize: L.fs + 4 + 'px' } });
+K.el('br', { parent: hook });
+const hookB = K.el('div', { cls: 'tk lime', parent: hook, html: 'watch this.', style: { fontSize: L.fs + 16 + 'px', marginTop: '14px' } });
+
+// pains and answers
+const pains = PAINS.map(([p, a]) => {
+  const pc = K.box(65, L.painY, W - 130, null, { cls: 'cap' });
+  const pb = K.el('div', { cls: 'tk', parent: pc, html: p, style: { fontSize: L.fs + 'px' } });
+  const st = K.el('div', { cls: 'strike', parent: pb });
+  const ac = K.box(65, L.ansY, W - 130, null, { cls: 'cap' });
+  const ab = K.el('div', { cls: 'tk lime', parent: ac, html: '<small>MakeAndList</small>' + a.replace('\n', '<br>'), style: { fontSize: L.fs - 4 + 'px' } });
+  return { pc, pb, st, ac, ab };
+});
+
+// proof: the real app
+const room = K.box(0, 0, W, H, { cls: 'room', style: { zIndex: 20 } });
+const blobA = K.box(0, 0, 900, 900, { parent: room, cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.38), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 800, 800, { parent: room, cls: 'blob', style: { background: 'radial-gradient(circle, rgba(232,96,60,.14), rgba(232,96,60,0) 62%)' } });
+const deck = K.phoneDeck(L.phX, L.phY, L.phW, [K.screen('22-phone-create'), K.screen('24-phone-product')], { h: L.phH });
+deck.root.style.zIndex = 30;
+const S = deck.sw / 780;
+const typed = K.box(64 * S, 0, 628 * S, null, { cls: 'typed', parent: deck.root.querySelector('.screen').firstChild, style: { fontSize: Math.round(30 * S * 1.0) + 'px', padding: `${14 * S}px ${18 * S}px`, height: (162 * S) + 'px' } });
+const SENTENCE = 'A botanical wedding planner, printable, A4 and Letter';
+const ptop = K.box(tall ? 65 : L.pillX, L.pTopY, tall ? W - 130 : W - L.pillX - 50, null, { cls: 'cap', style: { textAlign: tall ? 'center' : 'left', zIndex: 41 } });
+const ptopA = K.el('div', { cls: 'tk ink', parent: ptop, html: '<small>Step 1 · you type</small>One sentence in.', style: { fontSize: (tall ? 52 : 46) + 'px', position: 'absolute', left: tall ? '50%' : 0, top: 0, whiteSpace: tall ? 'nowrap' : 'normal' } });
+const ptopB = K.el('div', { cls: 'tk ink', parent: ptop, html: '<small>Step 2 · it makes</small>A finished product out.', style: { fontSize: (tall ? 52 : 46) + 'px', position: 'absolute', left: tall ? '50%' : 0, top: 0, whiteSpace: tall ? 'nowrap' : 'normal' } });
+const OUT = ['Print-ready files', 'Listing copy', 'Listing images', 'A short video'];
+const pills = OUT.map((t, i) => K.box(L.pillX, L.pillY + i * L.pillGap, null, null, { cls: 'pill', html: `<i>✓</i>${t}`, style: { width: 'auto', height: 'auto', zIndex: 41 } }));
+const review = K.box(L.pillX, L.pillY + 4 * L.pillGap + 20, null, null, { cls: 'pill', html: 'You review every file', style: { width: 'auto', height: 'auto', zIndex: 41, background: '#1F1F1F', color: '#DFFF5A' } });
+const realTag = K.demoTag('Real app · demo workspace', L.phX + 30, L.phY + L.phH + 16);
+if (!tall) { realTag.style.left = L.pillX + 'px'; realTag.style.top = L.pillY + 5 * L.pillGap + 60 + 'px'; }
+
+// close
+const close = K.box(65, L.closeY, W - 130, null, { cls: 'cap' });
+const closeA = K.el('div', { cls: 'tk', parent: close, html: 'It waits as a draft.', style: { fontSize: L.fs + 'px' } });
+K.el('br', { parent: close });
+const closeB = K.el('div', { cls: 'tk lime', parent: close, html: 'Live only when you say.', style: { fontSize: L.fs + 'px', marginTop: '14px' } });
+
+const flash = K.box(0, 0, W, H, { cls: 'flash' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Sell printables.<br>Skip the busywork.' });
+
+// a box that pops on at t0 (scale from the bottom edge), leaves at t1
+function popBox(el, T, t0, t1, from = 0.7) {
+  const p = K.p(T, t0, t0 + 0.4, E.outBack);
+  const o = t1 !== undefined ? K.p(T, t1, t1 + 0.18, E.inCubic) : 0;
+  el.style.opacity = K.p(T, t0, t0 + 0.08, E.linear) * (1 - o);
+  el.style.transform = `scale(${(from + (1 - from) * p) * (1 - 0.1 * o)}) rotate(${(1 - p) * -3}deg)`;
+}
+const CUTS = [B(3), B(7), B(11), PROOF, CLOSE];
+
+K.run({
+  id: 'D01', title: 'If You Sell Printables', dur: DUR, music: 'transcendental-earth-people', bpm: 129.2, mood: 'drive', key: 'A', intro: 0.0, cover: 2.6,
+  technique: 'Creator-native text-on-screen over fast lifestyle B-roll cut on the beat: three pains in white caption boxes are struck through with a red marker, the answers land in lime, then one proof on the real Create and Product screens',
+  caption: 'If you sell printables: describe the product once and MakeAndList makes the pages, the listing copy, the listing images and a short video, then waits for you as a draft. Start free at makeandlist.com',
+  short: 'Printables without the busywork.',
+  question: 'Is it for me?', gain: 'Time: from a sentence to a finished product',
+  beats: ['0–1.4 s: “If you sell printables, watch this.” over a kids’ activity book', '1.4–7 s: three pains struck through, three answers land, one B-roll cut per pain', '7–9 s: a sentence typed into the real Create screen', '9–11.2 s: the finished product — files, listing copy, images, video; you review', '11.2–13 s: “It waits as a draft. Live only when you say.”', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [0.05, 'pop'], [B(1), 'pop'],
+    ...PAINS.flatMap((_, i) => { const a = B(3 + i * 4); return [[a - 0.12, 'whoosh'], [a + 0.08, 'pop'], [a + B(1.6), 'marker'], [a + B(2.4), 'pop']]; }),
+    [PROOF - 0.12, 'whoosh'], [PROOF + B(0.6), 'type'], [B(19.4), 'click'], [B(19.6) - 0.1, 'whoosh'], ...OUT.map((_, i) => [B(20.3 + i * 0.8), 'pop']), [B(23.4), 'chime'],
+    [CLOSE - 0.12, 'whoosh'], [CLOSE + 0.1, 'pop'], [CLOSE + B(1.5), 'pop'], [12.95, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // B-roll: hard cuts on the beat, a punch-in that settles and a slow push
+  let live = -1;
+  SHOTS.forEach(([, a, b], i) => {
+    const A = B(a), Bb = Math.min(B(b), 13.0);
+    const on = T >= A && T < Bb;
+    if (on) live = i;
+    shots[i].s.style.visibility = on ? 'visible' : 'hidden';
+    const settle = K.p(T, A, A + 0.45, E.outExpo);
+    const sc = 1.16 - 0.1 * settle + 0.035 * (T - A);
+    const dx = (i % 2 ? -1 : 1) * 14 * (T - A);
+    shots[i].img.style.transform = `translateX(${dx}px) scale(${sc})`;
+    shots[i].img.style.filter = settle < 0.6 ? `blur(${(0.6 - settle) * 10}px)` : 'none';
+  });
+  const photo = live >= 0;
+  shade.style.opacity = photo ? 1 : 0;
+  conceptTag.style.opacity = photo ? 1 : 0;
+  let fl = 0; CUTS.forEach((c) => { if (T >= c && T < c + 0.07) fl = 0.55; });
+  flash.style.opacity = fl;
+
+  // hook
+  popBox(hookA, T, 0.05, B(3) - 0.2);
+  popBox(hookB, T, B(1), B(3) - 0.2, 0.5);
+  hook.style.transform = `translateY(${Math.sin(T * 2.2) * 4}px)`;
+
+  // pains: box lands, red marker strikes it, it dims; the answer lands below
+  pains.forEach((p, i) => {
+    const a = B(3 + i * 4), b = B(7 + i * 4);
+    const vis = T >= a && T < b;
+    p.pc.style.visibility = vis ? 'visible' : 'hidden'; p.ac.style.visibility = vis ? 'visible' : 'hidden';
+    popBox(p.pb, T, a + 0.08, b - 0.22);
+    const sp = K.p(T, a + B(1.6), a + B(1.6) + 0.28, E.inOutCubic);
+    p.st.style.transform = `scaleX(${sp}) rotate(-1.5deg)`;
+    p.pb.style.color = sp > 0.5 ? '#8A8378' : '#1F1F1F';
+    popBox(p.ab, T, a + B(2.4), b - 0.22, 0.55);
+    p.ac.style.transform = `translateY(${Math.sin((T - a) * 3) * 3}px)`;
+  });
+  counter.style.opacity = T >= B(3) && T < PROOF ? 1 : 0;
+  const ci = Math.min(2, Math.max(0, Math.floor((T - B(3)) / B(4))));
+  counter.innerHTML = `Pain <b>0${ci + 1}</b> / 03`;
+
+  // proof
+  const inP = K.p(T, PROOF, PROOF + 0.5, E.outExpo);
+  const outP = K.p(T, CLOSE - 0.25, CLOSE, E.inCubic);
+  const proofOn = T >= PROOF && T < CLOSE;
+  room.style.visibility = proofOn ? 'visible' : 'hidden';
+  blobA.style.transform = `translate(${W * 0.55 - 450 + Math.sin(T * 0.7) * 120}px, ${H * 0.3 - 450 + Math.cos(T * 0.5) * 100}px)`;
+  blobB.style.transform = `translate(${-200 + Math.cos(T * 0.6) * 100}px, ${H * 0.7 - 400 + Math.sin(T * 0.8) * 90}px)`;
+  deck.root.style.display = proofOn ? 'block' : 'none';
+  deck.root.style.transform = `translateY(${(1 - inP) * 260 + outP * 80}px) rotate(${(1 - inP) * -4 + Math.sin(T * 0.9) * 0.4}deg)`;
+  deck.root.style.opacity = 1 - outP;
+  // typing into the real textarea, then a swipe to the finished product
+  const swipe = (t) => K.p(t, B(19.6), B(19.6) + 0.5, E.inOutCubic);
+  const scroll1 = K.p(T, B(20), B(23.6), E.inOutCubic) * 0.12;
+  deck.draw(swipe(T), [0.02, scroll1], swipe(T) - swipe(T - 1 / 30));
+  const n = Math.round(K.p(T, PROOF + B(0.6), PROOF + B(0.6) + 1.3, E.linear) * SENTENCE.length);
+  typed.innerHTML = SENTENCE.slice(0, n) + (n < SENTENCE.length || f % 16 < 8 ? '<b></b>' : '');
+  // the textarea sits at y 575 of the 780-wide shot; the screen is scrolled by 2 % of what it can scroll
+  const nh = 3400 * S, max = nh - deck.sh;
+  typed.style.top = 575 * S - max * 0.02 + 'px';
+  typed.style.opacity = T >= PROOF ? 1 : 0;
+  popBox(ptopA, T, PROOF + 0.25, B(19.4), 0.6);
+  popBox(ptopB, T, B(19.9), CLOSE - 0.25, 0.6);
+  if (tall) { ptopA.style.transform += ' translateX(-50%)'; ptopB.style.transform += ' translateX(-50%)'; ptopA.style.transformOrigin = ptopB.style.transformOrigin = '0 100%'; }
+  pills.forEach((pl, i) => {
+    const a = B(20.3 + i * 0.8);
+    const p = K.p(T, a, a + 0.45, E.outBack);
+    pl.style.opacity = proofOn ? K.p(T, a, a + 0.1, E.linear) * (1 - outP) : 0;
+    pl.style.transform = `translateX(${(1 - p) * 120}px) scale(${0.8 + 0.2 * p}) translateY(${Math.sin(T * 1.8 + i) * 3}px)`;
+  });
+  const rp = K.p(T, B(23.4), B(23.4) + 0.45, E.outBack);
+  review.style.opacity = proofOn ? K.p(T, B(23.4), B(23.4) + 0.1, E.linear) * (1 - outP) : 0;
+  review.style.transform = `scale(${0.7 + 0.3 * rp})`;
+  realTag.style.opacity = proofOn ? inP * (1 - outP) : 0;
+
+  // close
+  close.style.visibility = T >= CLOSE ? 'visible' : 'hidden';
+  popBox(closeA, T, CLOSE + 0.1, 12.8);
+  popBox(closeB, T, CLOSE + B(1.5), 12.8, 0.5);
+
+  end(T);
+});
+</script></body></html>

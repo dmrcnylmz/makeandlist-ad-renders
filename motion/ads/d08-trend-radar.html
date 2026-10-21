@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D08 · Trend Radar</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #0E120F; color: #FAF7EE; }
+.bg { position: absolute; inset: 0; background: radial-gradient(70% 50% at 50% 50%, #1B241C 0, #0E120F 70%); }
+.ring { position: absolute; border-radius: 50%; border: 2px solid rgba(183,199,169,.22); }
+.ring.o { border: 3px solid rgba(183,199,169,.42); }
+.axis { position: absolute; background: rgba(183,199,169,.16); }
+.rl { position: absolute; font: 600 18px 'IBM Plex Mono', monospace; letter-spacing: .14em; color: rgba(183,199,169,.7); white-space: nowrap; }
+.sweep { position: absolute; border-radius: 50%; background: conic-gradient(from 0deg, rgba(223,255,90,0) 0deg, rgba(223,255,90,0) 250deg, rgba(223,255,90,.10) 320deg, rgba(223,255,90,.42) 360deg); }
+.edge { position: absolute; width: 4px; margin-left: -2px; transform-origin: 50% 100%; background: linear-gradient(rgba(223,255,90,.95), rgba(223,255,90,.2)); border-radius: 2px; box-shadow: 0 0 18px rgba(223,255,90,.8); }
+.blip { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 24px 6px rgba(223,255,90,.55); z-index: 6; }
+.ping { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 3px solid #DFFF5A; z-index: 5; }
+.pop { position: absolute; z-index: 10; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 4px #DFFF5A, 0 30px 60px -20px rgba(0,0,0,.9); }
+.pop img, .full img, .tile img { position: absolute; display: block; }
+.plab { position: absolute; z-index: 11; text-align: center; white-space: nowrap; }
+.plab b { display: block; font: 600 17px 'IBM Plex Mono', monospace; letter-spacing: .16em; color: #DFFF5A; text-transform: uppercase; }
+.plab span { display: block; margin-top: 4px; font: 700 26px 'Archivo'; color: #FAF7EE; }
+.tether { position: absolute; left: 0; top: 0; z-index: 7; overflow: visible; pointer-events: none; }
+.hook { position: absolute; z-index: 30; text-align: center; font: 800 86px/1.0 'Playfair Display'; letter-spacing: -0.02em; color: #FAF7EE; }
+.hook i { font-style: normal; color: #DFFF5A; }
+.cap { position: absolute; z-index: 30; font: 800 70px/1.08 'Playfair Display'; letter-spacing: -0.02em; color: #FAF7EE; }
+.cap em { font-style: normal; color: #DFFF5A; }
+.full { position: absolute; z-index: 20; overflow: hidden; }
+.shade { position: absolute; inset: 0; z-index: 21; background: linear-gradient(rgba(14,18,15,.82) 0, rgba(14,18,15,.25) 32%, rgba(14,18,15,0) 55%, rgba(14,18,15,.55) 100%); }
+.hl { position: absolute; z-index: 5; border-radius: 14px; border: 5px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; pointer-events: none; }
+.tile { position: absolute; z-index: 24; overflow: hidden; border-radius: 26px; box-shadow: 0 0 0 2px rgba(250,247,238,.15), 0 40px 70px -30px rgba(0,0,0,.9); }
+.mk { position: absolute; z-index: 25; font: 800 24px 'Archivo'; color: #1F1F1F; background: #DFFF5A; padding: 10px 18px; border-radius: 99px; white-space: nowrap; }
+.demo { background: rgba(14,18,15,.82); color: #EFEADF; border-color: #8A8378; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D08 — "What should I make next?" A radar scope where the rings are weeks ahead, not scores: the sweep finds four
+// seasonal ideas (Halloween sheets, gift tags, a wall calendar, nursery prints — concept images), one opens to fill the
+// frame, then the proof is the real Ideas page, which says it plainly: seasons ahead, no trend scores, no sales promises.
+// Pick one and make it. Nothing here predicts sales.
+// one <em> per word, so K.words (which splits on spaces) keeps every word highlighted
+const em = (s) => s.replace(/<em>(.*?)<\/em>/gs, (m, x) => x.split(/( |\n)/).map((w) => (w === ' ' || w === '\n' || !w ? w : '<em>' + w + '</em>')).join(''));
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 129.2, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const P = B(7); // one sweep revolution
+const T_ZOOM = B(10), T_PROOF = B(16), T_RING = B(18), T_TAP = B(21), T_PICK = B(23);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const R = tall ? 380 : 430, C = tall ? [540, 850] : [540, 770];
+const k = R / 380;
+const IDEAS = [
+  { img: 'g15-halloween-sheets', season: 'Halloween', name: 'Activity sheets', r: 0.7, off: [250, 120], fx: 0, fy: -0.2 },
+  { img: 'g16-christmas-tags', season: 'Gift season', name: 'Gift tags', r: 0.5, off: [-280, 250], fx: 0, fy: 0 },
+  { img: 'g14-calendar', season: 'New year', name: 'Wall calendar', r: 0.85, off: [-280, -230], fx: 0, fy: -0.1 },
+  { img: 'g12-nursery-art', season: 'All year', name: 'Nursery prints', r: 0.62, off: [260, -230], fx: 0, fy: -0.5 },
+].map((d, i) => { const tb = B(2 + i * 2), a = (tb / P) * 2 * Math.PI; return { ...d, tb, a, bx: C[0] + Math.sin(a) * d.r * R, by: C[1] - Math.cos(a) * d.r * R, px: C[0] + d.off[0] * k, py: C[1] + d.off[1] * k }; });
+const PD = tall ? 236 : 230;
+
+// ---------- the scope ----------
+K.box(0, 0, W, H, { cls: 'bg' });
+const scope = K.box(0, 0, W, H, { style: { zIndex: 2 } });
+[1 / 3, 2 / 3, 1].forEach((f, i) => K.box(C[0] - R * f, C[1] - R * f, 2 * R * f, 2 * R * f, { parent: scope, cls: 'ring' + (i === 2 ? ' o' : '') }));
+K.box(C[0] - R, C[1] - 1, 2 * R, 2, { parent: scope, cls: 'axis' });
+K.box(C[0] - 1, C[1] - R, 2, 2 * R, { parent: scope, cls: 'axis' });
+['4 WKS', '8 WKS', '12 WKS'].forEach((t, i) => K.box(C[0] + 10, C[1] - R * (i + 1) / 3 + 6, null, null, { parent: scope, cls: 'rl', html: t, style: { width: 'auto', height: 'auto' } }));
+K.box(C[0] - R * 0.98, C[1] + 10, null, null, { parent: scope, cls: 'rl', html: 'NOW · CENTRE', style: { width: 'auto', height: 'auto', opacity: 0 } });
+const sweep = K.box(C[0] - R, C[1] - R, 2 * R, 2 * R, { parent: scope, cls: 'sweep' });
+const edge = K.box(C[0], C[1] - R, 4, R, { parent: scope, cls: 'edge' });
+const tether = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+tether.setAttribute('class', 'tether'); tether.setAttribute('width', W); tether.setAttribute('height', H);
+scope.appendChild(tether);
+const blips = IDEAS.map((d) => {
+  const ping = K.box(d.bx, d.by, 22, 22, { parent: scope, cls: 'ping' });
+  const dot = K.box(d.bx, d.by, 22, 22, { parent: scope, cls: 'blip' });
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  Object.entries({ x1: d.bx, y1: d.by, x2: d.px, y2: d.py, stroke: '#DFFF5A', 'stroke-width': 2.5, 'pathLength': 1 }).forEach(([a, v]) => line.setAttribute(a, v));
+  tether.appendChild(line);
+  const pop = K.box(d.px - PD / 2, d.py - PD / 2, PD, PD, { parent: scope, cls: 'pop' });
+  const img = K.el('img', { parent: pop, src: K.pub('r04/' + d.img + '.webp'), style: { width: PD * 1.3 + 'px', height: PD * 1.3 * 1.5 + 'px', left: -PD * 0.15 + 'px', top: (-PD * 0.975 + d.fy * PD * 0.6) + 'px' } });
+  const lab = K.box(d.px - 160, d.py + PD / 2 + 14, 320, null, { parent: scope, cls: 'plab', html: `<b>${d.season}</b><span>${d.name}</span>` });
+  return { ping, dot, line, pop, img, lab };
+});
+
+// ---------- type ----------
+const hook = K.box(40, tall ? 285 : 66, W - 80, null, { cls: 'hook', style: { fontSize: (tall ? 84 : 80) + 'px' } });
+const hookW = K.words(hook, 'What should you\nmake <i>next?</i>');
+const conceptTag = K.demoTag('Concept image · AI-generated', 0, 0);
+
+// ---------- one idea opens to the full frame ----------
+const full = K.box(0, 0, W, H, { cls: 'full' });
+const fimg = K.el('img', { parent: full, src: K.pub('r04/g15-halloween-sheets.webp') });
+K.el('div', { parent: full, cls: 'shade' });
+const cap1 = K.box(65, tall ? 300 : 70, W - 130, null, { cls: 'cap', style: { textAlign: 'center', zIndex: 30, fontSize: (tall ? 78 : 74) + 'px' } });
+const cap1W = K.words(cap1, em('Ideas by season,\n<em>weeks ahead.</em>'));
+
+// ---------- proof: the real Ideas page ----------
+const PH = tall ? { x: (W - 384) / 2, y: 468, w: 384 } : { x: 90, y: 250, w: 410 };
+const ph = K.phone(PH.x, PH.y, PH.w, K.screen('66-phone-ideas'));
+ph.root.style.zIndex = 26;
+const sc = (PH.w - 28) / 780;
+const hl = K.el('div', { parent: ph.root.firstChild, cls: 'hl' });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+const capP = tall ? { x: 65, y: 296, w: W - 130, al: 'center', fs: 64 } : { x: 550, y: 330, w: 480, al: 'left', fs: 64 };
+const cap2 = K.box(capP.x, capP.y, capP.w, null, { cls: 'cap', style: { textAlign: capP.al, fontSize: capP.fs + 'px', zIndex: 30 } });
+const cap2W = K.words(cap2, em(tall ? 'No trend scores.\n<em>No sales promises.</em>' : 'No trend\nscores.\n<em>No sales\npromises.</em>'));
+const cap3 = K.box(capP.x, capP.y, capP.w, null, { cls: 'cap', style: { textAlign: capP.al, fontSize: capP.fs + 'px', zIndex: 30 } });
+const cap3W = K.words(cap3, em(tall ? 'Ideas you can\n<em>make today.</em>' : 'Ideas you\ncan <em>make\ntoday.</em>'));
+const cur = K.cursor();
+
+// ---------- pick one ----------
+const TG = tall ? { x0: 65, y0: 480, w: 465, h: 340, gap: 20 } : { x0: 65, y0: 270, w: 465, h: 420, gap: 20 };
+const tiles = IDEAS.map((d, i) => {
+  const t = K.box(0, 0, TG.w, TG.h, { cls: 'tile' });
+  const img = K.el('img', { parent: t, src: K.pub('r04/' + d.img + '.webp'), style: { width: TG.w + 'px', height: TG.w * 1.5 + 'px', left: 0, top: (-(TG.w * 1.5 - TG.h) / 2 * (1 - d.fy * 0.6)) + 'px' } });
+  const mk = K.el('div', { parent: t, cls: 'mk', html: i === 0 ? 'Make it →' : d.name, style: { left: '18px', bottom: '18px', position: 'absolute', background: i === 0 ? '#DFFF5A' : 'rgba(250,247,238,.92)' } });
+  return { t, mk };
+});
+const cap4 = K.box(65, tall ? 300 : 66, W - 130, null, { cls: 'cap', style: { textAlign: 'center', fontSize: (tall ? 72 : 68) + 'px', zIndex: 30 } });
+const cap4W = K.words(cap4, em('Pick one. Make it.\n<em>You approve every file.</em>'));
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Know what to<br>make next.', dark: true });
+
+K.run({
+  id: 'D08', title: 'Trend Radar', dur: DUR, bpm: BPM, music: 'transcendental-earth-people', mood: 'drive', key: 'A', intro: 0.0, cover: 3.9,
+  technique: 'A radar scope whose rings are weeks ahead: a conic-gradient sweep spins on the beat and pings four seasonal blips that open as circular concept images on tethers; one circle grows into the full frame, then the real Ideas page is ringed where it says “no trend scores, no sales promises”, and the four ideas become pickable tiles',
+  caption: 'Stuck on what to make next? MakeAndList keeps ideas by season and category, weeks ahead, and says plainly whether it can make each one today. No trend scores, no sales promises: pick one, make it, approve every file. Products shown are concept images. Start free at makeandlist.com',
+  short: 'Know what to make next.',
+  beats: ['0–1 s: “What should you make next?” over a radar sweep', '1–4.6 s: four seasonal ideas ping and open: Halloween sheets, gift tags, a wall calendar, nursery prints (concept images)', '4.6–7.4 s: one opens to the full frame: ideas by season, weeks ahead', '7.4–10.2 s: the real Ideas page: no trend scores, no sales promises; tap “Show Halloween ideas”', '10.2–13 s: pick one, make it, you approve every file', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], ...IDEAS.flatMap((d) => [[d.tb, 'notify'], [d.tb + B(0.5), 'pop']]), [T_ZOOM - 1.4, 'riser'], [T_ZOOM, 'whoosh'], [B(11), 'hit'],
+    [T_PROOF - 0.05, 'whoosh'], [B(17), 'pop'], [T_RING, 'marker'], [B(20), 'swish'], [T_TAP, 'click'], [T_PICK - 0.05, 'whoosh'], ...[0, 1, 2, 3].map((i) => [+(T_PICK + i * 0.12).toFixed(3), 'pop']), [B(25), 'click'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  // ---------- scope ----------
+  const ang = (T / P) * 360;
+  sweep.style.transform = `rotate(${ang}deg)`;
+  edge.style.transform = `rotate(${ang}deg)`;
+  const zoom = K.p(T, T_ZOOM - 0.05, T_ZOOM + 0.6, E.inOutExpo);
+  const back = K.p(T, T_PICK - 0.1, T_PICK + 0.5, E.outExpo);
+  scope.style.transform = `scale(${1 + zoom * 1.6 - back * 0.4 * 0}) `;
+  scope.style.transformOrigin = `${IDEAS[0].px}px ${IDEAS[0].py}px`;
+  scope.style.opacity = (1 - K.p(T, T_ZOOM + 0.2, T_ZOOM + 0.5, E.linear)) + back * 0.1;
+  if (back > 0) { scope.style.transform = `scale(${1.35 - 0.1 * back})`; scope.style.transformOrigin = `${C[0]}px ${C[1]}px`; }
+  scope.style.filter = back > 0 ? 'blur(4px)' : 'none';
+  const st = K.p(T, 0, 0.5, E.outExpo);
+  if (T < 0.5) { scope.style.transform = `scale(${0.85 + 0.15 * st})`; scope.style.transformOrigin = `${C[0]}px ${C[1]}px`; scope.style.opacity = st; }
+
+  blips.forEach((b, i) => {
+    const d = IDEAS[i];
+    // pings every time the sweep passes
+    const since = ((T - d.tb) % P + P) % P, on = T >= d.tb - 0.02;
+    const pp = K.clamp(since / 0.7);
+    b.ping.style.opacity = on && since < 0.7 ? 1 - pp : 0;
+    b.ping.style.transform = `scale(${1 + pp * 4})`;
+    b.dot.style.opacity = on ? 0.55 + 0.45 * Math.max(0, 1 - since / 1.2) : 0;
+    b.dot.style.transform = `scale(${on ? 0.8 + 0.4 * Math.max(0, 1 - since / 0.4) : 0})`;
+    const lp = K.p(T, d.tb + 0.05, d.tb + 0.35, E.outCubic);
+    b.line.style.strokeDasharray = `${lp} 1`; b.line.style.opacity = lp > 0 ? 0.8 : 0;
+    const op = K.p(T, d.tb + 0.2, d.tb + B(1) + 0.2, E.outBack);
+    const fl = Math.sin(T * 1.5 + i * 1.7) * 6;
+    b.pop.style.transform = `translateY(${fl}px) scale(${Math.max(0.001, op)})`;
+    b.pop.style.opacity = K.clamp(op * 3);
+    b.img.style.transform = `scale(${1.04 + 0.06 * K.p(T, d.tb, d.tb + 5, E.linear)})`;
+    const la = K.p(T, d.tb + 0.4, d.tb + 0.8, E.outExpo);
+    b.lab.style.opacity = la; b.lab.style.transform = `translateY(${(1 - la) * 20 + fl}px)`;
+    if (i === 0) { b.pop.style.opacity = K.clamp(op * 3) * (1 - K.p(T, T_ZOOM + 0.2, T_ZOOM + 0.3, E.linear)); }
+  });
+  K.reveal(hookW, T, 0.05, { kind: 'up', stagger: 0.07, dur: 0.45, out: T_ZOOM - 0.35 });
+  conceptTag.style.opacity = K.win(T, IDEAS[0].tb + 0.3, T_PROOF, 0.2) + K.win(T, T_PICK, 12.95, 0.2);
+  conceptTag.style.left = (W - 330) / 2 + 'px';
+  conceptTag.style.top = (T > T_PICK - 0.2 ? (tall ? 1196 : TG.y0 + 2 * TG.h + TG.gap + 22) : T > T_ZOOM ? (tall ? 1196 : 1260) : (tall ? 1196 : 1268)) + 'px';
+
+  // ---------- the full frame idea ----------
+  const fr = K.p(T, T_ZOOM, T_ZOOM + 0.6, E.inOutExpo);
+  const d0 = IDEAS[0];
+  const rad = K.lerp(PD / 2 * (1 + 1.6), Math.hypot(W, H), fr);
+  full.style.clipPath = `circle(${rad}px at ${d0.px}px ${d0.py}px)`;
+  full.style.opacity = T < T_ZOOM ? 0 : 1 - K.p(T, T_PICK - 0.1, T_PICK + 0.3, E.linear);
+  const fb = Math.max(W / 1024, H / 1536) * (1.08 + 0.1 * K.p(T, T_ZOOM, T_PICK, E.linear));
+  Object.assign(fimg.style, { width: 1024 * fb + 'px', height: 1536 * fb + 'px', left: (W - 1024 * fb) / 2 + 'px', top: (H - 1536 * fb) / 2 + 40 * Math.sin(T * 0.4) + 'px' });
+  const dim = K.p(T, T_PROOF - 0.1, T_PROOF + 0.4, E.inOutCubic);
+  fimg.style.filter = `blur(${dim * 14}px) brightness(${1 - dim * 0.55})`;
+  K.reveal(cap1W, T, T_ZOOM + 0.25, { kind: 'up', stagger: 0.08, dur: 0.5, out: T_PROOF - 0.3 });
+
+  // ---------- proof ----------
+  const pp = K.p(T, T_PROOF, T_PROOF + 0.6, E.outExpo), po = K.p(T, T_PICK - 0.15, T_PICK + 0.2, E.inCubic);
+  ph.root.style.opacity = K.p(T, T_PROOF, T_PROOF + 0.12, E.linear) * (1 - po);
+  ph.root.style.transform = `translateY(${(1 - pp) * 300 + po * 200}px) rotate(${(1 - pp) * 4}deg)`;
+  const SRC = K.k(T, [[T_PROOF, 60], [T_RING, 120], [B(20), 120], [B(20) + 0.5, 600], [13, 640]], E.inOutCubic);
+  ph.scroll(SRC * sc);
+  const hp = K.p(T, T_RING, T_RING + 0.35, E.outBack) * (1 - K.p(T, B(20) - 0.1, B(20) + 0.1, E.linear));
+  Object.assign(hl.style, { left: 18 * sc + 'px', top: (262 - SRC) * sc + 'px', width: 744 * sc + 'px', height: 66 * sc + 'px', opacity: hp > 1e-6 ? 1 : 0, transform: `scale(${1.1 - 0.1 * hp})` });
+  realTag.style.opacity = ph.root.style.opacity;
+  realTag.style.left = (tall ? 65 : PH.x + 10) + 'px';
+  realTag.style.top = (tall ? 1196 : PH.y + PH.w * 2.05 + 16) + 'px';
+  realTag.style.zIndex = 61;
+  K.reveal(cap2W, T, T_PROOF + 0.3, { kind: 'up', stagger: 0.07, dur: 0.45, out: B(20) - 0.25 });
+  K.reveal(cap3W, T, B(20), { kind: 'up', stagger: 0.07, dur: 0.45, out: T_PICK - 0.3 });
+  // tap "Show Halloween ideas" (source x 75–495, y ≈ 1165)
+  const bx = PH.x + 14 + 285 * sc, by = PH.y + 14 + (1165 - SRC) * sc;
+  const cin = K.p(T, B(20) + 0.3, T_TAP, E.inOutCubic);
+  cur.at(K.lerp(bx + 220, bx, cin), K.lerp(by + 260, by, cin), T > T_TAP && T < T_TAP + 0.15);
+  cur.hide(K.win(T, B(20) + 0.2, T_PICK - 0.1, 0.15));
+  cur.ripple(bx + 10, by + 10, T, T_TAP);
+
+  // ---------- pick one ----------
+  tiles.forEach(({ t, mk }, i) => {
+    const c = i % 2, r = Math.floor(i / 2);
+    const x = TG.x0 + c * (TG.w + TG.gap), y = TG.y0 + r * (TG.h + TG.gap);
+    const t0 = T_PICK + i * 0.12, p = K.p(T, t0, t0 + 0.5, E.outBack);
+    const sel = K.p(T, B(25), B(25) + 0.4, E.outBack);
+    const dimO = i === 0 ? 1 : 1 - 0.45 * K.p(T, B(25), B(25) + 0.3, E.linear);
+    t.style.left = x + 'px'; t.style.top = y + 'px';
+    t.style.opacity = K.clamp(p * 3) * dimO;
+    t.style.transform = `scale(${(0.7 + 0.3 * p) * (i === 0 ? 1 + 0.04 * sel : 1)})`;
+    t.style.boxShadow = i === 0 && sel > 0 ? '0 0 0 5px #DFFF5A, 0 40px 70px -30px rgba(0,0,0,.9)' : '';
+    t.style.zIndex = i === 0 ? 25 : 24;
+    t.firstChild.style.transform = `scale(${1.05 + 0.05 * Math.sin(T * 0.7 + i)})`;
+  });
+  K.reveal(cap4W, T, T_PICK + 0.1, { kind: 'up', stagger: 0.07, dur: 0.5 });
+
+  end(T);
+});
+</script></body></html>

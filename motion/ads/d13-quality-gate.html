@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D13 · The Quality Gate</title><link rel="stylesheet" href="kit.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&display=block">
+<style>
+#stage { background: #141619; color: #F3F1EA; }
+.cond { font-family: 'Archivo Narrow'; font-weight: 700; text-transform: uppercase; letter-spacing: .01em; }
+.hook { position: absolute; z-index: 60; line-height: .86; color: #F3F1EA; }
+.hook em { font-style: normal; color: #DFFF5A; }
+.sign { position: absolute; z-index: 20; display: flex; align-items: center; gap: 18px; padding: 0 26px; border-radius: 10px;
+  background: #0B0C0E; box-shadow: inset 0 0 0 2px #2B2F34, 0 20px 40px -20px #000; color: #DFFF5A; white-space: nowrap; }
+.sign .ar { width: 50px; height: 50px; border-radius: 8px; background: #DFFF5A; color: #0B0C0E; display: grid; place-items: center; font: 900 36px 'Archivo'; }
+.sign .t { font: 700 40px/1 'Archivo Narrow'; text-transform: uppercase; letter-spacing: .04em; }
+.sign .s { font: 500 20px 'IBM Plex Mono', monospace; color: #9EA3A8; letter-spacing: .06em; margin-left: auto; }
+.lamp { position: absolute; z-index: 22; text-align: center; }
+.lamp .bulb { width: 70px; height: 70px; margin: 0 auto; border-radius: 50%; background: #2A2E33; box-shadow: inset 0 -6px 12px rgba(0,0,0,.5), 0 0 0 4px #1D2024; position: relative; }
+.lamp .bulb i { position: absolute; inset: 0; border-radius: 50%; display: grid; place-items: center; font: 900 34px 'Archivo'; color: #141619; font-style: normal; }
+.lamp .nm { margin-top: 14px; font: 700 26px/1 'Archivo Narrow'; text-transform: uppercase; letter-spacing: .06em; color: #C9CDD1; }
+.pillar { position: absolute; z-index: 30; border-radius: 16px; background: linear-gradient(90deg, #262A2F, #34393F 50%, #23272B); box-shadow: 0 30px 60px -20px #000, inset 0 0 0 2px #3C4248; }
+.strip { position: absolute; z-index: 31; width: 8px; border-radius: 4px; }
+.beam { position: absolute; z-index: 31; border-radius: 16px; background: linear-gradient(180deg, #34393F, #23272B); box-shadow: inset 0 0 0 2px #3C4248; }
+.floor { position: absolute; z-index: 2; left: 0; right: 0; overflow: hidden; }
+.prod { position: absolute; z-index: 25; overflow: hidden; border-radius: 14px; background: #222; box-shadow: 0 40px 70px -30px #000, 0 0 0 3px #F3F1EA; }
+.prod img, .prod canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.prod canvas { image-rendering: pixelated; }
+.scan { position: absolute; z-index: 26; height: 6px; border-radius: 3px; pointer-events: none; }
+.arm { position: absolute; z-index: 40; height: 30px; border-radius: 15px; transform-origin: calc(100% - 15px) 15px;
+  background: repeating-linear-gradient(135deg, #E8603C 0 28px, #F3F1EA 28px 56px); box-shadow: 0 16px 30px -12px #000; }
+.read { position: absolute; z-index: 45; text-align: center; white-space: nowrap; }
+.read .k { font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #9EA3A8; }
+.read .v { margin-top: 8px; font: 700 60px/1 'Archivo Narrow'; text-transform: uppercase; letter-spacing: .02em; }
+.flash { position: absolute; inset: 0; z-index: 50; pointer-events: none; background: radial-gradient(80% 60% at 50% 50%, rgba(232,96,60,0), rgba(232,96,60,.45)); opacity: 0; }
+.card { position: absolute; z-index: 70; overflow: hidden; border-radius: 26px; background: #FFFDF8; box-shadow: 0 60px 120px -40px #000, 0 0 0 3px #DFFF5A; }
+.card img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.hl { position: absolute; z-index: 72; border: 5px solid #DFFF5A; border-radius: 16px; box-shadow: 0 0 0 2px #141619; pointer-events: none; }
+.cap { position: absolute; z-index: 71; text-align: center; font: 700 66px/0.95 'Archivo Narrow'; text-transform: uppercase; color: #F3F1EA; }
+.cap em { font-style: normal; color: #DFFF5A; }
+.chipD { position: absolute; z-index: 46; white-space: nowrap; font: 700 30px 'Archivo'; color: #141619; background: #DFFF5A; padding: 16px 28px; border-radius: 99px; display: flex; gap: 12px; align-items: center; }
+.chipD i { width: 14px; height: 14px; border-radius: 50%; background: #141619; display: block; }
+.demo { background: rgba(20,22,25,.86); color: #D9D3C9; border-color: #6A6F75; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .1; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D13 — airport-security wayfinding: a quality gate with four lamps (pages, sizes, sharpness, listing copy). A concept
+// colouring book walks through and clears; a print too soft for its size lights the sharpness lamp red and the
+// barrier arm slams down. The real technical check from the app proves it; a wedding planner clears on a fast run of
+// lamps and lands as a draft that waits for the seller.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 129.2, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const L = tall
+  ? { signY: 286, signH: 84, lampY: 404, gateY: 566, gateH: 540, gateW: 600, pw: 330, ph: 440, readY: 1112, hookY: 470, hookFs: 212, floorY: 1060,
+      cardW: 860, capY: 330, cardY: 560, chipY: 1120, tagY: 1196 }
+  : { signY: 60, signH: 76, lampY: 166, gateY: 330, gateH: 500, gateW: 560, pw: 300, ph: 400, readY: 880, hookY: 240, hookFs: 200, floorY: 790,
+      cardW: 820, capY: 90, cardY: 300, chipY: 890, tagY: 1270 };
+const GX = (W - L.gateW) / 2, PIL = 70;
+const CX = W / 2, PY = L.gateY + 40;
+
+// ---------- the hall ----------
+K.box(0, 0, W, H, { style: { background: 'radial-gradient(90% 55% at 50% 42%, #23272C 0, #141619 60%, #0D0E10 100%)' } });
+const floor = K.box(0, L.floorY, W, H - L.floorY, { cls: 'floor', style: { background: 'linear-gradient(180deg, #1B1E22, #0E0F11)' } });
+const floorSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+floorSVG.setAttribute('width', W); floorSVG.setAttribute('height', H - L.floorY); floor.appendChild(floorSVG);
+const hazard = K.box(0, L.floorY - 10, W, 16, { style: { zIndex: 3, background: 'repeating-linear-gradient(135deg, #DFFF5A 0 22px, #141619 22px 44px)', opacity: 0.85 } });
+
+const sign = K.box(65, L.signY, W - 130, L.signH, { cls: 'sign', html: `<div class="ar">↑</div><div class="t">Quality gate</div><div class="s">before anything is listed</div>` });
+
+const LAMPS = ['Pages', 'Sizes', 'Sharpness', 'Copy'];
+const lampX = (i) => 65 + ((W - 130) / 4) * (i + 0.5);
+const lamps = LAMPS.map((n, i) => {
+  const d = K.box(lampX(i) - 110, L.lampY, 220, null, { cls: 'lamp', html: `<div class="bulb"><i></i></div><div class="nm">${n}</div>` });
+  return { d, bulb: d.querySelector('.bulb'), i: d.querySelector('i') };
+});
+
+// gate
+const pL = K.box(GX, L.gateY, PIL, L.gateH, { cls: 'pillar' });
+const pR = K.box(GX + L.gateW - PIL, L.gateY, PIL, L.gateH, { cls: 'pillar' });
+const beam = K.box(GX - 10, L.gateY - 50, L.gateW + 20, 64, { cls: 'beam' });
+const sL = K.box(GX + PIL - 18, L.gateY + 30, 8, L.gateH - 60, { cls: 'strip' });
+const sR = K.box(GX + L.gateW - PIL + 10, L.gateY + 30, 8, L.gateH - 60, { cls: 'strip' });
+const scan = K.box(GX + PIL, 0, L.gateW - PIL * 2, 6, { cls: 'scan' });
+const ARM = L.gateW - PIL;
+const arm = K.box(GX + L.gateW - PIL / 2 + 15 - ARM, L.gateY + L.gateH * 0.5, ARM, 30, { cls: 'arm' });
+const flash = K.box(0, 0, W, H, { cls: 'flash' });
+
+// products: two concept photos and one deliberately low-resolution print (drawn small, shown pixelated)
+const mkProd = (src, low) => {
+  const d = K.box(0, PY, L.pw, L.ph, { cls: 'prod' });
+  const img = K.el('img', { src: K.pub('r04/' + src + '.webp'), parent: d, style: { objectPosition: '50% 40%' } });
+  let cv = null;
+  if (low) { cv = K.el('canvas', { parent: d }); cv.width = 22; cv.height = 30; img.style.visibility = 'hidden'; }
+  return { d, img, cv, drawn: false };
+};
+const PRODS = [
+  { el: mkProd('g24-colouring-book'), enter: B(3), at: B(4.6), checks: [B(5), B(6), B(7), B(8)], res: [1, 1, 1, 1], leave: B(9.4),
+    vals: ['Pages counted', 'Sizes checked', 'Sharp at size', 'Listing copy'], verdict: 'Cleared', vk: 'Colouring book' },
+  { el: mkProd('g01-botanical-print', true), enter: B(10), at: B(11.4), checks: [B(12), B(13), B(14)], res: [1, 1, 0], leave: B(16.2), back: true,
+    vals: ['Pages counted', '40 × 50 cm', 'Too soft', ''], verdict: 'Stopped', vk: 'Art print · 40 × 50 cm' },
+  { el: mkProd('g06-wedding-planner'), enter: B(22.3), at: B(23.6), checks: [B(24.5), B(25), B(25.5), B(26)], res: [1, 1, 1, 1], leave: 99,
+    vals: ['Pages counted', 'Sizes checked', 'Sharp at size', 'Listing copy'], verdict: 'Cleared', vk: 'Wedding planner' },
+];
+const read = K.box(0, L.readY, W, null, { cls: 'read', html: '<div class="k"></div><div class="v"></div>' });
+const readK = read.querySelector('.k'), readV = read.querySelector('.v');
+const conceptTag = K.demoTag('Concept image · AI-generated', 0, 0);
+
+// hook
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'hook cond', style: { fontSize: L.hookFs + 'px' } });
+const hookW = K.words(hook, 'Nothing\nsloppy\ngets <em>through.</em>'.replace('<em>through.</em>', 'through.'));
+hookW[hookW.length - 1].style.color = '#DFFF5A';
+const hookBg = K.box(0, 0, W, H, { style: { zIndex: 55, background: '#141619' } });
+
+// proof
+const PR = { sx: 40, sy: 400, sw: 710, sh: 530 };
+const ck = L.cardW / PR.sw, ch = PR.sh * ck;
+const card = K.box((W - L.cardW) / 2, L.cardY, L.cardW, ch, { cls: 'card' });
+K.el('img', { src: K.screen('33-phone-sell-physical'), parent: card, style: { transform: `translate(${-PR.sx * ck}px, ${-PR.sy * ck}px) scale(${ck})` } });
+const hl = K.box((W - L.cardW) / 2 + 22 * ck, L.cardY + 336 * ck, 650 * ck, 172 * ck, { cls: 'hl' });
+const cap = K.box(65, L.capY, W - 130, null, { cls: 'cap' });
+const capW = K.words(cap, 'Every print file\nchecked for its size.');
+const realTag = K.demoTag('Real app · demo workspace', (W - L.cardW) / 2 + 20, L.cardY + ch + 20);
+realTag.style.zIndex = 75;
+const dimAll = K.box(0, 0, W, H, { style: { zIndex: 65, background: 'rgba(10,11,13,.93)', opacity: 0 } });
+
+const chip = K.box(0, L.chipY, null, null, { cls: 'chipD', html: '<i></i>Draft · waiting for your yes', style: { width: 'auto', height: 'auto' } });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Checked first.<br>Then your yes.', dark: true });
+
+const T_PROOF = B(17), T_PROOF_OUT = B(22.5), T_FAIL = B(14);
+
+document.fonts.load('700 40px "Archivo Narrow"');
+K.run({
+  id: 'D13', title: 'The Quality Gate', dur: DUR, bpm: BPM, music: 'transcendental-earth-people', mood: 'drive', key: 'A', intro: 0.0, cover: 6.7,
+  technique: 'Airport-security wayfinding in condensed type: a gate with four lamps checks concept products on the beat; a print too soft for its size turns its lamp red, the striped barrier arm slams down with a red vignette flash, the real technical-pass crop proves the check, then a last product clears on a fast lamp roll into a draft',
+  caption: 'Before anything is listed, MakeAndList counts the pages, checks the sizes and whether the print file is sharp enough for its size, and writes the listing copy. A file too soft to print is flagged, and every product waits as a draft for your yes. Start free at makeandlist.com',
+  short: 'Checked before it’s listed.',
+  beats: ['0–1.4 s: “Nothing sloppy gets through.”', '1.4–4.6 s: a concept colouring book walks the gate: pages, sizes, sharpness, copy — cleared', '4.6–7.9 s: a print too soft for 40 × 50 cm: red lamp, the barrier drops, sent back', '7.9–10.5 s: the real technical check in the app', '10.5–13 s: a planner clears on a fast lamp roll; draft, waiting for your yes', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [B(1), 'type'], [B(3) - 0.05, 'whoosh'], ...PRODS.flatMap((p, k) => [[p.enter, 'swish'], ...p.checks.map((t, i) => [t, p.res[i] ? (k === 2 ? 'click' : 'pop') : 'hit'])]),
+    [B(9), 'chime'], [+(T_FAIL + 0.08).toFixed(3), 'stamp'], [B(16.2), 'whoosh'], [T_PROOF, 'whoosh'], [B(19), 'pop'], [B(22.5), 'whoosh'], [B(26.5), 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  // floor: perspective lines that crawl, so the hall is never still
+  const fh = H - L.floorY; let fl = '';
+  for (let i = -8; i <= 8; i++) fl += `<line x1="${W / 2 + i * 70}" y1="0" x2="${W / 2 + i * 260}" y2="${fh}" stroke="#2A2E33" stroke-width="2"/>`;
+  for (let j = 0; j < 7; j++) { const u = ((j + T * 0.9) % 7) / 7, y = fh * u * u; fl += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#262A2F" stroke-width="${1 + 3 * u}"/>`; }
+  floorSVG.innerHTML = fl;
+  hazard.style.backgroundPosition = `${-T * 40}px 0`;
+
+  // ---------- hook ----------
+  K.reveal(hookW, T, 0.0, { kind: 'up', stagger: 0.09, dur: 0.45, out: B(2.6) });
+  hook.style.transform = `scale(${1 + 0.03 * K.p(T, 0, B(3), E.linear)})`;
+  hookBg.style.opacity = 1 - K.p(T, B(2.6), B(3.2), E.inOutCubic);
+
+  // ---------- which product is in the gate ----------
+  let lampState = [0, 0, 0, 0], verdict = null, vk = '', vColor = '#DFFF5A', inGate = -1;
+  PRODS.forEach((p, k) => {
+    const el = p.el;
+    if (el.cv && !el.drawn && el.img.complete && el.img.naturalWidth) {
+      const c = el.cv.getContext('2d'); c.drawImage(el.img, 0, 0, 1024, 1536, 0, 0, 22, 30); el.drawn = true;
+    }
+    const inP = K.p(T, p.enter, p.at, E.outExpo);
+    const outP = K.p(T, p.leave, p.leave + B(1.2), E.inCubic);
+    const fromX = -L.pw - 40, midX = CX - L.pw / 2, toX = p.back ? -L.pw - 60 : W + 40;
+    const x = K.lerp(fromX, midX, inP) + (toX - midX) * outP;
+    const bob = Math.sin(T * 9) * 3 * (inP * (1 - inP) * 4 + outP * (1 - outP) * 4);
+    const fail = p.res.indexOf(0);
+    const shake = fail >= 0 && T > p.checks[fail] ? Math.sin((T - p.checks[fail]) * 70) * 14 * Math.exp(-(T - p.checks[fail]) * 6) : 0;
+    el.d.style.transform = `translate(${x + shake}px, ${bob}px) rotate(${(1 - inP) * -4 + outP * (p.back ? -5 : 4)}deg)`;
+    const vis = T >= p.enter && T < p.leave + B(1.2);
+    el.d.style.visibility = vis ? 'visible' : 'hidden';
+    if (T >= p.enter && T < p.leave + B(0.6)) {
+      inGate = k;
+      lampState = p.checks.map((t, i) => (T >= t ? (p.res[i] ? 1 : -1) : 0)).concat([0, 0, 0, 0]).slice(0, 4);
+      const lastCheck = p.checks[p.checks.length - 1];
+      if (T >= lastCheck + B(0.5)) { verdict = p.verdict; vColor = fail >= 0 ? '#E8603C' : '#DFFF5A'; vk = p.vk; }
+      else if (T >= p.at - 0.1) { verdict = '…'; vk = 'Checking'; vColor = '#F3F1EA'; const ci = p.checks.filter((t) => T >= t).length - 1; if (ci >= 0) { verdict = p.vals[ci]; vColor = p.res[ci] ? '#DFFF5A' : '#E8603C'; vk = 'Check ' + (ci + 1) + ' of 4'; } }
+    }
+  });
+
+  // lamps
+  lamps.forEach((lp, i) => {
+    const s = lampState[i];
+    const t0 = inGate >= 0 ? PRODS[inGate].checks[i] : 0;
+    const pop = s !== 0 ? K.p(T, t0, t0 + 0.25, E.outBack) : 0;
+    lp.bulb.style.background = s === 1 ? 'radial-gradient(circle at 35% 30%, #F4FFB8, #DFFF5A 55%, #A9C93A)' : s === -1 ? 'radial-gradient(circle at 35% 30%, #FFB79F, #E8603C 55%, #B8442A)' : '#2A2E33';
+    lp.bulb.style.boxShadow = s === 1 ? '0 0 0 4px #1D2024, 0 0 40px rgba(223,255,90,.7)' : s === -1 ? '0 0 0 4px #1D2024, 0 0 50px rgba(232,96,60,.85)' : 'inset 0 -6px 12px rgba(0,0,0,.5), 0 0 0 4px #1D2024';
+    lp.bulb.style.transform = `scale(${s ? 0.85 + 0.15 * pop : 1})`;
+    lp.i.innerHTML = s === 1 ? '✓' : s === -1 ? '✕' : '';
+    lp.d.style.opacity = K.p(T, B(2.6) + i * 0.06, B(3.2) + i * 0.06, E.linear);
+  });
+
+  // gate light strips, scan line
+  const live = inGate >= 0 && lampState.some((s) => s !== 0);
+  const failNow = lampState.includes(-1);
+  const stripC = failNow ? '#E8603C' : live ? '#DFFF5A' : '#4A5057';
+  [sL, sR].forEach((s) => { s.style.background = stripC; s.style.boxShadow = live ? `0 0 26px ${stripC}` : 'none'; });
+  const scanOn = inGate >= 0 && T >= PRODS[inGate].at - 0.1 && T < PRODS[inGate].checks[PRODS[inGate].checks.length - 1] + 0.2;
+  const su = (Math.sin(T * 7) + 1) / 2;
+  scan.style.top = PY + 10 + su * (L.ph - 20) + 'px';
+  scan.style.background = failNow ? '#E8603C' : '#DFFF5A';
+  scan.style.boxShadow = `0 0 22px ${failNow ? '#E8603C' : '#DFFF5A'}`;
+  scan.style.opacity = scanOn ? 0.9 : 0;
+
+  // barrier arm: up at rest, slams down on the fail, lifts once the print is sent back
+  const down = K.p(T, T_FAIL + 0.02, T_FAIL + 0.2, E.inCubic) * (1 - K.p(T, B(16.8), B(17.6), E.inOutCubic));
+  const bounce = T > T_FAIL + 0.2 ? Math.sin((T - T_FAIL - 0.2) * 30) * 5 * Math.exp(-(T - T_FAIL - 0.2) * 7) * (down > 0.9 ? 1 : 0) : 0;
+  arm.style.transform = `rotate(${84 - 84 * down - bounce}deg)`;
+  arm.style.opacity = K.p(T, T_FAIL - 0.25, T_FAIL - 0.05, E.linear) * (1 - K.p(T, B(17.2), B(17.6), E.linear));
+  flash.style.opacity = K.p(T, T_FAIL, T_FAIL + 0.08, E.linear) * (1 - K.p(T, T_FAIL + 0.1, T_FAIL + 0.9, E.outCubic));
+
+  // readout
+  readV.innerHTML = verdict || '';
+  readK.innerHTML = vk;
+  readV.style.color = vColor;
+  read.style.opacity = verdict && T < B(26.5) ? 1 : 0;
+  // concept tag beside the product in the gate
+  conceptTag.style.left = CX - L.pw / 2 + 'px'; conceptTag.style.top = PY + L.ph + 18 + 'px';
+  conceptTag.style.opacity = inGate >= 0 && T > PRODS[inGate].at - 0.2 ? 1 : 0;
+  read.style.top = (tall ? L.readY : L.readY) + 'px';
+
+  // ---------- proof ----------
+  const pIn = K.p(T, T_PROOF, T_PROOF + 0.55, E.outExpo), pOut = K.p(T, T_PROOF_OUT - 0.3, T_PROOF_OUT, E.inCubic);
+  dimAll.style.opacity = pIn * (1 - pOut);
+  card.style.opacity = pIn * (1 - pOut);
+  card.style.transform = `translateY(${(1 - pIn) * 140 - pOut * 80}px) scale(${0.94 + 0.06 * pIn + 0.02 * K.p(T, T_PROOF, T_PROOF_OUT, E.linear)})`;
+  card.style.visibility = T >= T_PROOF && T < T_PROOF_OUT ? 'visible' : 'hidden';
+  K.reveal(capW, T, T_PROOF + 0.1, { kind: 'up', stagger: 0.05, dur: 0.45, out: T_PROOF_OUT - 0.35 });
+  cap.style.visibility = T >= T_PROOF && T < T_PROOF_OUT ? 'visible' : 'hidden';
+  const hp = K.p(T, B(19), B(19) + 0.35, E.outBack);
+  hl.style.opacity = K.p(T, B(19), B(19) + 0.1, E.linear) * (1 - pOut);
+  hl.style.transform = `translateY(${(1 - pIn) * 140}px) scale(${1.1 - 0.1 * hp})`;
+  realTag.style.opacity = pIn * (1 - pOut);
+
+  // ---------- the draft ----------
+  const cp = K.p(T, B(26.5), B(26.5) + 0.45, E.outBack);
+  chip.style.opacity = K.p(T, B(26.5), B(26.5) + 0.15, E.linear);
+  chip.style.left = W / 2 + 'px';
+  chip.style.transform = `translateX(-50%) scale(${0.7 + 0.3 * cp})`;
+  chip.style.visibility = T >= B(26.5) ? 'visible' : 'hidden';
+
+  end(T);
+});
+</script></body></html>

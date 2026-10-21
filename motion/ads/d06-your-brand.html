@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D06 · Your Brand, Not Ours</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #2E3A30; }
+.full { position: absolute; inset: 0; overflow: hidden; }
+.full img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 30%; }
+.veil { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(24,30,25,.25) 0, rgba(24,30,25,.62) 30%, rgba(24,30,25,.55) 45%, rgba(24,30,25,.1) 62%, rgba(24,30,25,.35) 100%); }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 112px/0.98 'Playfair Display'; letter-spacing: -0.025em; color: #FAF7EE; }
+.hook em { font-style: italic; color: #DFFF5A; }
+.fine { position: absolute; z-index: 41; font: 500 20px 'IBM Plex Mono', monospace; color: #EFEADF; background: rgba(31,31,31,.6); padding: 6px 12px; border-radius: 8px; letter-spacing: .02em; }
+.fine.ink { color: #45403A; background: rgba(250,247,238,.86); border: 1px dashed #8A8378; }
+.kraft { position: absolute; inset: 0; background-color: #CDAE82;
+  background-image: radial-gradient(120% 80% at 40% 30%, rgba(255,240,215,.45), rgba(120,84,40,.25) 100%),
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .32  0 0 0 0 .18  0 0 0 .35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.pol { position: absolute; background: #FFFDF8; padding: 14px 14px 46px; box-shadow: 0 30px 50px -26px rgba(60,40,15,.6); }
+.pol img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tag { position: absolute; z-index: 20; }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.cap em { font-style: italic; }
+.cap.lt { color: #FAF7EE; }
+.cap.lt em { color: #DFFF5A; }
+.sub { position: absolute; z-index: 40; font: 600 34px/1.3 'Archivo'; color: #45403A; }
+.sub.lt { color: #EFEADF; }
+.room { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 30%, #F7F3EA 0, #ECE5D8 60%, #DFD6C6 100%); }
+.crop { position: absolute; z-index: 20; border-radius: 30px; overflow: hidden; background: #FAF7EE; box-shadow: 0 50px 90px -40px rgba(31,31,31,.6), 0 0 0 1.5px #E2DBCE; }
+.crop img { position: absolute; left: 0; top: 0; display: block; }
+.mark { position: absolute; z-index: 21; height: 12px; border-radius: 6px; background: #DFFF5A; mix-blend-mode: multiply; transform-origin: 0 50%; }
+.ring { position: absolute; z-index: 21; border-radius: 16px; border: 5px solid #DFFF5A; }
+.tile { position: absolute; z-index: 20; border-radius: 22px; overflow: hidden; background: #FFFDF8; box-shadow: 0 30px 50px -30px rgba(31,31,31,.55); }
+.tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tile svg { position: absolute; }
+.stores { position: absolute; z-index: 30; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.st { display: flex; align-items: center; gap: 10px; background: #FFFDF8; border-radius: 999px; padding: 12px 22px 12px 14px; font: 700 28px 'Archivo'; color: #1F1F1F; box-shadow: 0 0 0 1.5px #E2DBCE; }
+.st i { width: 18px; height: 18px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; display: block; }
+.demo { z-index: 60; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D06 — a (fictional) boutique, Paper & Pines. A rubber stamp presses the shop's own seal onto a kraft swing tag:
+// "Sold by Paper & Pines". Then the proof: the real Stores screen, where paperandpines.shop is the seller's own
+// WooCommerce store and every listing goes there as a draft. The same seal lands on every product.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 80.7, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const S1 = B(2), S2 = B(6), S3 = B(10), S4 = B(14);   // 1.487, 4.461, 7.435, 10.409
+const T_STAMP = B(4);
+const L = tall
+  ? { hookY: 560, fineY: 1196, tagX: 300, tagY: 520, tagW: 470, capY: 290, capFs: 80, subY: 1110, cropX: 70, cropY: 470, cropW: 940, gridY: 650, tileW: 440, tileH: 300, gap: 24, storesY: 470, closeY: 560 }
+  : { hookY: 420, fineY: 1262, tagX: 330, tagY: 270, tagW: 420, capY: 60, capFs: 68, subY: 1150, cropX: 130, cropY: 250, cropW: 820, gridY: 390, tileW: 380, tileH: 300, gap: 24, storesY: 210, closeY: 420 };
+
+// the seal: the shop's own mark, as a stamp would print it (rough ink via displacement)
+const SEAL = (id, size, ink = '#2E4A38') => `<svg viewBox="0 0 200 200" width="${size}" height="${size}" style="overflow:visible">
+  <defs><filter id="rough${id}"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="${id + 3}"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter>
+  <path id="arc${id}" d="M100,100 m-72,0 a72,72 0 1,1 144,0 a72,72 0 1,1 -144,0"/></defs>
+  <g filter="url(#rough${id})" fill="none" stroke="${ink}">
+    <circle cx="100" cy="100" r="94" stroke-width="7"/><circle cx="100" cy="100" r="54" stroke-width="3"/>
+    <text font-family="IBM Plex Mono" font-weight="600" font-size="21" fill="${ink}" stroke="none"><textPath href="#arc${id}" startOffset="0" textLength="446" lengthAdjust="spacing">PAPER &amp; PINES · STATIONERY · EST. BY YOU ·</textPath></text>
+    <path d="M100,62 L122,96 L110,96 L128,122 L106,122 L106,138 L94,138 L94,122 L72,122 L90,96 L78,96 Z" fill="${ink}" stroke="none"/>
+  </g></svg>`;
+
+// ── scene 1: the boutique ─────────────────────────────────────────────────────────────
+const shop = K.box(0, 0, W, H, { cls: 'full', style: { zIndex: 2 } });
+const shopImg = K.el('img', { src: K.pub('r04/g19-boutique.webp'), parent: shop, style: { objectPosition: '42% 30%' } });
+const shopVeil = K.el('div', { cls: 'veil', parent: shop });
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'hook' });
+const hookA = K.el('div', { parent: hook, html: 'Your shop.' });
+const hookB = K.el('div', { parent: hook, html: '<em>Your name</em> on it.' });
+const fine = K.box(65, L.fineY, null, null, { cls: 'fine', html: 'Paper &amp; Pines is a fictional shop · Concept image · AI-generated', style: { width: 'auto', height: 'auto' } });
+
+// ── scene 2: kraft desk, the stamp ──────────────────────────────────────────────────────
+const desk = K.box(0, 0, W, H, { style: { zIndex: 5 } });
+K.el('div', { cls: 'kraft', parent: desk });
+const pols = (tall ? [['g10-greeting-cards', -0.06, 0.6, 340, -9], ['g16-christmas-tags', 0.68, 0.5, 330, 7], ['g11-lemon-notebook', 0.02, 0.26, 290, -5]] : [['g10-greeting-cards', -0.05, 0.6, 300, -9], ['g16-christmas-tags', 0.74, 0.5, 290, 7], ['g11-lemon-notebook', 0.03, 0.2, 260, -5]]).map(([src, fx, fy, w, r]) => {
+  const p = K.el('div', { cls: 'pol', parent: desk, style: { left: fx * W + 'px', top: fy * H + 'px', width: w + 'px', height: w * 1.25 + 'px', transform: `rotate(${r}deg)` } });
+  K.el('img', { src: K.pub('r04/' + src + '.webp'), parent: p });
+  return { p, r };
+});
+const TW = L.tagW, TH = TW * 1.55;
+const tag = K.box(L.tagX, L.tagY, TW, TH, { cls: 'tag', parent: desk, html: `<svg viewBox="0 0 300 465" width="${TW}" height="${TH}" style="overflow:visible">
+  <path d="M150,-160 C170,-80 120,-40 150,40" fill="none" stroke="#F4EDE0" stroke-width="5"/>
+  <path d="M60,0 L240,0 L300,70 L300,440 Q300,465 275,465 L25,465 Q0,465 0,440 L0,70 Z" fill="#E9D5B0" stroke="#B48F5C" stroke-width="3"/>
+  <circle cx="150" cy="48" r="17" fill="#CDAE82" stroke="#B48F5C" stroke-width="3"/>
+  <text x="150" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-weight="500" font-size="20" letter-spacing="5" fill="#6B5233">SOLD BY</text>
+  <line x1="40" y1="392" x2="260" y2="392" stroke="#B48F5C" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="150" y="430" text-anchor="middle" font-family="Playfair Display" font-weight="700" font-style="italic" font-size="30" fill="#2E4A38">Paper &amp; Pines</text></svg>` });
+const tagSvg = tag.querySelector('svg');
+const tagName = tagSvg.lastElementChild;
+const seal = K.box(TW / 2 - TW * 0.36, TH * 0.31, TW * 0.72, TW * 0.72, { parent: tag, html: SEAL(1, TW * 0.72), style: { zIndex: 2 } });
+// the rubber stamp: a turned wooden handle over a dark rubber block
+const stampW = TW * 0.86;
+const stamp = K.box(0, 0, stampW, stampW * 1.15, { parent: desk, style: { zIndex: 30 }, html: `<svg viewBox="0 0 200 230" width="${stampW}" height="${stampW * 1.15}">
+  <ellipse cx="100" cy="40" rx="42" ry="38" fill="#7A5230"/><ellipse cx="88" cy="30" rx="14" ry="10" fill="#A27447" opacity=".7"/>
+  <path d="M82,70 L118,70 L126,150 L74,150 Z" fill="#6A4628"/>
+  <rect x="14" y="150" width="172" height="42" rx="8" fill="#8B5E36"/><rect x="14" y="150" width="172" height="10" rx="5" fill="#A27447"/>
+  <rect x="20" y="192" width="160" height="22" rx="4" fill="#2E4A38"/></svg>` });
+const cap2 = K.box(65, L.capY, W - 130, null, { cls: 'cap', parent: desk, html: 'Sold under<br><em>your</em> name.', style: { fontSize: L.capFs + 'px', textAlign: 'center' } });
+const deskTag = K.demoTag('Concept images · AI-generated', W - 400, tall ? 1196 : 1262);
+desk.appendChild(deskTag);
+
+// ── scene 3: the proof — the seller's own store, in the real Stores screen ─────────────────
+const proof = K.box(0, 0, W, H, { style: { zIndex: 8 } });
+K.el('div', { cls: 'room', parent: proof });
+const CY0 = 2622, CH0 = tall ? 520 : 520, cs = L.cropW / 780;
+const crop = K.box(L.cropX, L.cropY, L.cropW, CH0 * cs, { cls: 'crop', parent: proof });
+K.el('img', { src: K.screen('25-phone-stores'), parent: crop, style: { width: L.cropW + 'px', top: -CY0 * cs + 'px' } });
+// marker under "https://paperandpines.shop" and a ring around "Nothing is published until you confirm"
+const urlMark = K.box(L.cropX + 52 * cs, L.cropY + (2826 - CY0) * cs, 300 * cs, 12, { cls: 'mark', parent: proof });
+const ring = K.box(L.cropX + 18 * cs, L.cropY + (2880 - CY0) * cs, 700 * cs, 120 * cs, { cls: 'ring', parent: proof });
+const pSeal = K.box(L.cropX + L.cropW - 200, L.cropY - 90, 230, 230, { parent: proof, html: SEAL(2, 230), style: { zIndex: 25 } });
+const cap3 = K.box(65, L.capY, W - 130, null, { cls: 'cap', parent: proof, html: 'Listings go to<br><em>your own</em> store.', style: { fontSize: L.capFs + 'px' } });
+const sub3 = K.box(65, L.cropY + CH0 * cs + 40, W - 130, null, { cls: 'sub', parent: proof, html: 'As a draft. Live only when you confirm.' });
+const realTag = K.demoTag('Real app · demo workspace', L.cropX, L.cropY + CH0 * cs + (tall ? 120 : 100));
+proof.appendChild(realTag);
+
+// ── scene 4: every product carries the seal; every store in one place ──────────────────────
+const grid = K.box(0, 0, W, H, { style: { zIndex: 9 } });
+K.el('div', { cls: 'room', parent: grid });
+const GI = ['g10-greeting-cards', 'g16-christmas-tags', 'g11-lemon-notebook', 'g03-slow-mornings-mug'];
+const tw = L.tileW, th = L.tileH, gx0 = (W - tw * 2 - L.gap) / 2;
+const tiles = GI.map((src, i) => {
+  const x = gx0 + (i % 2) * (tw + L.gap), y = L.gridY + Math.floor(i / 2) * (th + L.gap);
+  const t = K.box(x, y, tw, th, { cls: 'tile', parent: grid });
+  K.el('img', { src: K.pub('r04/' + src + '.webp'), parent: t, style: { objectPosition: '50% 45%' } });
+  const sl = K.box(tw - 132, th - 132, 116, 116, { parent: t, html: SEAL(10 + i, 116, '#FAF7EE'), style: { zIndex: 2, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.35))' } });
+  return { t, sl };
+});
+const cap4 = K.box(65, L.capY, W - 130, null, { cls: 'cap', parent: grid, html: 'One place for<br><em>every</em> store.', style: { fontSize: L.capFs + 'px', textAlign: 'center' } });
+const STORES = [['ikas', 'ikas'], ['woocommerce', 'WooCommerce'], ['wix', 'Wix'], ['shopware', 'Shopware'], ['gumroad', 'Gumroad']];
+const stores = K.box(65, L.storesY, W - 130, null, { cls: 'stores', parent: grid });
+const chips = STORES.map(([, n]) => K.el('div', { cls: 'st', parent: stores, html: `<i></i>${n}` }));
+const gridTag = K.demoTag('Concept images · AI-generated', 65, tall ? 1196 : 1262); grid.appendChild(gridTag);
+
+// ── scene 5: back to the shop ──────────────────────────────────────────────────────────
+const close = K.box(65, L.closeY, W - 130, null, { cls: 'hook', html: 'Your customers.<br><em>Your stores.</em>', style: { fontSize: (tall ? 96 : 84) + 'px' } });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your shop,<br>with your name on it.' });
+
+K.run({
+  id: 'D06', title: 'Your Brand, Not Ours', dur: DUR, music: 'new-shoes', bpm: 80.7, mood: 'calm', key: 'Bb', intro: 0.0, cover: 3.6,
+  technique: 'Brand-stamp story around a fictional boutique: a rubber stamp presses the shop’s own seal onto a kraft swing tag on a textured kraft desk, the real Stores screen proves the listing goes to the seller’s own store as a draft, then the seal lands on every product',
+  caption: 'Your shop, your name on it: MakeAndList sends every listing to your own stores (ikas, WooCommerce, Wix and more) as a draft, live only when you confirm. Paper & Pines is a fictional shop. Start free at makeandlist.com',
+  short: 'Your shop. Your name on it.',
+  question: 'Whose store is it?', gain: 'Your stores, your customers, one place',
+  beats: ['0–1.5 s: a boutique front at dusk — “Your shop. Your name on it.” (fictional shop, labelled)', '1.5–4.5 s: a rubber stamp presses the shop’s seal onto a kraft tag: “Sold under your name.”', '4.5–7.4 s: the real Stores screen: the seller’s own WooCommerce shop; drafts, live only when you confirm', '7.4–10.4 s: the seal lands on every product; ikas, WooCommerce, Wix, Shopware, Gumroad in one place', '10.4–13 s: back at the shop — “Your customers. Your stores.”', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [0.05, 'swish'], [B(1), 'pop'], [S1 - 0.12, 'whoosh'], [S1 + 0.05, 'paper'], [T_STAMP - B(1), 'swish'], [T_STAMP, 'stamp'], [T_STAMP + B(0.8), 'pop'],
+    [S2 - 0.12, 'whoosh'], [S2 + B(0.5), 'pop'], [S2 + B(1.4), 'marker'], [S2 + B(2.2), 'pop'], [S2 + B(2.8), 'chime'],
+    [S3 - 0.12, 'whoosh'], ...GI.map((_, i) => [+(S3 + B(0.6 + i * 0.5)).toFixed(3), 'stamp']), [S3 + B(2.6), 'pop'],
+    [S4 - 0.12, 'whoosh'], [S4 + B(0.4), 'hit'], [12.95, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // scene 1 + 5: the shop
+  const onShop = T < S1 || T >= S4;
+  shop.style.visibility = onShop ? 'visible' : 'hidden';
+  if (T < S1) shopImg.style.transform = `scale(${1.12 - 0.05 * K.p(T, 0, 0.6, E.outExpo) + 0.03 * T})`;
+  else shopImg.style.transform = `scale(${1.22 - 0.14 * K.p(T, S4, 13, E.outCubic)}) translateY(${(1 - K.p(T, S4, 13, E.outCubic)) * -20}px)`;
+  const pa = K.p(T, 0.05, 0.55, E.outExpo), pb = K.p(T, B(1), B(1) + 0.5, E.outExpo), ho = K.p(T, S1 - 0.3, S1, E.inCubic);
+  hookA.style.opacity = pa * (1 - ho); hookA.style.transform = `translateY(${(1 - pa) * 50}px)`;
+  hookB.style.opacity = pb * (1 - ho); hookB.style.transform = `translateY(${(1 - pb) * 50}px)`;
+  fine.style.opacity = onShop ? 1 : 0;
+  const cp5 = K.p(T, S4 + B(0.4), S4 + B(0.4) + 0.6, E.outExpo);
+  close.style.opacity = T >= S4 ? cp5 : 0; close.style.transform = `translateY(${(1 - cp5) * 50}px)`;
+
+  // scene 2: the stamp
+  const onDesk = T >= S1 && T < S2;
+  desk.style.visibility = onDesk ? 'visible' : 'hidden';
+  const din = K.p(T, S1, S1 + 0.6, E.outExpo);
+  pols.forEach((p, i) => { p.p.style.transform = `rotate(${p.r + Math.sin(T * 0.5 + i) * 0.6}deg) translateY(${(1 - din) * (60 + i * 30)}px)`; });
+  tag.style.transform = `translateY(${(1 - din) * 200}px) rotate(${-4 + Math.sin(T * 1.1) * 1.5 + (T >= T_STAMP && T < T_STAMP + 0.2 ? 1.5 : 0)}deg)`;
+  tag.style.transformOrigin = '50% 0';
+  // stamp: comes in, hovers, presses on the beat, lifts and leaves
+  const sIn = K.p(T, T_STAMP - B(1.2), T_STAMP - 0.12, E.inOutCubic);
+  const press = K.p(T, T_STAMP - 0.12, T_STAMP, E.inCubic) * (1 - K.p(T, T_STAMP + 0.08, T_STAMP + 0.35, E.outCubic));
+  const sOut = K.p(T, T_STAMP + 0.22, T_STAMP + 0.75, E.inCubic);
+  const sx = L.tagX + TW / 2 - stampW / 2, sy = L.tagY + TH * 0.31 + TW * 0.36 - stampW * 1.15 + 10;
+  stamp.style.transform = `translate(${sx + (1 - sIn) * 420 + sOut * 520}px, ${sy - (1 - sIn) * 520 - 70 * (1 - press) * sIn * (1 - sOut) - sOut * 420}px) rotate(${(1 - sIn) * 18 - sOut * 14}deg)`;
+  stamp.style.opacity = sIn > 0 && sOut < 1 ? 1 : 0;
+  const ink = T >= T_STAMP ? 1 : 0;
+  const settle = K.p(T, T_STAMP, T_STAMP + 0.5, E.outCubic);
+  seal.style.opacity = ink * (0.95 - 0.1 * settle);
+  seal.style.transform = `scale(${1.04 - 0.04 * settle}) rotate(-8deg)`;
+  tagName.setAttribute('opacity', K.p(T, T_STAMP + B(0.6), T_STAMP + B(1.2), E.outCubic));
+  const c2 = K.p(T, T_STAMP + B(0.8), T_STAMP + B(0.8) + 0.5, E.outExpo);
+  cap2.style.opacity = c2; cap2.style.transform = `translateY(${(1 - c2) * 40}px)`;
+
+  // scene 3: proof
+  const onProof = T >= S2 && T < S3;
+  proof.style.visibility = onProof ? 'visible' : 'hidden';
+  const pin = K.p(T, S2, S2 + 0.6, E.outExpo);
+  crop.style.transform = `translateY(${(1 - pin) * 160 + Math.sin(T * 0.9) * 4}px) scale(${0.96 + 0.04 * pin})`;
+  crop.style.opacity = pin;
+  const mk = K.p(T, S2 + B(1.4), S2 + B(1.4) + 0.4, E.inOutCubic);
+  urlMark.style.transform = `scaleX(${mk})`;
+  const rg = K.p(T, S2 + B(2.2), S2 + B(2.2) + 0.45, E.outBack);
+  ring.style.opacity = K.p(T, S2 + B(2.2), S2 + B(2.2) + 0.1, E.linear); ring.style.transform = `scale(${1.15 - 0.15 * rg})`;
+  const ps = K.p(T, S2 + B(0.5), S2 + B(0.5) + 0.3, E.outBack);
+  pSeal.style.opacity = K.p(T, S2 + B(0.5), S2 + B(0.5) + 0.06, E.linear); pSeal.style.transform = `scale(${1.5 - 0.5 * ps}) rotate(${10 - 4 * ps}deg)`;
+  const c3 = K.p(T, S2 + 0.15, S2 + 0.75, E.outExpo);
+  cap3.style.opacity = c3; cap3.style.transform = `translateY(${(1 - c3) * 40}px)`;
+  const s3 = K.p(T, S2 + B(2.8), S2 + B(2.8) + 0.5, E.outExpo);
+  sub3.style.opacity = s3; sub3.style.transform = `translateY(${(1 - s3) * 24}px)`;
+  realTag.style.opacity = pin;
+
+  // scene 4: the grid and the stores
+  const onGrid = T >= S3 && T < S4;
+  grid.style.visibility = onGrid ? 'visible' : 'hidden';
+  tiles.forEach((tl, i) => {
+    const a = S3 + i * 0.09;
+    const p = K.p(T, a, a + 0.55, E.outExpo);
+    tl.t.style.opacity = p; tl.t.style.transform = `translateY(${(1 - p) * 90 + Math.sin(T * 1.2 + i) * 3}px)`;
+    const st = S3 + B(0.6 + i * 0.5);
+    const q = K.p(T, st, st + 0.25, E.outBack);
+    tl.sl.style.opacity = T >= st ? 1 : 0; tl.sl.style.transform = `scale(${1.6 - 0.6 * q}) rotate(${-14 + 6 * q}deg)`;
+  });
+  const c4 = K.p(T, S3 + 0.1, S3 + 0.7, E.outExpo);
+  cap4.style.opacity = c4; cap4.style.transform = `translateY(${(1 - c4) * 40}px)`;
+  chips.forEach((c, i) => {
+    const a = S3 + B(2.6) + i * 0.08;
+    const p = K.p(T, a, a + 0.45, E.outBack);
+    c.style.opacity = K.p(T, a, a + 0.1, E.linear); c.style.transform = `scale(${0.7 + 0.3 * p})`;
+  });
+
+  end(T);
+});
+</script></body></html>

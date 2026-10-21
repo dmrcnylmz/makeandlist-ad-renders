@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D14 · Swipe Your Next Product</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F4EFE4; }
+.amb { position: absolute; left: 0; top: 0; object-fit: cover; filter: blur(70px) saturate(1.2); opacity: .55; transform-origin: 50% 50%; }
+.wash { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 45%, rgba(250,247,238,.25), rgba(250,247,238,.85)); }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 70px/1.0 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.hook em { font-style: italic; color: #1F1F1F; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); padding: 0 .06em; }
+.card { position: absolute; z-index: 20; overflow: hidden; border-radius: 40px; background: #FFFDF8; transform-origin: 50% 110%;
+  box-shadow: 0 50px 90px -40px rgba(31,31,31,.55), 0 0 0 1px rgba(31,31,31,.06); }
+.card img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+.card .info { position: absolute; left: 0; right: 0; bottom: 0; padding: 140px 40px 38px; background: linear-gradient(180deg, rgba(20,16,10,0), rgba(20,16,10,.78)); color: #FFFDF8; }
+.card .nm { font: 800 54px/1.02 'Playfair Display'; letter-spacing: -0.015em; }
+.card .meta { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+.card .meta span { font: 600 22px 'Archivo'; padding: 8px 16px; border-radius: 99px; background: rgba(255,253,248,.18); backdrop-filter: blur(6px); white-space: nowrap; }
+.card .ct { position: absolute; left: 26px; top: 24px; font: 500 18px 'IBM Plex Mono', monospace; color: #45403A; background: rgba(250,247,238,.88); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; }
+.stamp { position: absolute; top: 90px; z-index: 5; padding: 10px 26px; border-radius: 18px; font: 800 64px/1 'Archivo'; letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; }
+.stamp.no { right: 40px; color: #FFFDF8; border: 7px solid #FFFDF8; transform: rotate(14deg); }
+.stamp.yes { left: 40px; color: #1F1F1F; background: #DFFF5A; border: 7px solid #1F1F1F; transform: rotate(-12deg); }
+.btn { position: absolute; z-index: 30; border-radius: 50%; display: grid; place-items: center; box-shadow: 0 24px 40px -18px rgba(31,31,31,.6); }
+.btn.no { background: #FFFDF8; color: #1F1F1F; font: 800 50px 'Archivo'; }
+.btn.yes { background: #DFFF5A; color: #1F1F1F; }
+.btn small { position: absolute; top: 100%; margin-top: 12px; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #45403A; white-space: nowrap; }
+.touch { position: absolute; z-index: 45; width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%; background: rgba(255,253,248,.55); border: 3px solid rgba(31,31,31,.55); box-shadow: 0 10px 30px rgba(31,31,31,.25); }
+.match { position: absolute; z-index: 50; inset: 0; background: #1F1F1F; }
+.mt { position: absolute; z-index: 52; text-align: center; color: #FAF7EE; }
+.mt .k { font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .18em; text-transform: uppercase; color: #DFFF5A; }
+.mt .h { margin-top: 18px; font: 800 96px/0.98 'Playfair Display'; letter-spacing: -0.02em; }
+.mt .h em { font-style: italic; color: #DFFF5A; }
+.mbtn { position: absolute; z-index: 53; display: flex; align-items: center; justify-content: center; gap: 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 40px 'Archivo'; white-space: nowrap; }
+.mini { position: absolute; z-index: 51; overflow: hidden; border-radius: 30px; box-shadow: 0 40px 80px -30px #000, 0 0 0 4px #DFFF5A; }
+.mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cap { position: absolute; z-index: 60; font: 800 50px/1.05 'Playfair Display'; letter-spacing: -0.015em; color: #1F1F1F; }
+.cap em { font-style: normal; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); }
+.step { position: absolute; z-index: 60; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #45403A; }
+.fan { position: absolute; z-index: 55; overflow: hidden; border-radius: 26px; box-shadow: 0 30px 60px -30px rgba(31,31,31,.6), 0 0 0 6px #FFFDF8; transform-origin: 50% 120%; }
+.fan img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fin { position: absolute; z-index: 60; text-align: center; font: 800 78px/1.0 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.fin em { font-style: italic; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .06; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D14 — a swipe deck of product ideas. Five concept products, a thumb flicks them on the beat: not now, not now,
+// save, not now… and a right swipe on the colouring book: "Make it". The match screen hands over to the real app —
+// the Ideas screen, then the plan and its quote — and the deck fans out: pick the idea, it makes the files, you approve.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 117.5, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const IDEAS = [
+  { id: 'g02-sunset-tee', nm: 'Sunset tee', meta: ['Apparel', 'Printed on demand'], dir: -1, at: B(3), pos: '50% 35%' },
+  { id: 'g03-slow-mornings-mug', nm: 'Slow mornings mug', meta: ['Drinkware', 'Printed on demand'], dir: -1, at: B(4.5), pos: '50% 50%' },
+  { id: 'g11-lemon-notebook', nm: 'Lemon notebook', meta: ['Stationery', 'Printed on demand'], dir: 1, at: B(6), save: true, pos: '50% 45%' },
+  { id: 'g07-sticker-sheet', nm: 'Woodland stickers', meta: ['Printable sheet', 'Digital'], dir: -1, at: B(7.5), pos: '50% 40%' },
+  { id: 'g24-colouring-book', nm: 'Forest Friends colouring book', meta: ['Kids', 'Printable PDF'], dir: 1, at: B(9.5), make: true, pos: '50% 55%' },
+];
+const T_MATCH = B(10.5), T_TAP = B(12), T_APP = B(13), T_SWAP = B(16.5), T_FIN = B(21);
+
+const L = tall
+  ? { hookY: 290, hookFs: 70, cx: 90, cy: 470, cw: 900, ch: 660, btnY: 1150, btnS: 96,
+      mtY: 320, miniW: 380, miniY: 590, mbtnY: 1110, mbtnW: 520, phX: 250, phY: 440, phW: 580, capX: 65, capY: 334, capW: 950, finY: 330, fanY: 760, fanW: 300 }
+  : { hookY: 54, hookFs: 60, cx: 220, cy: 200, cw: 640, ch: 860, btnY: 1110, btnS: 92,
+      mtY: 80, miniW: 440, miniY: 250, mbtnY: 900, mbtnW: 520, phX: 560, phY: 90, phW: 460, capX: 60, capY: 380, capW: 480, finY: 90, fanY: 520, fanW: 280 };
+
+// ambient: the current card, blurred, behind everything
+const amb = IDEAS.map((d) => K.el('img', { src: K.pub('r04/' + d.id + '.webp'), cls: 'amb', style: { width: W + 'px', height: H + 'px', opacity: 0 } }));
+K.box(0, 0, W, H, { cls: 'wash' });
+
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'hook', style: { fontSize: L.hookFs + 'px' } });
+const hookW = K.words(hook, tall ? 'Swipe right on\nyour next product.' : 'Swipe right on your next product.');
+hookW[hookW.length - 2].innerHTML = 'next '; hookW[hookW.length - 1].innerHTML = '<em>product.</em>';
+
+const cards = IDEAS.map((d, i) => {
+  const c = K.box(L.cx, L.cy, L.cw, L.ch, { cls: 'card', html: `<img src="${K.pub('r04/' + d.id + '.webp')}" style="object-position:${d.pos}">
+    <div class="ct">Concept image · AI-generated</div>
+    <div class="stamp no">Not now</div><div class="stamp yes">${d.make ? 'Make it' : 'Save'}</div>
+    <div class="info"><div class="nm" style="font-size:${tall ? 54 : 46}px">${d.nm}</div><div class="meta">${d.meta.map((m) => `<span>${m}</span>`).join('')}<span>Idea</span></div></div>` });
+  c.style.zIndex = 20 + (IDEAS.length - i);
+  return { c, no: c.querySelector('.stamp.no'), yes: c.querySelector('.stamp.yes') };
+});
+const bNo = K.box(W / 2 - L.btnS * 1.5 - 30, L.btnY, L.btnS, L.btnS, { cls: 'btn no', html: '✕<small>Not now</small>' });
+const bYes = K.box(W / 2 + L.btnS * 0.5 + 30, L.btnY, L.btnS, L.btnS, { cls: 'btn yes', html: `<svg width="46" height="46" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 5.3 3.2 1.7-2 3.2-3.2 5.3-3.2 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z" fill="#1F1F1F"/></svg><small>Make it</small>` });
+const touch = K.box(0, 0, 92, 92, { cls: 'touch' });
+
+// match screen
+const match = K.box(0, 0, W, H, { cls: 'match' });
+const mt = K.box(65, L.mtY, W - 130, null, { cls: 'mt', html: `<div class="k">It’s a match</div><div class="h">${tall ? 'Good idea.<br><em>Make it.</em>' : 'Good idea. <em>Make it.</em>'}</div>` });
+const mini = K.box((W - L.miniW) / 2, L.miniY, L.miniW, L.miniW * 1.2, { cls: 'mini', html: `<img src="${K.pub('r04/g24-colouring-book.webp')}" style="object-position:50% 55%">` });
+const mbtn = K.box((W - L.mbtnW) / 2, L.mbtnY, L.mbtnW, 110, { cls: 'mbtn', html: 'Make it →' });
+const matchTag = K.demoTag('Concept image · AI-generated', (W - L.miniW) / 2, L.miniY + L.miniW * 1.2 + 16);
+
+// the real app
+const deck = K.phoneDeck(L.phX, L.phY, L.phW, [K.screen('66-phone-ideas'), K.screen('65-phone-configure')]);
+deck.root.style.zIndex = 58;
+const step = K.box(L.capX, L.capY - 44, L.capW, null, { cls: 'step' });
+const caps = ['In the app: ideas, <em>not a blank page.</em>', 'Then the plan, <em>and the quote first.</em>'].map((t) => K.box(L.capX, L.capY, L.capW, null, { cls: 'cap', html: t }));
+const appBg = K.box(0, 0, W, H, { style: { zIndex: 56, background: '#F4EFE4', opacity: 0 } });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0); realTag.style.zIndex = 70;
+if (tall) { caps.forEach((c) => (c.style.width = (W - 130) + 'px')); }
+
+// finale: the deck fans out
+const fans = IDEAS.map((d) => K.box(0, 0, L.fanW, L.fanW * 1.35, { cls: 'fan', html: `<img src="${K.pub('r04/' + d.id + '.webp')}" style="object-position:${d.pos}">` }));
+const fin = K.box(65, L.finY, W - 130, null, { cls: 'fin', style: { fontSize: (tall ? 78 : 70) + 'px' } });
+const finW = K.words(fin, tall ? 'Pick the idea.\nIt makes the files.\nYou approve.' : 'Pick the idea. It makes\nthe files. You approve.');
+finW[finW.length - 1].innerHTML = '<em>approve.</em>';
+const finTag = K.demoTag('Concept images · AI-generated', 0, 0); finTag.style.zIndex = 70;
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Pick an idea.<br>Make it real.' });
+
+const DRAG = 0.36, FLING = 0.3; // drag before the beat, fling lands on it
+
+K.run({
+  id: 'D14', title: 'Swipe Your Next Product', dur: DUR, bpm: BPM, music: 'love-love-love', mood: 'bright', key: 'G', intro: 0.0, cover: 4.9,
+  technique: 'A swipe deck of concept product ideas: a touch dot drags each card on the beat (rotation from the bottom pivot, NOT NOW / SAVE / MAKE IT stamps by drag distance, the blurred card glowing behind), a right swipe opens a match screen whose button hands over to the real Ideas screen and the plan with its quote in a swiping phone, then the deck fans out',
+  caption: 'Not sure what to make next? Pick an idea, MakeAndList plans it, shows the quote first and makes the files, listing copy and images — and you approve before anything is listed. The products shown are concept images. Start free at makeandlist.com',
+  short: 'Swipe right on your next product.',
+  beats: ['0–1.5 s: “Swipe right on your next product.” — a deck of concept products', '1.5–4.9 s: not now, not now, save, not now… make it', '5.4–6.6 s: “Good idea. Make it.” — tap', '6.6–10.7 s: the real app: Ideas, then the plan and the quote first', '10.7–13 s: the deck fans out: pick the idea, it makes the files, you approve', '13–15 s: end card'],
+  cues: [[0.0, 'pop'], [B(1), 'swish'], ...IDEAS.map((d) => [d.at, d.make ? 'hit' : 'swish']), [B(6) + 0.1, 'pop'], [T_MATCH, 'chime'], [+(T_TAP - 0.02).toFixed(3), 'click'], [T_APP - 0.05, 'whoosh'], [B(14), 'pop'], [T_SWAP, 'swish'], [B(17.5), 'pop'],
+    [T_FIN - 0.05, 'whoosh'], ...[0, 1, 2, 3, 4].map((i) => [+(T_FIN + 0.1 + i * 0.09).toFixed(3), 'paper']).slice(0, 2), [B(23), 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // hook
+  K.reveal(hookW, T, 0.0, { kind: 'up', stagger: 0.06, dur: 0.5, out: T_MATCH - 0.4 });
+
+  // ---------- the deck ----------
+  let top = IDEAS.length; // index of the card on top
+  IDEAS.forEach((d, i) => { if (T < d.at + FLING) top = Math.min(top, i); });
+  cards.forEach((cd, i) => {
+    const d = IDEAS[i];
+    const enter = K.p(T, 0.05 + (IDEAS.length - 1 - i) * 0.05, 0.6 + (IDEAS.length - 1 - i) * 0.05, E.outExpo);
+    const drag = K.p(T, d.at - DRAG, d.at, E.inOutCubic);
+    const fling = K.p(T, d.at, d.at + FLING, E.inCubic);
+    const depth = Math.max(0, i - top); // 0 = on top
+    // the card under the top one grows as the top one leaves
+    const lead = i > top ? K.p(T, IDEAS[top].at - DRAG, IDEAS[top].at + FLING, E.outCubic) : 0;
+    const dd = Math.max(0, depth - lead);
+    const sc = (1 - 0.05 * Math.min(dd, 3)) * (0.9 + 0.1 * enter);
+    const dy = 34 * Math.min(dd, 3) + (1 - enter) * 300;
+    const dx = d.dir * (drag * 150 + fling * W * 1.1);
+    const rot = d.dir * (drag * 9 + fling * 16) + (i === top && drag === 0 ? Math.sin(T * 1.6) * 0.6 : 0);
+    // the last card is not flung off: it zooms into the match screen
+    if (d.make) {
+      const zoom = K.p(T, d.at, d.at + 0.5, E.inCubic);
+      cd.c.style.transform = `translate(${d.dir * drag * 150}px, ${dy - zoom * 80}px) rotate(${d.dir * drag * 9 * (1 - zoom)}deg) scale(${sc * (1 + 0.15 * zoom)})`;
+      cd.c.style.opacity = enter * (1 - K.p(T, T_MATCH - 0.15, T_MATCH + 0.1, E.linear));
+    } else {
+      cd.c.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(${sc})`;
+      cd.c.style.opacity = enter * (1 - K.p(T, d.at + FLING * 0.6, d.at + FLING, E.linear));
+    }
+    cd.c.style.visibility = T < d.at + FLING + 0.02 || d.make ? 'visible' : 'hidden';
+    const st = Math.min(1, drag * 1.6);
+    cd.no.style.opacity = d.dir < 0 ? st : 0;
+    cd.yes.style.opacity = d.dir > 0 ? st : 0;
+    cd.no.style.transform = `rotate(14deg) scale(${1.3 - 0.3 * st})`;
+    cd.yes.style.transform = `rotate(-12deg) scale(${1.3 - 0.3 * st})`;
+    // ambient
+    const on = i === Math.min(top, IDEAS.length - 1) ? 1 : 0;
+    amb[i].style.opacity = 0.55 * on;
+    amb[i].style.transform = `scale(${1.1 + 0.04 * Math.sin(T * 0.5)})`;
+  });
+
+  // touch dot: rides each drag
+  let tv = 0, tx = W / 2, ty = L.cy + L.ch * 0.55;
+  IDEAS.forEach((d) => {
+    const a = K.p(T, d.at - DRAG - 0.12, d.at - DRAG, E.outCubic) * (1 - K.p(T, d.at + 0.05, d.at + 0.15, E.linear));
+    if (a > 0) { tv = a; const drag = K.p(T, d.at - DRAG, d.at, E.inOutCubic); tx = W / 2 + d.dir * (drag * 150 + 20); ty = L.cy + L.ch * 0.55 - drag * 20; }
+  });
+  touch.style.opacity = tv; touch.style.left = tx + 'px'; touch.style.top = ty + 'px';
+  touch.style.transform = `scale(${0.8 + 0.2 * tv})`;
+
+  // buttons: the one matching the swipe pulses
+  const btnOut = K.p(T, T_MATCH - 0.3, T_MATCH, E.inCubic);
+  [bNo, bYes].forEach((b, k) => {
+    let pulse = 0;
+    IDEAS.forEach((d) => { if ((d.dir > 0) === (k === 1)) pulse = Math.max(pulse, K.p(T, d.at - 0.1, d.at + 0.05, E.outCubic) * (1 - K.p(T, d.at + 0.05, d.at + 0.35, E.outCubic))); });
+    const inP = K.p(T, 0.4 + k * 0.08, 0.9 + k * 0.08, E.outBack);
+    b.style.transform = `scale(${(0.6 + 0.4 * inP) * (1 + 0.18 * pulse) * (1 - btnOut)})`;
+    b.style.opacity = Math.min(1, inP) * (1 - btnOut);
+  });
+
+  // ---------- match ----------
+  const mIn = K.p(T, T_MATCH - 0.15, T_MATCH + 0.25, E.outCubic), mOut = K.p(T, T_APP - 0.1, T_APP + 0.35, E.inCubic);
+  match.style.opacity = mIn * (1 - mOut);
+  match.style.visibility = mIn > 0 && mOut < 1 ? 'visible' : 'hidden';
+  const mp = K.p(T, T_MATCH, T_MATCH + 0.6, E.outBack);
+  [mt, mini, mbtn, matchTag].forEach((el) => { el.style.visibility = match.style.visibility; el.style.opacity = mIn * (1 - mOut); });
+  mt.style.transform = `translateY(${(1 - mp) * 40}px)`;
+  mini.style.transform = `scale(${0.7 + 0.3 * mp}) rotate(${(1 - mp) * -6 + Math.sin(T * 2) * 1}deg)`;
+  const tap = K.p(T, T_TAP - 0.06, T_TAP, E.outCubic) * (1 - K.p(T, T_TAP, T_TAP + 0.2, E.outCubic));
+  const bp = K.p(T, T_MATCH + 0.3, T_MATCH + 0.8, E.outBack);
+  mbtn.style.transform = `scale(${(0.8 + 0.2 * bp) * (1 - 0.08 * tap)})`;
+  mbtn.style.boxShadow = T > T_TAP ? `0 0 0 ${K.p(T, T_TAP, T_TAP + 0.5, E.outCubic) * 30}px rgba(223,255,90,${0.5 * (1 - K.p(T, T_TAP, T_TAP + 0.5, E.linear))})` : 'none';
+
+  // ---------- the real app ----------
+  const aIn = K.p(T, T_APP - 0.1, T_APP + 0.5, E.outExpo), aOut = K.p(T, T_FIN - 0.3, T_FIN + 0.1, E.inCubic);
+  appBg.style.opacity = Math.min(1, aIn * 1.4) * (1 - aOut);
+  appBg.style.visibility = aIn > 0 && aOut < 1 ? 'visible' : 'hidden';
+  const posAt = (t) => K.p(t, T_SWAP, T_SWAP + 0.5, E.inOutCubic);
+  deck.draw(posAt(T), [K.p(T, T_APP + 0.6, T_SWAP, E.inOutCubic) * 0.05, 0.0 + K.p(T, T_SWAP + 0.5, T_FIN, E.inOutCubic) * 0.05], posAt(T) - posAt(T - 1 / 30));
+  deck.root.style.opacity = aIn * (1 - aOut);
+  deck.root.style.visibility = aIn > 0 && aOut < 1 ? 'visible' : 'hidden';
+  deck.root.style.transform = `translateY(${(1 - aIn) * 260 - aOut * 120}px) rotate(${(tall ? 0 : -2) + Math.sin(T * 0.8) * 0.4}deg)`;
+  caps.forEach((c, k) => {
+    const a = k === 0 ? T_APP + 0.15 : T_SWAP + 0.15, b = k === 0 ? T_SWAP : T_FIN - 0.2;
+    const p = K.p(T, a, a + 0.45, E.outExpo), o = K.p(T, b - 0.15, b + 0.1, E.inCubic);
+    c.style.opacity = p * (1 - o); c.style.transform = `translateY(${(1 - p) * 30 - o * 20}px)`;
+    c.style.visibility = T >= a && T < b + 0.1 ? 'visible' : 'hidden';
+  });
+  step.innerHTML = T < T_SWAP ? 'Ideas' : 'Plan & quote';
+  step.style.opacity = aIn * (1 - aOut);
+  
+  realTag.style.left = L.phX + 'px'; realTag.style.top = (tall ? L.phY + deck.h + 16 : L.phY + deck.h + 16) + 'px';
+  if (tall) { realTag.style.top = 1190 + 'px'; realTag.style.left = L.phX + 24 + 'px'; }
+  realTag.style.opacity = aIn * (1 - aOut);
+
+  // ---------- finale ----------
+  K.reveal(finW, T, T_FIN + 0.05, { kind: 'up', stagger: 0.05, dur: 0.5 });
+  fin.style.visibility = T >= T_FIN ? 'visible' : 'hidden';
+  fans.forEach((fn, i) => {
+    const p = K.p(T, T_FIN + 0.1 + i * 0.07, T_FIN + 0.75 + i * 0.07, E.outBack);
+    const k = i - 2;
+    fn.style.left = W / 2 - L.fanW / 2 + k * (tall ? 150 : 170) * p + 'px';
+    fn.style.top = L.fanY + Math.abs(k) * 30 * p + 'px';
+    fn.style.transform = `rotate(${k * 9 * p + Math.sin(T * 1.4 + i) * 0.8}deg) scale(${0.7 + 0.3 * Math.min(1, p)})`;
+    fn.style.opacity = K.p(T, T_FIN + 0.1 + i * 0.07, T_FIN + 0.3 + i * 0.07, E.linear);
+    fn.style.zIndex = 55 + (i === 4 ? 6 : 5 - Math.abs(k));
+  });
+  finTag.style.left = W / 2 - 160 + 'px'; finTag.style.top = L.fanY + L.fanW * 1.35 + 70 + 'px';
+  finTag.style.opacity = K.p(T, T_FIN + 0.5, T_FIN + 0.8, E.linear);
+
+  end(T);
+});
+</script></body></html>

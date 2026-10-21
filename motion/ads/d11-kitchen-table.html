@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D11 · The Kitchen Table Studio</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #120F0C; }
+.shot { position: absolute; left: 0; top: 0; overflow: hidden; }
+.shot img { position: absolute; display: block; transform-origin: 50% 50%; }
+.grade { position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  background: radial-gradient(110% 75% at 50% 42%, rgba(255,214,160,.0) 45%, rgba(18,12,6,.55) 100%), linear-gradient(rgba(255,190,120,.06), rgba(255,190,120,.06)); mix-blend-mode: multiply; }
+.low { position: absolute; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 4; background: linear-gradient(rgba(14,10,6,0) 0, rgba(14,10,6,.62) 45%, rgba(14,10,6,.8) 100%); }
+.leak { position: absolute; pointer-events: none; z-index: 60; border-radius: 50%; mix-blend-mode: screen;
+  background: radial-gradient(circle, rgba(255,170,90,.95) 0, rgba(255,120,60,.45) 35%, rgba(255,120,60,0) 70%); }
+.bars { position: absolute; left: 0; right: 0; z-index: 70; background: #0B0907; }
+.story { position: absolute; z-index: 75; font: 600 19px 'IBM Plex Mono', monospace; letter-spacing: .18em; text-transform: uppercase; color: rgba(250,247,238,.85); white-space: nowrap; }
+.story i { font-style: normal; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #E8603C; margin-right: 10px; vertical-align: 1px; }
+.title { position: absolute; z-index: 50; text-align: center; color: #FAF7EE; }
+.title .k { font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .4em; text-transform: uppercase; opacity: .85; }
+.chap { position: absolute; z-index: 50; text-align: center; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .3em; text-transform: uppercase; color: #DFFF5A; white-space: nowrap; }
+.sub { position: absolute; z-index: 50; text-align: center; font: italic 600 58px/1.12 'Playfair Display'; color: #FAF7EE; text-shadow: 0 3px 24px rgba(0,0,0,.7), 0 1px 2px rgba(0,0,0,.6); }
+.sub.big { font: 800 96px/1.0 'Playfair Display'; font-style: normal; letter-spacing: -0.02em; }
+.typed { position: absolute; z-index: 6; background: #FFFDF8; color: #1F1F1F; font-family: 'Archivo'; font-weight: 500; overflow: hidden; }
+.caret { display: inline-block; width: 2px; background: #1F1F1F; margin-left: 1px; vertical-align: -2px; }
+.hlb { position: absolute; z-index: 6; border-radius: 10px; border: 4px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; pointer-events: none; }
+.demo { background: rgba(18,15,12,.8); color: #EFEADF; border-color: #8A8378; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 80; opacity: .13; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D11 — "Is this for someone like me?" A short film, honestly labelled: a fictional creator (a story, not a customer)
+// works from the kitchen table. Golden-hour desk → a pencil sketch beside its framed print → the real create screen,
+// where she describes it and sees the quote first → her print partner packs the order → the parcel on a doorstep.
+// Graded, grained, gate-weave, light leaks on the cuts, subtitles and chapter marks. No earnings, no sales, no results.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 107.7, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const CUT = [0, B(4), B(8), B(14), B(19)]; // desk, sketch, app, packing, parcel
+const T_TYPE = B(9), T_TAP = B(12), T_LAST = B(22);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// ---------- shots ----------
+// [image, from {s, fx, fy}, to {s, fx, fy}] — fx/fy: -1..1 of the free overflow
+const SHOTS = [
+  ['g18-creator-desk', { s: 1.05, fx: 0.2, fy: 0.1 }, { s: 1.18, fx: 0.35, fy: 0.25 }],
+  ['g17-sketch-to-print', { s: 1.15, fx: 0, fy: 0.9 }, { s: 1.1, fx: 0, fy: -0.7 }],
+  ['g18-creator-desk', { s: 1.3, fx: -0.2, fy: 0.4 }, { s: 1.35, fx: -0.25, fy: 0.45 }],
+  ['g21-packing', { s: 1.2, fx: 0.1, fy: 0.2 }, { s: 1.06, fx: 0, fy: 0 }],
+  ['g20-parcel', { s: 1.22, fx: 0, fy: 0.35 }, { s: 1.04, fx: 0, fy: 0.1 }],
+];
+const shots = SHOTS.map(([id], i) => {
+  const r = K.box(0, 0, W, H, { cls: 'shot', style: { zIndex: 10 + i } });
+  const img = K.el('img', { parent: r, src: K.pub('r04/' + id + '.webp') });
+  const b = Math.max(W / 1024, H / 1536);
+  Object.assign(img.style, { width: 1024 * b + 'px', height: 1536 * b + 'px', left: (W - 1024 * b) / 2 + 'px', top: (H - 1536 * b) / 2 + 'px' });
+  K.el('div', { parent: r, cls: 'grade' });
+  K.el('div', { parent: r, cls: 'low', style: { height: (tall ? 1180 : 640) + 'px' } });
+  return { r, img, b };
+});
+// the app moment: her phone over the blurred desk
+const PH = tall ? { x: (W - 370) / 2, y: 316, w: 370 } : { x: (W - 440) / 2, y: 110, w: 440 };
+const ph = K.phone(PH.x, PH.y, PH.w, K.screen('22-phone-create'), { parent: shots[2].r });
+ph.root.style.zIndex = 5;
+const sc = (PH.w - 28) / 780, SCROLL = 250;
+const scr = ph.root.firstChild;
+const typed = K.el('div', { parent: scr, cls: 'typed', style: { left: 70 * sc + 'px', top: (604 - SCROLL) * sc + 'px', width: 630 * sc + 'px', height: 150 * sc + 'px', fontSize: 30 * sc + 'px', lineHeight: 1.35, padding: 4 * sc + 'px' } });
+const hlb = K.el('div', { parent: scr, cls: 'hlb' });
+const pointer = K.cursor(); pointer.hide(0);
+const IDEA = 'A botanical line-art print: a protea with a terracotta sun, for a calm living room';
+
+// ---------- overlays ----------
+const leak = K.box(0, 0, 1400, 1400, { cls: 'leak' });
+const story = K.box(65, tall ? 286 : 46, null, null, { cls: 'story', html: '<i></i>A story, not a customer', style: { width: 'auto', height: 'auto' } });
+const ctag = K.demoTag('Concept image · AI-generated', 0, 0);
+const rtag = K.demoTag('Real app · demo workspace', 0, 0);
+const subY = tall ? 1080 : 1110;
+const CH = ['I · The table', 'II · The sketch', 'III · The yes', 'IV · The partner', 'V · The doorstep'];
+const chap = K.box(65, subY - 46, W - 130, null, { cls: 'chap' });
+const SUBS = [
+  [0.05, CUT[1] - 0.15, 'Started at the\nkitchen table.', true],
+  [CUT[1] + 0.2, CUT[2] - 0.15, 'One sketch. One sentence\nto describe it.'],
+  [CUT[2] + 0.3, T_TAP - 0.1, 'She told MakeAndList\nwhat to make.'],
+  [T_TAP + 0.35, CUT[3] - 0.15, 'Saw the quote first.\nChecked every file.'],
+  [CUT[3] + 0.2, CUT[4] - 0.15, 'Her print partner\npacks each order.'],
+  [CUT[4] + 0.2, T_LAST - 0.1, 'And ships it to\nthe buyer’s door.'],
+  [T_LAST + 0.05, 12.95, 'From the\nkitchen table.', true],
+];
+const subs = SUBS.map(([a, b, t, big]) => {
+  const d = K.box(50, 0, W - 100, null, { cls: 'sub' + (big ? ' big' : ''), style: { fontSize: big ? (tall ? 100 : 92) + 'px' : (tall ? 58 : 54) + 'px' } });
+  return { d, a, b, big, w: K.words(d, t) };
+});
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Start yours at the<br>kitchen table.' });
+
+K.run({
+  id: 'D11', title: 'The Kitchen Table Studio', dur: DUR, bpm: BPM, music: 'blue-skies', mood: 'warm', key: 'G', intro: 0.0, cover: 3.2,
+  technique: 'A graded short film in five chapters: Ken Burns moves per shot (the sketch shot tilts from the sketchbook up to its framed print), gate weave and heavy grain, light-leak flashes that peak on each cut, italic subtitles with chapter marks, and one real app moment where the idea is typed into the create screen and Plan it is tapped',
+  caption: 'A story, not a customer: a kitchen-table creator sketches a print, describes it in one sentence, sees the quote before anything is made and checks every file; her own print partner packs and ships each order. No promises about earnings, just the way it works. Images are concept images. Start free at makeandlist.com',
+  short: 'Started at the kitchen table.',
+  beats: ['0–2.2 s: “Started at the kitchen table.” — golden-hour desk (concept image, a story, not a customer)', '2.2–4.5 s: a pencil sketch, then its framed print: one sentence to describe it', '4.5–7.8 s: the real create screen: the idea is typed, Plan it; the quote first, every file checked', '7.8–10.6 s: her print partner packs each order', '10.6–13 s: the parcel on the buyer’s doorstep; “From the kitchen table.”', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], ...CUT.slice(1).flatMap((c) => [[+(c - 0.3).toFixed(3), 'swish']]), [CUT[1] + 0.3, 'marker'], [T_TYPE, 'type'], [T_TYPE + 0.8, 'type'], [T_TAP, 'click'], [B(13), 'chime'],
+    [CUT[3] + 0.3, 'paper'], [CUT[4] + 0.4, 'box'], [T_LAST, 'hit'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 70}px, ${(seed(f + 7) - 0.5) * 70}px)`;
+  // gate weave: a tiny frame-stepped jitter of the whole picture
+  const wx = (seed(f * 3 + 1) - 0.5) * 2.4, wy = (seed(f * 5 + 2) - 0.5) * 2.4;
+  let cur = 0; CUT.forEach((c, i) => { if (T >= c) cur = i; });
+  shots.forEach((s, i) => {
+    const a = CUT[i], b = CUT[i + 1] ?? 13.4;
+    const fadeIn = i === 0 ? K.p(T, 0, 0.35, E.linear) : K.p(T, a - 0.2, a + 0.2, E.inOutCubic);
+    const vis = T >= a - 0.2 && T < b + 0.25;
+    s.r.style.visibility = vis ? 'visible' : 'hidden';
+    s.r.style.opacity = fadeIn;
+    const [, A, Z] = SHOTS[i], p = K.p(T, a - 0.2, b + 0.2, E.inOutCubic);
+    const S = K.lerp(A.s, Z.s, p), fx = K.lerp(A.fx, Z.fx, p), fy = K.lerp(A.fy, Z.fy, p);
+    const iw = 1024 * s.b * S, ih = 1536 * s.b * S;
+    s.img.style.transform = `translate(${fx * (iw - W) / 2 + wx}px, ${fy * (ih - H) / 2 + wy}px) scale(${S})`;
+    if (i === 2) s.img.style.filter = 'blur(16px) brightness(.55) saturate(1.1)';
+  });
+  // light leak peaking on each cut
+  let lk = 0, li = 0; CUT.slice(1).forEach((c, i) => { const v = Math.max(0, 1 - Math.abs(T - c) / 0.32); if (v > lk) { lk = v; li = i; } });
+  leak.style.opacity = lk * 0.85;
+  leak.style.transform = `translate(${(li % 2 ? W - 900 : -500) + lk * 120}px, ${(li % 2 ? -300 : H - 1000)}px) scale(${0.8 + lk * 0.5})`;
+
+  // ---------- the app moment ----------
+  const pp = K.p(T, CUT[2], CUT[2] + 0.6, E.outExpo);
+  ph.root.style.transform = `translateY(${(1 - pp) * 140 + Math.sin(T * 1.2) * 4}px) rotate(${(1 - pp) * 3 + Math.sin(T * 0.8) * 0.6}deg)`;
+  ph.scroll(SCROLL * sc);
+  const n = Math.floor(K.clamp((T - T_TYPE) / 1.6) * IDEA.length);
+  typed.innerHTML = T < T_TYPE ? '<span style="color:#8A8378">For example: a 30-page ocean colouring book…</span>' : IDEA.slice(0, n) + (n < IDEA.length || Math.floor(T * 3) % 2 ? `<span class="caret" style="height:${30 * sc}px"></span>` : '');
+  // tap "Plan it" (source x 68–213, y 1595–1660)
+  const bx = PH.x + 14 + 140 * sc, by = PH.y + 14 + (1628 - SCROLL) * sc;
+  const ci = K.p(T, T_TAP - 0.7, T_TAP - 0.05, E.inOutCubic);
+  pointer.at(K.lerp(bx + 200, bx, ci), K.lerp(by + 150, by, ci), T > T_TAP && T < T_TAP + 0.15);
+  pointer.hide(K.win(T, T_TAP - 0.75, CUT[3] - 0.25, 0.15));
+  pointer.ripple(bx + 10, by + 10, T, T_TAP);
+  // after the tap: ring the "Nothing is made or charged until you approve a quote." line (source y 528–560)
+  const hp = K.p(T, B(13), B(13) + 0.35, E.outBack);
+  Object.assign(hlb.style, { left: 48 * sc + 'px', top: (516 - SCROLL) * sc + 'px', width: 684 * sc + 'px', height: 58 * sc + 'px', opacity: hp > 1e-6 ? 1 : 0, transform: `scale(${1.1 - 0.1 * hp})` });
+
+  // ---------- type and tags ----------
+  subs.forEach((s, i) => {
+    const h = s.d.offsetHeight;
+    s.d.style.top = (s.big ? subY - h + (tall ? 150 : 120) : subY + (tall ? 30 : 20)) + 'px';
+    if (cur === 2 && !s.big) s.d.style.top = (tall ? 1112 : 1100) + 'px';
+    K.reveal(s.w, T, s.a, { kind: 'blur', stagger: 0.06, dur: 0.6, out: s.b < 12.9 ? s.b - 0.25 : undefined });
+  });
+  const ci2 = Math.min(4, cur);
+  chap.innerHTML = CH[ci2];
+  chap.style.top = (cur === 2 ? (tall ? 1086 : 1052) : (tall ? subY - 30 : subY - 36)) + 'px';
+  chap.style.opacity = K.win(T, CUT[ci2] + 0.1, (CUT[ci2 + 1] ?? T_LAST) - 0.1, 0.2);
+  story.style.opacity = K.p(T, 0.1, 0.5, E.linear);
+  ctag.style.opacity = cur === 2 ? 0 : 1;
+  ctag.style.left = W - 65 - 330 + 'px'; ctag.style.top = (tall ? 280 : 40) + 'px';
+  rtag.style.opacity = cur === 2 ? K.p(T, CUT[2], CUT[2] + 0.3, E.linear) : 0;
+  rtag.style.left = W - 65 - 300 + 'px'; rtag.style.top = (tall ? 280 : 40) + 'px';
+
+  end(T);
+});
+</script></body></html>

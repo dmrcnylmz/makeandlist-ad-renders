@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D04 · Fifteen-Second FAQ</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #E7EBE0; }
+.wall { position: absolute; inset: 0; background: radial-gradient(120% 80% at 70% 20%, #F3F4EC 0, #E6EADF 55%, #D9DFD1 100%); }
+.dots { position: absolute; inset: -40px; opacity: .35; background-image: radial-gradient(#B9C3AE 1.6px, transparent 1.8px); background-size: 34px 34px; }
+.hdr { position: absolute; z-index: 30; display: flex; align-items: center; gap: 22px; padding: 18px 26px; border-radius: 30px; background: rgba(255,253,248,.92);
+  box-shadow: 0 20px 40px -26px rgba(31,31,31,.45), 0 0 0 1.5px #DCE1D4; }
+.hdr img { width: 76px; height: 76px; border-radius: 50%; background: #1F1F1F; }
+.hdr .nm { font: 800 36px/1.1 'Archivo'; color: #1F1F1F; }
+.hdr .st { font: 500 22px 'IBM Plex Mono', monospace; color: #6B7A63; letter-spacing: .04em; }
+.hdr .q { margin-left: auto; font: 700 24px 'IBM Plex Mono', monospace; background: #DFFF5A; color: #1F1F1F; padding: 8px 16px; border-radius: 999px; }
+.view { position: absolute; overflow: hidden; z-index: 10; }
+.thread { position: absolute; left: 0; top: 0; width: 100%; }
+.msg { position: absolute; max-width: 84%; padding: 20px 28px 22px; border-radius: 34px; font: 500 38px/1.25 'Archivo'; letter-spacing: -0.005em; }
+.msg.me { right: 0; background: #FFFDF8; color: #1F1F1F; border-bottom-right-radius: 10px; box-shadow: 0 14px 30px -22px rgba(31,31,31,.5); transform-origin: 100% 100%; }
+.msg.app { left: 0; background: #1F1F1F; color: #FAF7EE; border-bottom-left-radius: 10px; transform-origin: 0 100%; }
+.msg.app em { font-style: normal; color: #DFFF5A; }
+.msg.photo { padding: 10px; }
+.msg.photo img { display: block; width: 100%; border-radius: 26px; }
+.msg.photo div { padding: 14px 16px 8px; }
+.msg.att { padding: 10px; background: #1F1F1F; max-width: none; }
+.att .crop { position: relative; overflow: hidden; border-radius: 24px; background: #FAF7EE; }
+.att .crop img { position: absolute; left: 0; top: 0; display: block; }
+.att .cap { padding: 12px 16px 6px; font: 500 20px 'IBM Plex Mono', monospace; color: #B9B2A6; letter-spacing: .04em; }
+.typing { position: absolute; left: 0; padding: 26px 30px; border-radius: 34px; border-bottom-left-radius: 10px; background: #1F1F1F; display: flex; gap: 12px; transform-origin: 0 100%; }
+.typing i { width: 16px; height: 16px; border-radius: 50%; background: #DFFF5A; display: block; }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 96px/0.98 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.hook em { font-style: italic; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .06; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D04 — the FAQ as a chat thread. A seller asks the three questions that stop people from trying (skills, cost,
+// control); MakeAndList answers each in one line plus a crop of the real screen that proves it. Typing dots, a thread
+// that scrolls itself, one question per bar.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 107.7, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const L = tall
+  ? { hdrY: 276, hdrH: 112, vx: 65, vy: 412, vw: 950, vh: 836, fs: 46, attW: 820, photoW: 500, hookY: 760, smallY: 1210 }
+  : { hdrY: 50, hdrH: 112, vx: 80, vy: 182, vw: 920, vh: 1050, fs: 40, attW: 700, photoW: 420, hookY: 520, smallY: 1300 };
+const GAP = 22, GAP_Q = 46;
+
+// the thread: [who, kind, content, beat, extra]
+const MSGS = [
+  ['me', 'photo', 'I make kids’ activity books.', 2.2],
+  ['me', 'text', 'Do I need design skills?', 4, { q: 1 }],
+  ['app', 'text', 'No. <em>Describe it in a sentence</em> — it plans and makes the pages.', 6, { typing: 5 }],
+  ['app', 'att', '22-phone-create', 7, { y0: 400, h: 400, cap: 'Real app · demo workspace' }],
+  ['me', 'text', 'What will it cost me?', 10, { q: 2 }],
+  ['app', 'text', 'You see <em>a quote in Credits</em> before anything is made.', 12, { typing: 11 }],
+  ['app', 'att', '65-phone-configure', 13, { y0: 3178, h: 262, cap: 'Real app · demo workspace' }],
+  ['me', 'text', 'Will it post without me?', 16, { q: 3 }],
+  ['app', 'text', 'Never. It sends <em>drafts</em>. Live only when you say.', 18, { typing: 17 }],
+  ['app', 'att', '72-phone-listing-send', 19, { y0: 3176, h: 252, cap: 'Real app · demo workspace' }],
+  ['me', 'text', 'Where do I start?', 21.4],
+  ['app', 'text', '<em>makeandlist.com</em> — it’s free to start.', 22.6, { typing: 21.9 }],
+];
+const tAt = (m) => B(m[3]);
+const tIn = (m) => B(m[4] && m[4].typing !== undefined ? m[4].typing : m[3]);
+
+K.box(0, 0, W, H, { cls: 'wall' });
+const dots = K.box(0, 0, W, H, { cls: 'dots' });
+const hdr = K.box(L.vx, L.hdrY, L.vw, L.hdrH, { cls: 'hdr', html: `<img src="${K.brand('makeandlist-icon.svg')}"><div><div class="nm">MakeAndList</div><div class="st">online</div></div><div class="q">FAQ</div>` });
+const hdrSt = hdr.querySelector('.st'), hdrQ = hdr.querySelector('.q');
+const view = K.box(L.vx, L.vy, L.vw, L.vh, { cls: 'view' });
+const thread = K.el('div', { cls: 'thread', parent: view });
+const els = MSGS.map((m) => {
+  const [who, kind, c, , x] = m;
+  const el = K.el('div', { cls: `msg ${who} ${kind}`, parent: thread, style: { fontSize: L.fs + 'px' } });
+  if (kind === 'text') el.innerHTML = c;
+  if (kind === 'photo') {
+    el.style.width = L.photoW + 'px';
+    K.el('img', { src: K.pub('r04/g05-kids-activity-book.webp'), parent: el, style: { height: L.photoW * 0.9 + 'px', objectFit: 'cover', objectPosition: '50% 60%' } });
+    K.el('div', { parent: el, html: c });
+    const tg = K.demoTag('Concept image · AI-generated', 22, 22); el.appendChild(tg); tg.style.fontSize = '16px';
+  }
+  if (kind === 'att') {
+    el.style.width = L.attW + 'px';
+    const s = (L.attW - 20) / 780;
+    const cr = K.el('div', { cls: 'crop', parent: el, style: { height: x.h * s + 'px' } });
+    K.el('img', { src: K.screen(c), parent: cr, style: { width: 780 * s + 'px', top: -x.y0 * s + 'px' } });
+    K.el('div', { cls: 'cap', parent: el, html: x.cap });
+  }
+  return el;
+});
+const composer = K.box(L.vx, L.vy + L.vh + 16, L.vw, 92, { style: { borderRadius: '46px', background: 'rgba(255,253,248,.92)', boxShadow: '0 0 0 1.5px #DCE1D4', zIndex: 30 } });
+K.el('div', { parent: composer, style: { position: 'absolute', right: '12px', top: '12px', width: '68px', height: '68px', borderRadius: '50%', background: '#DFFF5A' },
+  html: '<svg viewBox="0 0 24 24" width="68" height="68"><path d="M7 12h9M12 7.5 16.5 12 12 16.5" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' });
+const caret = K.el('div', { parent: composer, style: { position: 'absolute', left: '38px', top: '28px', width: '3px', height: '36px', background: '#6B7A63' } });
+const typing = K.el('div', { cls: 'typing', parent: thread, html: '<i></i><i></i><i></i>' });
+const tdots = Array.from(typing.children);
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'hook', html: 'Your questions,<br><em>answered fast.</em>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Ask anything.<br>Then try it free.' });
+
+// layout is measured once (fonts are in by then): y of every message and the scroll each one asks for
+let G = null;
+function geom() {
+  if (G) return G;
+  let y = 0; const ys = [], hs = [];
+  els.forEach((el, i) => {
+    const prev = MSGS[i - 1];
+    if (i > 0) y += prev && prev[0] !== MSGS[i][0] ? GAP_Q : GAP;
+    ys.push(y); const h = el.offsetHeight; hs.push(h); el.style.top = y + 'px'; y += h;
+  });
+  // scroll so the newest message's bottom sits at the bottom of the view
+  const target = ys.map((yy, i) => Math.max(0, yy + hs[i] - L.vh + 10));
+  G = { ys, hs, target };
+  return G;
+}
+
+K.run({
+  id: 'D04', title: 'Fifteen-Second FAQ', dur: DUR, music: 'blue-skies', bpm: 107.7, mood: 'warm', key: 'F', intro: 0.0, cover: 7.4,
+  technique: 'A chat thread that runs itself: a seller’s questions as bubbles, typing dots, MakeAndList’s one-line answers each followed by a crop of the real screen that proves it; the thread scrolls on the beat',
+  caption: 'Do I need design skills? No: describe it in a sentence. What will it cost? You see a quote in Credits first. Will it post without me? Never: drafts first, live only when you say. Start free at makeandlist.com',
+  short: 'Three questions, answered with the real app.',
+  question: 'Can I trust it?', gain: 'Trust: no skills needed, cost first, nothing live without your yes',
+  beats: ['0–2 s: “Your questions, answered fast.” — the chat opens; a seller shares a kids’ activity book', '2–5 s: Do I need design skills? → describe it in a sentence (real Create screen)', '5–8 s: What will it cost me? → a quote in Credits first (real quote)', '8–11.4 s: Will it post without me? → never, drafts first (real Send screen)', '11.4–13 s: Where do I start? → free at makeandlist.com', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [0.6, 'pop'], [B(2.2) - 0.1, 'swish'],
+    ...MSGS.flatMap((m, i) => i === 0 ? [[tAt(m), 'notify']] : m[0] === 'me' ? [[tAt(m), 'notify']] : m[4] && m[4].typing !== undefined ? [[tIn(m), 'type'], [tAt(m), 'pop']] : [[tAt(m), 'pop']]),
+    [12.95, 'hit']],
+}, (T) => {
+  const g = geom();
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  dots.style.transform = `translate(${(T * 6) % 34}px, ${(-T * 4) % 34}px)`;
+
+  // hook: the title card, then the chat slides up under it
+  const hIn = K.p(T, 0, 0.5, E.outExpo), hOut = K.p(T, B(2.2) - 0.35, B(2.2), E.inCubic);
+  hook.style.opacity = hIn * (1 - hOut);
+  hook.style.transform = `translateY(${(1 - hIn) * 40 - hOut * 120}px) scale(${0.95 + 0.05 * hIn})`;
+  const hp = K.p(T, 0.25, 0.85, E.outExpo);
+  hdr.style.opacity = hp; hdr.style.transform = `translateY(${(1 - hp) * -40}px)`;
+  composer.style.opacity = hp; composer.style.transform = `translateY(${(1 - hp) * 40}px)`; caret.style.opacity = f % 20 < 10 ? 1 : 0;
+
+  // thread scroll: each message asks for its target, eased on its own arrival
+  let sc = 0, prevT = 0;
+  MSGS.forEach((m, i) => { const d = g.target[i] - prevT; prevT = Math.max(prevT, g.target[i]); if (d > 0) sc += d * K.p(T, tIn(m), tIn(m) + 0.5, E.outExpo); });
+  thread.style.transform = `translateY(${-sc}px)`;
+
+  // messages
+  let typingNow = null;
+  MSGS.forEach((m, i) => {
+    const el = els[i];
+    const a = tAt(m);
+    const p = K.p(T, a, a + 0.42, E.outBack);
+    el.style.opacity = K.p(T, a, a + 0.1, E.linear);
+    el.style.transform = `scale(${0.8 + 0.2 * p}) translateY(${(1 - p) * 24}px)`;
+    if (m[4] && m[4].typing !== undefined && T >= tIn(m) && T < a) typingNow = i;
+  });
+  if (typingNow !== null) {
+    const i = typingNow;
+    typing.style.top = g.ys[i] + 'px';
+    const p = K.p(T, tIn(MSGS[i]), tIn(MSGS[i]) + 0.3, E.outBack);
+    typing.style.opacity = 1; typing.style.transform = `scale(${0.7 + 0.3 * p})`;
+    tdots.forEach((d, j) => { d.style.transform = `translateY(${-Math.max(0, Math.sin(T * 12 - j * 0.9)) * 10}px)`; });
+    hdrSt.innerHTML = 'typing… · sample conversation';
+  } else { typing.style.opacity = 0; hdrSt.innerHTML = 'online · sample conversation'; }
+  // question counter in the header
+  const QS = MSGS.filter((m) => m[4] && m[4].q);
+  let q = 0; QS.forEach((m) => { if (T >= tAt(m)) q = m[4].q; });
+  const last = T >= tAt(MSGS[10]);
+  hdrQ.innerHTML = last ? 'Start free' : q === 0 ? 'FAQ' : `Q ${q}/3`;
+  const qPop = [...QS, MSGS[10]].reduce((s, m) => s + (T >= tAt(m) && T < tAt(m) + 0.3 ? 1 : 0), 0);
+  hdrQ.style.transform = `scale(${1 + 0.15 * qPop})`;
+
+  end(T);
+});
+</script></body></html>

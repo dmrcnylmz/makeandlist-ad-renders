@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D09 · Sell Where Your Buyers Are</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F3EEE3; }
+.wash { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 50%, #FBF8F1 0, #F1EBDF 60%, #E6DFD1 100%); }
+canvas { position: absolute; left: 0; top: 0; z-index: 2; }
+.full { position: absolute; z-index: 20; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(31,31,31,.6); }
+.full img, .tt img { position: absolute; display: block; }
+.hook { position: absolute; z-index: 40; font: 800 108px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.hook .hl { display: inline-block; background: #FAF7EE; padding: 2px 22px 10px; border-radius: 6px; box-shadow: 0 30px 60px -30px rgba(31,31,31,.5); }
+.hook i { font-style: normal; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 90%, transparent 90%); }
+.cap { position: absolute; z-index: 40; font: 800 66px/1.08 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.cap em { font-style: normal; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.pin { position: absolute; left: 0; top: 0; z-index: 12; transform-origin: 50% 100%; }
+.pin .c { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); background: #FFFDF8; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 18px 30px -16px rgba(31,31,31,.55), 0 0 0 1.5px #E2DBCE; white-space: nowrap; font: 700 22px 'Archivo'; color: #1F1F1F; }
+.pin .c img { height: 30px; width: auto; display: block; }
+.pin .st { position: absolute; left: -2px; bottom: 6px; width: 4px; height: 22px; background: #1F1F1F; border-radius: 2px; }
+.pin .ft { position: absolute; left: -8px; bottom: -8px; width: 16px; height: 16px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 3px #1F1F1F; }
+.pin .dr { position: absolute; left: 50%; bottom: 92px; transform: translateX(-50%); font: 600 14px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; background: #1F1F1F; color: #DFFF5A; padding: 4px 9px; border-radius: 99px; white-space: nowrap; }
+.tt { position: absolute; z-index: 14; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 4px #DFFF5A, 0 0 0 6px #1F1F1F, 0 16px 26px -10px rgba(31,31,31,.6); }
+.ring { position: absolute; z-index: 5; border-radius: 18px; border: 5px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; pointer-events: none; }
+.chipF { position: absolute; z-index: 45; display: flex; align-items: center; gap: 14px; font: 700 28px 'Archivo'; color: #DFFF5A; background: #1F1F1F; padding: 18px 28px; border-radius: 99px; white-space: nowrap; box-shadow: 0 30px 50px -24px rgba(31,31,31,.8); }
+.chipF i { width: 14px; height: 14px; border-radius: 50%; background: #DFFF5A; display: block; }
+.lbl { position: absolute; z-index: 40; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #6B645A; white-space: nowrap; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// D09 — "Will it reach my buyers?" A dot-matrix globe printed on ivory turns slowly; one product (a concept tee) sits at
+// the hub and arcs carry it, beat by beat, to seven store pins — only stores MakeAndList connects to (ikas, WooCommerce,
+// Wix, Gumroad, Shopware, Salla, SHOPLINE). Each lands as a draft. The proof is the real Stores page: one place, every
+// connection. Pins are not geography claims; the globe says "wherever your stores are".
+// one <em> per word, so K.words (which splits on spaces) keeps every word highlighted
+const em = (s) => s.replace(/<em>(.*?)<\/em>/gs, (m, x) => x.split(/( |\n)/).map((w) => (w === ' ' || w === '\n' || !w ? w : '<em>' + w + '</em>')).join(''));
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 117.5, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const T_SHRINK = B(4), T_ARC = (i) => B(5 + i), T_PROOF = B(13), T_RING = B(15), T_BACK = B(19), T_YES = B(21);
+const R = tall ? 380 : 410, C = tall ? [540, 860] : [540, 770];
+const HUB = tall ? 190 : 180;
+const IMG = K.pub('r04/g02-sunset-tee.webp');
+const D2R = Math.PI / 180;
+
+K.box(0, 0, W, H, { cls: 'wash' });
+const cv = K.el('canvas'); cv.width = W; cv.height = H; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+const ctx = cv.getContext('2d');
+
+// ---------- a coarse land mask (lon, lat polygons) and the dot lattice ----------
+const LAND = [
+  [[-168, 66], [-140, 70], [-95, 72], [-80, 62], [-60, 55], [-65, 45], [-80, 30], [-97, 26], [-105, 20], [-90, 15], [-80, 8], [-100, 18], [-115, 30], [-125, 40], [-125, 50], [-150, 60]],
+  [[-80, 8], [-60, 10], [-35, -5], [-40, -22], [-58, -38], [-70, -55], [-75, -40], [-72, -18], [-81, -5]],
+  [[-10, 36], [-10, 44], [-5, 48], [0, 50], [5, 54], [10, 58], [5, 62], [15, 70], [30, 70], [40, 65], [40, 45], [28, 41], [20, 40], [12, 44], [3, 42]],
+  [[-17, 21], [-10, 35], [10, 37], [32, 31], [43, 12], [51, 12], [40, -5], [35, -25], [20, -35], [12, -18], [9, 4], [-8, 5], [-17, 14]],
+  [[40, 45], [40, 65], [60, 70], [100, 77], [140, 72], [170, 66], [160, 58], [140, 52], [130, 40], [122, 30], [110, 20], [105, 10], [98, 15], [90, 22], [78, 8], [70, 20], [57, 25], [50, 30], [35, 32]],
+  [[35, 30], [43, 13], [52, 15], [57, 23], [50, 29]],
+  [[114, -22], [130, -12], [142, -11], [153, -25], [146, -39], [135, -34], [115, -34]],
+  [[-55, 60], [-20, 60], [-20, 83], [-60, 82]],
+  [[-10, 50], [-5, 50], [-3, 58], [-8, 58]],
+  [[130, 31], [140, 35], [142, 43], [136, 37]],
+];
+const inPoly = (x, y, poly) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c; } return c; };
+const DOTS = [];
+for (let lat = -78; lat <= 84; lat += 2.6) {
+  const n = Math.max(8, Math.round(360 * Math.cos(lat * D2R) / 2.6));
+  for (let i = 0; i < n; i++) { const lon = -180 + (i / n) * 360; DOTS.push([lat * D2R, lon * D2R, LAND.some((p) => inPoly(lon, lat, p))]); }
+}
+const LAT0 = 18 * D2R;
+const lon0At = (T) => (4 + T * 0.9) * D2R;
+function proj(lat, lon, l0) {
+  const dl = lon - l0;
+  const x = Math.cos(lat) * Math.sin(dl);
+  const y = Math.cos(LAT0) * Math.sin(lat) - Math.sin(LAT0) * Math.cos(lat) * Math.cos(dl);
+  const z = Math.sin(LAT0) * Math.sin(lat) + Math.cos(LAT0) * Math.cos(lat) * Math.cos(dl);
+  return [x, y, z];
+}
+
+// ---------- the stores (pins are placements on the globe, not claims about where a platform operates) ----------
+const STORES = [
+  ['ikas', 'ikas.svg', 40, 38], ['WooCommerce', 'woocommerce.svg', -45, -15], ['Wix', 'wix.svg', -25, 5], ['Gumroad', 'gumroad.svg', -55, 48],
+  ['Shopware', 'shopware.svg', 12, 60], ['Salla', 'salla.svg', 48, 2], ['SHOPLINE', 'shopline.svg', 30, -30],
+];
+const pins = STORES.map(([name, svg]) => {
+  const d = K.box(0, 0, 0, 0, { cls: 'pin', html: `<div class="dr">Draft</div><div class="c"${name === 'Wix' ? ' style="background:#1F1F1F"' : ''}><img src="${K.pub('platforms/' + svg)}"${name === 'Wix' ? ' style="height:24px"' : ''}>${name === 'Gumroad' || name === 'Salla' ? name : ''}</div><div class="st"></div><div class="ft"></div>` });
+  return { d, dr: d.querySelector('.dr'), c: d.querySelector('.c') };
+});
+const travellers = STORES.map(() => { const t = K.box(0, 0, 64, 64, { cls: 'tt' }); K.el('img', { parent: t, src: IMG, style: { width: '86px', height: '129px', left: '-11px', top: '-30px' } }); return t; });
+
+// ---------- the product: full frame → the hub ----------
+const full = K.box(0, 0, W, H, { cls: 'full' });
+const fimg = K.el('img', { parent: full, src: IMG });
+const ctag = K.demoTag('Concept image · AI-generated', 0, 0);
+const hook = K.box(65, tall ? 330 : 120, W - 130, null, { cls: 'hook', style: { fontSize: (tall ? 104 : 96) + 'px' } });
+const hookW = ['One product.', 'Every store', 'you <i>use.</i>'].map((t) => { const m = K.el('span', { cls: 'line-mask', parent: hook }); return K.el('span', { cls: 'word hl', parent: m, html: t }); });
+
+const capY = tall ? 300 : 56;
+const cap1 = K.box(65, capY, W - 130, null, { cls: 'cap', style: { textAlign: 'center' } });
+const cap1W = K.words(cap1, em('Each store gets it\n<em>as a draft.</em>'));
+const PH = tall ? { x: (W - 384) / 2, y: 470, w: 384 } : { x: 90, y: 240, w: 410 };
+const ph = K.phone(PH.x, PH.y, PH.w, K.screen('25-phone-stores'));
+ph.root.style.zIndex = 30;
+const sc = (PH.w - 28) / 780;
+const ring = K.el('div', { parent: ph.root.firstChild, cls: 'ring' });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+const capP = tall ? { x: 65, y: 300, w: W - 130, al: 'center' } : { x: 550, y: 380, w: 480, al: 'left' };
+const cap2 = K.box(capP.x, capP.y, capP.w, null, { cls: 'cap', style: { textAlign: capP.al } });
+const cap2W = K.words(cap2, em(tall ? 'One place for\n<em>every store.</em>' : 'One place\nfor <em>every\nstore.</em>'));
+const cap3 = K.box(65, capY, W - 130, null, { cls: 'cap', style: { textAlign: 'center' } });
+const cap3W = K.words(cap3, em('Your stores.\n<em>Your customers.</em>'));
+const chip = K.box(0, 0, null, null, { cls: 'chipF', html: '<i></i>Live only after your yes', style: { width: 'auto', height: 'auto' } });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'One product.<br>All your stores.' });
+
+// the arc from the hub to a pin, as a point at u (0..1)
+function arcPt(px, py, u) {
+  const mx = (C[0] + px) / 2, my = (C[1] + py) / 2;
+  const dx = mx - C[0], dy = my - C[1];
+  const cx = mx + dx * 0.35, cy = my + dy * 0.35 - 120;
+  const a = (1 - u) * (1 - u), b = 2 * u * (1 - u), c = u * u;
+  return [a * C[0] + b * cx + c * px, a * C[1] + b * cy + c * py];
+}
+
+K.run({
+  id: 'D09', title: 'Sell Where Your Buyers Are', dur: DUR, bpm: BPM, music: 'back-in-the-80s', mood: 'bright', key: 'F', intro: 0.0, cover: 5.4,
+  technique: 'A dot-matrix globe drawn on canvas (orthographic projection of a land-masked lattice) turns slowly on ivory; on each beat an arc carries the product from the hub to a store pin that pops with a Draft badge, then the real Stores page proves the one place for every connection',
+  caption: 'Make it once, list it in the stores you already use: ikas, WooCommerce, Wix, Gumroad, Shopware, Salla, SHOPLINE and more, each listing a draft until you say yes. Your stores, your customers. The tee shown is a concept image. Start free at makeandlist.com',
+  short: 'One product. Every store you use.',
+  beats: ['0–2 s: “One product. Every store you use.” over a concept tee', '2–2.6 s: the tee shrinks to the hub of a turning globe', '2.6–6.6 s: arcs carry it to ikas, WooCommerce, Wix, Gumroad, Shopware, Salla, SHOPLINE; each lands as a draft', '6.6–9.7 s: the real Stores page: one place for every store', '9.7–13 s: your stores, your customers; live only after your yes', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [B(2), 'pop'], [T_SHRINK - 0.05, 'whoosh'], ...STORES.flatMap((_, i) => [[+(T_ARC(i) - 0.35).toFixed(3), 'swish'], [T_ARC(i), 'pop']]),
+    [T_PROOF - 1.4, 'riser'], [T_PROOF, 'whoosh'], [T_RING, 'click'], [B(17), 'swish'], [T_BACK, 'whoosh'], [T_YES, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const l0 = lon0At(T);
+  // globe presence: in after the shrink, smaller and dimmer under the proof
+  const gin = K.p(T, T_SHRINK - 0.1, T_SHRINK + 0.7, E.outExpo);
+  const pr = K.p(T, T_PROOF - 0.1, T_PROOF + 0.5, E.inOutCubic) * (1 - K.p(T, T_BACK - 0.1, T_BACK + 0.5, E.inOutCubic));
+  const gs = (0.82 + 0.18 * gin) * (1 + 0.2 * pr);
+  const gR = R * gs;
+  ctx.clearRect(0, 0, W, H);
+  ctx.globalAlpha = gin * (1 - 0.75 * pr);
+  // the globe disc and its rim
+  const grd = ctx.createRadialGradient(C[0] - gR * 0.35, C[1] - gR * 0.4, gR * 0.1, C[0], C[1], gR);
+  grd.addColorStop(0, '#FFFDF8'); grd.addColorStop(1, '#ECE5D6');
+  ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(C[0], C[1], gR, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(31,31,31,.18)'; ctx.lineWidth = 2; ctx.stroke();
+  for (const [lat, lon, land] of DOTS) {
+    const [x, y, z] = proj(lat, lon, l0);
+    if (z <= 0.02) continue;
+    const r = (land ? 3.4 : 1.5) * gs * (0.55 + 0.45 * z);
+    ctx.fillStyle = land ? `rgba(42,39,36,${0.35 + 0.6 * z})` : `rgba(140,131,120,${0.25 * z})`;
+    ctx.fillRect(C[0] + x * gR - r, C[1] - y * gR - r, r * 2, r * 2);
+  }
+  // arcs
+  const pinPos = STORES.map(([, , lon, lat]) => { const [x, y, z] = proj(lat * D2R, lon * D2R, l0); return [C[0] + x * gR, C[1] - y * gR, z]; });
+  STORES.forEach((_, i) => {
+    const a = T_ARC(i) - 0.5, u = K.p(T, a, T_ARC(i), E.inOutCubic);
+    if (u <= 0) { travellers[i].style.opacity = 0; return; }
+    const [px, py] = pinPos[i];
+    ctx.strokeStyle = '#1F1F1F'; ctx.lineWidth = 3; ctx.setLineDash([2, 9]); ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let s = 0; s <= 40; s++) { const [x, y] = arcPt(px, py, (s / 40) * u); s ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke(); ctx.setLineDash([]);
+    // traveller
+    const tv = travellers[i], [tx, ty] = arcPt(px, py, u);
+    tv.style.transform = `translate(${tx}px, ${ty}px) scale(${u < 1 ? 1 : Math.max(0, 1 - (T - T_ARC(i)) / 0.2)})`;
+    tv.style.opacity = (u > 0 && T < T_ARC(i) + 0.2 ? 1 : 0) * (1 - pr);
+  });
+  ctx.globalAlpha = 1;
+  // pins
+  pins.forEach((p, i) => {
+    const [x, y, z] = pinPos[i];
+    const pp = K.p(T, T_ARC(i) - 0.05, T_ARC(i) + 0.4, E.outBack);
+    const lit = K.p(T, T_ARC(i), T_ARC(i) + 0.3, E.outBack);
+    p.d.style.transform = `translate(${x}px, ${y}px) scale(${Math.max(0.001, pp) * (0.72 + 0.28 * z) * (1 - 0.3 * pr)})`;
+    p.d.style.opacity = K.clamp(pp * 3) * (1 - 0.85 * pr) * (z > 0.05 ? 1 : 0);
+    p.dr.style.opacity = lit; p.dr.style.transform = `translateX(-50%) scale(${0.6 + 0.4 * lit})`;
+  });
+
+  // ---------- the product ----------
+  const sp = K.p(T, T_SHRINK, T_SHRINK + 0.6, E.inOutExpo);
+  const fw = K.lerp(W, HUB, sp), fh = K.lerp(H, HUB, sp);
+  const fx = K.lerp(0, C[0] - HUB / 2, sp), fy = K.lerp(0, C[1] - HUB / 2, sp) + Math.sin(T * 1.6) * 6 * sp;
+  Object.assign(full.style, { left: fx + 'px', top: fy + 'px', width: fw + 'px', height: fh + 'px', borderRadius: K.lerp(0, HUB / 2, sp) + 'px',
+    border: `${K.lerp(0, 8, sp)}px solid #FFFDF8`, opacity: 1 - 0.9 * pr });
+  const fb = Math.max(fw / 1024, fh / 1536) * K.lerp(1.08 + 0.06 * K.p(T, 0, T_SHRINK, E.linear), 1.35, sp);
+  Object.assign(fimg.style, { width: 1024 * fb + 'px', height: 1536 * fb + 'px', left: (fw - 1024 * fb) / 2 + 'px', top: (fh - 1536 * fb) / 2 - K.lerp(0, 0.05, sp) * 1536 * fb + 'px' });
+  full.style.transform = `scale(${1 + 0.06 * Math.max(0, 1 - Math.abs(((T - T_ARC(0) + 0.5) % BEAT) / 0.15)) * (T > T_ARC(0) - 0.5 && T < T_ARC(6) ? 1 : 0)})`;
+  ctag.style.opacity = 1 - 0.9 * pr;
+  ctag.style.left = (sp < 0.5 ? 65 : C[0] - 165) + 'px';
+  ctag.style.top = (sp < 0.5 ? (tall ? 1196 : 1270) : C[1] + HUB / 2 + 18) + 'px';
+  ctag.style.zIndex = 61;
+
+  // ---------- type ----------
+  K.reveal(hookW.slice(0, 1), T, 0.06, { kind: 'up', dur: 0.5, out: T_SHRINK - 0.3 });
+  if (T < B(2)) hookW.slice(1).forEach((s) => { s.style.opacity = 0; });
+  else K.reveal(hookW.slice(1), T, B(2), { kind: 'up', stagger: 0.1, dur: 0.5, out: T_SHRINK - 0.3 });
+  K.reveal(cap1W, T, T_ARC(0) - 0.2, { kind: 'up', stagger: 0.07, dur: 0.5, out: T_PROOF - 0.3 });
+
+  // ---------- proof ----------
+  const pp = K.p(T, T_PROOF, T_PROOF + 0.6, E.outExpo), po = K.p(T, T_BACK - 0.15, T_BACK + 0.25, E.inCubic);
+  ph.root.style.opacity = K.p(T, T_PROOF, T_PROOF + 0.12, E.linear) * (1 - po);
+  ph.root.style.transform = `translateY(${(1 - pp) * 320 + po * 260}px) rotate(${(1 - pp) * -4}deg)`;
+  const SRC = K.k(T, [[T_PROOF, 640], [T_RING - 0.1, 760], [B(17), 760], [B(17) + 0.6, 1180], [T_BACK, 1220]], E.inOutCubic);
+  ph.scroll(SRC * sc);
+  const rp = K.p(T, T_RING, T_RING + 0.35, E.outBack);
+  Object.assign(ring.style, { left: 26 * sc + 'px', top: (892 - SRC) * sc + 'px', width: 728 * sc + 'px', height: 290 * sc + 'px', opacity: rp > 1e-6 ? 1 : 0, transform: `scale(${1.08 - 0.08 * rp})` });
+  realTag.style.opacity = ph.root.style.opacity;
+  realTag.style.left = (tall ? 65 : PH.x + 10) + 'px';
+  realTag.style.top = (tall ? 1196 : PH.y + PH.w * 2.05 + 16) + 'px';
+  K.reveal(cap2W, T, B(14), { kind: 'up', stagger: 0.07, dur: 0.5, out: T_BACK - 0.3 });
+
+  // ---------- back to the globe ----------
+  K.reveal(cap3W, T, T_BACK + 0.15, { kind: 'up', stagger: 0.08, dur: 0.5 });
+  const cp = K.p(T, T_YES, T_YES + 0.5, E.outBack);
+  chip.style.opacity = K.p(T, T_YES, T_YES + 0.1, E.linear);
+  chip.style.left = (W - chip.offsetWidth) / 2 + 'px';
+  chip.style.top = (tall ? 1150 : 1240) + 'px';
+  chip.style.transform = `scale(${0.75 + 0.25 * cp})`;
+
+  end(T);
+});
+</script></body></html>

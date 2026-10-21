@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D07 · The Whole Kit</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F4EFE4; }
+.sheet { position: absolute; inset: 0; background:
+  linear-gradient(rgba(69,64,58,.055) 1px, transparent 1px) 0 0 / 40px 40px,
+  linear-gradient(90deg, rgba(69,64,58,.055) 1px, transparent 1px) 0 0 / 40px 40px,
+  radial-gradient(120% 80% at 50% 40%, #FBF8F1 0, #F2ECE0 70%, #E9E2D4 100%); }
+.ph { position: absolute; overflow: hidden; }
+.ph img { position: absolute; display: block; transform-origin: 50% 50%; }
+.hero { z-index: 20; background: #FFFDF8; box-shadow: 0 50px 90px -40px rgba(31,31,31,.6), 0 0 0 1px rgba(31,31,31,.08); }
+.heroFrame { position: absolute; z-index: 21; pointer-events: none; border: 0 solid #FFFDF8; }
+.hook { position: absolute; z-index: 40; font: 800 132px/0.98 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.hook .line-mask { padding: 0 0 .1em; }
+.hook .hl { display: inline-block; background: #FAF7EE; padding: 0 22px 8px; border-radius: 6px; box-shadow: 0 30px 60px -30px rgba(31,31,31,.5); }
+.hook i { font-style: normal; color: #1F1F1F; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 90%, transparent 90%); }
+.cap { position: absolute; z-index: 40; font: 800 62px/1.02 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.cap em { font-style: normal; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.kick { position: absolute; z-index: 40; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #6B645A; white-space: nowrap; }
+.part { position: absolute; z-index: 25; border-radius: 20px; background: #FFFDF8; box-shadow: 0 34px 60px -34px rgba(31,31,31,.55), 0 0 0 1.5px #E2DBCE; overflow: hidden; }
+.plbl { position: absolute; left: 18px; top: 16px; font: 600 16px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #6B645A; white-space: nowrap; }
+.num { position: absolute; z-index: 30; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: #DFFF5A; color: #1F1F1F;
+  display: grid; place-items: center; font: 800 26px 'Archivo'; box-shadow: 0 0 0 3px #1F1F1F, 0 12px 24px -10px rgba(31,31,31,.6); }
+.pg { position: absolute; width: 96px; height: 128px; background: #FFFDF8; border-radius: 4px; box-shadow: 0 10px 20px -10px rgba(31,31,31,.5), 0 0 0 1px #DDD5C8; transform-origin: 50% 100%; }
+.pg b { position: absolute; left: 12px; right: 12px; height: 4px; border-radius: 2px; background: #E4DDD0; }
+.pg s { position: absolute; left: 12px; top: 12px; font: 600 9px 'IBM Plex Mono', monospace; text-decoration: none; letter-spacing: .1em; color: #7E9A7E; }
+.fchip { position: absolute; font: 500 15px 'IBM Plex Mono', monospace; color: #1F1F1F; background: #EFEADF; border-radius: 8px; padding: 6px 10px; white-space: nowrap; }
+.ttl { position: absolute; left: 18px; right: 18px; top: 50px; font: 700 25px/1.12 'Playfair Display'; color: #1F1F1F; min-height: 84px; }
+.caret { display: inline-block; width: 3px; height: 24px; margin-left: 2px; vertical-align: -3px; background: #1F1F1F; }
+.tag { position: absolute; font: 600 14px 'Archivo'; color: #45403A; border: 1.5px solid #D9D3C9; border-radius: 99px; padding: 5px 11px; white-space: nowrap; background: #FFFDF8; }
+.thumb { position: absolute; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1.5px #E2DBCE; }
+.thumb.main { box-shadow: 0 0 0 3px #1F1F1F; }
+.vid { position: absolute; border-radius: 12px; overflow: hidden; background: #1F1F1F; }
+.play { position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: rgba(250,247,238,.92); z-index: 3; }
+.play::after { content: ''; position: absolute; left: 23px; top: 17px; border-left: 20px solid #1F1F1F; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+.bar { position: absolute; left: 12px; right: 12px; bottom: 12px; height: 6px; border-radius: 3px; background: rgba(250,247,238,.35); z-index: 3; overflow: hidden; }
+.bar b { display: block; height: 100%; background: #DFFF5A; }
+.p5t { position: absolute; font: 700 26px/1.1 'Playfair Display'; color: #1F1F1F; }
+.p5s { position: absolute; font: 500 17px/1.35 'Archivo'; color: #45403A; }
+.lead { position: absolute; left: 0; top: 0; z-index: 22; overflow: visible; pointer-events: none; }
+.ring { position: absolute; z-index: 5; border-radius: 16px; border: 5px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; pointer-events: none; }
+.chipF { position: absolute; z-index: 45; display: flex; align-items: center; gap: 14px; font: 700 28px 'Archivo'; color: #DFFF5A; background: #1F1F1F; padding: 18px 28px; border-radius: 99px; white-space: nowrap; box-shadow: 0 30px 50px -24px rgba(31,31,31,.8); }
+.chipF i { width: 14px; height: 14px; border-radius: 50%; background: #DFFF5A; display: block; }
+.idea { position: absolute; z-index: 41; font: 500 24px 'IBM Plex Mono', monospace; color: #1F1F1F; background: #FFFDF8; padding: 14px 20px; border-radius: 14px; box-shadow: 0 20px 40px -20px rgba(31,31,31,.6), 0 0 0 1.5px #1F1F1F; white-space: nowrap; }
+.idea u { text-decoration: none; color: #6B645A; margin-right: 10px; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// D07 — "What do I get?" One idea, drawn as an exploded parts diagram: the product (a concept wedding planner) sits at
+// the centre of a manual-style sheet and its kit flies out on leader lines, numbered like an assembly insert: print-ready
+// PDFs, listing copy, listing images, a video, and an optional printed edition. Then the parts collapse into the real
+// product page, which shows those same tabs (Pages · Listing images · Video) and files, and it stays a draft until
+// the seller says yes. The planner photo is a generated concept image, labelled as such.
+// one <em> per word, so K.words (which splits on spaces) keeps every word highlighted
+const em = (s) => s.replace(/<em>(.*?)<\/em>/gs, (m, x) => x.split(/( |\n)/).map((w) => (w === ' ' || w === '\n' || !w ? w : '<em>' + w + '</em>')).join(''));
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 103.4, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const T_SHRINK = B(4), T_PART = (i) => B(5 + i), T_PROOF = B(13), T_RING = B(15), T_YES = B(18);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const IMG = K.pub('r04/g06-wedding-planner.webp');
+
+K.box(0, 0, W, H, { cls: 'sheet' });
+
+// ---------- layout ----------
+const dy = tall ? 0 : -190;
+const L = {
+  card: [415, 600 + dy, 250, 375],
+  parts: [[60, 480 + dy, 300, 270], [720, 480 + dy, 300, 270], [60, 800 + dy, 300, 230], [720, 800 + dy, 300, 230], [250, 1060 + dy, 580, 170]],
+  hookY: tall ? 470 : 250, capY: tall ? 300 : 60, kickY: tall ? 272 : 34,
+  phone: tall ? { x: (W - 390) / 2, y: 470, w: 390 } : { x: 90, y: 230, w: 420 },
+  cap3: tall ? { x: 65, y: 300, w: W - 130, al: 'center' } : { x: 560, y: 360, w: 460, al: 'left' },
+};
+
+// ---------- photo with a live cover crop (rect can change every frame) ----------
+function photo(src, cls, parent) {
+  const root = K.box(0, 0, 10, 10, { cls: 'ph ' + (cls || ''), parent });
+  const img = K.el('img', { src, parent: root });
+  return { root, img,
+    /** place the crop at (x, y, w, h); s = zoom, fx/fy = -1..1 of the free overflow */
+    at(x, y, w, h, s = 1, fx = 0, fy = 0) {
+      Object.assign(root.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px' });
+      const b = Math.max(w / 1024, h / 1536), iw = 1024 * b, ih = 1536 * b;
+      Object.assign(img.style, { width: iw + 'px', height: ih + 'px', left: (w - iw) / 2 + 'px', top: (h - ih) / 2 + 'px' });
+      const ox = (iw * s - w) / 2, oy = (ih * s - h) / 2;
+      img.style.transform = `translate(${fx * ox}px, ${fy * oy}px) scale(${s})`;
+    } };
+}
+
+// ---------- leader lines ----------
+const NS = 'http://www.w3.org/2000/svg';
+const lead = document.createElementNS(NS, 'svg');
+lead.setAttribute('class', 'lead'); lead.setAttribute('width', W); lead.setAttribute('height', H);
+document.getElementById('stage').appendChild(lead);
+const leads = L.parts.map(() => {
+  const g = document.createElementNS(NS, 'g');
+  g.innerHTML = '<path fill="none" stroke="#1F1F1F" stroke-width="2.5" pathLength="1"/><circle r="7" fill="#1F1F1F"/><circle r="5" fill="#FFFDF8" stroke="#1F1F1F" stroke-width="2.5"/>';
+  lead.appendChild(g);
+  return { g, path: g.children[0], dotA: g.children[1], dotB: g.children[2] };
+});
+
+// ---------- the hero (concept image) ----------
+const hero = photo(IMG, 'hero');
+const heroTag = K.demoTag('Concept image · AI-generated', 0, 0);
+
+// ---------- the five parts ----------
+const parts = L.parts.map(([x, y, w, h], i) => K.box(x, y, w, h, { cls: 'part' }));
+const nums = parts.map((_, i) => K.box(0, 0, 52, 52, { cls: 'num', html: String(i + 1) }));
+// 1 · print-ready PDFs
+K.el('div', { parent: parts[0], cls: 'plbl', html: 'Print-ready PDFs' });
+const pages = [0, 1, 2].map((k) => {
+  const p = K.el('div', { parent: parts[0], cls: 'pg', html: `<s>${['CHECKLIST', 'BUDGET', 'TIMELINE'][k]}</s>` + [32, 44, 56, 68, 80, 92, 104].map((t, j) => `<b style="top:${t}px;right:${12 + (j % 3) * 14}px"></b>`).join('') });
+  p.style.left = 46 + k * 4 + 'px'; p.style.top = 64 + 'px';
+  return p;
+});
+const f1 = K.el('div', { parent: parts[0], cls: 'fchip', html: 'planner-a4.pdf' });
+const f2 = K.el('div', { parent: parts[0], cls: 'fchip', html: 'planner-letter.pdf' });
+// 2 · listing copy
+K.el('div', { parent: parts[1], cls: 'plbl', html: 'Listing copy' });
+const ttl = K.el('div', { parent: parts[1], cls: 'ttl' });
+const TITLE = 'Wedding Planner Printable — Botanical, 36 pages';
+const tags = ['wedding planner', 'printable', 'botanical', 'checklist'].map((t) => K.el('div', { parent: parts[1], cls: 'tag', html: t }));
+// 3 · listing images (crops of the concept image)
+K.el('div', { parent: parts[2], cls: 'plbl', html: 'Listing images' });
+const thumbs = [[1.6, -0.6, -0.7], [2.0, 0.7, 0.5], [1.5, 0.2, 0.9]].map(([s, fx, fy], k) => {
+  const t = photo(IMG, 'thumb' + (k === 0 ? ' main' : ''), parts[2]);
+  t.root.classList.add('thumb'); if (k === 0) t.root.classList.add('main');
+  return { t, s, fx, fy };
+});
+// 4 · video
+K.el('div', { parent: parts[3], cls: 'plbl', html: 'Video' });
+const vid = K.el('div', { parent: parts[3], cls: 'vid', style: { left: '18px', top: '50px', width: '264px', height: '162px' } });
+const vimg = photo(IMG, '', vid);
+K.el('div', { parent: vid, cls: 'play' });
+const vbar = K.el('div', { parent: vid, cls: 'bar', html: '<b></b>' }).firstChild;
+// 5 · printed edition (drawn)
+K.el('div', { parent: parts[4], cls: 'plbl', html: 'Printed edition · optional' });
+K.el('div', { parent: parts[4], html: `<svg width="150" height="130" viewBox="0 0 150 130" style="position:absolute;left:22px;top:30px">
+  <rect x="34" y="14" width="96" height="112" rx="5" fill="#E9E1D0" transform="rotate(6 82 70)"/>
+  <rect x="26" y="10" width="96" height="112" rx="5" fill="#FFFDF8" stroke="#1F1F1F" stroke-width="2.5"/>
+  ${[0, 1, 2, 3, 4, 5, 6, 7].map((k) => `<rect x="20" y="${18 + k * 13}" width="13" height="6" rx="3" fill="none" stroke="#1F1F1F" stroke-width="2"/>`).join('')}
+  <path d="M74 92 C 74 74 72 58 76 42" fill="none" stroke="#7E9A7E" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M75 70 C 62 66 58 58 60 50 C 70 52 76 60 75 70 Z M75 58 C 88 54 92 46 90 38 C 80 40 75 48 75 58 Z M75 82 C 88 80 94 72 92 64 C 82 66 76 72 75 82 Z" fill="#B7C7A9" stroke="#7E9A7E" stroke-width="1.5"/>
+  <text x="74" y="110" text-anchor="middle" font-family="Playfair Display" font-style="italic" font-weight="600" font-size="12" fill="#1F1F1F">our wedding</text></svg>` });
+K.el('div', { parent: parts[4], cls: 'p5t', html: 'Printed by your partner,<br>one order at a time.', style: { left: '190px', top: '50px' } });
+K.el('div', { parent: parts[4], cls: 'p5s', html: 'Paid from your partner account, never Credits.', style: { left: '190px', top: '120px', width: '370px' } });
+
+// ---------- type ----------
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'hook' });
+const hookW = ['One idea.', 'Everything', 'you <i>need.</i>'].map((t) => { const m = K.el('span', { cls: 'line-mask', parent: hook }); return K.el('span', { cls: 'word hl', parent: m, html: t }); });
+const idea = K.box(0, 0, null, null, { cls: 'idea', html: '<u>idea ›</u>a botanical wedding planner', style: { width: 'auto', height: 'auto' } });
+const kick = K.box(65, L.kickY, W - 130, null, { cls: 'kick', html: 'In the kit · 5 parts', style: { textAlign: tall ? 'center' : 'left' } });
+const cap2 = K.box(65, L.capY + 8, W - 130, null, { cls: 'cap', style: { textAlign: tall ? 'center' : 'left', fontSize: (tall ? 64 : 58) + 'px' } });
+const cap2W = K.words(cap2, em('Files, listing, images, video.\n<em>Made from one sentence.</em>'));
+const cap3 = K.box(L.cap3.x, L.cap3.y, L.cap3.w, null, { cls: 'cap', style: { textAlign: L.cap3.al, fontSize: (tall ? 64 : 66) + 'px' } });
+const cap3W = K.words(cap3, em(tall ? 'All of it, on one\n<em>product page.</em>' : 'All of it,\non one\n<em>product page.</em>'));
+const cap4 = K.box(L.cap3.x, L.cap3.y, L.cap3.w, null, { cls: 'cap', style: { textAlign: L.cap3.al, fontSize: (tall ? 64 : 66) + 'px' } });
+const cap4W = K.words(cap4, em(tall ? 'You review it. Then\nit goes to <em>your stores.</em>' : 'You review it.\nThen it goes to\n<em>your stores.</em>'));
+
+// ---------- proof: the real product page ----------
+const ph = K.phone(L.phone.x, L.phone.y, L.phone.w, K.screen('24-phone-product'));
+const sc = (L.phone.w - 28) / 780;
+const ring = K.el('div', { parent: ph.root.firstChild, cls: 'ring' });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+const chip = K.box(0, 0, null, null, { cls: 'chipF', html: '<i></i>Draft until you say yes', style: { width: 'auto', height: 'auto' } });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'One idea.<br>The whole kit.' });
+
+// the stage rect of a part's centre
+const pc = (i) => { const [x, y, w, h] = L.parts[i]; return [x + w / 2, y + h / 2]; };
+const phoneC = () => [L.phone.x + L.phone.w / 2, L.phone.y + L.phone.w * 1.02];
+
+K.run({
+  id: 'D07', title: 'The Whole Kit', dur: DUR, bpm: BPM, music: 'earth', mood: 'bright', key: 'C', intro: 0.0, cover: 4.9,
+  technique: 'Exploded parts diagram on a manual sheet: the concept product shrinks to the centre and its kit flies out on dashed leader lines with numbered callouts (live cover crops, a typed title, a playing video tile), then every part collapses into the real product page, whose tabs are ringed',
+  caption: 'One idea, the whole kit: print-ready PDFs, the listing title, description and tags, listing images, a video and, if you want it, a printed edition your own print partner makes per order. You review every file, and it stays a draft until you say yes. The planner shown is a concept image. Start free at makeandlist.com',
+  short: 'One idea. Everything you need.',
+  beats: ['0–2.3 s: “One idea. Everything you need.” over the concept planner', '2.3–5.2 s: the kit explodes out: PDFs, listing copy, listing images, video, printed edition', '5.2–7.5 s: the parts work: pages fan, the title types, the video plays', '7.5–10.4 s: everything collapses into the real product page: Pages · Listing images · Video', '10.4–13 s: a draft until you say yes; then it goes to your stores', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [B(1), 'type'], [B(2), 'pop'], [T_SHRINK - 0.05, 'whoosh'], ...[0, 1, 2, 3, 4].map((i) => [T_PART(i), 'pop']), [T_PART(1) + 0.25, 'type'],
+    [B(10), 'paper'], [B(11), 'swish'], [T_PROOF - 1.4, 'riser'], [T_PROOF, 'whoosh'], [B(14), 'pop'], [T_RING, 'click'], [B(16.5), 'swish'], [T_YES, 'chime'], [B(20), 'pop'], [13.0, 'hit']],
+}, (T) => {
+  // ---------- the hero: full bleed → centre card → into the phone ----------
+  const sp = K.p(T, T_SHRINK, T_SHRINK + 0.62, E.inOutExpo);
+  const [cx, cy, cw, ch] = L.card;
+  const out = K.p(T, T_PROOF - 0.1, T_PROOF + 0.45, E.inCubic);
+  const x = K.lerp(0, cx, sp), y = K.lerp(0, cy, sp), w = K.lerp(W, cw, sp), h = K.lerp(H, ch, sp);
+  const kb = K.lerp(1.12 + 0.05 * K.p(T, 0, T_SHRINK, E.linear), 1.04, sp);
+  const fl = Math.sin(T * 1.4) * 5 * sp;
+  hero.at(x, y + fl, w, h, kb, K.lerp(0.15, 0, sp), K.lerp(-0.2, 0, sp));
+  hero.root.style.borderRadius = K.lerp(0, 14, sp) + 'px';
+  hero.root.style.border = `${K.lerp(0, 10, sp)}px solid #FFFDF8`;
+  hero.root.style.transform = `scale(${1 - out * 0.7})`; hero.root.style.opacity = 1 - out;
+  hero.root.style.transformOrigin = `${phoneC()[0] - x}px ${phoneC()[1] - y}px`;
+  heroTag.style.opacity = 1 - out;
+  heroTag.style.left = (sp < 0.5 ? 65 : cx) + 'px';
+  heroTag.style.top = (sp < 0.5 ? (tall ? 1180 : 1270) : cy + ch + 16 + fl) + 'px';
+
+  // hook (0 → shrink) and the idea chip
+  K.reveal(hookW.slice(0, 1), T, 0.08, { kind: 'up', stagger: 0.09, dur: 0.5, out: T_SHRINK - 0.3 });
+  if (T < B(2)) hookW.slice(1).forEach((s) => { s.style.opacity = 0; });
+  else K.reveal(hookW.slice(1), T, B(2), { kind: 'up', stagger: 0.09, dur: 0.5, out: T_SHRINK - 0.3 });
+  const ip = K.p(T, B(1), B(1) + 0.45, E.outBack), io = K.p(T, T_SHRINK - 0.25, T_SHRINK + 0.05, E.inCubic);
+  idea.style.left = (tall ? 65 : 65) + 'px'; idea.style.top = (L.hookY - 90) + 'px';
+  idea.style.opacity = K.p(T, B(1), B(1) + 0.1, E.linear) * (1 - io);
+  idea.style.transform = `scale(${0.8 + 0.2 * ip})`; idea.style.transformOrigin = '0 50%';
+  const typed = Math.floor(K.clamp((T - B(1)) / 0.6) * 27);
+  idea.lastChild.textContent = 'a botanical wedding planner'.slice(0, typed);
+
+  // ---------- parts explode out on leader lines ----------
+  const [hx, hy] = [cx + cw / 2, cy + ch / 2];
+  parts.forEach((d, i) => {
+    const t0 = T_PART(i) - 0.42, p = K.p(T, t0, T_PART(i), E.outExpo);
+    const [px, py] = pc(i), [bx, by, bw, bh] = L.parts[i];
+    const fx = Math.sin(T * 1.1 + i * 1.9) * 4, fy = Math.cos(T * 0.9 + i * 1.3) * 5;
+    // into the phone
+    const q = K.p(T, T_PROOF - 0.15 + i * 0.05, T_PROOF + 0.35 + i * 0.05, E.inCubic);
+    const [qx, qy] = phoneC();
+    const tx = K.lerp(K.lerp(hx - px, 0, p), qx - px, q), ty = K.lerp(K.lerp(hy - py, 0, p), qy - py, q);
+    d.style.transform = `translate(${tx + fx * p}px, ${ty + fy * p}px) scale(${K.lerp(0.25 + 0.75 * p, 0.15, q)}) rotate(${(1 - p) * (i % 2 ? 8 : -8)}deg)`;
+    d.style.opacity = K.p(T, t0, t0 + 0.12, E.linear) * (1 - K.p(T, T_PROOF + 0.15 + i * 0.05, T_PROOF + 0.35 + i * 0.05, E.linear));
+    // callout number at the part's outer top corner
+    const n = nums[i], np = K.p(T, T_PART(i) + 0.05, T_PART(i) + 0.45, E.outBack);
+    const nx = (i === 4 ? bx : bx < W / 2 ? bx : bx + bw) + tx + fx * p, ny = by + ty + fy * p;
+    n.style.left = nx + 'px'; n.style.top = ny + 'px';
+    n.style.transform = `scale(${np * (1 - q)})`; n.style.opacity = np > 1e-6 ? 1 : 0;
+    // leader: from the card edge to the part's inner edge
+    const lp = K.p(T, T_PART(i) - 0.05, T_PART(i) + 0.35, E.inOutCubic) * (1 - K.p(T, T_PROOF - 0.3, T_PROOF, E.linear));
+    const ax = i === 4 ? hx : bx < W / 2 ? cx : cx + cw, ay = i === 4 ? cy + ch : K.clamp(py, cy + 30, cy + ch - 30);
+    const ex = i === 4 ? hx : bx < W / 2 ? bx + bw : bx, ey = i === 4 ? by : py;
+    const mx = i === 4 ? hx : (ax + ex) / 2;
+    const L_ = leads[i];
+    L_.path.setAttribute('d', i === 4 ? `M${ax} ${ay + fl} L${ex + fx} ${ey + fy}` : `M${ax} ${ay + fl} L${mx} ${ay + fl} L${mx} ${ey + fy} L${ex + fx} ${ey + fy}`);
+    L_.path.style.strokeDasharray = `${lp} 1`; // drawn on
+    L_.g.style.opacity = lp > 1e-6 ? 1 : 0;
+    [L_.dotA, L_.dotB].forEach((c, k) => { c.setAttribute('cx', k ? ex + fx : ax); c.setAttribute('cy', k ? ey + fy : ay + fl); });
+    L_.dotB.style.opacity = lp > 0.95 ? 1 : 0;
+  });
+
+  // part 1: pages fan, files land
+  const fan = K.p(T, T_PART(0) + 0.1, T_PART(0) + 0.8, E.outBack);
+  pages.forEach((p, k) => { p.style.transform = `translateX(${(k - 1) * 34 * fan}px) rotate(${(k - 1) * 9 * fan + Math.sin(T * 1.6 + k) * 0.8}deg)`; });
+  f1.style.left = '168px'; f1.style.top = '86px'; f2.style.left = '168px'; f2.style.top = '134px';
+  [f1, f2].forEach((f, k) => { const fp = K.p(T, B(10) + k * 0.15, B(10) + 0.4 + k * 0.15, E.outBack); f.style.opacity = K.clamp(fp * 2); f.style.transform = `translateX(${(1 - fp) * 30}px)`; f.style.left = (k ? 150 : 168) + 'px'; });
+  pages.forEach((p) => { p.style.left = (26 + 0) + 'px'; });
+  // part 2: the title types, tags pop
+  const n2 = Math.floor(K.clamp((T - T_PART(1) - 0.25) / 1.3) * TITLE.length);
+  ttl.innerHTML = TITLE.slice(0, n2) + (T > T_PART(1) && n2 < TITLE.length ? '<span class="caret"></span>' : '');
+  let tx0 = 18, ty0 = 160;
+  tags.forEach((t, k) => {
+    const tp = K.p(T, B(9) + 0.3 + k * 0.12, B(9) + 0.7 + k * 0.12, E.outBack);
+    const tw = t.offsetWidth; if (tx0 + tw > 282) { tx0 = 18; ty0 += 38; }
+    t.style.left = tx0 + 'px'; t.style.top = ty0 + 'px'; tx0 += tw + 8;
+    t.style.opacity = K.clamp(tp * 2); t.style.transform = `scale(${0.6 + 0.4 * tp})`;
+  });
+  // part 3: thumbnails, the main one slides through the set
+  const shift = K.k(T, [[B(11), 0], [B(11) + 0.45, 1], [B(12), 1], [B(12) + 0.45, 2]], E.inOutCubic);
+  thumbs.forEach(({ t, s, fx, fy }, k) => {
+    const pos = ((k - shift) % 3 + 3) % 3;
+    const big = Math.max(0, 1 - Math.abs(pos));
+    const tw = 72 + 28 * big, th = tw * 1.4;
+    t.at(18 + pos * 80 + Math.min(pos, 1) * 28, 52 + (150 - th) / 2 + 6, tw, th, s, fx, fy);
+    t.root.style.boxShadow = big > 0.5 ? '0 0 0 3px #1F1F1F' : '0 0 0 1.5px #E2DBCE';
+  });
+  // part 4: the video plays (slow push + progress)
+  vimg.at(0, 0, 264, 162, 1.4 + 0.25 * K.p(T, T_PART(3), T_PROOF, E.linear), 0, K.lerp(-0.6, 0.4, K.p(T, T_PART(3), T_PROOF, E.linear)));
+  vbar.style.width = 100 * K.p(T, T_PART(3), T_PROOF, E.linear) + '%';
+
+  // ---------- captions ----------
+  kick.style.opacity = K.win(T, T_PART(0), T_PROOF, 0.2);
+  kick.style.display = tall ? 'block' : 'none';
+  K.reveal(cap2W, T, T_PART(0), { kind: 'up', stagger: 0.07, dur: 0.5, out: T_PROOF - 0.3 });
+  if (T < B(9)) cap2W.slice(4).forEach((s) => { s.style.opacity = 0; });
+  else K.reveal(cap2W.slice(4), T, B(9), { kind: 'up', stagger: 0.08, dur: 0.5, out: T_PROOF - 0.3 });
+  K.reveal(cap3W, T, B(14), { kind: 'up', stagger: 0.07, dur: 0.5, out: T_YES - 0.4 });
+  K.reveal(cap4W, T, T_YES - 0.05, { kind: 'up', stagger: 0.07, dur: 0.5 });
+
+  // ---------- proof: the phone with the real product page ----------
+  const pp = K.p(T, T_PROOF + 0.1, B(14) + 0.2, E.outExpo);
+  ph.root.style.opacity = K.p(T, T_PROOF + 0.1, T_PROOF + 0.25, E.linear);
+  ph.root.style.transform = `translateY(${(1 - pp) * 260}px) rotate(${(1 - pp) * -4 + Math.sin(T * 0.9) * 0.4}deg)`;
+  // scroll: title → tabs → the files list
+  const SRC = K.k(T, [[B(14), 240], [T_RING - 0.1, 560], [B(17.5), 760], [T_YES + 0.3, 1950], [13, 2050]], E.inOutCubic);
+  ph.scroll(SRC * sc);
+  const rp = K.p(T, T_RING, T_RING + 0.4, E.outBack) * (1 - K.p(T, T_YES - 0.1, T_YES + 0.2, E.linear));
+  Object.assign(ring.style, { left: 26 * sc + 'px', top: (1160 - SRC) * sc + 'px', width: 600 * sc + 'px', height: 112 * sc + 'px', opacity: rp > 1e-6 ? 1 : 0, transform: `scale(${1.15 - 0.15 * rp})` });
+  realTag.style.opacity = K.p(T, B(14), B(14) + 0.3, E.linear);
+  realTag.style.left = (tall ? 65 : L.phone.x + 10) + 'px';
+  realTag.style.top = (tall ? 1196 : L.phone.y + L.phone.w * 2.05 + 18) + 'px';
+  const cp = K.p(T, B(20), B(20) + 0.5, E.outBack);
+  chip.style.opacity = K.p(T, B(20), B(20) + 0.1, E.linear);
+  chip.style.left = (tall ? (W - chip.offsetWidth) / 2 : L.cap3.x) + 'px';
+  chip.style.top = (tall ? 1140 : 760) + 'px';
+  chip.style.transform = `scale(${0.75 + 0.25 * cp})`; chip.style.transformOrigin = tall ? '50% 50%' : '0 50%';
+
+  end(T);
+});
+</script></body></html>

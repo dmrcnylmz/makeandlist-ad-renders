@@ -5,7 +5,7 @@ name: Render ads (motion/ads)
 on:
   push:
     branches: ['main']
-    paths: ['motion/ads/**', 'motion/sfx/**', '.github/workflows/render-ads.yml']
+    paths: ['motion/ads/**', 'motion/sfx/**', 'motion/music/**', '.github/workflows/render-ads.yml']
   workflow_dispatch:
     inputs:
       ads:

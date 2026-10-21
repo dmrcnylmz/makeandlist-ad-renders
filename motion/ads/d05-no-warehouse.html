@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D05 · No Warehouse Needed</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EDE7DC; }
+.sky { position: absolute; inset: 0; background: radial-gradient(110% 70% at 50% 62%, #F6F2EA 0, #EAE3D6 55%, #DDD4C4 100%); }
+svg.iso { position: absolute; left: 0; top: 0; overflow: visible; z-index: 5; }
+.cap { position: absolute; z-index: 40; text-align: center; font: 800 92px/0.98 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.cap .w { display: inline-block; }
+.cap em { font-style: italic; background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 92%, transparent 92%); }
+.sub { position: absolute; z-index: 40; text-align: center; font: 600 34px/1.3 'Archivo'; color: #45403A; }
+.sub b { color: #1F1F1F; }
+.stock { position: absolute; z-index: 30; font: 600 26px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #1F1F1F;
+  background: #FFFDF8; padding: 12px 20px; border-radius: 12px; box-shadow: 0 0 0 2px #1F1F1F, 6px 6px 0 #1F1F1F; white-space: nowrap; }
+.stock b { color: #C4532F; }
+.prod { position: absolute; z-index: 20; overflow: hidden; border-radius: 18px; background: #FFFDF8; box-shadow: 0 40px 70px -30px rgba(31,31,31,.6), 0 0 0 6px #FFFDF8; }
+.prod img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+.head { position: absolute; left: -8%; width: 116%; height: 10px; border-radius: 5px; background: #DFFF5A; box-shadow: 0 0 30px 8px rgba(223,255,90,.75); }
+.notif { position: absolute; z-index: 50; display: flex; align-items: center; gap: 20px; padding: 22px 26px; border-radius: 30px; background: rgba(255,253,248,.96);
+  box-shadow: 0 30px 60px -30px rgba(31,31,31,.6), 0 0 0 1.5px #E2DBCE; }
+.notif img { width: 72px; height: 72px; border-radius: 18px; background: #1F1F1F; }
+.notif .t { font: 800 32px/1.15 'Archivo'; color: #1F1F1F; }
+.notif .s { font: 500 26px/1.3 'Archivo'; color: #45403A; }
+.notif .k { margin-left: auto; align-self: flex-start; font: 500 20px 'IBM Plex Mono', monospace; color: #8A8378; }
+.crop { position: absolute; z-index: 45; border-radius: 30px; overflow: hidden; background: #FAF7EE; box-shadow: 0 50px 90px -40px rgba(31,31,31,.7), 0 0 0 1.5px #E2DBCE; }
+.crop img { position: absolute; left: 0; top: 0; display: block; }
+.stamp { position: absolute; z-index: 47; font: 800 40px 'Archivo'; letter-spacing: .02em; color: #1F1F1F; background: #DFFF5A; padding: 14px 26px; border-radius: 16px; border: 4px solid #1F1F1F; white-space: nowrap; }
+.full { position: absolute; inset: 0; overflow: hidden; z-index: 60; }
+.full img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+.full .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(25,22,18,.62) 0, rgba(25,22,18,.15) 40%, rgba(25,22,18,0) 60%, rgba(25,22,18,.3) 100%); }
+.fcap { position: absolute; z-index: 62; text-align: center; font: 800 88px/1 'Playfair Display'; letter-spacing: -0.02em; color: #FAF7EE; }
+.fsub { position: absolute; z-index: 62; text-align: center; font: 600 32px/1.3 'Archivo'; color: #FAF7EE; }
+.fsub b { color: #DFFF5A; }
+.flash { position: absolute; inset: 0; background: #FFFDF8; z-index: 80; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D05 — an isometric warehouse, drawn in ink, and completely empty: racks, pallet, "In stock: 0". An order pings,
+// waits for the seller's yes (the real Orders screen), and only then does one product get printed into the empty room
+// under the lamp, boxed, and carried out to a doorstep. The room is still empty at the end.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 89.1, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const L = tall
+  ? { cx: 540, cy: 910, u: 60, capY: 286, capFs: 84, subY: 560, stockX: 690, stockY: 900, notifY: 300, cropX: 120, cropY: 520, cropW: 840, prodW: 300, fcapY: 330, fsubY: 560 }
+  : { cx: 540, cy: 640, u: 58, capY: 56, capFs: 66, subY: 290, stockX: 740, stockY: 640, notifY: 70, cropX: 160, cropY: 300, cropW: 760, prodW: 250, fcapY: 120, fsubY: 330 };
+const U = L.u;
+const iso = (x, y, z = 0) => [L.cx + (x - y) * U * 0.866, L.cy + (x + y) * U * 0.5 - z * U];
+const pt = (a) => a.map((v) => v.toFixed(1)).join(',');
+const poly = (pts) => pts.map((p) => pt(iso(...p))).join(' ');
+
+// ── the room ─────────────────────────────────────────────────────────────────────────────
+const NS = 'http://www.w3.org/2000/svg';
+K.box(0, 0, W, H, { cls: 'sky' });
+const svg = document.createElementNS(NS, 'svg');
+svg.setAttribute('class', 'iso'); svg.setAttribute('width', W); svg.setAttribute('height', H);
+document.getElementById('stage').appendChild(svg);
+const g = (parent = svg) => { const e = document.createElementNS(NS, 'g'); parent.appendChild(e); return e; };
+const strokes = []; // [element, order] for the draw-on
+function shape(tag, attrs, parent, order) {
+  const e = document.createElementNS(NS, tag);
+  Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+  (parent || svg).appendChild(e);
+  if (order !== undefined) { e.setAttribute('pathLength', '1'); e.setAttribute('stroke-dasharray', '1 1'); strokes.push([e, order]); }
+  return e;
+}
+const INK = '#2A2724', FL = '#E4DCCD';
+const room = g();
+// floor, walls
+shape('polygon', { points: poly([[0, 0], [8, 0], [8, 8], [0, 8]]), fill: FL, stroke: INK, 'stroke-width': 3 }, room, 0);
+shape('polygon', { points: poly([[0, 0, 0], [0, 8, 0], [0, 8, 5], [0, 0, 5]]), fill: '#EFE9DE', stroke: INK, 'stroke-width': 3 }, room, 0.05);
+shape('polygon', { points: poly([[0, 0, 0], [8, 0, 0], [8, 0, 5], [0, 0, 5]]), fill: '#F5F0E7', stroke: INK, 'stroke-width': 3 }, room, 0.05);
+// door in the right wall
+shape('polygon', { points: poly([[5.6, 0, 0], [7.2, 0, 0], [7.2, 0, 2.8], [5.6, 0, 2.8]]), fill: '#D9CFBE', stroke: INK, 'stroke-width': 3 }, room, 0.3);
+// floor tiles
+for (let i = 1; i < 8; i++) {
+  shape('line', { x1: iso(i, 0)[0], y1: iso(i, 0)[1], x2: iso(i, 8)[0], y2: iso(i, 8)[1], stroke: '#CFC5B4', 'stroke-width': 1.5 }, room, 0.1 + i * 0.01);
+  shape('line', { x1: iso(0, i)[0], y1: iso(0, i)[1], x2: iso(8, i)[0], y2: iso(8, i)[1], stroke: '#CFC5B4', 'stroke-width': 1.5 }, room, 0.1 + i * 0.01);
+}
+// racks: empty shelves along both walls
+function rack(alongY, a0, a1, order) {
+  const P = (along, depth, z) => (alongY ? [0.15 + depth, along, z] : [along, 0.15 + depth, z]);
+  [0.25, 1.35, 2.45, 3.55].forEach((z, li) => {
+    shape('polygon', { points: poly([P(a0, 0, z), P(a1, 0, z), P(a1, 1, z), P(a0, 1, z)]), fill: '#F8F4EC', stroke: INK, 'stroke-width': 2.5 }, room, order + li * 0.03);
+  });
+  for (let a = a0; a <= a1 + 0.01; a += (a1 - a0) / 2) [0, 1].forEach((d) => {
+    const p0 = iso(...P(a, d, 0)), p1 = iso(...P(a, d, 3.75));
+    shape('line', { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1], stroke: INK, 'stroke-width': 3, 'stroke-linecap': 'round' }, room, order + 0.1);
+  });
+}
+rack(true, 1.0, 4.6, 0.2);
+rack(false, 1.0, 4.8, 0.25);
+// an empty pallet
+const pal = [[5.2, 5.6], [6.8, 5.6], [6.8, 6.8], [5.2, 6.8]];
+shape('polygon', { points: poly(pal.map(([x, y]) => [x, y, 0.22])), fill: '#D8C29E', stroke: INK, 'stroke-width': 2.5 }, room, 0.45);
+// lamp
+const lampTop = iso(4.2, 4.2, 7.0), lampB = iso(4.2, 4.2, 6.2);
+shape('line', { x1: lampTop[0], y1: lampTop[1], x2: lampB[0], y2: lampB[1], stroke: INK, 'stroke-width': 3 }, room, 0.5);
+const shade = shape('path', { d: `M${lampB[0] - 46},${lampB[1] + 34} L${lampB[0] + 46},${lampB[1] + 34} L${lampB[0] + 20},${lampB[1]} L${lampB[0] - 20},${lampB[1]} Z`, fill: '#1F1F1F' }, room);
+const bulb = shape('ellipse', { cx: lampB[0], cy: lampB[1] + 36, rx: 40, ry: 9, fill: '#DFFF5A' }, room);
+// the pool of light (fades up when an order arrives)
+const pool = shape('ellipse', { cx: iso(4.2, 4.2)[0], cy: iso(4.2, 4.2)[1], rx: U * 2.6, ry: U * 1.3, fill: 'url(#pg)' }, room);
+const cone = shape('path', { d: `M${lampB[0] - 40},${lampB[1] + 36} L${lampB[0] + 40},${lampB[1] + 36} L${iso(4.2, 4.2)[0] + U * 2.4},${iso(4.2, 4.2)[1]} L${iso(4.2, 4.2)[0] - U * 2.4},${iso(4.2, 4.2)[1]} Z`, fill: 'url(#cg)' }, room);
+const defs = document.createElementNS(NS, 'defs'); svg.insertBefore(defs, svg.firstChild);
+defs.innerHTML = '<radialGradient id="pg"><stop offset="0" stop-color="#F4FFB8" stop-opacity=".95"/><stop offset="1" stop-color="#DFFF5A" stop-opacity="0"/></radialGradient>' +
+  '<linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4FFB8" stop-opacity=".55"/><stop offset="1" stop-color="#DFFF5A" stop-opacity=".08"/></linearGradient>';
+// dust in the light
+const dust = Array.from({ length: 18 }, (_, i) => shape('circle', { r: 2 + seed(i) * 3, fill: '#FFFDF8' }, room));
+// the parcel box (iso, drawn as three faces) at the product's spot
+const boxG = g(svg);
+const BX = [3.5, 3.5], BS = 1.4, BHt = 1.1;
+const fTop = shape('polygon', { points: poly([[BX[0], BX[1], BHt], [BX[0] + BS, BX[1], BHt], [BX[0] + BS, BX[1] + BS, BHt], [BX[0], BX[1] + BS, BHt]]), fill: '#D8B98A', stroke: INK, 'stroke-width': 2.5 }, boxG);
+shape('polygon', { points: poly([[BX[0] + BS, BX[1], 0], [BX[0] + BS, BX[1] + BS, 0], [BX[0] + BS, BX[1] + BS, BHt], [BX[0] + BS, BX[1], BHt]]), fill: '#C59E68', stroke: INK, 'stroke-width': 2.5 }, boxG);
+shape('polygon', { points: poly([[BX[0], BX[1] + BS, 0], [BX[0] + BS, BX[1] + BS, 0], [BX[0] + BS, BX[1] + BS, BHt], [BX[0], BX[1] + BS, BHt]]), fill: '#CFAA77', stroke: INK, 'stroke-width': 2.5 }, boxG);
+const tape = shape('line', { x1: iso(BX[0] + BS / 2, BX[1], BHt)[0], y1: iso(BX[0] + BS / 2, BX[1], BHt)[1], x2: iso(BX[0] + BS / 2, BX[1] + BS, BHt)[0], y2: iso(BX[0] + BS / 2, BX[1] + BS, BHt)[1], stroke: '#DFFF5A', 'stroke-width': 8, 'stroke-linecap': 'round' }, boxG);
+
+// ── overlays ─────────────────────────────────────────────────────────────────────────────
+const hook = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+const HW = ['No stock.', 'No warehouse.', '<em>Still printed.</em>'].map((t) => { const d = K.el('div', { parent: hook, html: `<span class="w">${t}</span>` }); return d.firstChild; });
+const subs = [
+  'Your shelves stay <b>empty</b>.',
+  'An order comes in.<br><b>It waits for you.</b>',
+  'You say yes.<br><b>Your print partner prints it.</b>',
+  'Shelves: <b>still empty.</b>',
+].map((t) => K.box(65, L.subY, W - 130, null, { cls: 'sub', html: t }));
+const stock = K.box(L.stockX, L.stockY, null, null, { cls: 'stock', html: 'In stock: <b>0</b>', style: { width: 'auto', height: 'auto' } });
+const notif = K.box(65, L.notifY, W - 130, null, { cls: 'notif', html: `<img src="${K.brand('makeandlist-icon.svg')}"><div><div class="t">New order · Sunset tee</div><div class="s">From your ikas store · waiting for you</div></div><div class="k">sample · now</div>` });
+// the real Orders screen: one order, paid by the buyer, waiting for Approve
+const CY0 = 1784, CH0 = 440, cs = L.cropW / 780;
+const crop = K.box(L.cropX, L.cropY, L.cropW, CH0 * cs, { cls: 'crop' });
+K.el('img', { src: K.screen('81-phone-orders'), parent: crop, style: { width: L.cropW + 'px', top: -CY0 * cs + 'px' } });
+const cropTag = K.demoTag('Real app · demo workspace', L.cropX, L.cropY + CH0 * cs + 16);
+const tapX = L.cropX + 204 * cs, tapY = L.cropY + (2096 - CY0) * cs;
+const cur = K.cursor();
+const stamp = K.box(0, 0, null, null, { cls: 'stamp', html: 'Approved by you', style: { width: 'auto', height: 'auto' } });
+// the product printed into the room
+const PW = L.prodW, PH = PW * 1.2;
+const prodAt = iso(4.2, 4.2, 2.0);
+const prod = K.box(prodAt[0] - PW / 2, prodAt[1] - PH / 2, PW, PH, { cls: 'prod' });
+const prodImg = K.el('img', { src: K.pub('r04/g02-sunset-tee.webp'), parent: prod, style: { objectPosition: '50% 45%' } });
+const head = K.el('div', { cls: 'head', parent: prod });
+const prodTag = K.demoTag('Concept image · AI-generated', 65, tall ? 1196 : 1270);
+// the doorstep
+const full = K.box(0, 0, W, H, { cls: 'full' });
+const fullImg = K.el('img', { src: K.pub('r04/g20-parcel.webp'), parent: full, style: { objectPosition: '50% 60%' } });
+K.el('div', { cls: 'veil', parent: full });
+const fcap = K.box(65, L.fcapY, W - 130, null, { cls: 'fcap', html: '…and ships it<br>to your buyer.' });
+const fsub = K.box(65, L.fsubY, W - 130, null, { cls: 'fsub', html: 'Printing is paid from <b>your own partner account</b>.' });
+const fullTag = K.demoTag('Concept image · AI-generated', 65, tall ? 1196 : 1270); fullTag.style.zIndex = 63;
+const flash = K.box(0, 0, W, H, { cls: 'flash' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Sell printed.<br>Stock nothing.' });
+
+const T_NOTIF = B(5), T_CROP = B(6.5), T_TAP = B(9), T_PRINT = B(10), T_BOX = B(13), T_DOOR = B(14.5), T_BACK = B(17.5);
+
+K.run({
+  id: 'D05', title: 'No Warehouse Needed', dur: DUR, music: 'a-small-town-on-pluto', bpm: 89.1, mood: 'bright', key: 'C', intro: 0.0, cover: 7.6,
+  technique: 'Isometric ink-drawn warehouse that draws itself on and stays empty; an order pings, waits for the seller’s yes on the real Orders screen, and only then one product is printed into the room under the lamp by a scanning print head, boxed and carried out to a doorstep photo',
+  caption: 'Sell printed products without stock: when an order comes in it waits for your yes, then your own print partner prints and ships it, paid from your partner account. Start free at makeandlist.com',
+  short: 'Printed products. No stock.',
+  question: 'Can I sell physical products too?', gain: 'Physical products without stock',
+  beats: ['0–2 s: “No stock. No warehouse. Still printed.” — an empty warehouse draws itself; a printed tee flashes under the lamp', '2–3.4 s: In stock: 0 — the shelves stay empty', '3.4–6.7 s: a sample order pings and waits; the seller approves on the real Orders screen', '6.7–9.8 s: only now one tee is printed into the room under the lamp, then boxed', '9.8–11.8 s: a parcel on a doorstep — printing paid from your partner account', '11.8–13 s: back in the room: shelves still empty', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [0.05, 'marker'], [B(1), 'pop'], [B(2), 'hit'], [B(3.4), 'stamp'], [T_NOTIF, 'notify'], [T_CROP - 0.1, 'swish'], [T_TAP - 0.05, 'click'], [T_TAP + 0.15, 'chime'],
+    [T_PRINT - 0.1, 'whoosh'], [T_PRINT + 0.2, 'printer'], [T_PRINT + B(2.2), 'hit'], [T_BOX, 'paper'], [T_BOX + B(0.9), 'box'], [T_DOOR - 0.12, 'whoosh'], [T_DOOR + 0.05, 'hit'], [T_BACK - 0.1, 'whoosh'], [T_BACK + B(0.7), 'pop'], [12.95, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // the room draws on in the first second and a half, then breathes with a slow camera drift
+  strokes.forEach(([e, o]) => { const p = K.p(T, o * 1.4, o * 1.4 + 0.6, E.outCubic); e.setAttribute('stroke-dashoffset', 1 - p); });
+  const fillP = K.p(T, 0.5, 1.5, E.outCubic);
+  room.querySelectorAll('polygon').forEach((p) => p.setAttribute('fill-opacity', fillP));
+  const cam = K.p(T, 0, 13, E.inOutCubic);
+  const zoomIn = K.p(T, T_PRINT - 0.3, T_PRINT + 0.6, E.inOutCubic) * (1 - K.p(T, T_BOX + 0.3, T_DOOR, E.inOutCubic));
+  const z = 1 + 0.04 * cam + 0.16 * zoomIn;
+  const focus = iso(4.2, 4.2, 1.5);
+  const camT = `translate(${focus[0]}px, ${focus[1]}px) scale(${z}) translate(${-focus[0] + Math.sin(T * 0.5) * 8}px, ${-focus[1] + (tall ? 160 : 140) * zoomIn * 0.5}px)`;
+  svg.style.transformOrigin = '0 0'; svg.style.transform = camT;
+
+  // light: dim until the order, full while printing
+  const tl = T >= B(2) && T < B(3.4) ? 0.7 * K.p(T, B(2), B(2) + 0.2, E.linear) * (1 - K.p(T, B(3.4) - 0.35, B(3.4), E.linear)) : 0;
+  const light = 0.15 + tl + 0.85 * K.p(T, T_NOTIF, T_NOTIF + 0.6, E.outCubic) - 0.5 * K.p(T, T_BACK, T_BACK + 0.6, E.inOutCubic);
+  pool.setAttribute('opacity', light); cone.setAttribute('opacity', light * 0.85); bulb.setAttribute('opacity', 0.3 + 0.7 * light);
+  dust.forEach((d, i) => {
+    const sx = seed(i * 3.1), sy = seed(i * 7.7);
+    const p = iso(2.8 + sx * 2.8, 2.8 + sy * 2.8, ((seed(i * 2.3) * 5 + T * (0.2 + sx * 0.3)) % 5));
+    d.setAttribute('cx', p[0] + Math.sin(T + i) * 6); d.setAttribute('cy', p[1]); d.setAttribute('opacity', light * 0.8);
+  });
+
+  // hook words
+  HW.forEach((w, i) => {
+    const a = i * B(1) + 0.05;
+    const p = K.p(T, a, a + 0.45, E.outExpo), out = K.p(T, B(3.4), B(3.4) + 0.3, E.inCubic);
+    w.style.opacity = p * (1 - out); w.style.transform = `translateY(${(1 - p) * 50 - out * 40}px)`;
+  });
+  // subs
+  const SUBW = [[B(3.6), T_NOTIF - 0.1], [T_NOTIF + B(0.6), T_CROP - 0.05], [T_TAP + B(0.8), T_BOX + B(1.2)], [T_BACK + B(0.4), 13.0]];
+  subs.forEach((s, i) => {
+    const [a, b] = SUBW[i];
+    const p = K.p(T, a, a + 0.45, E.outExpo), o = K.p(T, b - 0.25, b, E.inCubic);
+    s.style.opacity = p * (1 - o); s.style.transform = `translateY(${(1 - p) * 30}px)`;
+    s.style.top = (i === 1 ? L.notifY + (tall ? 140 : 130) : i === 2 ? L.capY + 10 : L.subY) + 'px';
+  });
+  subs.forEach((x) => (x.style.fontSize = (tall ? 54 : 44) + 'px'));
+  subs[3].style.top = L.capY + 10 + 'px'; subs[0].style.top = L.capY + 10 + 'px';
+
+  // stock counter, stamped in at B(3.4)
+  const sp = K.p(T, B(3.4), B(3.4) + 0.35, E.outBack);
+  stock.style.opacity = K.p(T, B(3.4), B(3.4) + 0.08, E.linear) * (1 - K.p(T, T_PRINT - 0.2, T_PRINT, E.linear) + K.p(T, T_BACK, T_BACK + 0.3, E.linear));
+  stock.style.transform = `scale(${1.6 - 0.6 * sp}) rotate(${-4 * sp}deg)`;
+
+  // notification drops in, then the real order card; the tap approves it
+  const np = K.p(T, T_NOTIF, T_NOTIF + 0.5, E.outBack), no = K.p(T, T_CROP - 0.1, T_CROP + 0.2, E.inCubic);
+  notif.style.opacity = K.p(T, T_NOTIF, T_NOTIF + 0.1, E.linear) * (1 - no);
+  notif.style.transform = `translateY(${(1 - np) * -160 - no * 60}px)`;
+  const cp = K.p(T, T_CROP, T_CROP + 0.55, E.outExpo), co = K.p(T, T_PRINT - 0.35, T_PRINT - 0.05, E.inCubic);
+  crop.style.opacity = cp * (1 - co); crop.style.transform = `translateY(${(1 - cp) * 140 + co * 80}px) scale(${0.96 + 0.04 * cp})`;
+  cropTag.style.opacity = cp * (1 - co);
+  stock.style.opacity = Number(stock.style.opacity) * (1 - cp * (1 - co));
+  const cxp = K.p(T, T_CROP + 0.4, T_TAP - 0.05, E.inOutCubic);
+  cur.at(K.lerp(W - 140, tapX, cxp), K.lerp(tapY + 260, tapY, cxp), T >= T_TAP - 0.05 && T < T_TAP + 0.12);
+  cur.hide(T >= T_CROP + 0.3 && T < T_PRINT - 0.3 ? 1 - co : 0);
+  cur.ripple(tapX, tapY, T, T_TAP);
+  const stp = K.p(T, T_TAP + 0.1, T_TAP + 0.4, E.outBack);
+  stamp.style.left = L.cropX + L.cropW * 0.36 + 'px'; stamp.style.top = tapY + 34 + 'px';
+  stamp.style.opacity = K.p(T, T_TAP + 0.1, T_TAP + 0.16, E.linear) * (1 - co);
+  stamp.style.transform = `scale(${1.8 - 0.8 * stp}) rotate(${-6 + 2 * stp}deg)`;
+
+  // the product prints into the light: a scanning head reveals it top to bottom
+  const tease = T >= B(2) && T < B(3.4);
+  const inRoom = tease || (T >= T_PRINT && T < T_DOOR);
+  const pr = tease ? 1 : K.p(T, T_PRINT + 0.15, T_PRINT + B(2.2), E.inOutCubic);
+  const teaseO = tease ? K.p(T, B(2), B(2) + 0.15, E.linear) * (1 - K.p(T, B(3.4) - 0.35, B(3.4), E.inCubic)) : 1;
+  const toBox = K.p(T, T_BOX, T_BOX + B(0.9), E.inCubic);
+  const pt0 = iso(4.2, 4.2, 2.0), pt1 = iso(BX[0] + BS / 2, BX[1] + BS / 2, BHt);
+  // the product lives in screen space; follow the camera transform
+  const toScreen = ([x, y]) => [focus[0] + (x - focus[0]) * z + Math.sin(T * 0.5) * 8 * z, focus[1] + (y - focus[1]) * z + (tall ? 160 : 140) * zoomIn * 0.5 * z];
+  const at = toScreen([K.lerp(pt0[0], pt1[0], toBox), K.lerp(pt0[1], pt1[1], toBox)]);
+  const ps = z * (1 - 0.85 * toBox);
+  prod.style.left = at[0] - PW / 2 + 'px'; prod.style.top = at[1] - PH / 2 + Math.sin(T * 1.6) * 6 * (1 - toBox) + 'px';
+  const tp = tease ? K.p(T, B(2), B(2) + 0.4, E.outBack) : 1;
+  prod.style.transform = `scale(${ps * (0.7 + 0.3 * tp)}) rotate(${Math.sin(T * 0.9) * 1.5 * (1 - toBox)}deg)`;
+  prod.style.opacity = teaseO;
+  prod.style.visibility = inRoom && toBox < 1 ? 'visible' : 'hidden';
+  prod.style.clipPath = `inset(0 0 ${100 - 100 * pr}% 0 round 18px)`;
+  head.style.top = `calc(${100 * pr}% - 5px)`; head.style.opacity = pr > 0 && pr < 1 ? 1 : 0;
+  prodTag.style.opacity = tease ? teaseO : inRoom ? K.p(T, T_PRINT + 0.3, T_PRINT + 0.6, E.linear) : 0;
+  // the box: pops in under the product, closes (tape), slides to the door
+  const bp = K.p(T, T_BOX - 0.25, T_BOX + 0.2, E.outBack);
+  const shut = K.p(T, T_BOX + B(0.9), T_BOX + B(1.2), E.outCubic);
+  const slide = K.p(T, T_BOX + B(1.3), T_DOOR, E.inCubic);
+  const d0 = iso(BX[0], BX[1]), d1 = iso(6.4 - BS / 2, -1.2);
+  boxG.style.transformOrigin = `${iso(BX[0] + BS / 2, BX[1] + BS / 2)[0]}px ${iso(BX[0] + BS / 2, BX[1] + BS / 2)[1]}px`;
+  boxG.style.transform = `translate(${(d1[0] - d0[0]) * slide}px, ${(d1[1] - d0[1]) * slide}px) scale(${bp})`;
+  boxG.style.opacity = T >= T_BOX - 0.25 && T < T_DOOR ? 1 : 0;
+  fTop.setAttribute('fill', shut > 0.5 ? '#D8B98A' : '#8E6E45');
+  tape.setAttribute('opacity', shut);
+
+  // the doorstep
+  const onDoor = T >= T_DOOR && T < T_BACK;
+  full.style.visibility = onDoor ? 'visible' : 'hidden';
+  fullImg.style.transform = `scale(${1.14 - 0.08 * K.p(T, T_DOOR, T_DOOR + 0.6, E.outExpo) + 0.02 * (T - T_DOOR)})`;
+  const fp = K.p(T, T_DOOR + 0.15, T_DOOR + 0.7, E.outExpo), fsP = K.p(T, T_DOOR + B(1.2), T_DOOR + B(1.2) + 0.5, E.outExpo);
+  fcap.style.opacity = onDoor ? fp : 0; fcap.style.transform = `translateY(${(1 - fp) * 40}px)`;
+  fsub.style.opacity = onDoor ? fsP : 0; fsub.style.transform = `translateY(${(1 - fsP) * 24}px)`;
+  fullTag.style.opacity = onDoor ? 1 : 0;
+  let fl = 0; [T_DOOR, T_BACK, T_PRINT].forEach((c) => { if (T >= c && T < c + 0.07) fl = 0.5; });
+  flash.style.opacity = fl;
+
+  end(T);
+});
+</script></body></html>

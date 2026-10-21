@@ -10,6 +10,7 @@ The mix is left at a safe level; the renderer normalises loudness to -14 LUFS / 
 import glob
 import json
 import os
+import subprocess
 import sys
 import wave
 
@@ -169,6 +170,24 @@ def place(buf, sig, at, gain=1.0):
     buf[i:j] += sig[: j - i] * gain
 
 
+MUSIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'music')
+
+
+def music_bed(name, dur, offset=0.0):
+    """A recorded CC0 bed (motion/music/<name>.ogg, see tracks.json): `dur` seconds from `offset`, faded out at the end."""
+    path = os.path.join(MUSIC_DIR, name + '.ogg')
+    raw = subprocess.run(['ffmpeg', '-v', 'error', '-ss', str(offset), '-t', str(dur), '-i', path, '-ac', '1', '-ar', str(SR),
+                          '-f', 'f64le', '-'], capture_output=True, check=True).stdout
+    x = np.frombuffer(raw, dtype=np.float64).copy()
+    n = int(dur * SR)
+    x = np.pad(x, (0, max(0, n - len(x))))[:n]
+    fi = int(0.04 * SR)
+    x[:fi] *= np.linspace(0, 1, fi)
+    fo = int(1.3 * SR)
+    x[-fo:] *= np.linspace(1, 0, fo) ** 1.4
+    return x
+
+
 def main():
     meta = json.load(open(sys.argv[1]))
     out = sys.argv[2]
@@ -195,10 +214,11 @@ def main():
     intro = float(meta.get('intro', 0.0))  # seconds before the beat drops
     outro = float(meta.get('outro', dur - 1.2))
 
-    # Pads and bass per bar
+    bed = meta.get('music')
+    # Pads and bass per bar (only when no recorded bed is chosen)
     t = 0.0
     bi = 0
-    while t < dur:
+    while t < dur and not bed:
         chord = prog[bi % len(prog)]
         ln = int(min(bar, dur - t) * SR) + int(0.5 * SR)
         freqs = [hz(root + c - 12) for c in chord]
@@ -210,7 +230,7 @@ def main():
         bi += 1
 
     # Arpeggio for bright / drive
-    if mood in ('bright', 'drive', 'warm'):
+    if mood in ('bright', 'drive', 'warm') and not bed:
         step = beat / (4 if mood != 'warm' else 2)
         t = intro
         i = 0
@@ -222,7 +242,7 @@ def main():
             i += 1
 
     # Drums
-    if mood != 'calm':
+    if mood != 'calm' and not bed:
         t = intro
         k = 0
         while t < outro:
@@ -254,7 +274,11 @@ def main():
             for j in range(10):
                 place(sfx, typing(rng), at + j * 0.07 + rng.uniform(0, 0.02), 1.0)
 
-    mix = drums * 0.8 + music * 0.75 + sfx * 0.9
+    if bed:
+        music = music_bed(bed, dur, float(meta.get('musicOffset', 0)))
+        mix = music * 0.62 + sfx * 0.95
+    else:
+        mix = drums * 0.8 + music * 0.75 + sfx * 0.9
     # Fade in/out
     fi = int(0.05 * SR)
     mix[:fi] *= np.linspace(0, 1, fi)

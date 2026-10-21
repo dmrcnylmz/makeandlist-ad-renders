@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D02 · Three Reasons</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #161514; color: #FAF7EE; }
+.glow { position: absolute; border-radius: 50%; pointer-events: none; }
+.photo { position: absolute; inset: 0; overflow: hidden; }
+.photo img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 50%; }
+.veil { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(18,17,16,.82) 0, rgba(18,17,16,.55) 30%, rgba(18,17,16,.05) 55%, rgba(18,17,16,.35) 100%); }
+.kick { position: absolute; z-index: 30; font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #DFFF5A; white-space: nowrap; }
+.head { position: absolute; z-index: 30; font: 800 86px/1.0 'Playfair Display'; letter-spacing: -0.025em; color: #FAF7EE; }
+.head em { font-style: italic; color: #DFFF5A; }
+.sub { position: absolute; z-index: 30; font: 500 33px/1.35 'Archivo'; color: #EFEADF; }
+.card { position: absolute; z-index: 32; border-radius: 30px; overflow: hidden; background: #FAF7EE;
+  box-shadow: 0 50px 90px -40px rgba(0,0,0,.85), 0 0 0 3px rgba(223,255,90,.9); }
+.card img { position: absolute; left: 0; top: 0; display: block; }
+.hook { position: absolute; z-index: 30; text-align: center; font: 800 112px/0.95 'Playfair Display'; letter-spacing: -0.03em; }
+.hook em { font-style: italic; color: #DFFF5A; }
+.idx { position: absolute; z-index: 33; font: 800 44px 'Playfair Display'; color: #161514; background: #DFFF5A; width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; }
+.row { position: absolute; z-index: 30; display: flex; align-items: center; gap: 30px; font: 800 86px/1 'Playfair Display'; letter-spacing: -0.02em; white-space: nowrap; }
+.row i { font-style: normal; width: 140px; height: 140px; border-radius: 26px; background-size: cover; background-position: center; flex: none; box-shadow: 0 0 0 3px #DFFF5A; }
+.row b { font: 600 26px 'IBM Plex Mono', monospace; color: #DFFF5A; width: 40px; }
+.demo { background: rgba(22,21,20,.82); color: #EFEADF; border-color: #8A8378; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// D02 — a listicle where the numerals are windows. Each giant serif numeral is a clip-path over its full-bleed photo;
+// the camera dives through the numeral's stroke and the photo is simply there, uncropped. Then one headline, one real
+// screen as the proof, and the next numeral. Three reasons: your own stores, printed without stock, nothing live
+// without your yes.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 117.5, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const R = [
+  { n: '1', img: 'g10-greeting-cards', fx: 50, fy: 45, head: 'It sells in your<br><em>own</em> stores.', sub: 'ikas, WooCommerce, Wix and more. One place for all of them.', scr: '25-phone-stores', y0: 770, y1: 1460, short: 'Your stores',
+    o: [-0.01, 0.0] },
+  { n: '2', img: 'g22-tee-rack', fx: 50, fy: 50, head: 'Printed products.<br><em>No</em> stock.', sub: 'Your print partner prints each order. You pay them from your own account.', scr: '33-phone-sell-physical', y0: 30, y1: 770, short: 'No stock',
+    o: [0.0, 0.0] },
+  { n: '3', img: 'g11-lemon-notebook', fx: 50, fy: 50, head: 'Nothing goes live<br>without <em>your yes.</em>', sub: 'Drafts first. Public only when you say.', scr: '72-phone-listing-send', y0: 1050, y1: 1470, short: 'Your yes',
+    o: [0.0, 0.0] },
+];
+const RS = (i) => B(3 + 6.5 * i);      // 1.532, 4.851, 8.170
+const RE = (i) => B(9.5 + 6.5 * i);    // 4.851, 8.170, 11.489
+const RECAP = RE(2);
+const FS = tall ? 1150 : 900;
+const L = tall
+  ? { cy: 880, hookY: 330, rowY: 1080, rowGap: 0, kickY: 300, headY: 350, headFs: 88, subY: 590, subW: 760, cardX: 380, cardY: 760, cardW: 640, cardMaxH: 460, recapY: 470, recapGap: 210, tagY: 1196 }
+  : { cy: 640, hookY: 90, rowY: 820, kickY: 70, headY: 115, headFs: 76, subY: 300, subW: 520, cardX: 600, cardY: 470, cardW: 420, cardMaxH: 640, recapY: 300, recapGap: 200, tagY: 1260 };
+
+const glowA = K.box(0, 0, 1300, 1300, { cls: 'glow', style: { background: 'radial-gradient(circle, rgba(223,255,90,.14), rgba(223,255,90,0) 62%)' } });
+const glowB = K.box(0, 0, 1000, 1000, { cls: 'glow', style: { background: 'radial-gradient(circle, rgba(232,96,60,.12), rgba(232,96,60,0) 62%)' } });
+
+// numerals: one SVG holds the clip paths (the windows) and the lime outlines drawn over them
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.createElementNS(NS, 'svg');
+svg.setAttribute('width', W); svg.setAttribute('height', H);
+Object.assign(svg.style, { position: 'absolute', left: 0, top: 0, zIndex: 12, overflow: 'visible', pointerEvents: 'none' });
+document.getElementById('stage').appendChild(svg);
+const defs = document.createElementNS(NS, 'defs'); svg.appendChild(defs);
+const BASE = L.cy + FS * 0.24; // baseline so the figure's middle sits at L.cy (the figures are ~0.48 em tall)
+const mkText = (n) => {
+  const t = document.createElementNS(NS, 'text');
+  t.setAttribute('x', W / 2); t.setAttribute('y', BASE); t.setAttribute('text-anchor', 'middle');
+  t.setAttribute('font-family', 'Playfair Display'); t.setAttribute('font-weight', '800'); t.setAttribute('font-size', FS);
+  t.textContent = n; return t;
+};
+const nums = R.map((r, i) => {
+  const cp = document.createElementNS(NS, 'clipPath'); cp.setAttribute('id', 'cp' + i); cp.setAttribute('clipPathUnits', 'userSpaceOnUse');
+  const ct = mkText(r.n); cp.appendChild(ct); defs.appendChild(cp);
+  const ol = mkText(r.n); ol.setAttribute('fill', 'none'); ol.setAttribute('stroke', '#DFFF5A'); ol.setAttribute('stroke-width', '3'); svg.appendChild(ol);
+  const ph = K.box(0, 0, W, H, { cls: 'photo', style: { zIndex: 10 } });
+  const img = K.el('img', { src: K.pub('r04/' + r.img + '.webp'), parent: ph, style: { objectPosition: `${r.fx}% ${r.fy}%` } });
+  const veil = K.el('div', { cls: 'veil', parent: ph });
+  return { ct, ol, ph, img, veil };
+});
+
+const hook = K.box(65, L.hookY, W - 130, null, { cls: 'hook', html: 'Three reasons<br>to <em>try it.</em>' });
+const hookW = hook; // whole block animates
+const kick = K.box(65, L.kickY, W - 130, null, { cls: 'kick' });
+const heads = R.map((r) => K.box(65, L.headY + (tall ? 0 : 0), tall ? W - 130 : W - 130, null, { cls: 'head', html: r.head, style: { fontSize: L.headFs + 'px' } }));
+const subs = R.map((r) => K.box(65, L.subY, L.subW, null, { cls: 'sub', html: r.sub }));
+const cards = R.map((r) => {
+  const s = L.cardW / 780, h = Math.min(L.cardMaxH, (r.y1 - r.y0) * s);
+  const c = K.box(L.cardX, L.cardY, L.cardW, h, { cls: 'card' });
+  const img = K.el('img', { src: K.screen(r.scr), parent: c, style: { width: L.cardW + 'px' } });
+  return { c, img, s, h };
+});
+const idx = K.box(0, 0, 72, 72, { cls: 'idx' });
+const realTag = K.demoTag('Real app · demo workspace', 0, 0);
+const conceptTag = K.demoTag('Concept image · AI-generated', 65, L.tagY);
+// recap
+const rows = R.map((r, i) => K.box(tall ? 150 : 200, L.recapY + i * L.recapGap, null, null, { cls: 'row', html: `<b>0${i + 1}</b><i style="background-image:url('${K.pub('r04/' + r.img + '.webp')}')"></i>${r.short}`, style: { width: 'auto', height: 'auto' } }));
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your stores. No stock.<br>Your yes.', dark: true });
+
+// a numeral's pose: centre (x, y) and scale; dive: zoom about a point in its stroke
+function pose(i, T) {
+  const a = RS(i);
+  // hook: three small figures in a row
+  const hs = 0.3, hx = W / 2 + (i - 1) * (tall ? 300 : 280), hy = L.rowY;
+  const rise = K.p(T, a - B(0.25), a + B(0.75), E.inOutExpo);
+  let s = K.lerp(hs, 1, rise), x = K.lerp(hx, W / 2, rise), y = K.lerp(hy, L.cy, rise);
+  return { s, x, y };
+}
+function setT(el, tr) { el.setAttribute('transform', tr); }
+// the dive point of each figure: the middle of its widest run of ink, found once by drawing the figure on a canvas
+let ORG = null;
+function origins() {
+  if (ORG) return ORG;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  ORG = R.map((r) => {
+    x.clearRect(0, 0, W, H); x.font = `800 ${FS}px "Playfair Display"`; x.textAlign = 'center'; x.fillStyle = '#000';
+    x.fillText(r.n, W / 2, BASE);
+    const d = x.getImageData(0, 0, W, H).data;
+    // deepest point: the run centre whose horizontal and vertical ink runs are both longest
+    const ink = (xx, y) => xx >= 0 && xx < W && y >= 0 && y < H && d[(y * W + xx) * 4 + 3] > 200;
+    let best = [W / 2, L.cy, 0];
+    for (let y = Math.round(BASE - FS * 0.7); y < BASE; y += 3) {
+      let run = 0;
+      for (let xx = 0; xx <= W; xx++) {
+        if (xx < W && ink(xx, y)) { run++; continue; }
+        if (run > 8) {
+          const cx = Math.round(xx - run / 2);
+          let up = 0, dn = 0;
+          while (ink(cx, y - up - 1)) up++;
+          while (ink(cx, y + dn + 1)) dn++;
+          const v = up + dn + 1, sc = Math.min(run, v);
+          if (sc > best[2]) best = [cx, Math.round(y - up + v / 2), sc];
+        }
+        run = 0;
+      }
+    }
+    return best;
+  });
+  return ORG;
+}
+
+K.run({
+  id: 'D02', title: 'Three Reasons', dur: DUR, music: 'back-in-the-80s', bpm: 117.5, mood: 'bright', key: 'D', intro: 0.0, cover: 3.2,
+  technique: 'Listicle whose giant serif numerals are clip-path windows onto full-bleed product photos; the camera dives through each numeral’s stroke into the photo, where one headline and one real screen land on the beat',
+  caption: 'Three reasons to try MakeAndList: it lists in your own stores, it makes printed products without stock through your own print partner, and nothing goes live without your yes. Start free at makeandlist.com',
+  short: 'Your stores. No stock. Your yes.',
+  question: 'What do I get?', gain: 'Your stores + printed without stock + control',
+  beats: ['0–1.5 s: “Three reasons to try it.” — three numerals filled with product photos', '1.5–4.9 s: 1 → dive into the photo: it sells in your own stores (real Stores screen)', '4.9–8.2 s: 2 → printed products, no stock (real Make it physical screen)', '8.2–11.5 s: 3 → nothing goes live without your yes (real Send screen)', '11.5–13 s: the three reasons in a row', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], [B(0.5), 'pop'], [B(1), 'pop'], [B(1.5), 'pop'],
+    ...R.flatMap((_, i) => { const a = RS(i); return [[a, 'swish'], [a + B(1.0), 'riser'], [a + B(2.0) - 0.1, 'whoosh'], [a + B(2.0), 'hit'], [a + B(3.0), 'pop'], [a + B(4.0), 'pop']]; }),
+    [RECAP, 'swish'], [RECAP + B(0.5), 'pop'], [RECAP + B(1), 'pop'], [RECAP + B(1.5), 'chime'], [12.95, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  glowA.style.transform = `translate(${W / 2 - 650 + Math.sin(T * 0.6) * 180}px, ${L.cy - 650 + Math.cos(T * 0.45) * 160}px)`;
+  glowB.style.transform = `translate(${W * 0.1 - 500 + Math.cos(T * 0.5) * 140}px, ${H * 0.8 - 500 + Math.sin(T * 0.7) * 120}px)`;
+
+  // hook
+  const hookIn = K.p(T, 0.0, 0.55, E.outExpo), hookOut = K.p(T, RS(0) - B(0.3), RS(0) + B(0.3), E.inCubic);
+  hook.style.opacity = hookIn * (1 - hookOut);
+  hook.style.transform = `translateY(${(1 - hookIn) * 60 - hookOut * 80}px) scale(${0.94 + 0.06 * hookIn})`;
+  hook.style.filter = hookOut > 0.02 ? `blur(${hookOut * 12}px)` : 'none';
+
+  let live = -1;
+  R.forEach((r, i) => {
+    const a = RS(i), e = RE(i), n = nums[i];
+    const pre = T < a + B(2);      // numeral phase (hook row, rise, dive)
+    const dive = K.p(T, a + B(1.1), a + B(2.0), E.inCubic);
+    const inHook = T < RS(0) + B(1);
+    // visibility of the small figure in the hook: pop in on half-beats; figures 2 and 3 wait in the row, dimmed
+    const popP = K.p(T, B(0.5) * (i + 1), B(0.5) * (i + 1) + 0.4, E.outBack);
+    const waiting = i > 0 && T >= RS(0) - B(0.3) && T < a - B(0.25);
+    const shown = T < e && (T < RS(0) || T >= a - B(0.25) || false);
+    const P = pose(i, T);
+    const sc = P.s * (T < a ? (0.6 + 0.4 * popP) : 1);
+    // dive origin in the figure's stroke (fractions of FS from the figure's centre)
+    const ox = origins()[i][0], oy = origins()[i][1];
+    const z = 1 + dive * dive * 5.5; // Chrome stops drawing SVG text past ~8000 px, so the dive ends inside the stroke at 6.5x and the clip lets go
+    const breathe = 1 + 0.015 * Math.sin(T * 3 + i);
+    const tr = `translate(${ox} ${oy}) scale(${z}) translate(${-ox} ${-oy}) translate(${P.x} ${P.y}) scale(${sc * breathe}) translate(${-W / 2} ${-L.cy})`;
+    setT(n.ct, tr); setT(n.ol, tr);
+    const onPhoto = T >= a + B(2) && T < e;
+    const vis = (shown && !waiting) && T < e;
+    n.ph.style.visibility = vis ? 'visible' : 'hidden';
+    n.ph.style.clipPath = onPhoto ? 'none' : `url(#cp${i})`;
+    n.ol.style.opacity = vis && pre ? (T < a ? popP : 1) * (1 - dive) : 0;
+    // inside the photo: slow push, the veil comes up for the type
+    const k = K.p(T, a + B(2), e, E.linear);
+    n.img.style.transform = `scale(${1.1 - 0.06 * K.p(T, a + B(1.4), a + B(2.6), E.outExpo) + 0.04 * k}) translateY(${-k * 30}px)`;
+    n.veil.style.opacity = K.p(T, a + B(2.2), a + B(3), E.outCubic);
+    // exit: the photo slides up and away as the next figure rises
+    const ex = K.p(T, e - B(0.35), e, E.inCubic);
+    n.ph.style.transform = onPhoto ? `translateY(${-ex * H * 0.25}px)` : 'none';
+    n.ph.style.opacity = onPhoto ? 1 - ex : 1;
+    if (onPhoto) live = i;
+
+    // headline, sub, real screen
+    const hp = K.p(T, a + B(2.0), a + B(2.8), E.outExpo);
+    const out = K.p(T, e - B(0.4), e - B(0.05), E.inCubic);
+    heads[i].style.opacity = onPhoto ? hp * (1 - out) : 0;
+    heads[i].style.transform = `translateY(${(1 - hp) * 50 - out * 40}px)`;
+    heads[i].style.clipPath = `inset(0 ${100 - 100 * hp}% -20% 0)`;
+    const sp = K.p(T, a + B(2.6), a + B(3.4), E.outExpo);
+    subs[i].style.opacity = onPhoto ? sp * (1 - out) : 0;
+    subs[i].style.transform = `translateY(${(1 - sp) * 30}px)`;
+    const cp = K.p(T, a + B(3.0), a + B(3.9), E.outBack);
+    const cd = cards[i];
+    cd.c.style.opacity = onPhoto ? K.p(T, a + B(3.0), a + B(3.2), E.linear) * (1 - out) : 0;
+    cd.c.style.transform = `translateY(${(1 - cp) * 140 + Math.sin(T * 1.4) * 5}px) rotate(${(1 - cp) * 5 - 1.2}deg)`;
+    const scroll = K.p(T, a + B(3.4), e, E.inOutCubic) * Math.max(0, (r.y1 - r.y0) - cd.h / cd.s) ;
+    cd.img.style.transform = `translateY(${-(r.y0 + scroll) * cd.s}px)`;
+  });
+
+  // kicker, index chip and tags ride with the live reason
+  if (live >= 0) {
+    const a = RS(live), e = RE(live);
+    const kp = K.p(T, a + B(2.0), a + B(2.6), E.outExpo) * (1 - K.p(T, e - B(0.4), e - B(0.05), E.inCubic));
+    kick.innerHTML = `Reason 0${live + 1} <span style="color:#EFEADF">/ 03</span>`;
+    kick.style.opacity = kp; kick.style.letterSpacing = (0.16 + 0.14 * (1 - kp)) + 'em';
+    const cd = cards[live];
+    idx.innerHTML = live + 1; idx.style.left = L.cardX - 30 + 'px'; idx.style.top = L.cardY - 30 + 'px';
+    const ip = K.p(T, a + B(3.4), a + B(4.0), E.outBack);
+    idx.style.opacity = K.p(T, a + B(3.4), a + B(3.5), E.linear) * kp; idx.style.transform = `scale(${ip}) translateY(${Math.sin(T * 1.4) * 5}px)`;
+    realTag.style.left = L.cardX + 70 + 'px'; realTag.style.top = L.cardY - 50 + 'px';
+    realTag.style.opacity = K.p(T, a + B(3.4), a + B(3.8), E.linear) * kp;
+    conceptTag.style.opacity = kp;
+  } else { kick.style.opacity = 0; idx.style.opacity = 0; realTag.style.opacity = 0; conceptTag.style.opacity = 0; }
+
+  // recap: three rows land on half-beats
+  rows.forEach((rw, i) => {
+    const a = RECAP + B(0.5) * (i + 1) - B(0.4);
+    const p = K.p(T, a, a + 0.5, E.outExpo);
+    rw.style.opacity = p; rw.style.transform = `translateX(${(1 - p) * -80}px)`;
+  });
+
+  end(T);
+});
+</script></body></html>
