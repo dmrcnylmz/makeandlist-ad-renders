@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.3,
+  "text": "Your new collection.",
+  "file": "01-47cd93cb76.wav",
+  "dur": 2.37
+ },
+ {
+  "t": 2.62,
+  "text": "One idea, five pieces.",
+  "file": "02-90963c10d8.wav",
+  "dur": 2.23
+ },
+ {
+  "t": 5.92,
+  "text": "Each one printed only when someone orders it.",
+  "file": "03-49af9bffd8.wav",
+  "dur": 2.88
+ },
+ {
+  "t": 8.9,
+  "text": "Everything starts as a draft.",
+  "file": "04-d0b429f05a.wav",
+  "dur": 2.09
+ },
+ {
+  "t": 10.95,
+  "text": "It drops when you say so.",
+  "file": "05-c830430859.wav",
+  "dur": 1.81
+ }
+]

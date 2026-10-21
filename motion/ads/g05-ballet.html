@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>G05 · Product Ballet</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #8E3F27; }
+.bg { position: absolute; inset: 0; }
+.beam { position: absolute; pointer-events: none; mix-blend-mode: screen; transform-origin: 50% 0; }
+.spot { position: absolute; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; }
+.pg { position: absolute; left: 0; top: 0; transform-origin: 50% 100%; }
+.pg .wr { position: absolute; inset: 0; transform-origin: 50% 100%; }
+.pg img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+.pg .rf { position: absolute; inset: 0; transform-origin: 50% 100%; -webkit-mask-image: linear-gradient(to bottom, transparent 50%, #000); }
+.pg .csh { position: absolute; left: 6%; width: 88%; border-radius: 50%; background: radial-gradient(closest-side, rgba(40,12,4,.7), rgba(40,12,4,0)); }
+.pg .dr { position: absolute; left: 50%; top: 100%; margin-top: 12px; transform: translateX(-50%); white-space: nowrap; display: flex; align-items: center; gap: 8px; font: 500 17px 'IBM Plex Mono', monospace; letter-spacing: .06em; color: #FFF4E6; }
+.pg .dr s { text-decoration: none; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #F5B547; box-shadow: 0 0 0 4px rgba(245,181,71,.25); }
+.mono { position: absolute; z-index: 45; }
+.mote { position: absolute; left: 0; top: 0; border-radius: 50%; background: rgba(255,236,214,.9); }
+.kick { position: absolute; z-index: 60; font: 500 21px 'IBM Plex Mono', monospace; letter-spacing: .26em; text-transform: uppercase; color: rgba(255,240,226,.72); text-align: center; white-space: nowrap; }
+.cap { position: absolute; z-index: 60; text-align: center; font: 700 96px/1.03 'Playfair Display'; letter-spacing: -0.025em; color: #FFF6EA; text-shadow: 0 6px 40px rgba(60,16,4,.45); }
+.cap em { font-style: italic; font-weight: 500; color: #DFFF5A; }
+.sub { position: absolute; z-index: 60; text-align: center; font: 500 29px/1.3 'Archivo'; color: rgba(255,244,232,.88); }
+.chip2 { position: absolute; z-index: 61; display: flex; align-items: center; gap: 14px; padding: 12px 22px 12px 14px; border-radius: 999px; white-space: nowrap;
+  background: rgba(60,20,8,.55); border: 1px solid rgba(255,240,226,.25); backdrop-filter: blur(8px); font: 500 23px 'IBM Plex Mono', monospace; letter-spacing: .03em; color: #FFF6EA; }
+.chip2 s { text-decoration: none; display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #F5B547; box-shadow: 0 0 0 5px rgba(245,181,71,.25); }
+.chip2 u { text-decoration: none; display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #DFFF5A; color: #1F1F1F; font: 800 17px 'Archivo'; }
+.demo.dk { background: rgba(60,20,8,.55); color: rgba(255,244,232,.85); border-color: rgba(255,244,232,.4); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// G05 — Product Ballet. A terracotta stage, a glossy floor, two follow-spots. All fourteen concept products dance on the
+// bar lines of the track: a chorus line, a rotating ring (depth-sorted, the back half soft), a catalogue grid where each one shows its "draft" dot, a V that brings one order forward, and finally a leap into
+// the letters M and L — which settle into the real MakeAndList monogram. Every move is a leap: an arc of lift with a lean
+// into the direction of travel, staggered across the company. Music-led, short captions.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 117.5, BEAT = 60 / BPM, BAR = 4 * BEAT, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const IDS = [['k01-mug', 852, 804, 0.8], ['k02-framed-print', 608, 897, 1.05], ['k03-tee', 977, 901, 0.95], ['k04-hoodie', 976, 979, 1.0], ['k05-tote', 595, 961, 1.05],
+  ['k06-notebook', 634, 923, 0.95], ['k07-sticker-sheet', 763, 918, 0.95], ['k08-greeting-card', 540, 928, 0.9], ['k09-kids-book', 656, 926, 0.98], ['k10-calendar', 643, 896, 1.0],
+  ['k11-parcel', 789, 789, 0.8], ['k12-poster-tube', 957, 603, 0.62], ['k13-wedding-planner', 984, 786, 0.8], ['k14-gift-tag', 596, 906, 0.95]];
+const N = IDS.length;
+const L = tall ? { cx: W / 2, back: 990, front: 1320, hBase: 270, capY: 300, capFs: 96, kickY: 270, chipY: 1196, tagY: 1214, mlTop: 690, mlBot: 1200 }
+  : { cx: W / 2, back: 760, front: 1050, hBase: 235, capY: 70, capFs: 84, kickY: 36, chipY: 1120, tagY: 1256, mlTop: 440, mlBot: 930 };
+const mid = (L.back + L.front) / 2, dep = L.front - L.back;
+
+// ---------- set ----------
+K.box(0, 0, W, H, { cls: 'bg', style: { background: `radial-gradient(80% 50% at 50% ${tall ? 44 : 46}%, #C4643F 0, #A24C2E 45%, #6E2C18 100%)` } });
+K.box(0, L.back - 80, W, H - L.back + 80, { cls: 'bg', style: { inset: 'auto', left: 0, top: L.back - 80 + 'px', width: W + 'px', height: H - L.back + 80 + 'px', background: 'linear-gradient(180deg, rgba(110,40,20,0) 0, rgba(96,36,18,.75) 18%, #5A2213 60%, #3E170C)' } });
+const beams = [0, 1].map((i) => K.box(0, -40, 380, L.front + 120, { cls: 'beam', style: { background: 'linear-gradient(90deg, rgba(255,226,196,0), rgba(255,226,196,.2) 50%, rgba(255,226,196,0))', filter: 'blur(18px)', clipPath: 'polygon(42% 0, 58% 0, 100% 100%, 0 100%)' } }));
+const spot = K.box(0, 0, 900, 300, { cls: 'spot', style: { background: 'radial-gradient(closest-side, rgba(255,222,190,.4), rgba(255,222,190,0))' } });
+
+function prod(file, nw, nh, hf) {
+  const h = L.hBase * hf, w = h * nw / nh, src = K.pub('r07/' + file + '.webp');
+  const g = K.box(0, 0, w, h, { cls: 'pg' });
+  const sh = K.el('div', { cls: 'csh', parent: g, style: { top: h - w * 0.06 + 'px', height: w * 0.12 + 'px' } });
+  const rf = K.el('img', { cls: 'rf', parent: g, src });
+  const wr = K.el('div', { cls: 'wr', parent: g });
+  K.el('img', { parent: wr, src });
+  const dr = K.el('div', { cls: 'dr', parent: g, html: '<s></s>draft' });
+  return { g, sh, rf, wr, dr, w, h };
+}
+const items = IDS.map(([f, nw, nh, hf]) => prod(f, nw, nh, hf));
+const mono = K.el('img', { cls: 'mono', src: K.brand('makeandlist-monogram-ivory.svg') });
+// the constellation: thin ivory strokes that join the dancers into M and L
+const NS = 'http://www.w3.org/2000/svg';
+const lines = document.createElementNS(NS, 'svg'); lines.setAttribute('width', W); lines.setAttribute('height', H);
+Object.assign(lines.style, { position: 'absolute', left: 0, top: 0, zIndex: 9, pointerEvents: 'none' });
+document.getElementById('stage').appendChild(lines);
+const motes = Array.from({ length: 30 }, (_, i) => K.box(0, 0, 2 + seed(i) * 5, 2 + seed(i) * 5, { cls: 'mote' }));
+
+// ---------- formations: each returns { x, y (floor contact / bottom), s, lift, ground } for product i ----------
+const beatPh = (T) => (T / BEAT) % 1;
+const F = [
+  // 0 · a chorus line in two staggered rows
+  (i) => ({ x: L.cx + (i - (N - 1) / 2) * (tall ? 72 : 74), y: i % 2 ? L.front - dep * 0.18 : L.back + dep * 0.3, s: i % 2 ? 1.0 : 0.86, lift: 0, ground: 1 }),
+  // 1 · a ring, turning
+  (i, T) => { const th = i / N * Math.PI * 2 + (T - 2) * 0.85; const d = Math.sin(th); return { x: L.cx + (tall ? 400 : 410) * Math.cos(th), y: mid + dep * 0.42 * d, s: 0.82 + 0.22 * (d + 1) / 2, lift: 0, ground: 1, d }; },
+  // 3 · the catalogue grid: 4 · 5 · 5 rows, back to front
+  (i) => { const rows = [4, 5, 5]; let r = 0, k = i; while (k >= rows[r]) { k -= rows[r]; r++; } const n = rows[r]; const sp = tall ? 205 : 205;
+    return { x: L.cx + (k - (n - 1) / 2) * sp * (0.86 + 0.07 * r), y: L.back + dep * (-0.2 + 0.36 * r), s: 0.74 + 0.09 * r, lift: 0, ground: 1, draft: 1 }; },
+  // 4 · a V: one product comes forward
+  (i) => { const k = i - 7; return { x: L.cx + k * (tall ? 74 : 78), y: L.front - Math.abs(k) * dep * 0.13 - (k === 0 ? 0 : 20), s: k === 0 ? 1.35 : 0.95 - Math.abs(k) * 0.03, lift: 0, ground: 1 }; },
+  // 5 · the letters M and L, in the air
+  (i) => ML[i],
+];
+let ML_PTS = [];
+// M: 9 points, L: 5 points (centres → bottoms), letter box from mlTop to mlBot
+const ML = (() => {
+  const t = L.mlTop, b = L.mlBot, m = (t + b) / 2, x0 = tall ? 120 : 150, mw = tall ? 540 : 520, lx = tall ? 780 : 780, lw = tall ? 200 : 180;
+  const pts = [[x0, b], [x0, m], [x0, t], [x0 + mw * 0.25, m - (b - t) * 0.1], [x0 + mw * 0.5, m + (b - t) * 0.12], [x0 + mw * 0.75, m - (b - t) * 0.1], [x0 + mw, t], [x0 + mw, m], [x0 + mw, b],
+    [lx, t], [lx, m], [lx, b], [lx + lw * 0.5, b], [lx + lw, b]];
+  ML_PTS = pts;
+  return pts.map(([x, y]) => ({ x, y: y + L.hBase * 0.3, s: 0.6, lift: 0, ground: 0 }));
+})();
+const TF = [0, BAR, BAR * 2, BAR * 3, BAR * 4]; // formation starts, on the bar lines
+const MONO = BAR * 5 + 0.45; // the letters hand over to the monogram
+const strokes = [ML_PTS.slice(0, 9), ML_PTS.slice(9)].map((pts) => {
+  const pl = document.createElementNS(NS, 'polyline');
+  pl.setAttribute('points', pts.map(([x, y]) => x + ',' + y).join(' '));
+  Object.assign(pl.style, { fill: 'none', stroke: '#FFF4E6', strokeWidth: '4', strokeLinecap: 'round', strokeLinejoin: 'round' });
+  lines.appendChild(pl);
+  const len = pts.reduce((a, p, i) => (i ? a + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0), 0);
+  pl.style.strokeDasharray = len; return { pl, len };
+});
+const MOVE = 0.8, STAG = 0.028;
+const pose = (i, T) => {
+  let k = 0; TF.forEach((t, j) => { if (T >= t) k = j; });
+  const cur = F[k](i, T);
+  if (k === 0) {
+    // entrance: from both wings, on the beats
+    const side = i % 2 ? 1 : -1, p = K.p(T, i * 0.06, 0.9 + i * 0.06, E.outCubic);
+    return { ...cur, x: K.lerp(L.cx + side * W * 0.8, cur.x, p), leap: Math.sin(p * Math.PI), lean: (1 - p) * side * -14, o: K.p(T, i * 0.06, 0.3 + i * 0.06, E.linear) };
+  }
+  const p = K.p(T, TF[k] + i * STAG, TF[k] + i * STAG + MOVE, E.inOutCubic);
+  if (p >= 1) return { ...cur, leap: 0, lean: 0, o: 1 };
+  const prev = F[k - 1](i, TF[k] + i * STAG);
+  const q = {}; ['x', 'y', 's', 'lift', 'ground'].forEach((key) => { q[key] = K.lerp(prev[key] ?? 0, cur[key] ?? 0, p); });
+  q.draft = K.lerp(prev.draft ?? 0, cur.draft ?? 0, p); q.d = cur.d;
+  q.leap = Math.sin(p * Math.PI); q.lean = Math.sin(p * Math.PI) * Math.sign(cur.x - prev.x) * Math.min(14, Math.abs(cur.x - prev.x) / 20); q.o = 1;
+  return q;
+};
+
+// ---------- type ----------
+const kick = K.box(65, L.kickY, W - 130, null, { cls: 'kick', html: 'Product film Nº 05 · product ballet' });
+const em = (s) => s.replace(/<em>(.*?)<\/em>/g, (m, x) => x.split(' ').map((w) => '<em>' + w + '</em>').join(' '));
+const CAP = [
+  { a: 0.3, b: BAR - 0.2, t: 'Every product,\n<em>in step.</em>' },
+  { a: BAR + 0.2, b: BAR * 2 - 0.2, t: 'One sentence\n<em>to start.</em>' },
+  { a: BAR * 2 + 0.25, b: BAR * 3 - 0.2, t: 'Each one\n<em>a draft.</em>' },
+  { a: BAR * 3 + 0.25, b: BAR * 4 - 0.2, t: 'Printed\n<em>per order.</em>' },
+  { a: BAR * 4 + 0.9, b: 12.85, t: 'One flow.\n<em>Every product.</em>' },
+];
+const caps = CAP.map((c) => { const el = K.box(65, L.capY + 30, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }); return { el, ws: K.words(el, em(c.t)), c }; });
+const SUBS = [
+  { a: BAR + 0.6, b: BAR * 2 - 0.2, t: 'describe it — the files, images and listing follow' },
+  { a: BAR * 2 + 0.6, b: BAR * 3 - 0.2, t: 'you review every one before it goes live' },
+  { a: BAR * 3 + 0.6, b: BAR * 4 - 0.2, t: 'by your own print partner, paid from your partner account' },
+];
+const subs = SUBS.map((c) => ({ el: K.box(65, L.capY + 30 + L.capFs * 2.14, W - 130, null, { cls: 'sub', html: c.t }), c }));
+const CHIP_Y = L.capY + 30 + L.capFs * 2.14 + 58;
+const chipO = K.box(0, CHIP_Y, null, null, { cls: 'chip2', html: '<u>1</u>A sample order · printed only now', style: { width: 'auto', height: 'auto' } });
+const chipY = K.box(0, CHIP_Y, null, null, { cls: 'chip2', html: '<s></s>Nothing goes live without your yes', style: { width: 'auto', height: 'auto' } });
+const tag = K.demoTag('Concept products · AI-generated', 0, 0); tag.classList.add('dk');
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'One flow.<br>Every product.' });
+
+K.run({
+  id: 'G05', title: 'Product Ballet', dur: DUR, bpm: BPM, music: 'love-love-love', mood: 'bright', key: 'G', intro: 0.0, cover: 6.9,
+  technique: 'Choreographed product film: fourteen cut-out products move as one company on the bar lines — chorus line, depth-sorted turning ring, a catalogue grid, a V, and a leap into the letters M and L that settle into the real monogram; every move is a staggered leap (lift arc plus lean) with contact shadows, glossy-floor reflections and crossing follow-spots',
+  caption: 'Every product in step: describe it once, review each draft before it goes live, and printed products are printed per order by your own partner, paid from your partner account. Products shown are concept images. Start free at makeandlist.com',
+  short: 'Every product, in step.',
+  question: 'What is it?', gain: 'Everything you sell, in one flow',
+  beats: ['0–2 s: fourteen products leap in from the wings into a chorus line — “Every product, in step.”', '2–4.1 s: a turning ring, the back half soft — “One sentence to start.”', '4.1–6.1 s: a catalogue grid, each with its draft dot — “Each one a draft.”', '6.1–8.2 s: a V brings one forward — “Printed per order” (a sample order, printed only now)', '8.2–10.7 s: a leap into the letters M and L', '10.7–13 s: the letters settle into the MakeAndList monogram — “One flow. Every product.” (nothing goes live without your yes)', '13–15 s: end card'],
+  cues: [[0.0, 'whoosh'], [B(2), 'pop'], ...TF.slice(1).map((t) => [+(t - 0.08).toFixed(3), 'swish']), [BAR * 2 + 0.5, 'pop'], [BAR * 3 + 0.75, 'pop'], [MONO - 1.4, 'riser'], [MONO + 0.75, 'hit'], [MONO + 0.75 + 0.5, 'pop'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const pulse = Math.exp(-beatPh(T) * 6); // a breath on every beat
+  const toMono = K.p(T, MONO, MONO + 0.8, E.inOutCubic);
+
+  const P = items.map((it, i) => ({ it, i, q: pose(i, T) }));
+  // depth sort: further back (smaller y) first; letters by row
+  P.sort((a, b) => a.q.y - b.q.y);
+  P.forEach(({ it, i, q }, k) => {
+    const lift = q.lift + q.leap * (tall ? 110 : 90);
+    const s = q.s * (1 + 0.025 * pulse) * (1 - 0.35 * toMono);
+    it.g.style.transform = `translate(${q.x - it.w / 2}px, ${q.y - it.h}px) scale(${s})`;
+    it.wr.style.transform = `translateY(${-lift}px) rotate(${q.lean || 0}deg)`;
+    it.rf.style.transform = `translateY(${lift}px) scaleY(-1)`;
+    it.rf.style.opacity = 0.28 * q.ground * (1 - Math.min(1, lift / 200));
+    it.sh.style.opacity = (0.3 + 0.7 * q.ground) * (1 - Math.min(0.8, lift / 220));
+    it.sh.style.transform = `scaleX(${1 + lift / 300})`;
+    const back = q.d !== undefined && q.ground > 0.9 ? (1 - q.d) / 2 : 0;
+    const blur = back * 2.2 + q.leap * 1.2;
+    it.g.style.filter = `${blur > 0.15 ? `blur(${blur.toFixed(2)}px) ` : ''}brightness(${(1 - 0.22 * back).toFixed(3)})`;
+    it.g.style.zIndex = 10 + k;
+    it.g.style.opacity = (q.o ?? 1) * (1 - K.p(T, MONO + 0.25 + i * 0.02, MONO + 0.8 + i * 0.02, E.inCubic));
+    it.dr.style.opacity = (q.draft || 0) * K.p(T, BAR * 2 + 0.3 + i * 0.04, BAR * 2 + 0.6 + i * 0.04, E.linear);
+  });
+
+  // the strokes draw on once the company has landed in the letters, then give way to the mark
+  strokes.forEach(({ pl, len }, j) => {
+    const d = K.p(T, BAR * 4 + 1.0 + j * 0.25, BAR * 4 + 2.0 + j * 0.25, E.inOutCubic);
+    pl.style.strokeDashoffset = len * (1 - d);
+    pl.style.opacity = 0.55 * (1 - toMono);
+  });
+  // the monogram: the letters hand over to the real mark
+  const mw = tall ? 600 : 520, mx = (W - mw) / 2, my = (L.mlTop + L.mlBot) / 2 - mw / 2;
+  mono.style.width = mw + 'px'; mono.style.left = mx + 'px'; mono.style.top = my + 'px';
+  mono.style.opacity = toMono; mono.style.transform = `scale(${0.9 + 0.1 * toMono + 0.012 * pulse * toMono})`;
+  mono.style.filter = toMono < 1 ? `blur(${(1 - toMono) * 12}px)` : 'drop-shadow(0 30px 40px rgba(50,14,4,.35))';
+
+  // lights: two crossing follow-spots swing on the bar; the floor spot follows the company
+  beams.forEach((b, i) => { const sw = Math.sin(T * (Math.PI / BAR) + i * Math.PI) * 18; b.style.transform = `translateX(${i ? W * 0.68 - 190 : W * 0.32 - 190}px) rotate(${(i ? 1 : -1) * 12 + sw}deg)`; b.style.opacity = 0.75 + 0.25 * pulse; });
+  spot.style.transform = `translate(${L.cx - 450 + Math.sin(T * 0.7) * 60}px, ${mid - 150}px) scale(${1 + 0.05 * pulse})`;
+  spot.style.opacity = 0.8 * (1 - 0.6 * toMono);
+  motes.forEach((m, i) => {
+    const x = (seed(i + 11) * W + Math.sin(T * 0.3 + i) * 40) % W, y = ((seed(i + 17) * L.front - T * (10 + seed(i + 5) * 18)) % L.front + L.front) % L.front;
+    m.style.transform = `translate(${x}px, ${y}px)`; m.style.zIndex = 48;
+    m.style.opacity = (0.2 + 0.5 * seed(i + 23)) * (0.5 + 0.5 * pulse);
+  });
+
+  // ---------- type ----------
+  kick.style.opacity = 0.9 * K.win(T, 0.2, BAR - 0.2, 0.3);
+  caps.forEach(({ el, ws, c }) => {
+    el.style.visibility = T > c.a - 0.05 && T < c.b + 0.4 ? 'visible' : 'hidden';
+    K.reveal(ws, T, c.a, { kind: 'up', stagger: 0.07, dur: 0.55, ease: E.outExpo, out: c.b });
+  });
+  subs.forEach(({ el, c }) => { const p = K.p(T, c.a, c.a + 0.5, E.outCubic), o = K.p(T, c.b - 0.25, c.b, E.inCubic); el.style.opacity = p * (1 - o); el.style.transform = `translateY(${(1 - p) * 14}px)`; });
+  const oP = K.win(T, BAR * 3 + 0.75, BAR * 4 - 0.15, 0.25), yP = K.win(T, MONO + 0.7, 12.9, 0.3);
+  chipO.style.left = (W - chipO.offsetWidth) / 2 + 'px'; chipO.style.opacity = oP; chipO.style.transform = `scale(${0.88 + 0.12 * K.p(T, BAR * 3 + 0.75, BAR * 3 + 1.1, E.outBack)})`;
+  chipY.style.left = (W - chipY.offsetWidth) / 2 + 'px'; chipY.style.opacity = yP; chipY.style.transform = `translateY(${(1 - K.p(T, MONO + 0.7, MONO + 1.2, E.outExpo)) * 20}px)`;
+  tag.style.left = (tall ? 65 : 60) + 'px'; tag.style.top = L.tagY + 'px';
+  tag.style.opacity = 0.95 * K.p(T, 0.8, 1.2, E.linear) * (1 - K.p(T, 12.6, 13, E.linear));
+
+  end(T);
+});
+</script></body></html>

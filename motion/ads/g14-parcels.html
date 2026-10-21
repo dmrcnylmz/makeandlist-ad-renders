@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>G14 · A Day of Parcels</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1A1512; }
+.back { position: absolute; inset: 0; background: radial-gradient(70% 55% at 50% 42%, #4A3B30 0%, #2A211B 45%, #15110E 100%); }
+.floorD { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(20,16,13,0), #1E1813 12%, #120E0B 100%); }
+.pool { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,214,160,.38), rgba(255,214,160,0)); }
+.cone { position: absolute; pointer-events: none; filter: blur(22px); mix-blend-mode: screen; background: linear-gradient(180deg, rgba(255,226,180,.34), rgba(255,226,180,0) 92%); clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%); }
+.mote { position: absolute; border-radius: 50%; background: #FFE9C6; pointer-events: none; }
+.prod { position: absolute; transform-origin: 50% 100%; }
+.pim { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 50% 100%; display: block; }
+.refl { -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0) 32%); mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0) 32%); }
+.gloss { mix-blend-mode: screen; filter: brightness(1.6) saturate(.3); -webkit-mask-image: linear-gradient(100deg, transparent 42%, #000 50%, transparent 58%); mask-image: linear-gradient(100deg, transparent 42%, #000 50%, transparent 58%); -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.csh { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.75), rgba(0,0,0,0)); }
+.lbl { position: absolute; z-index: 3; padding: 5px 9px; border-radius: 6px; background: #FFFDF8; font: 600 13px 'IBM Plex Mono', monospace; color: #1F1F1F; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.lbl b { color: #7E9A7E; }
+.hook { position: absolute; z-index: 40; font: 800 132px/0.92 'Playfair Display'; letter-spacing: -0.04em; color: #FAF7EE; }
+.hook i { font-style: italic; font-weight: 500; }
+.hook .w { display: inline-block; white-space: pre; }
+.kick { position: absolute; z-index: 40; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .2em; text-transform: uppercase; color: #CDBFA9; white-space: nowrap; }
+.clock { position: absolute; z-index: 40; font: 600 44px 'IBM Plex Mono', monospace; color: #FAF7EE; letter-spacing: .02em; white-space: nowrap; }
+.clock small { display: block; font: 600 16px 'IBM Plex Mono', monospace; letter-spacing: .2em; color: #CDBFA9; margin-top: 4px; }
+.ord { position: absolute; z-index: 45; width: 600px; height: 214px; border-radius: 26px; background: rgba(255,253,248,.96); box-shadow: 0 40px 70px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.4); transform-origin: 50% 50%; overflow: hidden; }
+.ord .th { position: absolute; left: 20px; top: 20px; width: 128px; height: 128px; border-radius: 18px; background: #EFEADF; display: grid; place-items: center; }
+.ord .th img { max-width: 112px; max-height: 112px; }
+.ord .sm { position: absolute; left: 168px; top: 22px; font: 600 16px 'IBM Plex Mono', monospace; letter-spacing: .14em; color: #8A8378; text-transform: uppercase; }
+.ord .nm { position: absolute; left: 168px; top: 50px; font: 700 36px/1.05 'Playfair Display'; color: #1F1F1F; white-space: nowrap; }
+.ord .stt { position: absolute; left: 168px; top: 104px; display: flex; align-items: center; gap: 10px; font: 600 21px 'Archivo'; color: #45403A; white-space: nowrap; }
+.ord .stt i { width: 12px; height: 12px; border-radius: 50%; background: #E8A23C; display: block; }
+.ord .btn { position: absolute; left: 20px; right: 20px; bottom: 16px; height: 0; }
+.ord .ap { position: absolute; right: 0; bottom: 0; padding: 12px 24px; border-radius: 99px; background: #DFFF5A; font: 800 24px 'Archivo'; color: #1F1F1F; box-shadow: 0 0 0 2.5px #1F1F1F; white-space: nowrap; }
+.ord .pt { position: absolute; left: 0; bottom: 6px; font: 600 17px 'IBM Plex Mono', monospace; color: #6B645A; white-space: nowrap; }
+.ord.loss { background: #FFF4F0; box-shadow: 0 40px 70px -30px rgba(0,0,0,.8), 0 0 0 3px #B8442A; }
+.ord.loss .stt { color: #B8442A; }
+.ord.loss .stt i { background: #B8442A; }
+.ord.loss .ap { background: #FFFDF8; box-shadow: 0 0 0 2.5px #B8442A; color: #B8442A; }
+.tick { position: absolute; z-index: 46; width: 70px; height: 70px; border-radius: 50%; background: #DFFF5A; display: grid; place-items: center; box-shadow: 0 0 0 3px #1F1F1F, 0 16px 30px -10px rgba(0,0,0,.6); }
+.note { position: absolute; z-index: 44; font: 600 20px 'IBM Plex Mono', monospace; color: #FAF7EE; background: rgba(31,31,31,.72); padding: 8px 14px; border-radius: 10px; white-space: nowrap; border: 1px solid rgba(255,255,255,.18); }
+.note b { color: #DFFF5A; font-weight: 600; }
+.fin { position: absolute; z-index: 44; font: 800 76px/1.02 'Playfair Display'; letter-spacing: -0.025em; color: #FAF7EE; }
+.fin em { font-style: italic; font-weight: 500; color: #DFFF5A; }
+.fin .w { display: inline-block; white-space: pre; }
+.finS { position: absolute; z-index: 44; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #CDBFA9; }
+.count { position: absolute; z-index: 44; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #CDBFA9; white-space: nowrap; }
+.count b { color: #FAF7EE; font: 800 30px 'Archivo'; letter-spacing: 0; margin-right: 6px; }
+.lsweep { position: absolute; inset: -20%; z-index: 38; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(100deg, rgba(255,240,210,0) 44%, rgba(255,240,210,.22) 50%, rgba(255,240,210,0) 56%); }
+.demoD { position: absolute; z-index: 60; font: 500 19px 'IBM Plex Mono', monospace; color: #E9E2D4; background: rgba(31,31,31,.7); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; white-space: nowrap; }
+.vig { position: absolute; inset: 0; z-index: 80; pointer-events: none; background: radial-gradient(110% 80% at 50% 50%, rgba(0,0,0,0) 50%, rgba(0,0,0,.45)); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// G14 — A Day of Parcels. A music-led film on a dark warm set under one top light: a sample day of print orders runs
+// on a clock. Each order card drops in "Waiting for you", the cursor approves it on the beat, the card folds into the
+// partner's parcel or poster tube, which falls into the light and lands on a growing pile (squash, contact shadow,
+// floor reflection, a gloss sweep, a label "printed by your partner"). One order would lose money: it turns red and is
+// held for its own yes — it never ships by itself. The pile is lit by a final sweep and the honest line lands: each one
+// paid from your partner account, never from Credits. Every order on screen is labelled sample.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 117.5, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const RATIO = { 'k11-parcel': 1, 'k12-poster-tube': 603 / 957 };
+const pub = (id) => K.pub('r07/' + id + '.webp');
+
+function Prod(id, w, o = {}) {
+  const h = w * RATIO[id], src = pub(id);
+  const root = K.box(0, 0, w, h, { cls: 'prod', style: { zIndex: 20 } });
+  const shadow = K.el('div', { cls: 'csh', parent: root, style: { left: w * 0.04 + 'px', width: w * 0.92 + 'px', top: h - w * 0.06 + 'px', height: w * 0.12 + 'px' } });
+  const refl = K.el('img', { cls: 'pim refl', src, parent: root, style: { opacity: o.refl ?? 0 } });
+  const img = K.el('img', { cls: 'pim', src, parent: root });
+  const gloss = K.el('img', { cls: 'pim gloss', src, parent: root });
+  const lbl = K.el('div', { cls: 'lbl', parent: root, html: o.label || '' });
+  if (o.lx !== undefined) Object.assign(lbl.style, { left: o.lx * w + 'px', top: o.ly * h + 'px', transform: `rotate(${o.lr || 0}deg)` });
+  return { root, w, h, lbl,
+    set(x, fy, s = 1, lift = 0, rot = 0, op = 1, blur = 0, sweep = -1, sq = 0) {
+      root.style.left = x - w / 2 + 'px'; root.style.top = fy - h + 'px';
+      root.style.transform = `scale(${s})`;
+      root.style.opacity = op; root.style.visibility = op > 0.001 ? 'visible' : 'hidden';
+      root.style.filter = blur > 0.3 ? `blur(${blur}px)` : 'none';
+      const t = `translateY(${-lift}px) rotate(${rot}deg) scale(${1 + sq}, ${1 - sq})`;
+      img.style.transform = gloss.style.transform = t;
+      lbl.style.marginTop = -lift + 'px';
+      refl.style.transform = `scaleY(-1) ${t}`;
+      const k = K.clamp(lift / 400);
+      shadow.style.transform = `scale(${1 + k * 0.7}, ${1 + k * 0.3})`; shadow.style.opacity = 1 - k * 0.9;
+      gloss.style.opacity = sweep >= 0 && sweep <= 1 ? 0.6 : 0;
+      const m = (1 - sweep) * 100 + '% 0';
+      gloss.style.webkitMaskPosition = m; gloss.style.maskPosition = m;
+    } };
+}
+
+// ---------- layout ----------
+const S = tall ? 1 : 0.8;
+const L = tall
+  ? { cx: 540, floor: 1420, kx: 65, hookY: 330, kickY: 290, clockX: 800, clockY: 290, ordX: 65, ordY: 330, noteY: 600, finY: 330, finS: 560, countY: 640, tagY: 1196 }
+  : { cx: 600, floor: 1170, kx: 60, hookY: 96, kickY: 56, clockX: 820, clockY: 56, ordX: 60, ordY: 110, noteY: 350, finY: 100, finS: 330, countY: 400, tagY: 1278 };
+// the pile: [type, width, dx, base (px above floor), rot, reflection, label offset]
+const PILE = [
+  { id: 'k11-parcel', w: 360, dx: -180, up: 0, rot: 0, refl: 0.28, lx: 0.12, ly: 0.52, lr: 14 },
+  { id: 'k11-parcel', w: 320, dx: 170, up: -18, rot: 0, refl: 0.28, lx: 0.56, ly: 0.58, lr: -12 },
+  { id: 'k12-poster-tube', w: 540, dx: -10, up: -96, rot: -2, refl: 0.3, lx: 0.4, ly: 0.36, lr: -14 },
+  { id: 'k11-parcel', w: 290, dx: -30, up: 262, rot: 3, refl: 0, lx: 0.18, ly: 0.55, lr: 12 },
+  { id: 'k12-poster-tube', w: 430, dx: 20, up: 492, rot: 4, refl: 0, lx: 0.45, ly: 0.36, lr: -14 },
+];
+const ORDERS = [
+  { n: '#1041', nm: 'Sunset tee · M', th: 'k03-tee', ship: 0 },
+  { n: '#1042', nm: 'Protea print · A3', th: 'k02-framed-print', ship: 2 },
+  { n: '#1043', nm: 'Monstera tote', th: 'k05-tote', ship: 1 },
+  { n: '#1044', nm: '“Slow mornings” mug', th: 'k01-mug', ship: 3 },
+  { n: '#1045', nm: 'Wall calendar', th: 'k10-calendar', ship: 4 },
+  { n: '#1046', nm: 'Mountain hoodie · L', th: 'k04-hoodie', ship: -1, loss: true },
+];
+// every order: card in at a, approve at a + 2 beats, fold at a + 2.5, lands at a + 3.5 beats
+const T_ORD = [B(3), B(6), B(9), B(11.5), B(14), B(17)];       // 1.53 3.06 4.60 5.87 7.15 8.68
+const T_APP = (i) => T_ORD[i] + B(1.5), T_FOLD = (i) => T_ORD[i] + B(2), T_LAND = (i) => T_ORD[i] + B(3);
+const T_FIN = B(22);                                             // 11.23: the pile is lit, the line lands
+
+// ---------- the set ----------
+K.box(0, 0, W, H, { cls: 'back' });
+K.box(0, L.floor - 200 * S, W, H, { cls: 'floorD' });
+const pool = K.box(L.cx - 560, L.floor - 160, 1120, 300, { cls: 'pool', style: { zIndex: 5 } });
+const cone = K.box(L.cx - 600, -120, 1200, L.floor + 150, { cls: 'cone', style: { zIndex: 6 } });
+const motes = Array.from({ length: 34 }, (_, i) => K.box(0, 0, 3 + seed(i) * 6, 3 + seed(i) * 6, { cls: 'mote', style: { zIndex: i % 4 === 0 ? 62 : 7 } }));
+
+const pile = PILE.map((p, i) => Prod(p.id, p.w * S, { refl: p.refl, label: `No. ${i + 1} · <b>printed by your partner</b>`, lx: p.lx, ly: p.ly, lr: p.lr }));
+pile.forEach((p) => { p.lbl.style.fontSize = Math.round(13 * S * 1.15) + 'px'; });
+
+// ---------- type and UI ----------
+const hook = K.box(L.kx, L.hookY, W - 2 * L.kx, null, { cls: 'hook', style: { fontSize: (tall ? 132 : 116) + 'px' } });
+hook.innerHTML = ['A', 'day', '<br>', '<i>of</i>', 'parcels.'].map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w} </span>`)).join('');
+const hookW = [...hook.querySelectorAll('.w')];
+const kick = K.box(L.kx, L.kickY, null, null, { cls: 'kick', style: { width: 'auto', height: 'auto' }, html: 'Sample orders · one sample day' });
+const clock = K.box(L.clockX, L.clockY, null, null, { cls: 'clock', style: { width: 'auto', height: 'auto' } });
+const cards = ORDERS.map((o) => K.box(L.ordX, L.ordY, 600, 214, { cls: 'ord' + (o.loss ? ' loss' : ''), html:
+  `<div class="th"><img src="${pub(o.th)}"></div><div class="sm">Sample order ${o.n}</div><div class="nm">${o.nm}</div>
+   <div class="stt"><i></i><span>${o.loss ? 'Would lose money' : 'Waiting for you'}</span></div>
+   <div class="btn"><div class="pt">${o.loss ? 'needs its own yes' : 'your partner prints it'}</div><div class="ap">${o.loss ? 'Held' : 'Approve'}</div></div>` }));
+const ticks = ORDERS.map(() => K.box(0, 0, 70, 70, { cls: 'tick', html: '<svg width="38" height="38" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#1F1F1F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' }));
+const note = K.box(L.ordX, L.noteY, null, null, { cls: 'note', style: { width: 'auto', height: 'auto' }, html: 'Nothing goes to your partner <b>without your yes</b>' });
+const lossNote = K.box(L.ordX, L.noteY, null, null, { cls: 'note', style: { width: 'auto', height: 'auto' }, html: 'A losing order waits for <b>its own yes</b>' });
+const count = K.box(L.kx, L.countY, null, null, { cls: 'count', style: { width: 'auto', height: 'auto' } });
+const fin = K.box(L.kx, L.finY, tall ? 900 : 640, null, { cls: 'fin', style: { fontSize: (tall ? 80 : 68) + 'px' } });
+fin.innerHTML = ['Each', 'one', 'paid', 'from', '<br>', '<em>your</em>', '<em>partner</em>', '<em>account.</em>'].map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w} </span>`)).join('');
+const finW = [...fin.querySelectorAll('.w')];
+const finS = K.box(L.kx, L.finS + (tall ? 30 : 0), W - 2 * L.kx, null, { cls: 'finS', html: 'Never from Credits · printed and shipped by your partner' });
+const sweepL = K.box(0, 0, W, H, { cls: 'lsweep' });
+const cursor = K.cursor();
+const tag = K.box(tall ? 65 : 60, L.tagY, null, null, { cls: 'demoD', style: { width: 'auto', height: 'auto' }, html: 'Sample orders · concept products, AI-generated' });
+const vig = K.box(0, 0, W, H, { cls: 'vig' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, dark: true, line: 'Printed per order.<br>Paid by your partner account.' });
+
+const shipped = (i) => ORDERS.findIndex((o) => o.ship === i); // order index that sends pile item i
+
+K.run({
+  id: 'G14', title: 'A Day of Parcels', dur: DUR, bpm: BPM, music: 'back-in-the-80s', mood: 'bright', key: 'A', intro: 0.0, cover: 11.6,
+  technique: 'Music-led product film on a dark warm set under one top light: sample order cards drop in, get approved on the beat, fold into the partner’s parcel or poster tube, which falls into the light and lands on a growing pile (squash, contact shadows, floor reflections, gloss sweeps, “printed by your partner” labels); a losing order turns red and is held for its own yes; a final sweep lights the pile',
+  caption: 'A day of print orders, sample data: each one waits for your yes, then your own print partner prints and ships it — paid from your partner account, never from Credits. An order that would lose money waits for its own confirmation. Start free at makeandlist.com',
+  short: 'Approved by you. Printed by your partner.',
+  beats: ['0–1.5 s: “A day of parcels.” — the clock starts on a sample day', '1.5–8.6 s: five sample orders: approved on the beat, each folds into a parcel or poster tube that lands on the pile', '8.7–11.2 s: one would lose money — it turns red and is held for its own yes', '11.2–13 s: the lit pile: each one paid from your partner account, never from Credits', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], ...ORDERS.flatMap((o, i) => o.loss ? [[T_ORD[i], 'notify'], [+(T_APP(i)).toFixed(2), 'pop']] :
+    [[T_ORD[i], 'swish'], [+(T_APP(i)).toFixed(2), 'click'], [+(T_FOLD(i)).toFixed(2), 'paper'], [+(T_LAND(i) - 0.02).toFixed(2), 'box']]),
+    [T_FIN - 0.1, 'whoosh'], [T_FIN + 0.05, 'chime'], [12.4, 'coin'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  cone.style.opacity = 0.85 + Math.sin(T * 1.7) * 0.08 + Math.sin(T * 5.3) * 0.03;
+  pool.style.opacity = 0.8 + Math.sin(T * 1.7) * 0.1;
+  motes.forEach((m, i) => {
+    const x = L.cx - 380 + seed(i) * 760 + Math.sin(T * 0.4 + i) * 40;
+    const y = ((seed(i + 30) * L.floor - T * (10 + seed(i + 4) * 22)) % L.floor + L.floor) % L.floor;
+    m.style.transform = `translate(${x}px, ${y}px)`;
+    m.style.opacity = (0.2 + 0.5 * (0.5 + 0.5 * Math.sin(T * 2.2 + i * 1.3))) * (1 - Math.abs(x - L.cx) / 500);
+    m.style.filter = i % 4 === 0 ? 'blur(3px)' : 'none';
+  });
+  // the sample day's clock: 09:00 → 18:00 over the orders
+  const mins = 9 * 60 + Math.floor(K.p(T, 0.3, T_FIN, E.inOutCubic) * 9 * 60);
+  clock.innerHTML = `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}<small>sample day</small>`;
+  clock.style.opacity = K.p(T, 0.2, 0.5, E.linear) * (1 - K.p(T, T_FIN - 0.3, T_FIN, E.linear));
+
+  // camera: a slow push in with a lateral drift; it cranes up a little as the pile grows
+  const crane = K.k(T, [[0, 0], [T_LAND(4), 80], [T_FIN, 40], [13, 20]], E.inOutCubic) * S;
+  const push = 1 + 0.05 * K.p(T, 0, 13, E.linear);
+  const camX = Math.sin(T * 0.35) * 18;
+
+  // ---------- hook ----------
+  const hOut = K.p(T, 1.25, 1.5, E.inCubic);
+  hookW.forEach((w, i) => {
+    const p = K.p(T, 0.0 + i * 0.07, 0.5 + i * 0.07, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.5) * (1 - hOut);
+    w.style.transform = `translateY(${(1 - p) * 70 - hOut * 40}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 10}px)` : 'none';
+  });
+  hook.style.visibility = hOut < 1 ? 'visible' : 'hidden';
+  kick.style.opacity = K.p(T, 0.1, 0.4, E.linear) * (1 - K.p(T, T_FIN - 0.3, T_FIN, E.linear));
+  kick.style.top = L.kickY + 'px';
+
+  // ---------- order cards ----------
+  cards.forEach((c, i) => {
+    const o = ORDERS[i], a = T_ORD[i];
+    const pin = K.p(T, a, a + 0.38, E.outExpo);
+    const fold = o.loss ? 0 : K.p(T, T_FOLD(i), T_FOLD(i) + 0.3, E.inCubic);
+    const lossOut = o.loss ? K.p(T, T_FIN - 0.4, T_FIN - 0.1, E.inCubic) : 0;
+    // folding: scale down toward the pile, card flips edge-on
+    const tx = (L.cx - 300 - L.ordX) * fold, ty = (L.floor - 600 * S - L.ordY) * fold;
+    c.style.opacity = Math.min(1, pin * 2) * (1 - fold) * (1 - lossOut);
+    c.style.transform = `translate(${tx + (1 - pin) * -120 + lossOut * -80}px, ${ty + (1 - pin) * -40}px) rotateX(${fold * 70}deg) scale(${(0.9 + 0.1 * pin) * (1 - 0.6 * fold)}) rotate(${(1 - pin) * -4}deg)`;
+    c.style.visibility = pin > 0 && fold < 1 && lossOut < 1 ? 'visible' : 'hidden';
+    c.style.zIndex = 45 + i;
+    // status text changes on approval
+    const st = c.querySelector('.stt span'), dot = c.querySelector('.stt i'), ap = c.querySelector('.ap');
+    const approved = !o.loss && T >= T_APP(i);
+    st.textContent = o.loss ? (T >= T_APP(i) ? 'Would lose money · held' : 'Would lose money') : approved ? 'Approved by you' : 'Waiting for you';
+    dot.style.background = o.loss ? '#B8442A' : approved ? '#7E9A7E' : '#E8A23C';
+    const press = T >= T_APP(i) && T < T_APP(i) + 0.14;
+    ap.style.transform = `scale(${press ? 0.92 : 1})`;
+    if (o.loss) c.style.transform += ` translateX(${Math.sin(K.clamp((T - T_APP(i)) / 0.4) * Math.PI * 4) * 8 * (1 - K.clamp((T - T_APP(i)) / 0.4))}px)`;
+    // the tick
+    const tk = ticks[i], tp = K.p(T, T_APP(i), T_APP(i) + 0.3, E.outBack);
+    tk.style.left = L.ordX + 600 - 50 + 'px'; tk.style.top = L.ordY - 22 + 'px';
+    tk.style.opacity = o.loss ? 0 : Math.min(1, tp * 2) * (1 - fold);
+    tk.style.transform = `scale(${tp})`;
+    tk.style.visibility = !o.loss && T >= T_APP(i) && fold < 1 ? 'visible' : 'hidden';
+  });
+  // the cursor visits each Approve button
+  const apX = L.ordX + 600 - 20 - 70, apY = L.ordY + 214 - 16 - 24;
+  let cx = apX + 200, cy = apY + 240, press = false, cvis = 0;
+  ORDERS.forEach((o, i) => {
+    const a = T_ORD[i] + 0.25, b = T_APP(i);
+    if (T >= a - 0.1 && T < T_FOLD(i) + 0.1) {
+      const p = K.p(T, a, b, E.inOutCubic);
+      cx = apX + 200 * (1 - p); cy = apY + 220 * (1 - p); press = T >= b && T < b + 0.14;
+      cvis = K.p(T, a - 0.1, a + 0.05, E.linear) * (1 - K.p(T, T_FOLD(i) - 0.05, T_FOLD(i) + 0.1, E.linear));
+      if (o.loss) cvis *= 1 - K.p(T, b + 0.1, b + 0.3, E.linear);
+    }
+  });
+  cursor.at(cx, cy, press); cursor.hide(cvis);
+  const lastApp = ORDERS.map((_, i) => T_APP(i)).filter((x) => x <= T).pop();
+  cursor.ripple(apX, apY, T, lastApp ?? -10);
+
+  // notes under the cards
+  const nIn = K.p(T, T_APP(0) + 0.1, T_APP(0) + 0.5, E.outExpo), nOut = K.p(T, T_ORD[5] - 0.3, T_ORD[5], E.inCubic);
+  note.style.opacity = nIn * (1 - nOut); note.style.transform = `translateY(${(1 - nIn) * 20}px)`;
+  note.style.visibility = nIn > 0 && nOut < 1 ? 'visible' : 'hidden';
+  const lIn = K.p(T, T_APP(5) + 0.1, T_APP(5) + 0.5, E.outExpo), lOut = K.p(T, T_FIN - 0.4, T_FIN - 0.1, E.inCubic);
+  lossNote.style.opacity = lIn * (1 - lOut); lossNote.style.transform = `translateY(${(1 - lIn) * 20}px)`;
+  lossNote.style.visibility = lIn > 0 && lOut < 1 ? 'visible' : 'hidden';
+
+  // ---------- the pile ----------
+  let landed = 0;
+  pile.forEach((p, k) => {
+    const oi = shipped(k), q = PILE[k];
+    const tl = T_LAND(oi), tf = T_FOLD(oi);
+    const d = K.clamp((T - tf - 0.1) / (tl - tf - 0.1));
+    const lift = T < tl ? (1 - d * d) * (L.floor - 200) : 0;
+    const after = T - tl;
+    const sq = after >= 0 && after < 0.5 ? Math.sin(after / 0.5 * Math.PI) * 0.08 * Math.exp(-after * 3) : 0;
+    if (T >= tl) landed++;
+    const x = L.cx + q.dx * S * push + camX * (1 + k * 0.05);
+    const fy = L.floor + crane - q.up * S * push;
+    const sweep = T > T_FIN ? K.clamp((T - T_FIN - k * 0.06) / 0.9) * 1.2 - 0.1 : K.clamp((after - 0.05) / 0.7) * 1.2 - 0.1;
+    p.set(x, fy, push, lift, q.rot + (T < tl ? (1 - d) * 18 * (k % 2 ? 1 : -1) : 0), T >= tf + 0.1 ? 1 : 0, T < tl ? Math.min(5, (1 - d) * 8) : 0, sweep, sq);
+    p.root.style.zIndex = 20 + [1, 2, 4, 3, 5][k];
+    // its label shows for a moment after it lands, then leaves the pile clean
+    const lp = K.p(T, tl + 0.15, tl + 0.45, E.outBack), lo = K.p(T, tl + 1.15, tl + 1.4, E.linear);
+    p.lbl.style.opacity = Math.min(1, lp * 2) * (1 - lo); p.lbl.style.scale = String(0.6 + 0.4 * lp);
+  });
+  pool.style.transform = `translateY(${crane}px)`;
+  const cnt = K.p(T, T_LAND(0), T_LAND(0) + 0.3, E.linear) * (1 - K.p(T, T_FIN - 0.3, T_FIN, E.linear));
+  count.style.opacity = cnt; count.style.top = L.countY + (tall ? 30 : 0) + 'px';
+  count.innerHTML = `<b>${landed}</b> printed by your partner` + (T >= T_APP(5) ? ' · <b>1</b> held for you' : '');
+
+  // ---------- final: the lit pile and the honest line ----------
+  finW.forEach((w, i) => {
+    const p = K.p(T, T_FIN + 0.05 + i * 0.07, T_FIN + 0.55 + i * 0.07, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.5);
+    w.style.transform = `translateY(${(1 - p) * 50}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+  fin.style.visibility = T >= T_FIN ? 'visible' : 'hidden';
+  finS.style.opacity = K.p(T, T_FIN + 0.6, T_FIN + 1.0, E.linear);
+  const ls = K.p(T, T_FIN - 0.1, T_FIN + 1.2, E.inOutCubic);
+  sweepL.style.transform = `translateX(${(ls * 2 - 1) * W * 1.1}px)`;
+  sweepL.style.opacity = T > T_FIN - 0.1 && T < T_FIN + 1.2 ? 1 : 0;
+  tag.style.opacity = K.p(T, 0.4, 0.7, E.linear);
+  end(T);
+});
+</script></body></html>

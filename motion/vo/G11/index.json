@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.3,
+  "text": "One product. Three rooms.",
+  "file": "01-851cbf12af.wav",
+  "dur": 2.09
+ },
+ {
+  "t": 2.55,
+  "text": "At your desk, you describe it and approve it.",
+  "file": "02-449b7bce18.wav",
+  "dur": 2.65
+ },
+ {
+  "t": 5.55,
+  "text": "At your partner's, it's printed when someone orders.",
+  "file": "03-41b09e248c.wav",
+  "dur": 3.48
+ },
+ {
+  "t": 9.4,
+  "text": "Then it arrives in a buyer's home.",
+  "file": "04-f361106777.wav",
+  "dur": 2.79
+ }
+]

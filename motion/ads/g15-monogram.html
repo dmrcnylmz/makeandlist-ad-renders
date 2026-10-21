@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>G15 · The Monogram</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #141312; }
+.back { position: absolute; inset: 0; background: radial-gradient(80% 55% at 50% 44%, #34312D 0%, #1E1C1A 50%, #0E0D0C 100%); }
+.floorD { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(14,13,12,0), rgba(10,9,8,.85) 30%, #090807); }
+.horizon { position: absolute; left: 0; right: 0; height: 220px; background: linear-gradient(180deg, rgba(255,250,235,0), rgba(255,250,235,.07) 50%, rgba(255,250,235,0)); filter: blur(12px); }
+.haze { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(60px); }
+.bokeh { position: absolute; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(255,244,214,.5), rgba(255,244,214,.12) 70%, rgba(255,244,214,0)); }
+.prod { position: absolute; transform-origin: 50% 100%; }
+.pim { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 50% 100%; display: block; }
+.refl { -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0) 30%); mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0) 30%); }
+.gloss { mix-blend-mode: screen; filter: brightness(1.6) saturate(.3); -webkit-mask-image: linear-gradient(100deg, transparent 42%, #000 50%, transparent 58%); mask-image: linear-gradient(100deg, transparent 42%, #000 50%, transparent 58%); -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.csh { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.8), rgba(0,0,0,0)); }
+.dot { position: absolute; transform-origin: 50% 50%; }
+.dot img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.mono { position: absolute; z-index: 30; }
+.mono img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.mono .sheen { filter: sepia(1) saturate(2.4) brightness(1.15) hue-rotate(5deg); -webkit-mask-image: linear-gradient(105deg, transparent 40%, #000 50%, transparent 60%); mask-image: linear-gradient(105deg, transparent 40%, #000 50%, transparent 60%); -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.monoR { position: absolute; z-index: 29; -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0) 14%, rgba(0,0,0,.38) 14.5%, rgba(0,0,0,0) 40%); mask-image: linear-gradient(180deg, rgba(0,0,0,0) 14%, rgba(0,0,0,.38) 14.5%, rgba(0,0,0,0) 40%); }
+.monoR img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform: scaleY(-1); }
+.glow { position: absolute; z-index: 28; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(255,240,205,.35), rgba(255,240,205,0)); }
+.kick { position: absolute; z-index: 40; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .24em; text-transform: uppercase; color: #A89F90; white-space: nowrap; text-align: center; }
+.line1 { position: absolute; z-index: 40; text-align: center; font: 700 70px/1.04 'Playfair Display'; letter-spacing: -0.02em; color: #FAF7EE; }
+.line1 i { font-style: italic; font-weight: 500; }
+.line1 .w { display: inline-block; white-space: pre; }
+.verb { position: absolute; z-index: 40; text-align: center; white-space: nowrap; }
+.verb .v { font: 800 190px/0.9 'Playfair Display'; letter-spacing: -0.04em; color: #FAF7EE; }
+.verb .v b { font-weight: 800; color: #DFFF5A; }
+.verb .s { margin-top: 18px; font: 500 44px/1.1 'Playfair Display'; font-style: italic; color: #D9D1C2; }
+.fin { position: absolute; z-index: 40; text-align: center; font: 700 64px/1 'Playfair Display'; letter-spacing: -0.02em; color: #FAF7EE; white-space: nowrap; }
+.fin i { font-style: italic; font-weight: 500; color: #DFFF5A; }
+.facts { position: absolute; z-index: 40; text-align: center; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #A89F90; }
+.demoD { position: absolute; z-index: 60; font: 500 19px 'IBM Plex Mono', monospace; color: #E9E2D4; background: rgba(31,31,31,.7); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; white-space: nowrap; }
+.lsweep { position: absolute; inset: -20%; z-index: 38; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(100deg, rgba(255,244,220,0) 45%, rgba(255,244,220,.16) 50%, rgba(255,244,220,0) 55%); }
+.vig { position: absolute; inset: 0; z-index: 80; pointer-events: none; background: radial-gradient(110% 80% at 50% 48%, rgba(0,0,0,0) 50%, rgba(0,0,0,.55)); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// G15 — The Monogram. A brand film narrated as a short manifesto. On a graphite studio set, twelve concept products
+// float on a slow 3D orbit (scaled, layered and blurred by depth, mirrored in a glossy floor, bokeh and haze in the
+// air). Each spoken verb — Make, List, Print — lands as one huge word while the orbit answers it (tightens, tilts,
+// slows). Then the orbit collapses into the centre and blooms into a constellation of small products arranged along
+// the strokes of the ML monogram (points sampled inside the brand mark's own path), which resolves into the solid
+// ivory monogram with a gold sheen and a floor reflection: "Make, and list."
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 76, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const IDS = ['k01-mug', 'k02-framed-print', 'k03-tee', 'k04-hoodie', 'k05-tote', 'k06-notebook', 'k07-sticker-sheet', 'k08-greeting-card', 'k09-kids-book', 'k10-calendar', 'k13-wedding-planner', 'k14-gift-tag', 'k11-parcel', 'k12-poster-tube'];
+const RATIO = { 'k01-mug': 804 / 852, 'k02-framed-print': 897 / 608, 'k03-tee': 901 / 977, 'k04-hoodie': 979 / 976, 'k05-tote': 961 / 595, 'k06-notebook': 923 / 634, 'k07-sticker-sheet': 918 / 763,
+  'k08-greeting-card': 928 / 540, 'k09-kids-book': 926 / 656, 'k10-calendar': 896 / 643, 'k11-parcel': 1, 'k12-poster-tube': 603 / 957, 'k13-wedding-planner': 786 / 984, 'k14-gift-tag': 906 / 596 };
+const pub = (id) => K.pub('r07/' + id + '.webp');
+// The brand mark's own outline (frontend/public/brand/makeandlist-monogram.svg, viewBox 134 133.5 989 989).
+const MONO_D = 'M 175.692 274.701 C 174.508 275.007, 173.990 275.917, 174.192 277.335 C 174.464 279.247, 175.346 279.584, 181.739 280.222 C 219.560 283.994, 249.199 308.084, 257.905 342.128 C 262.004 358.158, 262.195 368.908, 261.730 558 C 261.297 734.177, 261.043 749.085, 257.970 779 C 256.527 793.050, 255.435 798.657, 251.843 810.460 C 245.978 829.729, 237.848 843.160, 224.164 856.181 C 216.324 863.642, 213.444 865.619, 202.801 870.849 C 188.056 878.094, 174.116 881.893, 159.250 882.718 C 150.135 883.224, 149 883.493, 149 885.144 C 149 886.942, 152.942 887, 276 887 C 402.333 887, 403 886.990, 403 885 C 403 883.199, 402.328 882.998, 396.250 882.983 C 381.203 882.944, 362.403 878.267, 347.083 870.752 C 310.441 852.779, 286.719 813.229, 278.556 756.500 C 273.595 722.031, 273.768 728.800, 272.924 536 C 272.487 436.175, 271.869 352.475, 271.551 350 C 271.048 346.087, 271.950 347.457, 278.462 360.500 C 282.581 368.750, 305.528 414.875, 329.456 463 C 373.329 551.241, 381.422 567.186, 416.503 634.500 C 454.027 706.500, 477.527 754.792, 489.084 783.646 C 496.319 801.713, 504.884 825.328, 508.525 837.250 C 511.971 848.535, 514 852.760, 514 848.652 C 514 846.995, 527.114 814.257, 533.384 800.262 C 543.398 777.911, 573.154 722, 575.036 722 C 575.371 722, 578.947 727.513, 582.983 734.250 C 595.198 754.643, 608.336 773.231, 625.921 795 C 637.184 808.942, 672.608 844.312, 687 855.987 C 697.745 864.702, 722.172 881.603, 731.945 887.084 L 736.253 889.500 735.658 897 C 734.826 907.479, 732.656 915.051, 727.492 925.500 C 717.529 945.658, 700.130 960.525, 675.773 969.691 C 666.406 973.216, 647.318 977, 638.901 977 C 634.449 977, 634 977.211, 634 979.308 L 634 981.615 855.201 981.558 L 1076.403 981.500 1082.712 958 C 1098.377 899.660, 1109.844 850.643, 1108.592 847.379 C 1107.608 844.816, 1106.403 845.978, 1104.574 851.250 C 1100.936 861.740, 1087.053 888.771, 1079.571 899.932 C 1065.101 921.518, 1051.009 935.980, 1032.500 948.243 C 1014.123 960.418, 995.909 967.591, 970.500 972.662 C 958.233 975.110, 927.039 975.125, 911.627 972.690 C 879.421 967.602, 846.106 954.751, 814 935.030 C 794.295 922.927, 764.700 900.008, 741.003 878.500 C 737.367 875.200, 729.484 868.225, 723.484 863 C 673.062 819.088, 651.834 796.819, 621.998 756.535 C 610.666 741.235, 590 710.336, 590 708.694 C 590 705.748, 622.869 661.052, 636.417 645.576 C 667.638 609.911, 697.017 583.121, 728.005 562.059 C 757.278 542.163, 788.294 531.497, 825.846 528.411 L 834.192 527.725 833.948 436.613 C 833.709 346.974, 833.738 345.376, 835.791 337.831 C 840.470 320.627, 851.244 306.348, 867.975 295.175 C 878.487 288.156, 897.759 281.761, 912.974 280.245 C 920.080 279.537, 920.447 279.377, 920.446 277 L 920.445 274.500 847.855 274.226 L 775.264 273.952 753.241 307.226 C 725.989 348.400, 715.752 364.168, 703.397 384 C 690.844 404.149, 662.672 450.670, 657.977 459 C 655.962 462.575, 651.948 469.550, 649.057 474.500 C 625.135 515.456, 595.468 572.443, 585.145 597.265 C 575.843 619.633, 572.137 636.277, 573.975 647.426 C 574.909 653.087, 577 657.449, 577 653.734 C 577 652.108, 583.017 633.969, 586.531 625 C 597.935 595.898, 621.246 549.075, 649.511 498.500 C 671.137 459.804, 716.562 384.069, 734.981 356 L 739.246 349.500 738.625 383.500 C 738.283 402.200, 738.002 445.466, 738.002 479.646 L 738 541.792 732.750 545.118 C 718.528 554.131, 696.203 571.710, 675.402 590.276 C 647.711 614.992, 612.246 656.076, 591.043 688 C 587.573 693.225, 584.400 697.871, 583.993 698.323 C 581.936 700.612, 527.040 606.799, 492.519 542 C 487.684 532.925, 480.008 518.525, 475.461 510 C 463.282 487.167, 423.162 409.209, 409.073 381 C 402.343 367.525, 387.331 337.938, 375.714 315.250 L 354.592 274 266.046 274.116 C 217.346 274.180, 176.686 274.443, 175.692 274.701 M 849.500 541.664 C 813.912 542.825, 788.824 548.030, 767.735 558.625 C 760.003 562.510, 741.079 574.995, 738.846 577.685 C 736.912 580.016, 736.831 869.110, 738.765 869.755 C 739.461 869.987, 743.286 872.898, 747.265 876.223 C 770.730 895.833, 808.368 919.762, 831.500 929.776 C 851.828 938.576, 874 946.774, 874 945.491 C 874 945.317, 871.171 943.157, 867.713 940.690 C 849.170 927.457, 837.798 910.107, 835.144 891 C 834.486 886.262, 833.886 830.830, 833.515 740.500 C 832.876 584.892, 832.644 592.651, 838.285 581.010 C 841.619 574.132, 854.212 562.080, 862.624 557.718 C 876.695 550.421, 893.204 546.567, 914 545.723 C 918.862 545.526, 919.537 545.239, 919.820 543.250 L 920.139 541 888.820 541.201 C 871.594 541.312, 853.900 541.520, 849.500 541.664';
+
+function Prod(id, w, o = {}) {
+  const h = w * RATIO[id], src = pub(id);
+  const root = K.box(0, 0, w, h, { cls: 'prod', style: { zIndex: 20 } });
+  const shadow = K.el('div', { cls: 'csh', parent: root, style: { left: w * 0.1 + 'px', width: w * 0.8 + 'px', top: h - w * 0.05 + 'px', height: w * 0.1 + 'px' } });
+  const refl = K.el('img', { cls: 'pim refl', src, parent: root, style: { opacity: o.refl ?? 0.32 } });
+  const img = K.el('img', { cls: 'pim', src, parent: root });
+  const gloss = K.el('img', { cls: 'pim gloss', src, parent: root });
+  return { root, w, h,
+    set(x, fy, s = 1, lift = 0, rot = 0, op = 1, blur = 0, sweep = -1) {
+      root.style.left = x - w / 2 + 'px'; root.style.top = fy - h + 'px';
+      root.style.transform = `scale(${s})`;
+      root.style.opacity = op; root.style.visibility = op > 0.001 ? 'visible' : 'hidden';
+      root.style.filter = blur > 0.3 ? `blur(${blur}px)` : 'none';
+      const t = `translateY(${-lift}px) rotate(${rot}deg)`;
+      img.style.transform = gloss.style.transform = t;
+      refl.style.transform = `scaleY(-1) ${t}`;
+      const k = K.clamp(lift / 500);
+      shadow.style.transform = `scale(${1 + k * 0.8}, ${1 + k * 0.4})`; shadow.style.opacity = 0.9 - k * 0.7;
+      gloss.style.opacity = sweep >= 0 && sweep <= 1 ? 0.7 : 0;
+      const m = (1 - sweep) * 100 + '% 0';
+      gloss.style.webkitMaskPosition = m; gloss.style.maskPosition = m;
+    } };
+}
+
+// ---------- layout ----------
+const L = tall
+  ? { cx: 540, cy: 880, floor: 1160, Rx: 450, Ry: 120, pw: 190, mW: 680, mY: 400, kY: 300, l1Y: 340, vY: 330, finY: 1215, factsY: 1150, tagY: 1196 }
+  : { cx: 540, cy: 700, floor: 960, Rx: 430, Ry: 100, pw: 160, mW: 560, mY: 240, kY: 60, l1Y: 96, vY: 86, finY: 870, factsY: 950, tagY: 1278 };
+const mX = L.cx - L.mW / 2, mS = L.mW / 989;
+const toScreen = (px, py) => [mX + (px - 134) * mS, L.mY + (py - 133.5) * mS];
+
+// ---------- the set ----------
+K.box(0, 0, W, H, { cls: 'back' });
+K.box(0, L.floor - 110, W, 220, { cls: 'horizon' });
+K.box(0, L.floor, W, H - L.floor, { cls: 'floorD' });
+const hazes = [0, 1, 2].map((i) => K.box(0, 0, 900, 700, { cls: 'haze', style: { background: ['rgba(255,236,200,.10)', 'rgba(223,255,90,.05)', 'rgba(232,96,60,.06)'][i], zIndex: 6 } }));
+const bokeh = Array.from({ length: 16 }, (_, i) => K.box(0, 0, 30 + seed(i) * 90, 30 + seed(i) * 90, { cls: 'bokeh', style: { zIndex: i % 3 ? 7 : 62, filter: `blur(${2 + seed(i + 9) * 6}px)` } }));
+
+// the orbit: twelve products
+const RING = IDS.slice(0, 12);
+const ring = RING.map((id, i) => ({ p: Prod(id, L.pw * (id === 'k03-tee' || id === 'k04-hoodie' || id === 'k13-wedding-planner' ? 1.3 : 1)), a: (i / 12) * Math.PI * 2 }));
+
+// the constellation: points inside the monogram's own path (deterministic jittered grid + Path2D hit test)
+const path = new Path2D(MONO_D);
+const ctx = document.createElement('canvas').getContext('2d');
+const PTS = [];
+const STEP = 54;
+for (let gy = 150, r = 0; gy < 1120; gy += STEP * 0.87, r++) {
+  for (let gx = 150 + (r % 2) * STEP / 2; gx < 1120; gx += STEP) {
+    const n = PTS.length + r * 31 + gx;
+    const x = gx + (seed(n) - 0.5) * 14, y = gy + (seed(n + 3) - 0.5) * 14;
+    if (ctx.isPointInPath(path, x, y, 'evenodd')) PTS.push([x, y]);
+  }
+}
+// a fine second pass fills the hairlines (the L's thin strokes) where the coarse grid found nothing
+for (let gy = 140; gy < 1120; gy += 6) {
+  for (let gx = 140; gx < 1120; gx += 6) {
+    if (!ctx.isPointInPath(path, gx, gy, 'evenodd')) continue;
+    if (PTS.every(([px, py]) => Math.hypot(px - gx, py - gy) > STEP * 0.78)) PTS.push([gx, gy]);
+  }
+}
+const DOTW = STEP * mS * 1.25;
+const dots = PTS.map(([x, y], i) => {
+  const id = IDS[(i * 5) % IDS.length];
+  const r = RATIO[id], w = r > 1 ? DOTW / r : DOTW, h = w * r;
+  const el = K.box(0, 0, w, h, { cls: 'dot', html: `<img src="${pub(id)}">`, style: { zIndex: 31 } });
+  const [sx, sy] = toScreen(x, y);
+  return { el, sx, sy, w, h, d: Math.hypot(sx - L.cx, sy - (L.mY + L.mW / 2)), rot: (seed(i + 11) - 0.5) * 30 };
+});
+const dMax = Math.max(...dots.map((d) => d.d));
+
+// the solid monogram, its sheen and reflection
+const mono = K.box(mX, L.mY, L.mW, L.mW, { cls: 'mono', html: `<img src="${K.brand('makeandlist-monogram-ivory.svg')}"><img class="sheen" src="${K.brand('makeandlist-monogram-ivory.svg')}">` });
+const sheen = mono.querySelector('.sheen');
+// mirrored about the glyphs' baseline (85.7 % down the mark's box)
+const monoR = K.box(mX, L.mY + L.mW * 0.714, L.mW, L.mW, { cls: 'monoR', html: `<img src="${K.brand('makeandlist-monogram-ivory.svg')}">` });
+const glow = K.box(L.cx - L.mW * 0.75, L.mY - L.mW * 0.2, L.mW * 1.5, L.mW * 1.4, { cls: 'glow' });
+
+// ---------- type ----------
+const kick = K.box(65, L.kY, W - 130, null, { cls: 'kick', html: 'A manifesto for small sellers' });
+const line1 = K.box(65, L.l1Y, W - 130, null, { cls: 'line1', style: { fontSize: (tall ? 76 : 64) + 'px' } });
+line1.innerHTML = ['For', 'the', 'ones', 'with', '<br>', '<i>an</i>', '<i>idea</i>', 'and', 'a', '<br>', 'small', 'shop.'].map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w} </span>`)).join('');
+const l1W = [...line1.querySelectorAll('.w')];
+const VERBS = [['Make', 'with care.'], ['List', 'in your own stores.'], ['Print', 'only when it’s ordered.']];
+const verbs = VERBS.map(([v, s]) => K.box(0, L.vY, W, null, { cls: 'verb', html: `<div class="v" style="font-size:${tall ? 190 : 150}px">${v}<b>.</b></div><div class="s" style="font-size:${tall ? 46 : 40}px">${s}</div>` }));
+const fin = K.box(0, L.finY, W, null, { cls: 'fin', style: { fontSize: (tall ? 72 : 60) + 'px' }, html: 'Make, <i>and</i> list.' });
+const facts = K.box(65, L.factsY, W - 130, null, { cls: 'facts', html: 'Drafts first · printed per order by your own partner' });
+const sweepL = K.box(0, 0, W, H, { cls: 'lsweep' });
+const tag = K.box(tall ? 65 : 60, L.tagY, null, null, { cls: 'demoD', style: { width: 'auto', height: 'auto' }, html: 'Concept products · AI-generated' });
+const vig = K.box(0, 0, W, H, { cls: 'vig' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, dark: true, line: 'Make it. List it.<br>Your yes.' });
+
+// ---------- timing (fitted to Marian’s takes) ----------
+const VO = [[0.3, 'For the ones with an idea, and a small shop.'], [3.5, 'Make it with care.'], [5.55, 'List it in your own stores.'], [7.85, 'Print it only when it’s ordered.'], [10.6, 'Make, and list.']];
+const T_V = [3.78, 5.87, 8.27];     // each verb lands on its spoken word
+const T_COL = 9.2, T_BLOOM = 9.55, T_SOLID = 10.75;
+
+K.run({
+  id: 'G15', title: 'The Monogram', dur: DUR, bpm: BPM, music: 'letting-go-of-the-past', mood: 'calm', key: 'E', intro: 0.0, cover: 11.6,
+  technique: 'Narrated brand manifesto on a graphite studio set: twelve concept products float on a slow 3D orbit (depth scale, depth-of-field blur, glossy floor reflections, haze and bokeh); each spoken verb lands as one huge word while the orbit answers it; the orbit collapses and blooms into a constellation of small products placed inside the ML monogram’s own path, which resolves into the solid ivory monogram with a gold sheen and floor reflection',
+  caption: 'For the ones with an idea and a small shop: make it with care, list it in your own stores, print it only when it’s ordered — by your own print partner, on your yes. MakeAndList. Start free at makeandlist.com',
+  short: 'Make it. List it. Print it when it’s ordered.',
+  vo: VO,
+  beats: ['0–3.5 s: “For the ones with an idea, and a small shop.” — twelve products orbit in the dark', '3.8–5.9 s: MAKE. — with care; the orbit tightens', '5.9–8.3 s: LIST. — in your own stores; the orbit tilts', '8.3–9.5 s: PRINT. — only when it’s ordered; the orbit slows', '9.5–13 s: the orbit collapses into a constellation along the ML monogram, which turns solid: “Make, and list.”', '13–15 s: end card'],
+  cues: [[0.0, 'riser'], [0.2, 'swish'], [T_V[0] - 0.3, 'hit'], [T_V[1] - 0.3, 'whoosh'], [T_V[1] - 0.05, 'pop'], [T_V[2] - 0.3, 'whoosh'], [T_V[2] + 0.6, 'printer'],
+    [T_COL - 0.1, 'whoosh'], [T_BLOOM, 'pop'], [T_SOLID + 0.05, 'hit'], [12.3, 'chime'], [13.0, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  hazes.forEach((h, i) => { h.style.transform = `translate(${L.cx - 450 + Math.sin(T * 0.3 + i * 2) * 300}px, ${L.cy - 350 + Math.cos(T * 0.25 + i) * 160}px)`; });
+  bokeh.forEach((b, i) => {
+    const near = i % 3 === 0;
+    const x = ((seed(i) * (W + 300) + T * (near ? 26 : 9)) % (W + 300)) - 150;
+    const y = seed(i + 20) * H * 0.8 + Math.sin(T * 0.5 + i) * 30;
+    b.style.transform = `translate(${x}px, ${y}px)`;
+    b.style.opacity = (near ? 0.35 : 0.5) * (0.6 + 0.4 * Math.sin(T * 1.3 + i));
+  });
+
+  // ---------- the orbit ----------
+  // speed eases down over the film; each verb gives it a push; it tightens on Make, tilts on List, slows on Print
+  const spin = 0.32 * T + 0.35 * K.p(T, T_V[0] - 0.3, T_V[0] + 0.6, E.outCubic) + 0.35 * K.p(T, T_V[1] - 0.3, T_V[1] + 0.6, E.outCubic) + 0.2 * K.p(T, T_V[2] - 0.3, T_V[2] + 0.8, E.outCubic);
+  const tight = 1 - 0.12 * K.p(T, T_V[0] - 0.2, T_V[0] + 0.5, E.outCubic) + 0.06 * K.p(T, T_V[1], T_V[1] + 0.6, E.inOutCubic);
+  const tilt = K.k(T, [[0, 1], [T_V[1] - 0.2, 1], [T_V[1] + 0.6, 1.55], [T_V[2], 1.3], [T_COL, 1.2]], E.inOutCubic);
+  const col = K.p(T, T_COL, T_BLOOM, E.inCubic);
+  const ringIn = K.p(T, 0, 1.2, E.outCubic);
+  ring.forEach(({ p, a }, i) => {
+    const phi = a + spin;
+    const depth = (Math.cos(phi) + 1) / 2;
+    const rx = L.Rx * tight * (0.7 + 0.3 * ringIn), ry = L.Ry * tilt;
+    let x = L.cx + rx * Math.sin(phi), y = L.cy + ry * Math.cos(phi) + Math.sin(T * 0.9 + i) * 12;
+    // collapse: everything pulls into the centre and shrinks to nothing
+    x = K.lerp(x, L.cx, col); y = K.lerp(y, L.mY + L.mW * 0.5, col);
+    const sc = (0.55 + 0.45 * depth) * (1 - col * 0.9) * (0.85 + 0.15 * ringIn);
+    const lift = L.floor - y;
+    const blur = (1 - depth) * 6 + col * 4;
+    const op = (0.4 + 0.6 * depth) * ringIn * (1 - K.p(T, T_BLOOM - 0.1, T_BLOOM + 0.05, E.linear));
+    const sw = K.clamp((Math.sin(phi) + 0.3) / 0.6);
+    p.set(x, L.floor, sc, lift / sc, Math.sin(phi) * -6, op, blur, depth > 0.85 ? sw : -1);
+    p.root.style.zIndex = 10 + Math.round(depth * 20);
+  });
+
+  // ---------- the constellation and the solid mark ----------
+  const solid = K.p(T, T_SOLID, T_SOLID + 0.7, E.inOutCubic);
+  dots.forEach((d, i) => {
+    const at = T_BLOOM + (d.d / dMax) * 0.4 + seed(i + 50) * 0.1;
+    const p = K.p(T, at, at + 0.55, E.outExpo);
+    const cx = L.cx, cy = L.mY + L.mW * 0.5;
+    const x = K.lerp(cx, d.sx, p), y = K.lerp(cy, d.sy, p);
+    const tw = 1 + 0.06 * Math.sin(T * 3 + i);
+    d.el.style.left = x - d.w / 2 + 'px'; d.el.style.top = y - d.h / 2 + 'px';
+    d.el.style.opacity = Math.min(1, p * 2) * (1 - solid);
+    d.el.style.transform = `rotate(${d.rot * (1 - p * 0.6)}deg) scale(${(0.3 + 0.7 * p) * tw * (1 - solid * 0.5)})`;
+    d.el.style.visibility = T >= at && solid < 1 ? 'visible' : 'hidden';
+  });
+  mono.style.opacity = solid;
+  mono.style.transform = `scale(${0.96 + 0.04 * solid + 0.015 * K.p(T, T_SOLID, 13, E.linear)})`;
+  mono.style.visibility = solid > 0 ? 'visible' : 'hidden';
+  monoR.style.opacity = solid * 0.8; monoR.style.visibility = mono.style.visibility;
+  glow.style.opacity = K.p(T, T_BLOOM, T_SOLID + 0.5, E.inOutCubic) * (0.8 + 0.2 * Math.sin(T * 2));
+  const sh = K.p(T, T_SOLID + 0.4, T_SOLID + 1.6, E.inOutCubic);
+  sheen.style.opacity = sh > 0 && sh < 1 ? 1 : 0;
+  const m = (1 - (sh * 1.2 - 0.1)) * 100 + '% 0';
+  sheen.style.webkitMaskPosition = m; sheen.style.maskPosition = m;
+
+  // ---------- type ----------
+  const l1Out = K.p(T, T_V[0] - 0.35, T_V[0] - 0.1, E.inCubic);
+  kick.style.opacity = K.p(T, 0.1, 0.5, E.linear) * (1 - l1Out);
+  l1W.forEach((w, i) => {
+    const p = K.p(T, 0.35 + i * 0.17, 0.95 + i * 0.17, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.4) * (1 - l1Out);
+    w.style.transform = `translateY(${(1 - p) * 40 - l1Out * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 10}px)` : 'none';
+  });
+  line1.style.visibility = l1Out < 1 ? 'visible' : 'hidden';
+  verbs.forEach((v, i) => {
+    const a = T_V[i] - 0.08, b = i < 2 ? T_V[i + 1] - 0.15 : T_COL;
+    const pin = K.p(T, a, a + 0.5, E.outExpo), pout = K.p(T, b - 0.25, b, E.inCubic);
+    const vv = v.firstChild, ss = v.lastChild;
+    vv.style.opacity = pin * (1 - pout);
+    vv.style.transform = `scale(${1.25 - 0.25 * pin + 0.03 * K.p(T, a, b, E.linear)}) translateY(${-pout * 20}px)`;
+    vv.style.filter = pin < 1 ? `blur(${(1 - pin) * 14}px)` : pout > 0 ? `blur(${pout * 10}px)` : 'none';
+    vv.style.letterSpacing = `${-0.04 + 0.05 * (1 - pin)}em`;
+    const sp = K.p(T, a + 0.25, a + 0.7, E.outExpo);
+    ss.style.opacity = sp * (1 - pout); ss.style.transform = `translateY(${(1 - sp) * 20}px)`;
+    v.style.visibility = pin > 0 && pout < 1 ? 'visible' : 'hidden';
+  });
+  const fp = K.p(T, 10.8, 11.4, E.outExpo);
+  fin.style.opacity = fp; fin.style.transform = `translateY(${(1 - fp) * 30}px)`;
+  fin.style.top = (tall ? L.mY + L.mW + 36 : L.finY) + 'px';
+  facts.style.top = (tall ? L.mY + L.mW + 128 : L.finY + 90) + 'px';
+  facts.style.opacity = K.p(T, 11.6, 12.0, E.linear);
+  const ls = K.p(T, T_SOLID + 0.3, T_SOLID + 1.8, E.inOutCubic);
+  sweepL.style.transform = `translateX(${(ls * 2 - 1) * W * 1.1}px)`;
+  sweepL.style.opacity = ls > 0 && ls < 1 ? 1 : 0;
+  tag.style.opacity = K.p(T, 0.8, 1.1, E.linear) * (1 - K.p(T, T_COL, T_BLOOM, E.linear)) + K.p(T, T_BLOOM, T_BLOOM + 0.3, E.linear) * (1 - solid);
+  end(T);
+});
+</script></body></html>

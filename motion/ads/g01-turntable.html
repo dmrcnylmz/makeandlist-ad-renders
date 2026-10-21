@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>G01 · The Turntable</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #0D0B09; }
+.cam { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.wash { position: absolute; inset: 0; }
+.beam { position: absolute; pointer-events: none; mix-blend-mode: screen; }
+.plat { position: absolute; border-radius: 50%; }
+.side { position: absolute; }
+.pool { position: absolute; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; }
+.pg { position: absolute; left: 0; top: 0; transform-origin: 50% 100%; }
+.pg .wr { position: absolute; inset: 0; transform-origin: 50% 100%; }
+.pg img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+.pg .rf { position: absolute; inset: 0; transform-origin: 50% 100%; opacity: .22; -webkit-mask-image: linear-gradient(to bottom, transparent 55%, #000); }
+.pg .sw { filter: brightness(1.9) saturate(1.1); opacity: 0; }
+.pg .csh { position: absolute; left: 6%; width: 88%; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.85), rgba(0,0,0,.45) 50%, rgba(0,0,0,0)); }
+.mote { position: absolute; left: 0; top: 0; border-radius: 50%; background: rgba(255,240,214,.9); }
+.haze { position: absolute; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(255,232,196,.10), rgba(255,232,196,0)); }
+.kick { position: absolute; z-index: 60; font: 500 21px 'IBM Plex Mono', monospace; letter-spacing: .26em; text-transform: uppercase; color: rgba(255,246,228,.62); text-align: center; white-space: nowrap; }
+.cap { position: absolute; z-index: 60; text-align: center; font: 700 96px/1.04 'Playfair Display'; letter-spacing: -0.02em; color: #FFF8EC; text-shadow: 0 6px 40px rgba(0,0,0,.6); }
+.cap i { font-weight: 500; }
+.cap em { font-style: italic; font-weight: 500; color: #DFFF5A; }
+.sub { position: absolute; z-index: 60; text-align: center; font: 500 30px/1.3 'Archivo'; color: rgba(255,246,228,.82); }
+.chip2 { position: absolute; z-index: 61; display: flex; align-items: center; gap: 14px; padding: 12px 22px 12px 14px; border-radius: 999px; white-space: nowrap;
+  background: rgba(24,21,18,.72); border: 1px solid rgba(255,246,228,.22); backdrop-filter: blur(8px); font: 500 23px 'IBM Plex Mono', monospace; letter-spacing: .04em; color: #FFF8EC; }
+.chip2 b { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #DFFF5A; color: #1F1F1F; font: 800 18px 'Archivo'; }
+.chip2 s { text-decoration: none; display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #E8A33C; box-shadow: 0 0 0 5px rgba(232,163,60,.22); }
+.demo.dk { background: rgba(20,17,14,.66); color: rgba(255,246,228,.8); border-color: rgba(255,246,228,.35); }
+.vig { position: absolute; inset: 0; pointer-events: none; z-index: 50; background: radial-gradient(110% 80% at 50% 50%, rgba(0,0,0,0) 50%, rgba(0,0,0,.7) 100%); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// G01 — The Turntable. A dark studio, one spotlight, a lacquered turntable. The "slow mornings" mug turns under a light
+// sweep (made once); the camera pushes to a macro of the lettering with a rack focus (a draft you review); it pulls back
+// as the light pool widens and more products rise onto the rim and orbit (printed per order, by your own partner); a
+// parcel lands at the front (paid from your partner account, only with your yes). One continuous take; impacts in the
+// breaths of the voice.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const AR = { k01: 852 / 804, k02: 608 / 897, k03: 977 / 901, k05: 595 / 961, k06: 634 / 923, k11: 789 / 789, k09: 656 / 926 };
+const FILE = { k01: 'k01-mug', k02: 'k02-framed-print', k03: 'k03-tee', k05: 'k05-tote', k06: 'k06-notebook', k11: 'k11-parcel', k09: 'k09-kids-book' };
+
+// A cut-out product: contact shadow, floor reflection (flipped, faded copy), the product, and a light-sweep copy (a
+// brightened duplicate behind a moving gradient mask, so the light only falls on the product itself).
+function prod(id, w, parent) {
+  const h = w / AR[id], src = K.pub('r07/' + FILE[id] + '.webp');
+  const g = K.box(0, 0, w, h, { cls: 'pg', parent });
+  const sh = K.el('div', { cls: 'csh', parent: g, style: { top: h - w * 0.07 + 'px', height: w * 0.14 + 'px' } });
+  const rf = K.el('img', { cls: 'rf', parent: g, src });
+  const wr = K.el('div', { cls: 'wr', parent: g });
+  const im = K.el('img', { parent: wr, src });
+  const sw = K.el('img', { cls: 'sw', parent: wr, src });
+  return { g, w, h, set(o) {
+    const s = o.s ?? 1, L = o.lift ?? 0, ry = o.ry ?? 0;
+    g.style.transform = `translate(${o.x - w / 2}px, ${o.y - h}px) scale(${s})`;
+    g.style.opacity = o.o ?? 1;
+    g.style.zIndex = o.z ?? 10;
+    const f = [];
+    if ((o.blur ?? 0) > 0.05) f.push(`blur(${o.blur}px)`);
+    if ((o.bright ?? 1) !== 1) f.push(`brightness(${o.bright})`);
+    g.style.filter = f.length ? f.join(' ') : 'none';
+    wr.style.transform = `translateY(${-L}px) perspective(1600px) rotateY(${ry}deg)`;
+    rf.style.transform = `translateY(${L}px) scaleY(-1) perspective(1600px) rotateY(${-ry}deg)`;
+    rf.style.opacity = o.refl ?? 0.22;
+    sh.style.opacity = (o.shadow ?? 1) * (1 - Math.min(0.8, L / h));
+    sh.style.transform = `scaleX(${1 + L / h * 0.5})`;
+    const p = o.sweep ?? -1;
+    if (p > -0.4 && p < 1.4) {
+      const c = p * 100;
+      sw.style.webkitMaskImage = `linear-gradient(102deg, transparent ${c - 22}%, rgba(0,0,0,.85) ${c - 4}%, #000 ${c}%, rgba(0,0,0,.85) ${c + 4}%, transparent ${c + 22}%)`;
+      sw.style.opacity = o.sweepA ?? 0.75;
+    } else sw.style.opacity = 0;
+  } };
+}
+
+// ---------- layout ----------
+const L = tall
+  ? { cx: W / 2, cy: 1110, R: 490, mugW: 500, kickY: 286, capY: 330, capFs: 104, subY: 560, chipY: 1180, tagY: 1196 }
+  : { cx: W / 2, cy: 1010, R: 450, mugW: 440, kickY: 58, capY: 98, capFs: 88, subY: 300, chipY: 1210, tagY: 1268 };
+const TILT = 74;
+
+// ---------- set (inside the camera) ----------
+const cam = K.box(0, 0, W, H, { cls: 'cam' });
+const wash = K.el('div', { cls: 'wash', parent: cam, style: { background: `radial-gradient(60% 34% at 50% ${tall ? 46 : 50}%, #3A2F24 0, #1C1712 48%, #0D0B09 100%)` } });
+const floor = K.box(-W, L.cy - 120, W * 3, H, { parent: cam, style: { background: 'linear-gradient(180deg, rgba(40,33,26,0) 0, rgba(28,23,18,.9) 22%, #0D0B09 70%)' } });
+const beam = K.box(L.cx - L.R * 1.25, -200, L.R * 2.5, L.cy + 260, { cls: 'beam', parent: cam, style: {
+  clipPath: 'polygon(40% 0, 60% 0, 100% 100%, 0 100%)', background: 'linear-gradient(180deg, rgba(255,232,196,.26), rgba(255,232,196,.07) 70%, rgba(255,232,196,0))', filter: 'blur(26px)' } });
+const hazes = Array.from({ length: 5 }, (_, i) => K.box(0, 0, 520 + seed(i) * 300, 300 + seed(i + 9) * 160, { cls: 'haze', parent: cam }));
+// turntable: base disc + side band + top disc (CSS 3D: rotateX tilts it onto the floor, rotateZ spins it)
+const D = L.R * 2, TH = 30;
+const base = K.box(L.cx - L.R, L.cy - L.R + TH, D, D, { cls: 'plat', parent: cam, style: { background: 'linear-gradient(90deg, #0B0A09, #2A241E 30%, #4A3E31 50%, #2A241E 70%, #0B0A09)' } });
+const side = K.box(L.cx - L.R, L.cy, D, TH, { cls: 'side', parent: cam, style: { background: 'linear-gradient(90deg, #0B0A09, #2A241E 30%, #4A3E31 50%, #2A241E 70%, #0B0A09)' } });
+const disc = K.box(L.cx - L.R, L.cy - L.R, D, D, { cls: 'plat', parent: cam, style: {
+  background: `radial-gradient(closest-side, rgba(255,240,214,0) 0 96%, rgba(255,240,214,.55) 97.4%, rgba(255,240,214,0) 98.6%),
+    repeating-conic-gradient(from 0deg, rgba(255,240,214,.05) 0 1.2deg, rgba(0,0,0,0) 1.2deg 15deg),
+    repeating-radial-gradient(closest-side, #1E1A16 0 5px, #231E19 5px 7px),
+    #1E1A16`, boxShadow: 'inset 0 0 60px rgba(0,0,0,.7)' } });
+const mark = K.el('div', { parent: disc, style: { position: 'absolute', left: '50%', top: '3.2%', width: '20px', height: '20px', marginLeft: '-10px', borderRadius: '50%', background: '#DFFF5A', boxShadow: '0 0 22px rgba(223,255,90,.8)' } });
+const pool = K.box(L.cx - L.R, L.cy - L.R * Math.cos(TILT * Math.PI / 180), D, D * Math.cos(TILT * Math.PI / 180), { cls: 'pool', parent: cam, style: { background: 'radial-gradient(closest-side, rgba(255,230,190,.34), rgba(255,230,190,.08) 60%, rgba(255,230,190,0))' } });
+
+// products: the mug at the centre; four more rise onto the rim; the parcel lands at the front
+const mug = prod('k01', L.mugW, cam);
+const RIM = [['k09', 205], ['k02', 190], ['k05', 185], ['k06', 180]].map(([id, w]) => prod(id, w * (tall ? 1 : 0.95), cam));
+const parcel = prod('k11', tall ? 230 : 210, cam);
+const motes = Array.from({ length: 34 }, (_, i) => K.box(0, 0, 2 + seed(i) * 5, 2 + seed(i) * 5, { cls: 'mote', parent: cam }));
+
+// ---------- type ----------
+const vig = K.box(0, 0, W, H, { cls: 'vig' });
+const kick = K.box(65, L.kickY, W - 130, null, { cls: 'kick', html: 'Product film Nº 01 · the turntable' });
+const CAP = [
+  { a: 0.9, b: 2.5, t: 'Made <em>once.</em>' },
+  { a: 2.9, b: 5.25, t: 'A draft\nyou <em>review.</em>' },
+  { a: 5.72, b: 8.95, t: 'Printed\n<em>per order.</em>' },
+  { a: 9.55, b: 10.95, t: 'Paid from your\npartner <em>account.</em>' },
+  { a: 11.02, b: 12.85, t: 'Sent with\nyour <em>yes.</em>' },
+];
+const caps = CAP.map((c) => { const el = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }); return { el, ws: K.words(el, c.t.replace(/<em>(.*?)<\/em>/g, (m, x) => x.split(' ').map((w) => '<em>' + w + '</em>').join(' '))), c }; });
+const subs = [
+  { a: 7.0, b: 8.95, t: 'by your own print partner, when a buyer orders' },
+  { a: 9.95, b: 10.95, t: 'printing is never paid in Credits' },
+].map((c) => ({ el: K.box(65, L.capY + L.capFs * 2.2, W - 130, null, { cls: 'sub', html: c.t }), c }));
+const chip = K.box(0, L.chipY, null, null, { cls: 'chip2', html: '<s></s>Draft · waiting for your yes', style: { width: 'auto', height: 'auto' } });
+const chipOk = K.box(0, L.chipY, null, null, { cls: 'chip2', html: '<b>✓</b>Approved by you · sent to print', style: { width: 'auto', height: 'auto' } });
+const tag = K.demoTag('Concept products · AI-generated', 0, 0); tag.classList.add('dk');
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, dark: true, line: 'Made once.<br>Printed per order.' });
+
+K.run({
+  id: 'G01', title: 'The Turntable', dur: DUR, bpm: BPM, music: 'new-shoes', mood: 'calm', key: 'C', intro: 0.0, cover: 5.6,
+  technique: 'One-take studio product film: a CSS 3D lacquered turntable (rotateX floor tilt, rotateZ spin) under a spotlight beam with haze and dust, the cut-out mug turning with a masked light sweep, floor reflection and contact shadow; a push to a macro rack focus, then a pull back as products rise onto the rim and orbit as depth-sorted billboards with blur by depth',
+  caption: 'Make it once, print it per order. Your design becomes a draft you review; when someone orders, your own print partner prints it, paid from your partner account, and nothing is sent without your yes. Products shown are concept images. Start free at makeandlist.com',
+  short: 'Made once. Printed per order.',
+  question: 'Can I sell physical products too?', gain: 'Physical products without stock, under your control',
+  vo: [[0.35, 'Make it once.'], [2.55, 'Your design becomes a draft you review.'], [5.5, 'When someone orders, your own print partner prints it.'], [9.3, 'Paid from your partner account. Sent with your yes.']],
+  beats: ['0–2.5 s: “Made once.” — a spotlight comes up on a lacquered turntable; the mug turns under a light sweep', '2.5–5.3 s: push to a macro of the lettering, rack focus: “A draft you review.” (Draft · waiting for your yes)', '5.3–9 s: pull back, the light pool widens, four more products rise onto the rim and orbit: printed per order by your own partner', '9–13 s: a parcel lands at the front: paid from your partner account, never Credits; sent with your yes', '13–15 s: end card'],
+  cues: [[0.0, 'swish'], [2.45, 'whoosh'], [3.62, 'pop'], [5.2, 'swish'], [6.95, 'pop'], [9.35, 'box'], [10.9, 'pop'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const lightUp = K.p(T, 0, 1.4, E.inOutCubic);
+
+  // ---------- camera: wide → macro (lettering) → wide orbit → slight push on the parcel ----------
+  const fxMug = L.cx, fyMug = L.cy - mug.h * 0.52;
+  const ZK = [[0, 1.08], [2.45, 1.0], [3.3, 1.95], [5.25, 2.05], [6.1, 0.98], [9.2, 0.95], [12.6, 1.02]];
+  const z = K.k(T, ZK, E.inOutCubic);
+  const fy = K.k(T, [[0, L.cy - 260], [2.45, L.cy - 250], [3.3, fyMug], [5.25, fyMug + 10], [6.1, L.cy - 250], [9.2, L.cy - 240], [12.6, L.cy - 200]], E.inOutCubic);
+  const fx = L.cx + Math.sin(T * 0.4) * 10;
+  const ax = W / 2, ay = (tall ? 860 : 760) + (tall ? 170 : 120) * K.k(T, [[2.45, 0], [3.3, 1], [5.25, 1], [6.1, 0]], E.inOutCubic);
+  cam.style.transform = `translate(${ax - fx * z}px, ${ay - fy * z}px) scale(${z})`;
+  const camVel = Math.abs(K.k(T + 1 / 30, ZK, E.inOutCubic) - z) * 30;
+
+  // set lighting
+  wash.style.opacity = 0.35 + 0.65 * lightUp;
+  beam.style.opacity = lightUp * (0.85 + 0.15 * Math.sin(T * 2.1));
+  const poolW = K.k(T, [[0, 0.55], [5.3, 0.62], [6.5, 1.05]], E.inOutCubic);
+  pool.style.transform = `scale(${poolW})`; pool.style.opacity = lightUp;
+  hazes.forEach((h, i) => {
+    const x = L.cx - 300 + Math.sin(T * 0.12 + i * 1.7) * 260 + (seed(i + 2) - 0.5) * 300, y = 240 + seed(i + 4) * (L.cy - 300) + Math.cos(T * 0.1 + i) * 40;
+    h.style.transform = `translate(${x}px, ${y}px)`; h.style.opacity = lightUp * (0.6 + 0.4 * Math.sin(T * 0.5 + i));
+  });
+
+  // turntable
+  const spin = T * 26; // degrees: a slow, steady luxury spin
+  const tiltT = TILT + K.k(T, [[0, 0], [5.3, 0], [6.6, -4], [12.6, -5]], E.inOutCubic);
+  [disc, base].forEach((d) => { d.style.transform = `perspective(5000px) rotateX(${tiltT}deg) rotateZ(${spin}deg)`; });
+  const ct = Math.cos(tiltT * Math.PI / 180), side0 = L.R;
+  side.style.top = L.cy + 'px';
+  const macro = K.p(T, 2.5, 3.3, E.inOutCubic) * (1 - K.p(T, 5.25, 6.0, E.inOutCubic));
+  // depth of field: the set falls out of focus on the macro
+  const bgBlur = macro * 9 + Math.min(6, camVel * 6);
+  [disc, base, side, floor, wash].forEach((d) => { d.style.filter = bgBlur > 0.1 ? `blur(${bgBlur}px)` : 'none'; });
+
+  // ---------- the mug (centre) ----------
+  const ry = Math.sin(T * 0.9) * 17;
+  const sw1 = K.k(T, [[0.6, -0.3], [2.4, 1.3]], E.inOutCubic), sw2 = K.k(T, [[3.4, -0.3], [5.2, 1.3]], E.inOutCubic), sw3 = K.k(T, [[6.3, -0.3], [7.9, 1.3]], E.inOutCubic);
+  const sweep = T < 2.6 ? sw1 : T < 5.5 ? sw2 : T < 8.5 ? sw3 : -1;
+  const focus = 1 - K.p(T, 3.3, 4.0, E.inOutCubic); // rack focus on the macro
+  const mugBlur = (T > 2.9 && T < 4.1 ? focus * 7 : 0);
+  mug.set({ x: L.cx, y: L.cy + 2, s: 1 - 0.3 * K.p(T, 5.3, 6.4, E.inOutCubic), ry, sweep, sweepA: 0.7, blur: mugBlur, z: 30, bright: 0.25 + 0.75 * lightUp, refl: 0.16 });
+
+  // ---------- rim products: rise and orbit, depth-sorted billboards ----------
+  const rise = K.p(T, 5.8, 7.2, E.outCubic);
+  const rr = L.R * 0.8;
+  RIM.forEach((p, i) => {
+    const th = (spin + i * 90 + 200) * Math.PI / 180;
+    const d = Math.sin(th); // +1 front … −1 back
+    const x = L.cx + rr * Math.cos(th), y = L.cy + rr * d * ct;
+    const ri = K.p(T, 5.8 + i * 0.18, 7.0 + i * 0.18, E.outCubic);
+    p.set({ x, y, s: (0.86 + 0.16 * d) * (0.6 + 0.4 * ri), z: d > 0 ? 40 : 20, blur: (1 - d) * 1.6 + (1 - ri) * 6, bright: (0.5 + 0.5 * (d + 1) / 2) * ri, o: ri, refl: 0.12, sweep: sw3 - 0.1 + i * 0.05, sweepA: 0.45 });
+    p.g.style.visibility = rise > 0 ? 'visible' : 'hidden';
+  });
+  // parcel lands at the front
+  const pl = K.p(T, 8.85, 9.35, E.inCubic), bounce = Math.sin(K.p(T, 9.35, 9.75, E.linear) * Math.PI) * 14;
+  parcel.set({ x: L.cx + L.R * 0.5, y: L.cy + L.R * ct * 0.9 + 30, lift: (1 - pl) * 520 + bounce, s: 1, z: 60, o: K.p(T, 8.85, 9.05, E.linear), refl: 0.14, sweep: K.k(T, [[9.8, -0.3], [11.2, 1.3]], E.inOutCubic), sweepA: 0.5 });
+  parcel.g.style.visibility = T > 8.8 ? 'visible' : 'hidden';
+
+  // dust in the beam
+  motes.forEach((m, i) => {
+    const x = L.cx + (seed(i + 11) - 0.5) * L.R * 2.2 + Math.sin(T * 0.3 + i) * 30;
+    const y = ((seed(i + 17) * L.cy - T * (10 + seed(i + 5) * 16)) % L.cy + L.cy) % L.cy;
+    m.style.transform = `translate(${x}px, ${y}px)`;
+    m.style.opacity = lightUp * (0.2 + 0.6 * seed(i + 23)) * (0.5 + 0.5 * Math.sin(T * 1.7 + i * 2));
+  });
+
+  // ---------- type ----------
+  kick.style.opacity = 0.9 * K.win(T, 0.3, 2.5, 0.35);
+  caps.forEach(({ el, ws, c }) => {
+    el.style.visibility = T > c.a - 0.05 && T < c.b + 0.4 ? 'visible' : 'hidden';
+    K.reveal(ws, T, c.a, { kind: 'blur', stagger: 0.1, dur: 0.8, ease: E.outCubic, out: c.b });
+  });
+  subs.forEach(({ el, c }) => {
+    const p = K.p(T, c.a, c.a + 0.7, E.outCubic), o = K.p(T, c.b - 0.3, c.b, E.inCubic);
+    el.style.opacity = p * (1 - o); el.style.transform = `translateY(${(1 - p) * 16}px)`;
+  });
+  const chipP = K.win(T, 3.6, 5.3, 0.35), okP = K.win(T, 11.0, 12.9, 0.3);
+  chip.style.left = (W - chip.offsetWidth) / 2 + 'px'; chip.style.opacity = chipP; chip.style.transform = `translateY(${(1 - K.p(T, 3.6, 4.2, E.outExpo)) * 30}px)`;
+  chipOk.style.left = (W - chipOk.offsetWidth) / 2 + 'px'; chipOk.style.opacity = okP; chipOk.style.transform = `scale(${0.9 + 0.1 * K.p(T, 11.0, 11.4, E.outBack)})`;
+  tag.style.left = (tall ? 65 : 60) + 'px';
+  tag.style.top = (tall ? 1248 - 44 : 1350 - 60 - 34) + 'px';
+  tag.style.opacity = 0.95 * K.p(T, 1.0, 1.5, E.linear) * (1 - Math.max(chipP, okP)) * (1 - K.p(T, 12.6, 13, E.linear));
+
+  end(T);
+});
+</script></body></html>

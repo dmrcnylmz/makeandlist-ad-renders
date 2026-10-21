@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.3,
+  "text": "Look closer.",
+  "file": "01-07cffec225.wav",
+  "dur": 2.04
+ },
+ {
+  "t": 1.75,
+  "text": "Every line, checked before it prints.",
+  "file": "02-bd04f9a320.wav",
+  "dur": 3.39
+ },
+ {
+  "t": 4.75,
+  "text": "Then a framed print, made to order.",
+  "file": "03-1f98963413.wav",
+  "dur": 3.48
+ },
+ {
+  "t": 8,
+  "text": "And its listing, a draft until your yes.",
+  "file": "04-09dfb56fcf.wav",
+  "dur": 4.09
+ }
+]

@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>G09 · Macro to Wide</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #2B2723; }
+.macro { position: absolute; inset: 0; overflow: hidden; }
+.macro img { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: block; }
+.macro .soft { -webkit-mask-image: radial-gradient(60% 45% at 50% 48%, rgba(0,0,0,0) 35%, #000 100%); mask-image: radial-gradient(60% 45% at 50% 48%, rgba(0,0,0,0) 35%, #000 100%); }
+.cam { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
+.studio { position: absolute; left: -3000px; top: -3000px; width: 6000px; height: 6000px; overflow: hidden; }
+.studio > * { position: absolute; }
+.paperN { mix-blend-mode: multiply; opacity: .32; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .4  0 0 0 0 .33  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.refl { transform: scaleY(-1); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 62%, rgba(0,0,0,.8)); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 62%, rgba(0,0,0,.8)); }
+.cs { border-radius: 50%; background: radial-gradient(closest-side, rgba(55,38,22,.6), rgba(55,38,22,0)); }
+.sheen { mix-blend-mode: soft-light; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+.shaft { mix-blend-mode: soft-light; filter: blur(40px); background: linear-gradient(180deg, rgba(255,250,236,1), rgba(255,250,236,0)); }
+.mote { position: absolute; border-radius: 50%; background: rgba(255,248,230,.9); pointer-events: none; z-index: 20; }
+.vig { position: absolute; inset: 0; z-index: 21; pointer-events: none; background: radial-gradient(110% 80% at 50% 45%, rgba(20,14,8,0) 50%, rgba(20,14,8,.45) 100%); }
+.cap { position: absolute; z-index: 40; text-align: center; font: italic 600 80px/1.04 'Playfair Display'; letter-spacing: -0.015em; color: #FFFDF8; text-shadow: 0 4px 34px rgba(30,20,10,.55); }
+.cap b { font-weight: 800; font-style: normal; }
+.sub { position: absolute; z-index: 40; text-align: center; font: 500 23px/1.5 'IBM Plex Mono', monospace; letter-spacing: .05em; color: #FFFDF8; text-shadow: 0 2px 16px rgba(30,20,10,.7); }
+.ret { position: absolute; z-index: 30; pointer-events: none; }
+.ret i { position: absolute; width: 46px; height: 46px; border-color: #DFFF5A; border-style: solid; border-width: 0; }
+.note { position: absolute; z-index: 31; white-space: nowrap; display: flex; align-items: center; gap: 12px; padding: 10px 18px; border-radius: 99px; background: rgba(31,31,31,.78); color: #FFFDF8; font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .05em; }
+.note b { width: 30px; height: 30px; border-radius: 50%; background: #DFFF5A; color: #1F1F1F; display: grid; place-items: center; font: 800 17px 'Archivo'; }
+.card { position: absolute; z-index: 5; border-radius: 40px; background: #FFFDF8; box-shadow: 0 70px 120px -50px rgba(0,0,0,.75), 0 0 0 1px rgba(0,0,0,.05); }
+.ttl { position: absolute; z-index: 25; font: 800 50px/1.02 'Playfair Display'; letter-spacing: -0.015em; color: #1F1F1F; }
+.meta { position: absolute; z-index: 25; font: 500 21px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #6B645A; white-space: nowrap; }
+.row { position: absolute; z-index: 25; display: flex; gap: 12px; flex-wrap: wrap; }
+.row span { font: 700 24px 'Archivo'; color: #1F1F1F; padding: 10px 18px; border-radius: 12px; box-shadow: inset 0 0 0 2px #E2DBCE; white-space: nowrap; }
+.row span.on { box-shadow: inset 0 0 0 3px #1F1F1F; }
+.stat { position: absolute; z-index: 25; white-space: nowrap; display: flex; align-items: center; gap: 12px; font: 800 28px 'Archivo'; padding: 14px 24px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; box-shadow: 0 0 0 2px #1F1F1F; }
+.stat i { width: 13px; height: 13px; border-radius: 50%; background: #1F1F1F; display: block; }
+.strip { position: absolute; z-index: 25; overflow: hidden; border-radius: 18px; background: #FAF7EE; box-shadow: 0 0 0 1px #E2DBCE; }
+.strip img { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: block; }
+.demo.dk { background: rgba(30,27,23,.6); color: rgba(255,253,248,.9); border-color: rgba(255,253,248,.45); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// G09 — Macro to Wide. One continuous pull-back. It opens on an extreme macro of a print's textured paper and its
+// terracotta sun (a concept photograph, breathing in and out of focus), match-dissolves onto the same sun on the
+// framed protea print, then glides across the graphite line work while a reticle checks it, and keeps pulling back:
+// the print in a sunlit still-life set (floor reflection, contact shadow, a light sweep on the glass, a mug and a gift tag
+// as props), until the whole set becomes the hero image of its listing — a white card with the title, sizes and a lime
+// "Draft · goes live on your yes". 4:5 adds the real "drafts first" line from the app underneath.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 80.7, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian) — speech windows: L1 0.95–2.25 · L2 2.78–3.51 / 3.91–5.03 · L3 5.49–6.81 / 7.31–8.08 ·
+// L4 8.66–9.89 / 10.31–10.77 / 11.17–11.70. Cues sit in the breaths.
+const VO = [[0.3, 'Look closer.'], [1.75, 'Every line, checked before it prints.'], [4.75, 'Then a framed print, made to order.'], [8.0, 'And its listing, a draft until your yes.']];
+
+// ---------- world (the still-life set), origin at the print's bottom centre ----------
+const PH = 1000, PS = PH / 897, PW = 608 * PS;     // print height in world px, natural → world scale
+const nat = (x, y) => [-PW / 2 + x * PS, -PH + y * PS];  // a point on the print (natural px) in world px
+const SUN = nat(318, 205), LINE = nat(292, 540), LINE2 = nat(250, 690);
+const HERO = { x0: -620, x1: 620, y0: -810, y1: 120 };   // the listing's hero image, in world px
+const L = tall
+  ? { heroCx: 540, heroCy: 600, Zf: 0.645, capY: 300, capFs: 80, subY: 494, card: [100, 262, 880, 978], ttlY: 930, metaY: 994, rowY: 1040, statY: 1118, ltag: [140, 1192], anchorY: 860 }
+  : { heroCx: 540, heroCy: 398, Zf: 0.645, capY: 70, capFs: 72, subY: 246, card: [60, 60, 960, 1230], ttlY: 726, metaY: 788, rowY: 832, statY: 904, ltag: [100, 1236], anchorY: 640 };
+
+const AY = tall ? H * 0.5 : H * 0.56; // where the macro shots sit
+const cam = K.box(0, 0, 0, 0, { cls: 'cam', style: { zIndex: 10 } });
+const studio = K.el('div', { parent: cam, cls: 'studio' });
+const O = 3000; // studio box offset
+const at = (x, y, w, h, opts) => K.box(O + x, O + y, w, h, { parent: studio, ...opts });
+at(-3000, -3000, 6000, 3000, { style: { background: 'radial-gradient(1400px 1100px at 3000px 2400px, #FBF5EA 0%, #EFE3D0 45%, #D9C8AE 100%)' } });
+at(-3000, 0, 6000, 3000, { style: { background: 'linear-gradient(180deg, #CDB89A 0, #BFA886 6%, #A99070 40%, #8C7559 100%)' } });
+at(-3000, -3, 6000, 6, { style: { background: 'linear-gradient(90deg, rgba(255,250,236,0), rgba(255,250,236,.7) 50%, rgba(255,250,236,0))', filter: 'blur(2px)' } });
+const shaft = at(-200, -2400, 700, 2600, { cls: 'shaft' });
+const leaf = at(500, -1300, 900, 900, { style: { opacity: 0.14, filter: 'blur(14px)', mixBlendMode: 'multiply' }, html: `<svg viewBox="0 0 100 100" width="900" height="900"><g fill="#4A3A22">${Array.from({ length: 8 }, (_, i) => `<ellipse cx="${18 + (i % 3) * 30 + seed(i) * 8}" cy="${18 + Math.floor(i / 3) * 30}" rx="${10 + seed(i + 5) * 4}" ry="4" transform="rotate(${seed(i + 9) * 180} ${18 + (i % 3) * 30} ${18 + Math.floor(i / 3) * 30})"/>`).join('')}</g></svg>` });
+// props: a gift tag leaning left, the mug right, both a step back (softer)
+const tagP = { w: 380 * 596 / 906, h: 380 };
+at(-470 - tagP.w * 0.6, -16, tagP.w * 1.2, 34, { cls: 'cs' });
+const gift = at(-470 - tagP.w / 2, -tagP.h, tagP.w, tagP.h, { tag: 'img', src: K.pub('r07/k14-gift-tag.webp'), style: { transform: 'rotate(-7deg)', transformOrigin: '50% 100%', filter: 'blur(1.5px)' } });
+const mugP = { w: 300 * 852 / 804, h: 300 };
+at(470 - mugP.w * 0.55, -16, mugP.w * 1.1, 34, { cls: 'cs' });
+const mug = at(470 - mugP.w / 2, -mugP.h, mugP.w, mugP.h, { tag: 'img', src: K.pub('r07/k01-mug.webp'), style: { filter: 'blur(1.5px)' } });
+at(470 - mugP.w / 2, 0, mugP.w, mugP.h, { tag: 'img', cls: 'refl', src: K.pub('r07/k01-mug.webp'), style: { opacity: 0.16 } });
+// the print
+at(-PW * 0.55, -22, PW * 1.1, 44, { cls: 'cs' });
+const PRINT = K.pub('r07/k02-framed-print.webp');
+at(-PW / 2, 0, PW, PH, { tag: 'img', cls: 'refl', src: PRINT, style: { opacity: 0.2 } });
+const print = at(-PW / 2, -PH, PW, PH, { tag: 'img', src: PRINT });
+const paperN = at(-PW / 2 + 60 * PS, -PH + 60 * PS, PW - 120 * PS, PH - 120 * PS, { cls: 'paperN' });
+const sheen = at(-PW / 2, -PH, PW, PH, { cls: 'sheen', style: { WebkitMaskImage: `url("${PRINT}")`, maskImage: `url("${PRINT}")`, background: 'linear-gradient(115deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.95) 50%, rgba(255,255,255,0) 60%)', backgroundSize: '300% 100%' } });
+
+// ---------- the macro photograph (opening) ----------
+const macro = K.box(0, 0, W, H, { cls: 'macro', style: { zIndex: 12 } });
+const mA = K.el('img', { parent: macro, src: K.pub('r05/h12-print-macro.webp'), style: { width: '1024px', height: '1536px' } });
+const mB = K.el('img', { parent: macro, cls: 'soft', src: K.pub('r05/h12-print-macro.webp'), style: { width: '1024px', height: '1536px', filter: 'blur(14px)' } });
+const motes = Array.from({ length: 24 }, (_, i) => K.box(0, 0, 2 + seed(i) * 6, 2 + seed(i) * 6, { cls: 'mote', style: { filter: `blur(${1 + seed(i + 40) * 2}px)` } }));
+const vig = K.box(0, 0, W, H, { cls: 'vig' });
+const scrim = K.box(0, 0, W, tall ? 760 : 420, { style: { zIndex: 22, pointerEvents: 'none', background: 'linear-gradient(180deg, rgba(30,20,10,.42) 0%, rgba(30,20,10,.25) 55%, rgba(30,20,10,0) 100%)' } });
+
+// ---------- type and annotations ----------
+const CAPS = [
+  { a: 0.92, b: 2.45, t: 'Look <b>closer.</b>' },
+  { a: 2.75, b: 5.2, t: 'Every line,\n<b>checked</b> before it prints.' },
+  { a: 5.45, b: 8.15, t: 'A framed print,\n<b>made to order.</b>', sub: 'printed per order by your own print partner<br>paid from your partner account' },
+];
+const caps = CAPS.map((c) => {
+  const el = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  const ws = K.words(el, c.t.replace(/<b>(.*?)<\/b>/g, (m, x) => x.split(' ').map((w) => '<b>' + w + '</b>').join(' ')));
+  const sub = c.sub ? K.box(65, L.subY, W - 130, null, { cls: 'sub', html: c.sub }) : null;
+  return { el, ws, sub, c };
+});
+const RS = tall ? 300 : 260;
+const ret = K.box(0, 0, RS, RS, { cls: 'ret', html: ['left:0;top:0;border-left-width:4px;border-top-width:4px', 'right:0;top:0;border-right-width:4px;border-top-width:4px', 'left:0;bottom:0;border-left-width:4px;border-bottom-width:4px', 'right:0;bottom:0;border-right-width:4px;border-bottom-width:4px'].map((s) => `<i style="${s}"></i>`).join('') });
+const note = K.box(0, 0, null, null, { cls: 'note', html: '<span>line work · sharp at print size</span><b>✓</b>', style: { width: 'auto', height: 'auto' } });
+const noteB = note.querySelector('b'), noteTx = note.querySelector('span');
+
+// the listing card (screen space), drawn: a preview with sample data
+const [cx0, cy0, cw, ch] = L.card;
+const card = K.box(cx0, cy0, cw, ch, { cls: 'card' });
+const ttl = K.box(cx0 + 40, L.ttlY, cw - 80, null, { cls: 'ttl', html: 'Protea line-art print' });
+const meta = K.box(cx0 + 40, L.metaY, cw - 80, null, { cls: 'meta', html: 'Framed print · made to order' });
+const row = K.box(cx0 + 40, L.rowY, cw - 80, null, { cls: 'row', html: '<span>A4</span><span class="on">A3</span><span>50 × 70 cm</span>' });
+const stat = K.box(cx0 + 40, L.statY, null, null, { cls: 'stat', html: '<i></i><span>Draft</span>', style: { width: 'auto', height: 'auto' } });
+const statTx = stat.querySelector('span');
+const ltag = K.demoTag('Listing preview · sample data', L.ltag[0], L.ltag[1]); ltag.style.zIndex = 26;
+let strip = null, rtag = null;
+if (!tall) {
+  const sw = 840, k = sw / 780;
+  strip = K.box(120, 990, sw, 186, { cls: 'strip', html: `<img src="${K.screen('72-phone-listing-send')}">` });
+  strip.firstChild.style.transform = `translate(0, ${-1086 * k}px) scale(${k})`;
+  rtag = K.demoTag('Real app · demo workspace', 120, 1186); rtag.style.zIndex = 26;
+}
+const ctag = K.demoTag('Concept products · AI-generated', 0, 0); ctag.classList.add('dk'); ctag.style.zIndex = 27;
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Look closer.<br>Then say yes.' });
+
+// ---------- the camera: world point (fx, fy) at screen (ax, ay), scale Z (keyed in log space) ----------
+const T_DIS = [1.85, 2.55], T_PULL = [5.0, 8.05], T_CARD = [8.1, 10.0];
+const camAt = (t) => {
+  const lz = K.k(t, [[T_DIS[0], Math.log(3.7)], [T_PULL[0], Math.log(2.3)], [T_PULL[1], Math.log(0.96)], [T_CARD[1], Math.log(L.Zf)], [13, Math.log(L.Zf * 1.03)]], E.inOutCubic);
+  const fx = K.k(t, [[T_DIS[0], SUN[0]], [3.0, SUN[0] - 30], [4.4, LINE[0]], [T_PULL[0], LINE2[0]], [T_PULL[1], 0], [T_CARD[1], 0]], E.inOutCubic);
+  const fy = K.k(t, [[T_DIS[0], SUN[1]], [3.0, SUN[1] + 40], [4.4, LINE[1]], [T_PULL[0], LINE2[1]], [T_PULL[1], -PH / 2 - 40], [T_CARD[1], (HERO.y0 + HERO.y1) / 2]], E.inOutCubic);
+  const ay = K.k(t, [[T_PULL[0], AY], [T_PULL[1], L.anchorY - (tall ? 0 : 0)], [T_CARD[1], L.heroCy]], E.inOutCubic);
+  return { Z: Math.exp(lz), fx, fy, ax: W / 2, ay: t < T_PULL[0] ? AY : ay };
+};
+
+K.run({
+  id: 'G09', title: 'Macro to Wide', dur: DUR, bpm: BPM, music: 'puppy-love', mood: 'calm', key: 'G', intro: 0.0, cover: 7.4,
+  technique: 'One continuous pull-back keyed in log-zoom space: an extreme macro of textured paper (concept photo with a radial depth-of-field mask) match-dissolves onto the same terracotta sun on the framed print, a reticle checks the graphite line work, and the camera keeps pulling back through a CSS still-life set (floor reflection, contact shadows, an alpha-masked light sweep on the glass, window shaft and leaf gobo, motes) until a clip-path closes the set into the hero image of a drawn listing card',
+  caption: 'Look closer: every line of a design is checked before it prints. Then it becomes a framed print, made to order and printed by your own print partner, paid from your partner account. Its listing stays a draft until your yes. Products shown are concept images; the listing is a preview with sample data. Start free at makeandlist.com',
+  short: 'Look closer. Then say yes.',
+  question: 'Can I trust it?', gain: 'Quality: checked before it prints, live only on your yes',
+  vo: VO,
+  beats: ['0–2.2 s: “Look closer.” — an extreme macro of textured paper and a terracotta sun, breathing into focus', '2.2–5 s: match-dissolve onto the print’s sun; the camera glides over the line work, a reticle: sharp at print size ✓', '5–8 s: the long pull-back to the framed print in a sunlit still life; a light sweep on the glass — made to order', '8–10.4 s: the set closes into the hero image of its listing card — title, sizes', '10.4–13 s: “a draft until your yes” — Draft turns “Draft · goes live on your yes”', '13–15 s: end card'],
+  cues: [[0.0, 'swish'], [T_DIS[0], 'swish'], [3.6, 'click'], [5.12, 'chime'], [5.05, 'whoosh'], [6.95, 'swish'], [8.12, 'paper'], [10.05, 'pop'], [10.9, 'pop'], [12.05, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+
+  // ---------- macro opening ----------
+  const mv = T < T_DIS[1];
+  macro.style.visibility = mv ? 'visible' : 'hidden';
+  if (mv) {
+    const base = Math.max(W / 1024, H / 1536);
+    const sc = K.lerp(2.2, 1.75, E.inOutCubic(K.clamp(T / 2.4))) * base;
+    const px = 650 + T * 14, py = 560 - T * 10; // the sun's lower-left edge and the leaf tips (image px)
+    const x = K.clamp(W / 2 - px * sc, W - 1024 * sc, 0), y = K.clamp(AY - py * sc, H - 1536 * sc, 0);
+    [mA, mB].forEach((m) => { m.style.transform = `translate(${x}px, ${y}px) scale(${sc})`; });
+    const foc = 1 - K.p(T, 0.15, 1.1, E.inOutCubic) + 0.4 * K.p(T, 1.5, T_DIS[1], E.inCubic);
+    mA.style.filter = foc > 0.02 ? `blur(${(foc * 10).toFixed(1)}px)` : 'none';
+    macro.style.opacity = 1 - K.p(T, T_DIS[0], T_DIS[1], E.inOutCubic);
+  }
+
+  // ---------- the camera ----------
+  const c = camAt(T);
+  cam.style.transform = `translate(${c.ax - c.fx * c.Z}px, ${c.ay - c.fy * c.Z}px) scale(${c.Z})`;
+  // focus breathes as the print takes over from the photograph; it softens a touch on the fast part of the pull
+  const vz = Math.abs(Math.log(camAt(T).Z) - Math.log(camAt(T - 1 / 30).Z)) * 30;
+  const foc = (1 - K.p(T, T_DIS[0], T_DIS[1] + 0.3, E.outCubic)) * 6 + Math.min(2.5, vz * 2.4);
+  cam.style.filter = foc > 0.3 ? `blur(${foc.toFixed(1)}px)` : 'none';
+  paperN.style.opacity = 0.34 * K.clamp((c.Z - 1.1) / 1.6);
+  shaft.style.transform = `translateX(${Math.sin(T * 0.3) * 60}px) rotate(18deg)`;
+  leaf.style.transform = `translate(${Math.sin(T * 0.25) * 40}px, ${Math.cos(T * 0.2) * 30}px)`;
+  const sw = K.clamp((T - 6.6) / 1.3), sw2 = K.clamp((T - 11.2) / 1.2);
+  const swp = sw > 0 && sw < 1 ? sw : sw2 > 0 && sw2 < 1 ? sw2 : -1;
+  sheen.style.opacity = swp >= 0 ? 0.9 : 0; sheen.style.backgroundPosition = `${(1 - swp) * 100}% 0`;
+  // props sharpen once the set is wide (rack focus to the whole still life)
+  const wideF = K.p(T, 7.0, 8.4, E.inOutCubic);
+  gift.style.filter = mug.style.filter = `blur(${(2.5 * (1 - wideF)).toFixed(1)}px)`;
+
+  // the set closes into the listing's hero image
+  const cp = K.p(T, T_CARD[0] + 0.2, T_CARD[1] - 0.2, E.inOutCubic);
+  const ins = [O + HERO.y0, O * 2 - (O + HERO.x1), O * 2 - (O + HERO.y1), O + HERO.x0].map((v) => (v * cp).toFixed(1));
+  studio.style.clipPath = cp > 0 ? `inset(${ins[0]}px ${ins[1]}px ${ins[2]}px ${ins[3]}px round ${(28 / c.Z * cp).toFixed(1)}px)` : 'none';
+  const kp = K.p(T, T_CARD[0] + 0.6, T_CARD[1] + 0.1, E.outExpo);
+  card.style.opacity = kp; card.style.transform = `translateY(${(1 - kp) * 80}px) scale(${0.94 + 0.06 * kp})`;
+  [[ttl, 9.3], [meta, 9.45], [row, 9.6]].forEach(([el, a]) => { const p = K.p(T, a, a + 0.5, E.outExpo); el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * 24}px)`; });
+  const sp = K.p(T, 10.0, 10.35, E.outBack);
+  stat.style.opacity = K.clamp(sp * 2); stat.style.transform = `scale(${0.7 + 0.3 * sp})`; stat.style.transformOrigin = '0 50%';
+  statTx.textContent = T < 10.85 ? 'Draft' : 'Draft · goes live on your yes';
+  const pulse = K.p(T, 10.85, 11.25, E.outCubic);
+  stat.style.boxShadow = `0 0 0 2px #1F1F1F, 0 0 0 ${(pulse * 18).toFixed(1)}px rgba(223,255,90,${(0.5 * (1 - pulse)).toFixed(2)})`;
+  ltag.style.opacity = K.p(T, 9.6, 10, E.linear);
+  if (strip) { const q = K.p(T, 10.5, 11.1, E.outExpo); strip.style.opacity = q; strip.style.transform = `translateY(${(1 - q) * 40}px)`; rtag.style.opacity = q; }
+
+  // dust in the light
+  motes.forEach((m, i) => {
+    const x = (seed(i + 11) * W + Math.sin(T * 0.3 + i) * 40) % W;
+    const y = ((seed(i + 17) * H - T * (5 + seed(i + 3) * 12)) % H + H) % H;
+    m.style.transform = `translate(${x}px, ${y}px)`;
+    m.style.opacity = (0.2 + 0.5 * seed(i + 23)) * (0.6 + 0.4 * Math.sin(T * 1.3 + i * 2)) * (1 - cp) * (1 - K.p(T, 12.7, 13, E.linear));
+  });
+  vig.style.opacity = 1 - cp * 0.6;
+  scrim.style.opacity = K.p(T, 0.7, 1.1, E.linear) * (1 - K.p(T, 7.9, 8.3, E.linear));
+
+  // ---------- type ----------
+  caps.forEach(({ el, ws, sub, c: cc }) => {
+    const vis = T >= cc.a - 0.02 && T < cc.b + 0.02;
+    el.style.visibility = vis ? 'visible' : 'hidden';
+    if (sub) sub.style.opacity = vis ? K.p(T, cc.a + 1.2, cc.a + 1.6, E.linear) * (1 - K.p(T, cc.b - 0.3, cc.b, E.linear)) : 0;
+    if (!vis) return;
+    ws.forEach((w, j) => {
+      const p = K.p(T, cc.a + j * 0.1, cc.a + j * 0.1 + 0.7, E.outCubic), o = K.p(T, cc.b - 0.4, cc.b, E.inOutCubic);
+      w.style.opacity = p * (1 - o); w.style.transform = `translateY(${(1 - p) * 14}px)`;
+      w.style.filter = p < 1 || o > 0 ? `blur(${((1 - p) * 8 + o * 6).toFixed(1)}px)` : 'none';
+    });
+  });
+  // the reticle settles on the line work, then the check lands
+  const rIn = K.p(T, 3.2, 3.65, E.outBack), rOut = K.p(T, 4.9, 5.2, E.inCubic);
+  const rx = W / 2 - RS / 2 + Math.sin(T * 1.1) * 6, ry = AY - RS / 2 + Math.cos(T * 0.9) * 6;
+  ret.style.left = rx + 'px'; ret.style.top = ry + 'px';
+  ret.style.opacity = K.clamp(rIn * 2) * (1 - rOut); ret.style.transform = `scale(${1.4 - 0.4 * rIn})`;
+  note.style.left = (W - note.offsetWidth) / 2 + 'px'; note.style.top = ry + RS + 26 + 'px';
+  note.style.opacity = K.p(T, 3.65, 3.95, E.outCubic) * (1 - rOut);
+  noteTx.textContent = T < 4.4 ? 'line work · sharp at print size' : 'print file · checked';
+  noteB.style.transform = `scale(${T < 4.4 ? K.p(T, 4.0, 4.3, E.outBack) : K.p(T, 4.45, 4.75, E.outBack)})`;
+
+  // tags: the photograph and the print are concept images
+  ctag.style.left = (tall ? 65 : W - 60 - ctag.offsetWidth) + 'px';
+  ctag.style.top = (cp > 0.5 ? L.heroCy - 300 * (L.Zf / 0.645) + 18 : tall ? 1206 : 1270) + 'px';
+  if (cp > 0.5) ctag.style.left = L.heroCx + 400 - 18 - ctag.offsetWidth + 'px';
+  ctag.style.opacity = K.p(T, 0.5, 0.9, E.linear) * (1 - K.win(T, T_CARD[0] + 0.2, T_CARD[0] + 1.2, 0.3)) * (1 - K.p(T, 12.7, 13, E.linear));
+  end(T);
+});
+</script></body></html>

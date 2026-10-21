@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>G03 · The Light Sweep</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #070707; }
+.set { position: absolute; inset: 0; }
+.beam { position: absolute; top: -100px; pointer-events: none; mix-blend-mode: screen; }
+.hot { position: absolute; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; }
+.pl { position: absolute; left: 0; top: 0; transform-origin: 50% 100%; }
+.pl img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+.pl .rfw { position: absolute; left: 0; width: 100%; transform-origin: 50% 0; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.55), transparent 55%); }
+.pl .rfw img { transform: scaleY(-1); }
+.pl .csh { position: absolute; left: 4%; width: 92%; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.95), rgba(0,0,0,0)); }
+.mote { position: absolute; left: 0; top: 0; border-radius: 50%; background: rgba(255,244,222,.95); }
+.kick { position: absolute; z-index: 60; font: 500 21px 'IBM Plex Mono', monospace; letter-spacing: .26em; text-transform: uppercase; color: rgba(255,246,228,.55); text-align: center; white-space: nowrap; }
+.cap { position: absolute; z-index: 60; text-align: center; font: 700 100px/1.03 'Playfair Display'; letter-spacing: -0.025em; color: #FFF8EC; text-shadow: 0 6px 40px rgba(0,0,0,.7); }
+.cap em { font-style: italic; font-weight: 500; color: #DFFF5A; }
+.sub { position: absolute; z-index: 60; text-align: center; font: 500 29px/1.3 'Archivo'; color: rgba(255,246,228,.8); }
+.lab { position: absolute; z-index: 58; white-space: nowrap; font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,246,228,.85); display: flex; align-items: center; gap: 14px; }
+.lab i { display: block; width: 46px; height: 1.5px; background: rgba(255,246,228,.6); }
+.lab b { color: #DFFF5A; font-weight: 600; }
+.chip2 { position: absolute; z-index: 61; display: flex; align-items: center; gap: 14px; padding: 12px 22px 12px 14px; border-radius: 999px; white-space: nowrap;
+  background: rgba(20,18,16,.75); border: 1px solid rgba(255,246,228,.22); backdrop-filter: blur(8px); font: 500 23px 'IBM Plex Mono', monospace; letter-spacing: .03em; color: #FFF8EC; }
+.chip2 s { text-decoration: none; display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #E8A33C; box-shadow: 0 0 0 5px rgba(232,163,60,.22); }
+.demo.dk { background: rgba(14,12,10,.7); color: rgba(255,246,228,.8); border-color: rgba(255,246,228,.35); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// G03 — The Light Sweep. A black set, a glossy black floor, one vertical beam of warm light. The camera trucks along a
+// line of products standing in the dark; each one comes out of the darkness only where the beam touches it (a lit copy
+// behind a gradient mask that follows the beam), keeps a faint afterglow, and gets a museum-style mono label. At the end
+// the products glide together into one group and the whole set lights up: the range, drafts first, live on your yes.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 103.4, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const SZ = { 'k01-mug': [852, 804], 'k02-framed-print': [608, 897], 'k05-tote': [595, 961], 'k07-sticker-sheet': [763, 918], 'k09-kids-book': [656, 926], 'k13-wedding-planner': [984, 786] };
+
+const L = tall ? { floor: 1150, hMax: 540, sp: 640, capY: 300, capFs: 100, labY: 1180, gScale: 0.66 } : { floor: 1050, hMax: 560, sp: 620, capY: 64, capFs: 86, labY: 1086, gScale: 0.56 };
+// [file, height at the hero size, label]
+const P = [
+  ['k02-framed-print', 1.0, 'Nº 01 · <b>wall art</b> · printed per order'],
+  ['k01-mug', 0.62, 'Nº 02 · <b>mug</b> · printed per order'],
+  ['k09-kids-book', 0.9, 'Nº 03 · <b>colouring book</b> · print or download'],
+  ['k05-tote', 1.0, 'Nº 04 · <b>tote</b> · printed per order'],
+  ['k07-sticker-sheet', 0.82, 'Nº 05 · <b>sticker sheet</b> · printed per order'],
+  ['k13-wedding-planner', 0.66, 'Nº 06 · <b>planner</b> · printable download'],
+];
+// when each product sits under the beam (beat grid, 3 beats apart)
+const TI = P.map((_, i) => B(1.5 + 3 * i));
+const GROUP_A = 10.45, GROUP_B = 11.4;
+// final group: [x offset in hero widths, depth row 0 back / 1 front]
+const GP = tall
+  ? [[-330, 0], [-20, 1.0], [20, 0], [330, 0], [-270, 1], [260, 1]]
+  : [[-330, 0], [-40, 1.0], [0, 0], [300, 0], [-280, 1], [260, 1]];
+
+// ---------- set ----------
+const set = K.box(0, 0, W, H, { cls: 'set', style: { background: `radial-gradient(70% 40% at 50% ${tall ? 52 : 58}%, #1A1714 0, #0B0A09 60%, #050505 100%)` } });
+const wash = K.box(0, 0, W, H, { cls: 'set', style: { background: `radial-gradient(80% 46% at 50% ${tall ? 50 : 56}%, rgba(120,96,70,.55), rgba(60,48,36,.2) 55%, rgba(0,0,0,0) 85%)`, opacity: 0 } });
+K.box(0, L.floor, W, H - L.floor, { cls: 'set', style: { inset: 'auto', left: 0, top: L.floor + 'px', width: W + 'px', height: H - L.floor + 'px', background: 'linear-gradient(180deg, #121110 0, #080808 40%, #050505)' } });
+const horizon = K.box(0, L.floor - 1, W, 2, { style: { background: 'linear-gradient(90deg, rgba(255,240,214,0), rgba(255,240,214,.18), rgba(255,240,214,0))' } });
+const BW = tall ? 380 : 400;
+const beam = K.box(0, 0, BW * 2.4, L.floor + 200, { cls: 'beam', style: { background: `linear-gradient(90deg, rgba(255,236,204,0) 0, rgba(255,236,204,.05) 25%, rgba(255,236,204,.22) 44%, rgba(255,244,226,.34) 50%, rgba(255,236,204,.22) 56%, rgba(255,236,204,.05) 75%, rgba(255,236,204,0) 100%)`, filter: 'blur(14px)' } });
+const hot = K.box(0, 0, BW * 2.2, 150, { cls: 'hot', style: { background: 'radial-gradient(closest-side, rgba(255,236,204,.42), rgba(255,236,204,0))' } });
+
+const items = P.map(([file, hs, lab], i) => {
+  const [nw, nh] = SZ[file], h = L.hMax * hs, w = h * nw / nh;
+  const g = K.box(0, 0, w, h, { cls: 'pl' });
+  const sh = K.el('div', { cls: 'csh', parent: g, style: { top: h - w * 0.05 + 'px', height: w * 0.1 + 'px' } });
+  const rfw = K.el('div', { cls: 'rfw', parent: g, style: { top: h + 'px', height: h + 'px' } });
+  const rfDark = K.el('img', { parent: rfw, src: K.pub('r07/' + file + '.webp'), style: { filter: 'brightness(.08)' } });
+  const rfLit = K.el('img', { parent: rfw, src: K.pub('r07/' + file + '.webp') });
+  const dark = K.el('img', { parent: g, src: K.pub('r07/' + file + '.webp') });
+  const lit = K.el('img', { parent: g, src: K.pub('r07/' + file + '.webp') });
+  const label = K.box(0, L.labY, null, null, { cls: 'lab', html: `<i></i><span>${lab}</span>`, style: { width: 'auto', height: 'auto' } });
+  return { g, sh, rfw, rfDark, rfLit, dark, lit, label, w, h, i };
+});
+const motes = Array.from({ length: 40 }, (_, i) => K.box(0, 0, 2 + seed(i) * 5, 2 + seed(i) * 5, { cls: 'mote' }));
+
+// ---------- type ----------
+const kick = K.box(65, tall ? 286 : 30, W - 130, null, { cls: 'kick', html: 'Product film Nº 03 · the light sweep' });
+const em = (s) => s.replace(/<em>(.*?)<\/em>/g, (m, x) => x.split(' ').map((w) => '<em>' + w + '</em>').join(' '));
+const CAP = [
+  { a: 0.9, b: 3.1, t: 'In its best\n<em>light.</em>' },
+  { a: 3.35, b: 6.35, t: 'Files, images,\n<em>a listing.</em>' },
+  { a: 7.0, b: 9.3, t: 'Printed\n<em>per order.</em>' },
+  { a: 9.6, b: 12.85, t: 'Live on\nyour <em>yes.</em>' },
+];
+const caps = CAP.map((c) => { const el = K.box(65, L.capY + (tall ? 40 : 30), W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }); return { el, ws: K.words(el, em(c.t)), c }; });
+const sub3 = K.box(65, L.capY + (tall ? 40 : 30) + L.capFs * 2.16, W - 130, null, { cls: 'sub', html: 'by your own print partner, paid from your partner account' });
+const sub2 = K.box(65, L.capY + (tall ? 40 : 30) + L.capFs * 2.16, W - 130, null, { cls: 'sub', html: 'made for each product, for you to review' });
+const chip = K.box(0, tall ? 1196 : 1120, null, null, { cls: 'chip2', html: '<s></s>Drafts · nothing live without your yes', style: { width: 'auto', height: 'auto' } });
+const tag = K.demoTag('Concept products · AI-generated', 0, 0); tag.classList.add('dk');
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, dark: true, line: 'Every product,<br>in its best light.' });
+
+K.run({
+  id: 'G03', title: 'The Light Sweep', dur: DUR, bpm: BPM, music: 'earth', mood: 'bright', key: 'A', intro: 0.0, cover: 4.4,
+  technique: 'Dark-set reveal: a single vertical beam with haze and a floor hotspot stays on camera while the camera trucks along a line of cut-out products in the dark; each product is lit only where the beam touches it (a lit copy behind a gradient mask that tracks the beam, mirrored in a glossy floor reflection) and keeps an afterglow; on the last beat the products glide into one group and the set lights up',
+  caption: 'Every product in its best light: files, images and a listing made for each one, for you to review. Printed products are printed per order by your own partner, paid from your partner account, and nothing goes live without your yes. Products shown are concept images. Start free at makeandlist.com',
+  short: 'Every product, in its best light.',
+  question: 'What do I get?', gain: 'A finished product, drafts first',
+  vo: [[0.35, 'Every product, in its best light.'], [3.2, 'Files, images and a listing for each one.'], [6.45, 'Printed per order by your own partner.'], [9.4, 'And nothing goes live without your yes.']],
+  beats: ['0–3 s: black set, one beam: the framed print comes out of the dark — “In its best light.”', '3–6 s: the camera trucks on: mug, colouring book — “Files, images, a listing.”', '6–9.3 s: tote, sticker sheet — “Printed per order” by your own partner, paid from your partner account', '9.3–11 s: the planner, then all six glide into one group', '11–13 s: the set lights up — “Live on your yes.” (Drafts · nothing live without your yes)', '13–15 s: end card'],
+  cues: [[0.0, 'riser'], ...TI.map((t) => [+(t - 0.12).toFixed(3), 'swish']), [GROUP_A, 'whoosh'], [GROUP_B, 'hit'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const on = K.p(T, 0, 0.7, E.inOutCubic);
+  const allLit = K.p(T, GROUP_A + 0.2, GROUP_B + 0.3, E.inOutCubic);
+
+  // camera truck: plateaus with each product under the beam (slow in, slow out), then the group
+  const X = K.k(T, TI.map((t, i) => [t, i * L.sp]), E.inOutCubic) + (T < TI[0] ? (T - TI[0]) * 160 : 0);
+  const gp = K.p(T, GROUP_A, GROUP_B, E.inOutCubic);
+
+  // the beam: a slow breathing sway, gone when the set lights up
+  const bx = W / 2 + Math.sin(T * 0.9) * 26;
+  beam.style.transform = `translateX(${bx - BW * 1.2}px)`;
+  beam.style.opacity = on * (1 - 0.8 * allLit) * (0.9 + 0.1 * Math.sin(T * 3.1));
+  hot.style.transform = `translate(${bx - BW * 1.1}px, ${L.floor - 75}px)`; hot.style.opacity = on * (1 - allLit);
+  wash.style.opacity = allLit;
+  horizon.style.opacity = 0.4 + 0.6 * allLit;
+
+  items.forEach((it, i) => {
+    // line position vs group position
+    const lx = W / 2 + i * L.sp - X;
+    const [gx, row] = GP[i];
+    const gs = L.gScale * (row ? 1.08 : 0.92);
+    const gxS = W / 2 + gx, gy = L.floor + (row ? -10 : -110);
+    const x = K.lerp(lx, gxS, gp), y = K.lerp(L.floor, gy, gp), s = K.lerp(1, gs, gp);
+    it.g.style.transform = `translate(${x - it.w / 2}px, ${y - it.h}px) scale(${s})`;
+    it.g.style.zIndex = row ? 30 : 20;
+    // light: the beam's position in the product's own box → a soft band on the lit copy
+    const left = x - it.w * s / 2, c = (bx - left) / (it.w * s) * 100, half = BW * 0.62 / (it.w * s) * 100;
+    const passed = K.clamp((T - TI[i] - 0.1) / 0.9);
+    const glow = 0.18 * passed + allLit;
+    const mask = `linear-gradient(90deg, rgba(0,0,0,${Math.min(1, glow)}) 0, rgba(0,0,0,${Math.min(1, glow)}) ${c - half}%, #000 ${c - half * 0.35}%, #000 ${c + half * 0.35}%, rgba(0,0,0,${Math.min(1, glow)}) ${c + half}%, rgba(0,0,0,${Math.min(1, glow)}) 100%)`;
+    it.lit.style.webkitMaskImage = mask; it.rfLit.style.webkitMaskImage = mask;
+    it.dark.style.filter = 'brightness(.07)';
+    it.lit.style.opacity = on; it.rfLit.style.opacity = on;
+    it.rfw.style.opacity = 0.32;
+    it.sh.style.opacity = 0.9;
+    // DOF: neighbours on the line are a touch soft; the group is sharp
+    const dist = Math.abs(lx - W / 2) / L.sp;
+    const blur = (1 - gp) * Math.min(3, dist * 2.2);
+    it.g.style.filter = blur > 0.1 ? `blur(${blur.toFixed(2)}px)` : 'none';
+    // label: under the product while it's in the beam
+    const lp = K.win(T, TI[i] - 0.55, TI[i] + 0.95, 0.3) * (1 - gp);
+    it.label.style.opacity = lp;
+    it.label.style.left = Math.max(65, Math.min(W - 65 - it.label.offsetWidth, W / 2 - it.label.offsetWidth / 2)) + 'px';
+    it.label.style.transform = `translateX(${(x - W / 2) * 0.35}px)`;
+  });
+
+  motes.forEach((m, i) => {
+    const x = bx + (seed(i + 11) - 0.5) * BW * 1.4 + Math.sin(T * 0.4 + i) * 20;
+    const y = ((seed(i + 17) * L.floor - T * (12 + seed(i + 5) * 22)) % L.floor + L.floor) % L.floor;
+    m.style.transform = `translate(${x}px, ${y}px)`; m.style.zIndex = 40;
+    m.style.opacity = on * (1 - allLit) * (0.25 + 0.6 * seed(i + 23)) * (0.5 + 0.5 * Math.sin(T * 2 + i * 2));
+  });
+
+  // ---------- type ----------
+  kick.style.opacity = 0.9 * K.win(T, 0.25, 3.1, 0.35);
+  caps.forEach(({ el, ws, c }) => {
+    el.style.visibility = T > c.a - 0.05 && T < c.b + 0.4 ? 'visible' : 'hidden';
+    K.reveal(ws, T, c.a, { kind: 'blur', stagger: 0.1, dur: 0.75, ease: E.outCubic, out: c.b });
+  });
+  [[sub2, 4.2, 6.35], [sub3, 7.8, 9.3]].forEach(([el, a, b]) => {
+    const p = K.p(T, a, a + 0.6, E.outCubic), o = K.p(T, b - 0.3, b, E.inCubic);
+    el.style.opacity = p * (1 - o); el.style.transform = `translateY(${(1 - p) * 14}px)`;
+  });
+  const cp = K.win(T, GROUP_B + 0.2, 12.9, 0.35);
+  chip.style.left = (W - chip.offsetWidth) / 2 + 'px'; chip.style.opacity = cp; chip.style.transform = `translateY(${(1 - K.p(T, GROUP_B + 0.2, GROUP_B + 0.8, E.outExpo)) * 24}px)`;
+  tag.style.left = (tall ? 65 : 60) + 'px'; tag.style.top = (tall ? 1212 : 1196) + 'px';
+  tag.style.opacity = 0.95 * K.p(T, 0.9, 1.3, E.linear) * (1 - cp) * (1 - K.p(T, 12.6, 13, E.linear));
+
+  end(T);
+});
+</script></body></html>

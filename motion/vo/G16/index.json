@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.3,
+  "text": "It starts with one sentence.",
+  "file": "01-55954f5b4c.wav",
+  "dur": 2.09
+ },
+ {
+  "t": 2.2,
+  "text": "MakeAndList makes the files, the images, the listing.",
+  "file": "02-3d94ef2401.wav",
+  "dur": 3.95
+ },
+ {
+  "t": 6.45,
+  "text": "You review it. Nothing goes live without your yes.",
+  "file": "03-ffe160743a.wav",
+  "dur": 3.53
+ },
+ {
+  "t": 9.6,
+  "text": "Your own print partner prints each order.",
+  "file": "04-a48ef810a5.wav",
+  "dur": 3.25
+ }
+]

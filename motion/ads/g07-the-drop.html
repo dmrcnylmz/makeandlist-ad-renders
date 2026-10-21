@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>G07 · The Drop</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #050505; }
+.cyc { position: absolute; inset: 0; }
+.floor { position: absolute; left: 0; right: 0; bottom: 0; }
+.horizon { position: absolute; left: 0; right: 0; height: 2px; }
+.scene { position: absolute; inset: 0; }
+.g { position: absolute; width: 0; height: 0; transform-origin: 0 0; }
+.g > * { position: absolute; }
+.g img { display: block; }
+.cone { mix-blend-mode: screen; filter: blur(16px); clip-path: polygon(41% 0, 59% 0, 100% 100%, 0 100%); }
+.pool { border-radius: 50%; mix-blend-mode: screen; }
+.cs { border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.95), rgba(0,0,0,0)); }
+.plinth { background: linear-gradient(90deg, #17171a 0%, #2a2a2e 38%, #1d1d20 70%, #101012 100%); }
+.plinth::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 10px; background: linear-gradient(90deg, #2c2c30, #4a4a50 40%, #303034); }
+.prf { background: linear-gradient(180deg, rgba(42,42,46,.55), rgba(42,42,46,0)); }
+.obj { left: 0; top: 0; }
+.obj > * { position: absolute; }
+.refl { transform: scaleY(-1); transform-origin: 50% 50%; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 55%, rgba(0,0,0,.9)); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 55%, rgba(0,0,0,.9)); }
+.wire { width: 2px; background: linear-gradient(180deg, rgba(255,250,240,0), rgba(255,250,240,.45)); }
+.sheen { mix-blend-mode: screen; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+.dust { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,240,215,.9); }
+.haze { position: absolute; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; }
+.mote { position: absolute; border-radius: 50%; background: rgba(255,244,225,.9); pointer-events: none; }
+.kick { position: absolute; z-index: 40; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .32em; text-transform: uppercase; color: rgba(250,247,238,.72); white-space: nowrap; }
+.kick i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #DFFF5A; margin-right: 14px; vertical-align: 2px; font-style: normal; }
+.cap { position: absolute; z-index: 40; text-align: center; font: 700 84px/1.02 'Playfair Display'; letter-spacing: -0.02em; color: #FAF7EE; text-shadow: 0 6px 40px rgba(0,0,0,.7); }
+.cap i { font-weight: 600; }
+.cap em { font-style: italic; color: #DFFF5A; }
+.sub { position: absolute; z-index: 40; text-align: center; font: 500 23px/1.4 'IBM Plex Mono', monospace; letter-spacing: .06em; color: rgba(250,247,238,.78); }
+.plate { position: absolute; z-index: 40; white-space: nowrap; text-align: center; font: 500 21px 'IBM Plex Mono', monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(250,247,238,.8); }
+.plate b { color: #DFFF5A; font-weight: 600; }
+.chipS { position: absolute; z-index: 41; white-space: nowrap; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .08em; padding: 8px 14px; border-radius: 99px; border: 1.5px solid rgba(250,247,238,.55); color: #FAF7EE; background: rgba(10,10,10,.6); }
+.chipS.live { background: #DFFF5A; color: #1F1F1F; border-color: #DFFF5A; }
+.yes { position: absolute; z-index: 42; white-space: nowrap; display: flex; align-items: center; gap: 14px; padding: 18px 30px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 32px 'Archivo'; box-shadow: 0 0 0 10px rgba(223,255,90,.14), 0 30px 60px -20px rgba(223,255,90,.45); }
+.yes small { font: 600 19px 'IBM Plex Mono', monospace; letter-spacing: .08em; }
+.demo.dk { background: rgba(10,10,10,.72); color: rgba(255,253,248,.85); border-color: rgba(255,253,248,.4); }
+.vig { position: absolute; inset: 0; z-index: 30; pointer-events: none; background: radial-gradient(110% 80% at 50% 50%, rgba(0,0,0,0) 50%, rgba(0,0,0,.75) 100%); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .1; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// G07 — The Drop. A luxury-launch teaser on a black set: a hairline of light, then each piece of a seller's new
+// collection drops into its own spotlight on the beat — the print and the mug land on stone plinths with a dust puff,
+// the garments and the tote fall on wires and spring to a stop — while a low hero camera whip-pans from piece to piece
+// (depth of field on the neighbours, motion blur on the pans). The camera pulls back to the full line-up on a glossy
+// floor, a light sweep crosses every product, each one gets its "Draft" tag, and only the seller's yes "drops" it:
+// the lights bloom and the tags turn "Live in your stores". No countdown, no scarcity: the drop is the seller's yes.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 129.2, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian) — speech windows measured from the takes:
+// L1 1.07–2.55 · L2 2.77–3.60 / 4.03–4.65 · L3 6.05–8.60 · L4 9.45–10.86 · L5 11.35–12.66. Every landing sits in a breath.
+const VO = [[0.3, 'Your new collection.'], [2.62, 'One idea, five pieces.'], [5.92, 'Each one printed only when someone orders it.'], [8.9, 'Everything starts as a draft.'], [10.95, 'It drops when you say so.']];
+const D = [B(2), B(8), B(10.5), B(11.5), B(12.5)];   // 0.929 3.715 4.876 5.341 5.805 — landings
+const WIDE = [5.95, 7.45];                            // pull back to the line-up
+const SWEEP = [6.9, 8.5];
+const DRAFT = 9.0, YES = 11.2, BLOOM = [11.3, 12.45];
+
+const L = tall
+  ? { fy: 1130, k: 1, S: 440, kickY: 292, capY: 336, capFs: 86, subY: 548, plateY: 1162, tagY: 274, chipY: 1064, yesY: 1128 }
+  : { fy: 935, k: 0.84, S: 440, kickY: 62, capY: 104, capFs: 76, subY: 292, plateY: 984, tagY: 1274, chipY: 880, yesY: 1080 };
+const P = 1500, OY = L.fy - 150; // perspective, origin a little above the floor line: a low hero camera
+const WIDE_D = tall ? 2100 : 1700; // camera distance for the line-up
+
+// ---------- set ----------
+const cyc = K.box(0, 0, W, H, { cls: 'cyc', style: { background: `radial-gradient(70% 45% at 50% ${(L.fy / H * 100 - 8).toFixed(1)}%, #232120 0%, #0d0c0c 55%, #050505 100%)` } });
+const glow = K.box(0, 0, W, H, { cls: 'cyc', style: { background: `radial-gradient(55% 30% at 50% ${(L.fy / H * 100 - 6).toFixed(1)}%, rgba(255,228,190,.24), rgba(255,228,190,0) 70%)`, opacity: 0 } });
+const floor = K.box(0, L.fy, W, H - L.fy, { cls: 'floor', style: { background: 'linear-gradient(180deg, #151413 0%, #0a0a0a 40%, #040404 100%)' } });
+const hz = K.box(0, L.fy - 1, W, 2, { cls: 'horizon', style: { background: 'linear-gradient(90deg, rgba(255,240,215,0), rgba(255,240,215,.5) 50%, rgba(255,240,215,0))' } });
+const hazes = [0, 1, 2].map((i) => K.box(0, 0, 900, 700, { cls: 'haze', style: { background: 'radial-gradient(closest-side, rgba(255,236,210,.08), rgba(255,236,210,0))', filter: 'blur(30px)' } }));
+const scene = K.box(0, 0, W, H, { cls: 'scene', style: { perspective: P + 'px', perspectiveOrigin: `${W / 2}px ${OY}px`, zIndex: 10 } });
+
+// ---------- the collection (concept products) ----------
+// lift: hangs above the floor on wires · ph: stands on a plinth of this height
+const PR = [
+  { id: 'k02-framed-print', nw: 608, nh: 897, h: 520, ph: 120, name: 'Protea print' },
+  { id: 'k03-tee', nw: 977, nh: 901, h: 470, lift: 170, wires: [0.33, 0.67], name: 'Sunset tee' },
+  { id: 'k05-tote', nw: 595, nh: 961, h: 560, lift: 110, wires: [0.5], name: 'Monstera tote' },
+  { id: 'k01-mug', nw: 852, nh: 804, h: 270, ph: 230, name: 'Slow-mornings mug' },
+  { id: 'k04-hoodie', nw: 976, nh: 979, h: 500, lift: 150, wires: [0.36, 0.64], name: 'Mountain hoodie' },
+];
+const G = PR.map((p, i) => {
+  const k = L.k, h = p.h * k, w = h * p.nw / p.nh, ph = (p.ph || 0) * k, lift = (p.lift || 0) * k, x = (i - 2) * L.S;
+  const src = K.pub('r07/' + p.id + '.webp');
+  const g = K.el('div', { parent: scene, cls: 'g', style: { left: W / 2 + 'px', top: L.fy + 'px' } });
+  const pw = Math.max(w * 0.95, 220 * k);
+  const cone = K.el('div', { parent: g, cls: 'cone', style: { left: -pw * 1.1 + 'px', top: -(L.fy + 400) + 'px', width: pw * 2.2 + 'px', height: L.fy + 440 + 'px', background: 'linear-gradient(180deg, rgba(255,242,220,.0) 0%, rgba(255,242,220,.10) 45%, rgba(255,242,220,.22) 100%)' } });
+  const pool = K.el('div', { parent: g, cls: 'pool', style: { left: -pw * 1.15 + 'px', top: -60 + 'px', width: pw * 2.3 + 'px', height: 150 + 'px', background: 'radial-gradient(closest-side, rgba(255,236,205,.42), rgba(255,236,205,0))' } });
+  const cs = K.el('div', { parent: g, cls: 'cs', style: { left: -w * 0.5 + 'px', top: -18 + 'px', width: w + 'px', height: 36 + 'px' } });
+  let plinth = null;
+  if (ph) {
+    plinth = K.el('div', { parent: g, cls: 'plinth', style: { left: -pw / 2 + 'px', top: -ph + 'px', width: pw + 'px', height: ph + 'px' } });
+    K.el('div', { parent: g, cls: 'prf', style: { left: -pw / 2 + 'px', top: 0, width: pw + 'px', height: ph * 0.7 + 'px' } });
+  }
+  const obj = K.el('div', { parent: g, cls: 'obj' });
+  const top = -(lift + ph + h);
+  (p.wires || []).forEach((wx) => K.el('div', { parent: obj, cls: 'wire', style: { left: -w / 2 + w * wx - 1 + 'px', top: top - 2600 + 'px', height: 2600 + h * 0.04 + 'px' } }));
+  const img = K.el('img', { parent: obj, src, style: { left: -w / 2 + 'px', top: top + 'px', width: w + 'px', height: h + 'px' } });
+  const sheen = K.el('div', { parent: obj, cls: 'sheen', style: { left: -w / 2 + 'px', top: top + 'px', width: w + 'px', height: h + 'px', WebkitMaskImage: `url("${src}")`, maskImage: `url("${src}")`,
+    background: 'linear-gradient(105deg, rgba(255,255,255,0) 42%, rgba(255,250,235,.55) 50%, rgba(255,255,255,0) 58%)', backgroundSize: '300% 100%' } });
+  const refl = K.el('img', { parent: g, cls: 'refl', src, style: { left: -w / 2 + 'px', top: lift + ph + 'px', width: w + 'px', height: h + 'px' } });
+  const dust = ph ? Array.from({ length: 12 }, () => K.el('div', { parent: g, cls: 'dust' })) : [];
+  return { p, g, x, w, h, ph, lift, cone, pool, cs, obj, img, sheen, refl, dust, plinth };
+});
+
+// ---------- atmosphere ----------
+const motes = Array.from({ length: 36 }, (_, i) => K.box(0, 0, 2 + seed(i) * 5, 2 + seed(i) * 5, { cls: 'mote', style: { zIndex: 20, filter: `blur(${seed(i + 40) * 2.5}px)` } }));
+K.box(0, 0, W, H, { cls: 'vig' });
+
+// ---------- type ----------
+const kick = K.box(65, L.kickY, W - 130, null, { cls: 'kick', html: '<i></i>The drop · new collection', style: { textAlign: 'center' } });
+const CAPS = [
+  { a: 1.02, b: 2.6, t: 'Your new\n<em>collection.</em>' },
+  { a: 2.74, b: 5.75, t: 'One idea.\n<i>Five pieces.</i>' },
+  { a: 6.0, b: 8.75, t: 'Printed only when\nsomeone <em>orders.</em>', sub: 'by your own print partner · paid from your partner account' },
+  { a: 9.4, b: 10.95, t: 'Everything starts\nas a <em>draft.</em>' },
+  { a: 11.3, b: 12.9, t: 'It drops when\n<em>you say so.</em>' },
+];
+const caps = CAPS.map((c) => {
+  const el = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  const ws = K.words(el, c.t.replace(/<em>(.*?)<\/em>/g, (m, x) => x.split(' ').map((w) => '<em>' + w + '</em>').join(' ')).replace(/<i>(.*?)<\/i>/g, (m, x) => x.split(' ').map((w) => '<i>' + w + '</i>').join(' ')));
+  const sub = c.sub ? K.box(65, L.subY, W - 130, null, { cls: 'sub', html: c.sub }) : null;
+  return { el, ws, sub, c };
+});
+const plates = PR.map((p, i) => K.box(0, L.plateY, W, null, { cls: 'plate', html: `Nº 0${i + 1} · ${p.name} · <b>made to order</b>` }));
+const chips = PR.map(() => K.box(0, 0, null, null, { cls: 'chipS', html: 'Draft', style: { width: 'auto', height: 'auto' } }));
+const yes = K.box(0, L.yesY, null, null, { cls: 'yes', html: 'Yes, list it <small>· your call</small>', style: { width: 'auto', height: 'auto' } });
+const cur = K.cursor();
+const tag = K.demoTag('Concept products · AI-generated', 0, L.tagY); tag.classList.add('dk');
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, dark: true, line: 'It drops when<br>you say so.' });
+
+// ---------- camera ----------
+const xs = G.map((g) => g.x);
+const camXAt = (t) => K.k(t, [[0, xs[0]], [D[1] - 0.42, xs[0]], [D[1] - 0.1, xs[1]], [D[2] - 0.36, xs[1]], [D[2] - 0.08, xs[2]], [D[3] - 0.3, xs[2]], [D[3] - 0.06, xs[3]],
+  [D[4] - 0.3, xs[3]], [D[4] - 0.06, xs[4]], [WIDE[0], xs[4]], [WIDE[1], 0], [13, 0]], E.inOutExpo);
+const camDAt = (t) => K.k(t, [[0, -120], [D[1] - 0.42, 40], [D[1] - 0.1, -60], [D[2] - 0.36, 0], [D[3], 120], [WIDE[0], 200], [WIDE[1], WIDE_D], [YES, WIDE_D - 140], [13, WIDE_D - 260]], E.inOutCubic);
+
+// a piece's fall: plinth pieces drop and land (accelerating, a 2-frame squash); wired pieces fall and spring to a stop
+function fall(i, T) {
+  const d = D[i], g = G[i], H0 = L.fy + g.h + 300;
+  if (g.ph) {
+    if (T < d) { const p = K.p(T, d - 0.34, d, E.linear); return { y: -H0 * (1 - p * p), sq: 1 }; }
+    const a = T - d; return { y: -Math.abs(Math.sin(a * 14)) * 26 * Math.exp(-a * 9), sq: 1 - 0.07 * Math.exp(-a * 18) };
+  }
+  const p = K.clamp((T - (d - 0.16)) / 0.9);
+  return { y: -H0 * (1 - E.spring(p)), sq: 1 };
+}
+
+K.run({
+  id: 'G07', title: 'The Drop', dur: DUR, bpm: BPM, music: 'transcendental-earth-people', mood: 'drive', key: 'A', intro: 0.0, cover: 7.6,
+  technique: 'Luxury-drop teaser on a CSS black set: a low hero camera (CSS perspective, translate3d groups) whip-pans with motion blur from spotlight to spotlight as each concept product drops on the beat — plinth pieces land with squash and a dust puff, garments fall on wires and spring to a stop — with depth-of-field blur on the neighbours, floor reflections, contact shadows, beam haze and motes, then a pull-back to the line-up, an alpha-masked light sweep, Draft tags, and a yes that blooms the lights',
+  caption: 'A new collection, dropped on your terms: each piece is printed only when someone orders it, by your own print partner and paid from your partner account. Everything starts as a draft and goes live in your stores when you say so. Products shown are concept images. Start free at makeandlist.com',
+  short: 'It drops when you say so.',
+  question: 'Can I sell physical products too?', gain: 'Control: a collection that waits for your yes',
+  vo: VO,
+  beats: ['0–1 s: black set, a hairline of light; the protea print drops onto its plinth', '1–5.8 s: “Your new collection. One idea, five pieces.” — tee, tote, mug and hoodie drop into their spotlights on the beat, whip-pans between them', '5.8–8.8 s: pull back to the line-up on a glossy floor, a light sweep — printed only when someone orders, by your partner', '8.8–11 s: every piece gets its Draft tag — everything starts as a draft', '11–13 s: the seller taps yes; the lights bloom, tags turn Live — “It drops when you say so.”', '13–15 s: end card'],
+  cues: [[0.0, 'swish'], [D[0] - 0.3, 'whoosh'], [D[0], 'hit'], [D[1] - 0.3, 'whoosh'], [D[1], 'box'], [D[2] - 0.2, 'swish'], [D[2], 'pop'], [D[3] - 0.2, 'swish'], [D[3], 'box'], [D[4] - 0.2, 'swish'], [D[4], 'pop'],
+    [WIDE[0] - 0.08, 'hit'], [SWEEP[0] + 0.3, 'swish'], [DRAFT, 'pop'], [DRAFT + 0.2, 'pop'], [DRAFT + 0.4, 'pop'], [YES, 'click'], [12.72, 'chime'], [13.0, 'hit']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const camX = camXAt(T), camD = camDAt(T);
+  const vel = Math.abs(camX - camXAt(T - 1 / 30));
+  const s = P / (P + camD); // screen scale at the products' depth
+  const wide = K.p(T, WIDE[0], WIDE[1], E.inOutCubic);
+  const bloom = K.p(T, BLOOM[0], BLOOM[1], E.inOutCubic);
+
+  // set: the hairline of light comes up first, the stage glow breathes, the yes floods the back wall
+  const on = K.p(T, 0.05, 0.5, E.outCubic);
+  hz.style.opacity = on * (0.55 + 0.25 * wide + 0.2 * bloom);
+  glow.style.opacity = K.p(T, 0.5, 1.2, E.linear) * (0.45 + 0.35 * wide + 0.6 * bloom) * (0.94 + 0.06 * Math.sin(T * 2.1));
+  hazes.forEach((h, i) => { h.style.transform = `translate(${W * (0.15 + 0.35 * i) - 450 + Math.sin(T * 0.35 + i * 2) * 120}px, ${L.fy - 520 + Math.cos(T * 0.3 + i) * 60}px)`; h.style.opacity = on; });
+  scene.style.filter = vel > 2 ? `blur(${Math.min(16, vel / 9).toFixed(1)}px)` : 'none';
+
+  G.forEach((g, i) => {
+    g.g.style.transform = `translate3d(${g.x - camX}px, 0, ${-camD}px)`;
+    const lit = K.p(T, D[i] - 0.34, D[i] + 0.1, E.outCubic);
+    const flick = T > D[i] - 0.34 && T < D[i] - 0.18 ? (f % 2 ? 0.35 : 1) : 1;
+    const L1 = lit * flick * (1 + 0.25 * bloom);
+    g.cone.style.opacity = L1 * 0.95;
+    g.pool.style.opacity = L1;
+    const fl = fall(i, T);
+    const air = K.clamp(-fl.y / 600);
+    g.obj.style.transform = `translateY(${fl.y}px) scaleY(${fl.sq}) scaleX(${2 - fl.sq})`;
+    g.obj.style.transformOrigin = `0 ${-(g.lift + g.ph)}px`;
+    g.obj.style.visibility = T > D[i] - 0.4 ? 'visible' : 'hidden';
+    g.refl.style.transform = `translateY(${-fl.y}px) scaleY(-1)`;
+    g.refl.style.opacity = (T > D[i] - 0.4 ? 0.3 : 0) * (1 - air * 0.6);
+    g.cs.style.opacity = T > D[i] - 0.4 ? (g.lift ? 0.45 : 0.85) * (1 - air) : 0;
+    g.cs.style.transform = `scaleX(${1 + air * 0.6 + (g.lift ? 0.4 : 0)})`;
+    // a slow turntable breath once it has landed, and the sweep across every product
+    const turn = Math.sin(T * 0.9 + i * 1.3) * 7 * K.p(T, D[i], D[i] + 1, E.linear);
+    g.img.style.transform = `rotateY(${turn}deg)`;
+    const sw = K.clamp((T - SWEEP[0] - i * 0.12) / (SWEEP[1] - SWEEP[0] - 0.5));
+    const sw2 = K.clamp((T - BLOOM[0] - 0.4 - i * 0.08) / 0.9);
+    const swp = sw > 0 && sw < 1 ? sw : sw2 > 0 && sw2 < 1 ? sw2 : -1;
+    g.sheen.style.opacity = swp >= 0 ? 1 : 0;
+    g.sheen.style.backgroundPosition = `${(1 - swp) * 100}% 0`;
+    g.sheen.style.transform = g.img.style.transform;
+    // depth of field: the neighbours soften while the camera is close
+    const dof = Math.min(9, Math.abs(g.x - camX) / L.S * 7) * (1 - wide);
+    g.g.style.filter = dof > 0.4 ? `blur(${dof.toFixed(1)}px)` : 'none';
+    // landing dust
+    g.dust.forEach((d, j) => {
+      const a = T - D[i], dir = (seed(i * 20 + j) - 0.5) * 2;
+      const p = K.clamp(a / 0.8);
+      d.style.opacity = a > 0 && a < 0.8 ? (1 - p) * 0.8 : 0;
+      d.style.transform = `translate(${dir * g.w * 0.75 * E.outCubic(p)}px, ${-g.ph - 6 - seed(j + i) * 40 * Math.sin(p * Math.PI)}px)`;
+    });
+  });
+
+  // motes drifting through the beams
+  motes.forEach((m, i) => {
+    const x = (seed(i + 11) * W + Math.sin(T * 0.4 + i) * 50 - (camX * 0.25) % W + W * 2) % W;
+    const y = ((seed(i + 17) * L.fy - T * (6 + seed(i + 3) * 16)) % L.fy + L.fy) % L.fy;
+    m.style.transform = `translate(${x}px, ${y}px)`;
+    m.style.opacity = (0.2 + 0.6 * seed(i + 23)) * (0.6 + 0.4 * Math.sin(T * 1.7 + i * 2)) * on * (1 - K.p(T, 12.7, 13, E.linear));
+  });
+
+  // ---------- type ----------
+  kick.style.opacity = K.p(T, 0.1, 0.5, E.linear) * (1 - K.p(T, 0.95, 1.1, E.linear));
+  caps.forEach(({ el, ws, sub, c }) => {
+    const vis = T >= c.a - 0.02 && T < c.b + 0.02;
+    el.style.visibility = vis ? 'visible' : 'hidden';
+    if (!vis) { if (sub) sub.style.opacity = 0; return; }
+    K.reveal(ws, T, c.a, { kind: 'blur', stagger: 0.07, dur: 0.5, ease: E.outExpo });
+    const o = K.p(T, c.b - 0.25, c.b, E.inCubic);
+    el.style.opacity = 1 - o; el.style.transform = `translateY(${-o * 18}px)`;
+    if (sub) { sub.style.opacity = K.p(T, c.a + 0.5, c.a + 0.9, E.linear) * (1 - o); }
+  });
+  // name plates under the piece in focus (close shots only)
+  plates.forEach((pl, i) => {
+    const a = D[i] + 0.05, b = i < 4 ? D[i + 1] - 0.3 : WIDE[0];
+    const o = K.p(T, a, a + 0.3, E.outCubic) * (1 - K.p(T, b - 0.15, b, E.linear));
+    pl.style.opacity = o; pl.style.transform = `translateY(${(1 - o) * 12}px)`;
+  });
+  // draft tags under each piece in the line-up, and the yes that turns them live
+  const yIn = K.p(T, 10.7, 11.05, E.outBack), yOut = K.p(T, 11.75, 12.05, E.inCubic);
+  chips.forEach((c, i) => {
+    const sx = W / 2 + (G[i].x - camX) * s;
+    const pIn = K.p(T, DRAFT + i * 0.1, DRAFT + i * 0.1 + 0.35, E.outBack);
+    const live = T >= YES + 0.35 + i * 0.09;
+    c.innerHTML = live ? 'Live' : 'Draft';
+    c.classList.toggle('live', live);
+    const w = c.offsetWidth;
+    c.style.left = sx - w / 2 + 'px';
+    c.style.top = L.chipY + 'px';
+    c.style.opacity = K.clamp(pIn * 1.5) * (1 - K.p(T, 12.75, 12.95, E.linear));
+    c.style.transform = `scale(${0.7 + 0.3 * pIn + (live ? 0.12 * (1 - K.p(T, YES + 0.35 + i * 0.09, YES + 0.6 + i * 0.09)) : 0)})`;
+  });
+  const yw = yes.offsetWidth;
+  yes.style.left = (W - yw) / 2 + 'px';
+  yes.style.opacity = yIn > 0 ? Math.min(1, yIn * 2) * (1 - yOut) : 0;
+  const press = T > YES - 0.06 && T < YES + 0.12;
+  yes.style.transform = `scale(${(0.8 + 0.2 * yIn) * (press ? 0.93 : 1)})`;
+  const cx = K.k(T, [[10.75, W * 0.78], [YES - 0.05, W / 2 + 40]], E.inOutCubic), cy = K.k(T, [[10.75, L.yesY + 190], [YES - 0.05, L.yesY + 40]], E.inOutCubic);
+  cur.at(cx, cy, press); cur.hide(K.win(T, 10.8, 11.75, 0.15));
+  cur.ripple(W / 2 + 40, L.yesY + 40, T, YES);
+
+  tag.style.left = (W - tag.offsetWidth) / 2 + 'px';
+  tag.style.opacity = K.p(T, 1.0, 1.4, E.linear) * (1 - K.p(T, 12.7, 13, E.linear)) * (tall ? 1 - K.win(T, 0, 1.12, 0.1) : 1);
+  end(T);
+});
+</script></body></html>

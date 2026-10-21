@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>G13 · Seasons on a Carousel</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #DCE5D3; }
+.wall { position: absolute; inset: 0; }
+.floorG { position: absolute; left: 0; right: 0; bottom: 0; }
+.spot { position: absolute; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(255,252,244,.85), rgba(255,252,244,0)); }
+.beam { position: absolute; pointer-events: none; mix-blend-mode: soft-light; filter: blur(18px);
+  background: linear-gradient(180deg, rgba(255,250,236,.9), rgba(255,250,236,0)); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); }
+.disc { position: absolute; border-radius: 50%; }
+.rim { position: absolute; border-radius: 50%; background: linear-gradient(90deg, #8E8372, #CFC6B6 30%, #E9E3D7 48%, #C9BFAE 70%, #857A69); }
+.dsh { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(40,30,20,.45), rgba(40,30,20,0)); filter: blur(10px); }
+.prod { position: absolute; transform-origin: 50% 100%; }
+.pim { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 50% 100%; display: block; }
+.refl { -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0) 30%); mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0) 30%); }
+.gloss { mix-blend-mode: screen; filter: brightness(1.5) saturate(.3); -webkit-mask-image: linear-gradient(100deg, transparent 42%, #000 50%, transparent 58%); mask-image: linear-gradient(100deg, transparent 42%, #000 50%, transparent 58%); -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.csh { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(40,30,18,.6), rgba(40,30,18,0)); }
+.cal { position: absolute; z-index: 12; filter: drop-shadow(0 30px 30px rgba(40,30,20,.28)); transform-origin: 50% 0; }
+.cal img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.cal .mo { position: absolute; left: 30.3%; top: 11.2%; width: 39.7%; height: 11.9%; background: #F4F0EA; display: grid; place-items: center; transform-origin: 50% 0; backface-visibility: hidden; }
+.cal .mo span { font: 600 10px 'Playfair Display'; letter-spacing: .06em; color: #2A2622; white-space: nowrap; }
+.cal .nail { position: absolute; left: 50%; top: 1.2%; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #EDE6DA, #6B6255); box-shadow: 0 3px 4px rgba(0,0,0,.3); }
+.part { position: absolute; border-radius: 50%; pointer-events: none; }
+.kick { position: absolute; z-index: 40; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .2em; text-transform: uppercase; color: #3A352E; white-space: nowrap; }
+.season { position: absolute; z-index: 40; font: 800 150px/0.9 'Playfair Display'; letter-spacing: -0.04em; color: #1F1F1F; white-space: nowrap; }
+.season i { font-style: italic; font-weight: 500; }
+.sub { position: absolute; z-index: 40; font: 700 50px/1.06 'Playfair Display'; letter-spacing: -0.015em; color: #1F1F1F; }
+.sub em { font-style: normal; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.hookT { position: absolute; z-index: 40; font: 800 104px/0.98 'Playfair Display'; letter-spacing: -0.035em; color: #1F1F1F; }
+.hookT i { font-style: italic; font-weight: 500; }
+.hookT .w { display: inline-block; white-space: pre; }
+.chipP { position: absolute; z-index: 44; padding: 16px 24px; border-radius: 18px; background: #1F1F1F; color: #FAF7EE; font: 600 26px/1.25 'Archivo'; }
+.chipP b { color: #DFFF5A; }
+.draft { position: absolute; z-index: 44; display: flex; align-items: center; gap: 14px; padding: 16px 26px; border-radius: 99px; background: #FFFDF8; color: #1F1F1F; font: 700 28px 'Archivo'; box-shadow: 0 0 0 2px #1F1F1F, 0 20px 40px -20px rgba(31,31,31,.6); white-space: nowrap; }
+.draft i { width: 14px; height: 14px; border-radius: 50%; background: #E8603C; display: block; }
+.yes { position: absolute; z-index: 45; white-space: nowrap; display: flex; align-items: center; gap: 14px; padding: 18px 32px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 32px 'Archivo'; box-shadow: 0 24px 40px -20px rgba(31,31,31,.7), 0 0 0 3px #1F1F1F; }
+.vig { position: absolute; inset: 0; z-index: 80; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, rgba(0,0,0,0) 55%, rgba(30,22,14,.28)); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// G13 — Seasons on a Carousel. A lit turntable stage carries four seasonal sets; each quarter turn lands on the word
+// Marian says (spring cards, summer tees, autumn books, winter tags) and the whole studio regrades — wall, floor,
+// light and particles (petals, sun motes, leaves, snow) — while the calendar on the wall flips its month. The disc is a
+// real rotating surface (a conic-segmented circle squashed into perspective); every product stands on it at its own
+// angle, scaled, layered and blurred by depth, with contact shadows and a gloss sweep as it comes to the front. Then
+// the stage spins through the year for the honest line (printed per order by your own partner) and stops on the draft.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 103.4, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const RATIO = { 'k02-framed-print': 897 / 608, 'k03-tee': 901 / 977, 'k04-hoodie': 979 / 976, 'k05-tote': 961 / 595, 'k07-sticker-sheet': 918 / 763,
+  'k08-greeting-card': 928 / 540, 'k09-kids-book': 926 / 656, 'k10-calendar': 896 / 643, 'k14-gift-tag': 906 / 596, 'k01-mug': 804 / 852 };
+const mix = (a, b, p) => a.map((v, i) => v + (b[i] - v) * p);
+const rgb = (c, a = 1) => `rgba(${c.map((v) => Math.round(v)).join(',')},${a})`;
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+
+function Prod(id, w, o = {}) {
+  const h = w * RATIO[id], src = K.pub('r07/' + id + '.webp');
+  const root = K.box(0, 0, w, h, { cls: 'prod', style: { zIndex: 20 } });
+  const shadow = K.el('div', { cls: 'csh', parent: root, style: { left: w * 0.06 + 'px', width: w * 0.88 + 'px', top: h - w * 0.06 + 'px', height: w * 0.12 + 'px' } });
+  const refl = K.el('img', { cls: 'pim refl', src, parent: root, style: { opacity: o.refl ?? 0.3 } });
+  const img = K.el('img', { cls: 'pim', src, parent: root });
+  const gloss = K.el('img', { cls: 'pim gloss', src, parent: root });
+  return { root, w, h,
+    set(x, fy, s = 1, lift = 0, rot = 0, op = 1, blur = 0, sweep = -1) {
+      root.style.left = x - w / 2 + 'px'; root.style.top = fy - h + 'px';
+      root.style.transform = `scale(${s})`;
+      root.style.opacity = op; root.style.visibility = op > 0.001 ? 'visible' : 'hidden';
+      root.style.filter = blur > 0.3 ? `blur(${blur}px)` : 'none';
+      const t = `translateY(${-lift}px) rotate(${rot}deg)`;
+      img.style.transform = gloss.style.transform = t;
+      refl.style.transform = `scaleY(-1) ${t}`;
+      gloss.style.opacity = sweep >= 0 && sweep <= 1 ? 0.7 : 0;
+      const m = (1 - sweep) * 100 + '% 0';
+      gloss.style.webkitMaskPosition = m; gloss.style.maskPosition = m;
+    } };
+}
+
+// ---------- seasons ----------
+const SEASONS = [
+  { name: 'Spring', word: 'cards', month: 'April', wall: ['#E2EADB', '#C5D3BA'], floor: ['#B9C9AC', '#8FA582'], disc: '#EEF2E6', part: 'petal',
+    items: [['k08-greeting-card', 230, -13, 0.56], ['k02-framed-print', 230, 17, 0.72]] },
+  { name: 'Summer', word: 'tees', month: 'July', wall: ['#F6DEBA', '#EBC08F'], floor: ['#DDAE7B', '#BF8752'], disc: '#F8E8CF', part: 'mote',
+    items: [['k03-tee', 360, -12, 0.55], ['k05-tote', 200, 19, 0.74]] },
+  { name: 'Autumn', word: 'books', month: 'October', wall: ['#EBC7AB', '#CE9571'], floor: ['#B97C58', '#8E5638'], disc: '#F1D9C5', part: 'leaf',
+    items: [['k09-kids-book', 250, -12, 0.56], ['k07-sticker-sheet', 220, 18, 0.72]] },
+  { name: 'Winter', word: 'tags', month: 'December', wall: ['#DCE2E9', '#B3BFCC'], floor: ['#98A6B6', '#6C7B8D'], disc: '#E8ECF1', part: 'snow',
+    items: [['k14-gift-tag', 200, -13, 0.56], ['k04-hoodie', 330, 16, 0.72]] },
+];
+SEASONS.forEach((s) => { s.w0 = hex(s.wall[0]); s.w1 = hex(s.wall[1]); s.f0 = hex(s.floor[0]); s.f1 = hex(s.floor[1]); });
+
+const L = tall
+  ? { cx: 540, cy: 1190, R: 540, k: 0.3, thick: 42, base: 1.42, kx: 65, ky: 300, sy: 340, fs: 150, suby: 500, calX: 730, calY: 270, calW: 280,
+      hookY: 330, hookFs: 104, chipY: 560, draftY: 560, yesY: 660, tagY: 1196 }
+  : { cx: 540, cy: 960, R: 500, k: 0.28, thick: 36, base: 1.2, kx: 60, ky: 56, sy: 92, fs: 128, suby: 230, calX: 790, calY: 40, calW: 230,
+      hookY: 80, hookFs: 92, chipY: 300, draftY: 300, yesY: 392, tagY: 1278 };
+
+// the set
+const wall = K.box(0, 0, W, H, { cls: 'wall' });
+const floorG = K.box(0, L.cy - L.R * L.k - 40, W, H - (L.cy - L.R * L.k - 40), { cls: 'floorG' });
+const spot = K.box(0, 0, 1400, 1000, { cls: 'spot' });
+const beam = K.box(L.cx - 650, -100, 1300, L.cy + 60, { cls: 'beam', style: { zIndex: 6 } });
+const dsh = K.box(L.cx - L.R * 1.15, L.cy - L.R * L.k * 0.6 + L.thick, L.R * 2.3, L.R * L.k * 2.4, { cls: 'dsh', style: { zIndex: 7 } });
+const rim = K.box(L.cx - L.R, L.cy - L.R * L.k + L.thick, L.R * 2, L.R * L.k * 2, { cls: 'rim', style: { zIndex: 8 } });
+const discRefl = K.box(L.cx - L.R, L.cy + L.R * L.k + L.thick, L.R * 2, L.R * L.k * 2.2, { cls: 'disc', style: { zIndex: 7, borderRadius: '50%', opacity: .35,
+  background: 'radial-gradient(closest-side, rgba(255,255,255,.55), rgba(255,255,255,0))', filter: 'blur(14px)' } });
+const disc = K.box(L.cx - L.R, L.cy - L.R, L.R * 2, L.R * 2, { cls: 'disc', style: { zIndex: 9 } });
+const discHi = K.box(L.cx - L.R, L.cy - L.R * L.k, L.R * 2, L.R * L.k * 2, { cls: 'disc', style: { zIndex: 9,
+  background: 'radial-gradient(60% 70% at 45% 30%, rgba(255,255,255,.55), rgba(255,255,255,0) 70%)' } });
+
+// calendar on the wall: its month patch flips with every season
+const cal = K.box(L.calX, L.calY, L.calW, L.calW * RATIO['k10-calendar'], { cls: 'cal', html: `<img src="${K.pub('r07/k10-calendar.webp')}"><div class="nail"></div>` });
+const moB = K.el('div', { cls: 'mo', parent: cal, html: '<span></span>' });
+const moA = K.el('div', { cls: 'mo', parent: cal, html: '<span></span>' });
+const fitMonth = (el, m) => { const sp = el.firstChild; sp.textContent = m.toUpperCase(); sp.style.fontSize = Math.min(L.calW * 0.095, L.calW * 0.38 / (m.length * 0.78)) + 'px'; };
+
+// products on the disc
+const PRODS = [];
+SEASONS.forEach((s, g) => s.items.forEach(([id, w, da, r]) => PRODS.push({ g, p: Prod(id, w * L.base), a: (-g * 90 + da) * Math.PI / 180, r })));
+
+// particles: one family per season
+const PARTS = Array.from({ length: 64 }, (_, i) => {
+  const g = i % 4, kind = SEASONS[g].part;
+  const sz = kind === 'snow' ? 6 + seed(i) * 9 : kind === 'mote' ? 10 + seed(i) * 26 : kind === 'leaf' ? 16 + seed(i) * 14 : 12 + seed(i) * 10;
+  const el = K.box(0, 0, sz, kind === 'leaf' || kind === 'petal' ? sz * 0.6 : sz, { cls: 'part', style: { zIndex: seed(i + 5) > 0.7 ? 60 : 11,
+    background: { snow: '#FFFFFF', mote: 'radial-gradient(closest-side, rgba(255,236,190,.9), rgba(255,236,190,0))', leaf: ['#C8643A', '#D9893F', '#9E4A2A'][i % 3], petal: ['#F4C9CF', '#FBE3E1', '#EBD3E6'][i % 3] }[kind],
+    borderRadius: kind === 'leaf' ? '80% 0 80% 0' : '50%' } });
+  return { el, g, kind, x0: seed(i + 1), y0: seed(i + 2), sp: 0.5 + seed(i + 3), sz, near: seed(i + 5) > 0.7 };
+});
+
+// ---------- type ----------
+const hook = K.box(L.kx, L.hookY, W - 2 * L.kx, null, { cls: 'hookT', style: { fontSize: L.hookFs + 'px' } });
+hook.innerHTML = ['Every', 'season,', '<br>', '<i>something</i>', '<br>', 'new', 'to', 'sell.'].map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w} </span>`)).join('');
+const hookW = [...hook.querySelectorAll('.w')];
+const kick = K.box(L.kx, L.ky, null, null, { cls: 'kick', style: { width: 'auto', height: 'auto' } });
+const names = SEASONS.map((s) => K.box(L.kx, L.sy, null, null, { cls: 'season', style: { width: 'auto', height: 'auto', fontSize: L.fs + 'px' }, html: s.name }));
+const subs = SEASONS.map((s) => K.box(L.kx, L.suby, tall ? 640 : 680, null, { cls: 'sub', html: `${s.name} <em>${s.word}</em>, made to order.` }));
+const chipP = K.box(L.kx, L.chipY, tall ? 640 : 700, null, { cls: 'chipP', html: 'Printed per order by <b>your own partner</b>, paid from your partner account.' });
+const bigP = K.box(L.kx, L.sy, tall ? 700 : 720, null, { cls: 'season', style: { fontSize: L.fs * 0.8 + 'px', whiteSpace: 'normal' }, html: 'All year,<br><i>no stock.</i>' });
+const draft = K.box(L.kx, L.draftY, null, null, { cls: 'draft', style: { width: 'auto', height: 'auto' }, html: '<i></i>Draft · 8 products, waiting for you' });
+const yes = K.box(L.kx, L.yesY, null, null, { cls: 'yes', style: { width: 'auto', height: 'auto' }, html: '<svg width="30" height="30" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#1F1F1F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Yes, list the season' });
+const cursor = K.cursor();
+const tag = K.demoTag('Concept products · AI-generated', tall ? 65 : 60, L.tagY);
+const vig = K.box(0, 0, W, H, { cls: 'vig' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Every season.<br>Made to order.' });
+
+// ---------- timing (fitted to Marian’s takes; each quarter turn lands on the season she names) ----------
+const VO = [[0.3, 'Every season, something new to sell.'], [2.75, 'Spring cards, summer tees, autumn books, winter tags.'],
+  [7.0, 'Each one printed per order by your own partner.'], [9.8, 'And it goes live only on your yes.']];
+const T_SEAS = [2.95, 3.9, 4.9, 5.8];     // each season reaches the front on its word (spring … winter)
+const T_SPIN = 6.75, T_STOP = 10.3, T_YES = 12.5;
+// continuous season index: holds, then turns (0.75 s, on the beat) into each season; spins a whole year during line 3
+const seasonAt = (t) => {
+  const keys = [[0, -0.45], [T_SEAS[0], 0], [T_SEAS[1] - 0.7, 0], [T_SEAS[1], 1], [T_SEAS[2] - 0.7, 1], [T_SEAS[2], 2], [T_SEAS[3] - 0.7, 2], [T_SEAS[3], 3]];
+  if (t <= T_SEAS[3]) return K.k(t, keys, E.inOutCubic);
+  // a slow drift, then the spin through the year (3 → 7 = back to winter), easing to a stop
+  return K.k(t, [[T_SEAS[3], 3], [T_SPIN, 3.15], [T_STOP, 7]], E.inOutCubic);
+};
+
+K.run({
+  id: 'G13', title: 'Seasons on a Carousel', dur: DUR, bpm: BPM, music: 'earth', mood: 'bright', key: 'D', intro: 0.0, cover: 4.6,
+  technique: 'A lit turntable stage (a conic-segmented disc squashed into perspective, with rim, contact shadow and gloss) turns a quarter on each season the narrator names; products stand on the disc at their own angles, scaled, layered and blurred by depth; the whole studio regrades per season with its own particles (petals, sun motes, leaves, snow) while a calendar on the wall flips its month, then the stage spins a full year and stops on the draft',
+  caption: 'Every season, something new to sell: spring cards, summer tees, autumn books, winter gift tags — made from your designs and printed per order by your own print partner, paid from your partner account. Drafts first; nothing is listed until you say yes. Start free at makeandlist.com',
+  short: 'Every season. Made to order.',
+  vo: VO,
+  beats: ['0–2.8 s: “Every season, something new to sell.” — spring set at the front, petals', '2.8–7.4 s: a quarter turn on each word: spring cards, summer tees, autumn books, winter tags; the studio and calendar change with them', '7.4–10.3 s: the stage spins a whole year; printed per order by your own partner, paid from your partner account', '10.3–13 s: it stops; Draft · waiting for you; “Yes, list the season”', '13–15 s: end card'],
+  cues: [[0.0, 'swish'], [0.25, 'pop'], [T_SEAS[0] - 0.05, 'pop'], [T_SEAS[1] - 0.7, 'whoosh'], [T_SEAS[1], 'pop'], [T_SEAS[2] - 0.7, 'whoosh'], [T_SEAS[2], 'pop'], [T_SEAS[3] - 0.7, 'whoosh'], [T_SEAS[3], 'pop'],
+    [T_SPIN - 0.05, 'whoosh'], [T_STOP - 0.05, 'hit'], [10.55, 'pop'], [T_YES, 'click'], [12.85, 'chime'], [13.0, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const s = seasonAt(T);
+  const sw = (s % 4 + 4) % 4, gi = Math.floor(sw), gp = sw - gi;
+  const A = SEASONS[gi], Bs = SEASONS[(gi + 1) % 4];
+  const wc0 = mix(A.w0, Bs.w0, gp), wc1 = mix(A.w1, Bs.w1, gp), fc0 = mix(A.f0, Bs.f0, gp), fc1 = mix(A.f1, Bs.f1, gp);
+  wall.style.background = `radial-gradient(90% 60% at 50% 30%, ${rgb(mix(wc0, [255, 255, 255], 0.35))}, ${rgb(wc0)} 45%, ${rgb(wc1)} 100%)`;
+  floorG.style.background = `linear-gradient(180deg, ${rgb(fc0, 0)} 0%, ${rgb(fc0, 0.9)} 18%, ${rgb(fc1)} 100%)`;
+  spot.style.transform = `translate(${L.cx - 700 + Math.sin(T * 0.5) * 60}px, ${L.cy - L.R * 1.6}px)`;
+  beam.style.opacity = 0.55 + 0.15 * Math.sin(T * 1.3);
+
+  // the disc turns; its four sectors carry the season tints
+  const theta = -s * 90;
+  const c = SEASONS.map((x) => x.disc);
+  disc.style.background = `radial-gradient(closest-side, rgba(255,255,255,.0) 60%, rgba(0,0,0,.08) 96%, rgba(0,0,0,.18)), repeating-conic-gradient(from 0deg, rgba(0,0,0,.035) 0 1deg, rgba(0,0,0,0) 1deg 15deg), conic-gradient(from 135deg, ${c[0]} 0 90deg, ${c[1]} 90deg 180deg, ${c[2]} 180deg 270deg, ${c[3]} 270deg 360deg)`;
+  disc.style.transform = `scaleY(${L.k}) rotate(${theta}deg)`;
+
+  // products on the disc
+  const th = theta * Math.PI / 180;
+  PRODS.forEach(({ p, a, r }) => {
+    const phi = a - th;
+    const x = L.cx + L.R * r * Math.sin(phi), y = L.cy + L.R * L.k * r * Math.cos(phi);
+    const depth = (Math.cos(phi) + 1) / 2; // 1 front … 0 back
+    const sc = (0.5 + 0.5 * depth);
+    const blur = (1 - depth) * 7 + (T > T_SPIN && T < T_STOP ? Math.abs(Math.sin(phi)) * 2 : 0);
+    p.set(x, y, sc, 0, 0, 0.35 + 0.65 * depth, blur, -1);
+    // gloss: passes as the item turns through the front
+    const gs = K.clamp((Math.sin(phi) + 0.25) / 0.5);
+    p.root.lastChild.style.opacity = depth > 0.85 ? 0.7 * (1 - Math.abs(gs - 0.5) * 2) : 0;
+    const m = (1 - gs) * 100 + '% 0';
+    p.root.lastChild.style.webkitMaskPosition = m; p.root.lastChild.style.maskPosition = m;
+    p.root.style.zIndex = 10 + Math.round(depth * 40);
+  });
+
+  // calendar: the month patch flips over on every season change
+  const flipP = sw - Math.floor(sw);
+  fitMonth(moA, SEASONS[gi].month); fitMonth(moB, SEASONS[(gi + 1) % 4].month);
+  // the next month waits underneath; the current one is a flap that folds away over the turn
+  moA.style.transform = `perspective(600px) rotateX(${-K.clamp(flipP / 0.6) * 90}deg)`;
+  moA.style.visibility = flipP < 0.6 ? 'visible' : 'hidden';
+  cal.style.transform = `rotate(${Math.sin(T * 1.4) * 0.8 + (flipP > 0 && flipP < 1 ? Math.sin(flipP * Math.PI) * 2.5 : 0)}deg) translateY(${Math.sin(T * 0.6) * 4}px)`;
+  const calIn = K.p(T, 0.3, 0.9, E.outExpo);
+  cal.style.opacity = calIn; cal.style.marginTop = (1 - calIn) * -60 + 'px';
+
+  // particles of the season(s) on screen
+  PARTS.forEach((q, i) => {
+    const d = Math.abs((((sw - q.g) % 4 + 4) % 4 + 2) % 4 - 2), wgt = K.clamp(1 - d); // 1 when this season is in front
+    const fall = q.kind === 'mote' ? -18 : q.kind === 'snow' ? 90 : 55;
+    const x = (q.x0 * (W + 100) + Math.sin(T * q.sp + i) * (q.kind === 'snow' ? 20 : 60) + T * (q.kind === 'leaf' ? 30 : 8)) % (W + 100) - 50;
+    const y = ((q.y0 * H + T * fall * q.sp) % H + H) % H;
+    q.el.style.transform = `translate(${x}px, ${y}px) rotate(${(T * 90 * q.sp + i * 40) % 360}deg)` + (q.near ? ' scale(1.8)' : '');
+    q.el.style.opacity = wgt * (q.kind === 'mote' ? 0.8 : 0.85) * K.p(T, 0, 0.6, E.linear);
+    q.el.style.filter = q.near ? 'blur(4px)' : 'none';
+    q.el.style.visibility = wgt > 0.01 ? 'visible' : 'hidden';
+  });
+
+  // ---------- type ----------
+  const hOut = K.p(T, T_SEAS[0] - 0.5, T_SEAS[0] - 0.25, E.inCubic);
+  hookW.forEach((w, i) => {
+    const p = K.p(T, 0.05 + i * 0.07, 0.6 + i * 0.07, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.5) * (1 - hOut);
+    w.style.transform = `translateY(${(1 - p) * 60 - hOut * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+  hook.style.visibility = hOut < 1 ? 'visible' : 'hidden';
+  // season names, one per turn
+  SEASONS.forEach((x, i) => {
+    const a = T_SEAS[i] - 0.25, b = i < 3 ? T_SEAS[i + 1] - 0.3 : T_SPIN;
+    const vis = 1;
+    const pin = K.p(T, a, a + 0.45, E.outExpo), pout = K.p(T, b - 0.2, b + 0.05, E.inCubic);
+    names[i].style.opacity = vis * pin * (1 - pout);
+    names[i].style.transform = `translateY(${(1 - pin) * 50 - pout * 30}px)`;
+    names[i].style.filter = pin < 1 ? `blur(${(1 - pin) * 8}px)` : 'none';
+    names[i].style.visibility = vis && pin > 0 && pout < 1 ? 'visible' : 'hidden';
+    const sp = K.p(T, a + 0.15, a + 0.6, E.outExpo);
+    subs[i].style.opacity = vis * sp * (1 - pout);
+    subs[i].style.transform = `translateY(${(1 - sp) * 30}px)`;
+    subs[i].style.visibility = names[i].style.visibility;
+    subs[i].querySelector('em').style.backgroundSize = `${K.p(T, a + 0.35, a + 0.7, E.outCubic) * 100}% 100%`;
+  });
+  kick.innerHTML = T < T_SPIN ? `Season 0${Math.max(1, T_SEAS.filter((x) => T >= x - 0.25).length)} / 04 · made to order` : T < T_STOP ? 'The whole year · made to order' : 'Your season · draft';
+  kick.style.opacity = K.p(T, T_SEAS[0] - 0.3, T_SEAS[0], E.linear);
+  const pIn = K.p(T, T_SPIN + 0.1, T_SPIN + 0.6, E.outExpo), pOut = K.p(T, T_STOP - 0.2, T_STOP + 0.05, E.inCubic);
+  bigP.style.opacity = pIn * (1 - pOut); bigP.style.transform = `translateY(${(1 - pIn) * 50}px)`;
+  bigP.style.visibility = pIn > 0 && pOut < 1 ? 'visible' : 'hidden';
+  const cpi = K.p(T, 7.5, 8.0, E.outExpo);
+  chipP.style.top = (tall ? 600 : 330) + 'px';
+  chipP.style.opacity = cpi * (1 - pOut); chipP.style.transform = `translateY(${(1 - cpi) * 30}px)`;
+  chipP.style.visibility = cpi > 0 && pOut < 1 ? 'visible' : 'hidden';
+  const dIn = K.p(T, T_STOP + 0.25, T_STOP + 0.7, E.outBack);
+  draft.style.top = L.sy + 'px';
+  draft.style.opacity = Math.min(1, dIn * 2); draft.style.transform = `translateY(${(1 - dIn) * 30}px) scale(${0.85 + 0.15 * dIn})`;
+  draft.style.visibility = T >= T_STOP + 0.25 ? 'visible' : 'hidden';
+  const yp = K.p(T, 11.0, 11.5, E.outBack), press = T >= T_YES && T < T_YES + 0.16;
+  yes.style.top = L.sy + 100 + 'px';
+  yes.style.opacity = Math.min(1, yp * 2);
+  yes.style.transform = `translateY(${(1 - yp) * 40}px) scale(${(0.8 + 0.2 * yp) * (press ? 0.93 : 1)})`;
+  yes.style.visibility = T >= 11.0 ? 'visible' : 'hidden';
+  const ycx = L.kx + 170, ycy = L.sy + 140;
+  const cuP = K.p(T, 11.8, T_YES, E.inOutCubic);
+  cursor.at(ycx + 240 * (1 - cuP), ycy + 200 * (1 - cuP), press);
+  cursor.hide(T < 13 ? K.p(T, 11.75, 11.9, E.linear) * (1 - K.p(T, T_YES + 0.3, T_YES + 0.45, E.linear)) : 0);
+  cursor.ripple(ycx, ycy, T, T_YES);
+  tag.style.opacity = K.p(T, 0.6, 0.9, E.linear);
+  end(T);
+});
+</script></body></html>

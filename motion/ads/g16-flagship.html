@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>G16 · The Flagship Film</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #0C0B0A; }
+.bgD { position: absolute; inset: 0; background: radial-gradient(75% 50% at 50% 46%, #2E2B27 0%, #171513 48%, #090807 100%); }
+.bgL { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 36%, #FFFDF8 0%, #F6F1E7 45%, #E8E0D1 100%); }
+.floorD { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(9,8,7,0), rgba(9,8,7,.85) 25%, #070606); }
+.floorL { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(226,216,200,0), rgba(226,216,200,.7) 25%, #D9CFBE); }
+.horizon { position: absolute; left: 0; right: 0; height: 220px; filter: blur(14px); }
+.cone { position: absolute; pointer-events: none; filter: blur(26px); mix-blend-mode: screen; background: linear-gradient(180deg, rgba(255,246,226,.28), rgba(255,246,226,0) 95%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); }
+.pool { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,240,214,.3), rgba(255,240,214,0)); }
+.haze { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(60px); }
+.spark { position: absolute; border-radius: 50%; background: #FFF6DC; box-shadow: 0 0 12px 3px rgba(255,236,190,.7); pointer-events: none; }
+.dust { position: absolute; border-radius: 50%; background: #FFF3D8; pointer-events: none; }
+.prod { position: absolute; transform-origin: 50% 100%; }
+.pim { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 50% 100%; display: block; }
+.refl { -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0) 30%); mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,0) 30%); }
+.gloss { mix-blend-mode: screen; filter: brightness(1.6) saturate(.3); -webkit-mask-image: linear-gradient(100deg, transparent 42%, #000 50%, transparent 58%); mask-image: linear-gradient(100deg, transparent 42%, #000 50%, transparent 58%); -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.csh { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.7), rgba(0,0,0,0)); }
+.bloom { position: absolute; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(255,246,222,.9), rgba(255,246,222,.25) 45%, rgba(255,246,222,0)); mix-blend-mode: screen; }
+.sent { position: absolute; z-index: 40; text-align: center; font: 600 64px/1.12 'Playfair Display'; letter-spacing: -0.01em; color: #FAF7EE; }
+.sent i { font-style: italic; font-weight: 500; }
+.sent .c { display: inline-block; white-space: pre; }
+.caret { display: inline-block; width: 4px; height: .9em; margin-left: 4px; vertical-align: -.08em; background: #DFFF5A; box-shadow: 0 0 14px #DFFF5A; }
+.kickD { position: absolute; z-index: 40; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .24em; text-transform: uppercase; color: #A89F90; white-space: nowrap; }
+.kickL { position: absolute; z-index: 40; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .24em; text-transform: uppercase; color: #6B645A; white-space: nowrap; }
+.capD { position: absolute; z-index: 40; font: 800 84px/0.98 'Playfair Display'; letter-spacing: -0.03em; color: #FAF7EE; }
+.capD i { font-style: italic; font-weight: 500; }
+.capD em { font-style: normal; color: #DFFF5A; }
+.capD .w { display: inline-block; white-space: pre; }
+.capL { position: absolute; z-index: 40; font: 800 84px/0.98 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.capL i { font-style: italic; font-weight: 500; }
+.capL .w { display: inline-block; white-space: pre; }
+.capL .hl { background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / 0% 100%; }
+.words { position: absolute; z-index: 40; display: flex; gap: 14px; }
+.wd { padding: 12px 22px; border-radius: 99px; font: 700 30px 'Archivo'; color: #FAF7EE; box-shadow: 0 0 0 2px rgba(250,247,238,.35); white-space: nowrap; }
+.wd.on { background: #DFFF5A; color: #1F1F1F; box-shadow: 0 0 0 2px #DFFF5A, 0 0 30px rgba(223,255,90,.45); }
+.fc { position: absolute; z-index: 30; border-radius: 22px; background: rgba(255,253,248,.97); box-shadow: 0 40px 70px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.5); overflow: hidden; }
+.fc .h { position: absolute; left: 18px; top: 14px; font: 600 15px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #6B645A; }
+.fc .pdf { position: absolute; left: 18px; right: 18px; height: 52px; border-radius: 12px; background: #F4F1EA; display: flex; align-items: center; gap: 12px; padding: 0 14px; font: 600 19px 'Archivo'; color: #1F1F1F; }
+.fc .pdf b { width: 28px; height: 34px; border-radius: 4px; background: #FFFDF8; box-shadow: 0 0 0 1.5px #C9C1B3; display: block; flex: none; }
+.fc .pdf s { margin-left: auto; text-decoration: none; font: 500 15px 'IBM Plex Mono', monospace; color: #6B645A; }
+.fc .ims { position: absolute; left: 18px; right: 18px; top: 46px; bottom: 18px; display: grid; grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; }
+.fc .ims div { border-radius: 12px; background: #E3EADC; position: relative; overflow: hidden; }
+.fc .ims div:first-child { grid-row: span 2; background: #DCE5D3; }
+.fc .ims img { position: absolute; left: 50%; top: 50%; width: 92%; transform: translate(-50%, -50%) rotate(-4deg); }
+.fc .tt { position: absolute; left: 18px; right: 18px; top: 46px; font: 700 28px/1.1 'Playfair Display'; color: #1F1F1F; }
+.fc .tg { position: absolute; left: 18px; right: 18px; bottom: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+.fc .tg span { padding: 5px 11px; border-radius: 99px; border: 1.5px solid #D9D3C9; font: 600 15px 'Archivo'; color: #45403A; }
+.draft { position: absolute; z-index: 46; display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 99px; background: #FFFDF8; color: #1F1F1F; font: 700 26px 'Archivo'; box-shadow: 0 0 0 2px #1F1F1F, 0 20px 40px -20px rgba(0,0,0,.7); white-space: nowrap; }
+.draft i { width: 14px; height: 14px; border-radius: 50%; background: #E8603C; display: block; }
+.yes { position: absolute; z-index: 47; white-space: nowrap; display: flex; align-items: center; gap: 14px; padding: 22px 40px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 38px 'Archivo'; box-shadow: 0 0 0 3px #1F1F1F, 0 0 60px rgba(223,255,90,.5), 0 30px 50px -20px rgba(0,0,0,.8); }
+.stores { position: absolute; z-index: 44; display: flex; gap: 12px; align-items: center; }
+.st { width: 118px; height: 76px; border-radius: 18px; background: #FFFDF8; display: grid; place-items: center; box-shadow: 0 14px 26px -16px rgba(31,31,31,.5), 0 0 0 1px #E2DBCE; }
+.st img { max-width: 84px; max-height: 34px; }
+.stl { font: 600 19px 'IBM Plex Mono', monospace; letter-spacing: .06em; color: #45403A; white-space: nowrap; margin-left: 6px; }
+.flash { position: absolute; inset: 0; z-index: 85; pointer-events: none; background: radial-gradient(60% 45% at 50% 60%, #FFFFFF, rgba(255,253,246,.0)); }
+.lsweep { position: absolute; inset: -20%; z-index: 38; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(100deg, rgba(255,246,226,0) 45%, rgba(255,246,226,.2) 50%, rgba(255,246,226,0) 55%); }
+.demoD { position: absolute; z-index: 60; font: 500 19px 'IBM Plex Mono', monospace; color: #E9E2D4; background: rgba(31,31,31,.7); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; white-space: nowrap; }
+.vig { position: absolute; inset: 0; z-index: 80; pointer-events: none; }
+.bars { position: absolute; left: 0; right: 0; z-index: 88; background: #000; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .06;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// G16 — The Flagship Film. MakeAndList's whole story in one cinematic take, narrated by Marian.
+//  1 Dark void: one sentence types itself in light; its letters burst into sparks that stream to the floor and
+//    materialise the product (a concept botanical wedding planner) in a bloom of light.
+//  2 The planner on a black glossy set, camera orbiting; as she names them, its files, listing images and listing
+//    copy fly out on floating planes in depth; the camera pulls back as the rest of a catalogue arcs in behind.
+//  3 The proof: the real app on a phone rises into the set — the same Wedding Planner — Botanical, a Draft waiting
+//    for review; she says "your yes", the lime Yes is pressed, the phone swipes to Send and the studio floods with light.
+//  4 Ivory studio: the printed edition and the parcel on the floor — printed per order by your own partner, paid from
+//    your partner account — drafts into your own stores. End card.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 129.2, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const RATIO = { 'k13-wedding-planner': 786 / 984, 'k02-framed-print': 897 / 608, 'k01-mug': 804 / 852, 'k03-tee': 901 / 977, 'k05-tote': 961 / 595, 'k09-kids-book': 926 / 656, 'k11-parcel': 1, 'k06-notebook': 923 / 634 };
+const pub = (id) => K.pub('r07/' + id + '.webp');
+
+function Prod(id, w, o = {}) {
+  const h = w * RATIO[id], src = pub(id);
+  const root = K.box(0, 0, w, h, { cls: 'prod', style: { zIndex: o.z || 20 } });
+  const shadow = K.el('div', { cls: 'csh', parent: root, style: { left: w * 0.06 + 'px', width: w * 0.88 + 'px', top: h - w * 0.05 + 'px', height: w * 0.1 + 'px' } });
+  const refl = K.el('img', { cls: 'pim refl', src, parent: root, style: { opacity: o.refl ?? 0.3 } });
+  const img = K.el('img', { cls: 'pim', src, parent: root });
+  const gloss = K.el('img', { cls: 'pim gloss', src, parent: root });
+  return { root, w, h, img,
+    set(x, fy, s = 1, lift = 0, rot = 0, op = 1, blur = 0, sweep = -1, bright = 1) {
+      root.style.left = x - w / 2 + 'px'; root.style.top = fy - h + 'px';
+      root.style.transform = `scale(${s})`;
+      root.style.opacity = op; root.style.visibility = op > 0.001 ? 'visible' : 'hidden';
+      root.style.filter = (blur > 0.3 ? `blur(${blur}px) ` : '') + (bright !== 1 ? `brightness(${bright})` : '') || 'none';
+      const t = `translateY(${-lift}px) rotate(${rot}deg)`;
+      img.style.transform = gloss.style.transform = t;
+      refl.style.transform = `scaleY(-1) ${t}`;
+      const k = K.clamp(lift / 400);
+      shadow.style.transform = `scale(${1 + k * 0.7}, ${1 + k * 0.3})`; shadow.style.opacity = 1 - k * 0.85;
+      gloss.style.opacity = sweep >= 0 && sweep <= 1 ? 0.7 : 0;
+      const m = (1 - sweep) * 100 + '% 0';
+      gloss.style.webkitMaskPosition = m; gloss.style.maskPosition = m;
+    } };
+}
+
+// ---------- layout ----------
+const L = tall
+  ? { cx: 540, floor: 1190, heroW: 600, sentY: 600, sentFs: 66, kx: 65, kY: 300, capY: 340, wordsY: 560,
+      files: [70, 640, 330, 250], imgs: [690, 610, 330, 280], list: [620, 960, 400, 220],
+      ph: { x: 330, y: 600, w: 420 }, draftY: 560, yesX: 300, yesY: 1110, stY: 560, tagY: 1196 }
+  : { cx: 540, floor: 1000, heroW: 500, sentY: 420, sentFs: 58, kx: 60, kY: 56, capY: 92, wordsY: 280,
+      files: [70, 380, 300, 240], imgs: [720, 360, 300, 260], list: [650, 700, 370, 200],
+      ph: { x: 120, y: 250, w: 350 }, draftY: 300, yesX: 560, yesY: 800, stY: 300, tagY: 1278 };
+
+// ---------- the sets: dark void, then the ivory studio ----------
+const bgD = K.box(0, 0, W, H, { cls: 'bgD' });
+const bgL = K.box(0, 0, W, H, { cls: 'bgL' });
+const horizon = K.box(0, L.floor - 110, W, 220, { cls: 'horizon' });
+const floorD = K.box(0, L.floor, W, H - L.floor, { cls: 'floorD' });
+const floorL = K.box(0, L.floor, W, H - L.floor, { cls: 'floorL' });
+const cone = K.box(L.cx - 640, -140, 1280, L.floor + 160, { cls: 'cone', style: { zIndex: 6 } });
+const pool = K.box(L.cx - 520, L.floor - 120, 1040, 240, { cls: 'pool', style: { zIndex: 6 } });
+const hazes = [0, 1].map((i) => K.box(0, 0, 900, 700, { cls: 'haze', style: { background: ['rgba(255,236,200,.10)', 'rgba(223,255,90,.05)'][i], zIndex: 7 } }));
+const dust = Array.from({ length: 30 }, (_, i) => K.box(0, 0, 3 + seed(i) * 5, 3 + seed(i) * 5, { cls: 'dust', style: { zIndex: i % 4 ? 8 : 62 } }));
+
+// ---------- shot 1: the sentence ----------
+const SENT = 'A botanical wedding planner, 36 printable pages.';
+const sent = K.box(L.kx, L.sentY, W - 2 * L.kx, null, { cls: 'sent', style: { fontSize: L.sentFs + 'px' } });
+sent.innerHTML = SENT.split('').map((c) => `<span class="c">${c}</span>`).join('') + '<span class="caret"></span>';
+const chars = [...sent.querySelectorAll('.c')], caret = sent.querySelector('.caret');
+const kick1 = K.box(L.kx, L.sentY - 70, W - 2 * L.kx, null, { cls: 'kickD', html: 'It starts with one sentence', style: { textAlign: 'center' } });
+const sparks = Array.from({ length: 70 }, (_, i) => K.box(0, 0, 5 + seed(i + 3) * 6, 5 + seed(i + 3) * 6, { cls: 'spark', style: { zIndex: 41 } }));
+const bloom = K.box(0, 0, 900, 900, { cls: 'bloom', style: { zIndex: 25 } });
+
+// ---------- shot 2: the hero and its kit ----------
+const hero = Prod('k13-wedding-planner', L.heroW, { z: 24, refl: 0.32 });
+const CAT = [['k02-framed-print', 230, -1], ['k03-tee', 300, 1], ['k01-mug', 230, -2], ['k05-tote', 190, 2], ['k09-kids-book', 220, -3], ['k06-notebook', 200, 3]];
+const cat = CAT.map(([id, w]) => Prod(id, w * (tall ? 1.1 : 1), { z: 12, refl: 0.25 }));
+const cap2 = K.box(L.kx, L.capY, W - 2 * L.kx, null, { cls: 'capD', style: { fontSize: (tall ? 84 : 74) + 'px' } });
+cap2.innerHTML = ['MakeAndList', '<br>', '<i>makes</i>', 'the', 'kit.'].map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w} </span>`)).join('');
+const cap2W = [...cap2.querySelectorAll('.w')];
+const words = K.box(L.kx, L.wordsY, null, null, { cls: 'words', style: { width: 'auto', height: 'auto' }, html: ['Files', 'Images', 'Listing'].map((w) => `<div class="wd">${w}</div>`).join('') });
+const wds = [...words.querySelectorAll('.wd')];
+const fcard = (r, html) => K.box(r[0], r[1], r[2], r[3], { cls: 'fc', html });
+const fFiles = fcard(L.files, '<div class="h">Print-ready files</div>' + ['wedding-planner-a4.pdf', 'wedding-planner-letter.pdf', 'page-previews.zip'].map((n, i) => `<div class="pdf" style="top:${46 + i * 62}px"><b></b>${n.replace('wedding-planner', 'planner')}</div>`).join(''));
+const fImgs = fcard(L.imgs, `<div class="h">Listing images</div><div class="ims"><div><img src="${pub('k13-wedding-planner')}"></div><div><img src="${pub('k13-wedding-planner')}" style="width:150%;transform:translate(-30%,-40%) rotate(0deg)"></div><div><img src="${pub('k13-wedding-planner')}" style="width:160%;transform:translate(-62%,-55%)"></div></div>`);
+const fList = fcard(L.list, '<div class="h">Listing copy</div><div class="tt">Wedding Planner Printable — Botanical, 36 pages</div><div class="tg"><span>wedding planner</span><span>printable</span><span>botanical</span></div>');
+const conceptTag = K.box(tall ? 65 : 60, L.tagY, null, null, { cls: 'demoD', style: { width: 'auto', height: 'auto' }, html: 'Concept products · AI-generated' });
+
+// ---------- shot 3: the real app ----------
+const deck = K.phoneDeck(L.ph.x, L.ph.y, L.ph.w, [K.screen('24-phone-product'), K.screen('72-phone-listing-send')]);
+deck.root.style.zIndex = 34;
+const phRefl = K.box(L.ph.x, L.ph.y + deck.h + 8, L.ph.w, deck.h * 0.4, { style: { zIndex: 33, borderRadius: '64px', background: 'linear-gradient(180deg, rgba(60,56,50,.55), rgba(60,56,50,0) 60%)', filter: 'blur(3px)' } });
+const realTag = K.box(0, 0, null, null, { cls: 'demoD', style: { width: 'auto', height: 'auto', zIndex: 61 }, html: 'Real app · demo workspace' });
+const cap3 = K.box(L.kx, L.capY, W - 2 * L.kx, null, { cls: 'capD', style: { fontSize: (tall ? 84 : 66) + 'px', width: tall ? W - 130 + 'px' : '420px' } });
+cap3.innerHTML = ['You', '<i>review</i>', 'it.'].map((w) => `<span class="w">${w} </span>`).join('');
+const cap3b = K.box(L.kx, L.capY, W - 2 * L.kx, null, { cls: 'capD', style: { fontSize: (tall ? 84 : 66) + 'px', width: tall ? W - 130 + 'px' : '440px' } });
+cap3b.innerHTML = ['Live', 'only', 'on', '<br>', '<em>your</em>', '<em>yes.</em>'].map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w} </span>`)).join('');
+const cap3W = [...cap3.querySelectorAll('.w')], cap3bW = [...cap3b.querySelectorAll('.w')];
+const draft = K.box(0, 0, null, null, { cls: 'draft', style: { width: 'auto', height: 'auto' }, html: '<i></i>Draft · waiting for your review' });
+const yes = K.box(L.yesX, L.yesY, null, null, { cls: 'yes', style: { width: 'auto', height: 'auto' }, html: '<svg width="36" height="36" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#1F1F1F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Yes, send it' });
+const cursor = K.cursor();
+const flash = K.box(0, 0, W, H, { cls: 'flash' });
+
+// ---------- shot 4: printed, in the light ----------
+const tee4 = Prod('k03-tee', tall ? 470 : 400, { z: 22, refl: 0.16 });
+const hero4 = Prod('k13-wedding-planner', tall ? 470 : 400, { z: 23, refl: 0.16 });
+const print4 = Prod('k02-framed-print', tall ? 250 : 210, { z: 21, refl: 0.16 });
+const parcel4 = Prod('k11-parcel', tall ? 300 : 250, { z: 26, refl: 0.16 });
+const kick4 = K.box(L.kx, L.kY, null, null, { cls: 'kickL', style: { width: 'auto', height: 'auto' }, html: 'Printed products · made to order' });
+const cap4 = K.box(L.kx, L.capY, W - 2 * L.kx, null, { cls: 'capL', style: { fontSize: (tall ? 80 : 70) + 'px' } });
+cap4.innerHTML = ['Printed', 'per', 'order', 'by', '<br>', '<span class="hl">your</span>', '<span class="hl">own</span>', '<span class="hl">partner.</span>'].map((w) => (w === '<br>' ? '<br>' : `<span class="w">${w} </span>`)).join('');
+const cap4W = [...cap4.querySelectorAll('.w')], cap4H = [...cap4.querySelectorAll('.hl')];
+const stores = K.box(L.kx, 0, null, null, { cls: 'stores', style: { width: 'auto', height: 'auto' },
+  html: ['ikas', 'woocommerce', 'shopware'].map((s) => `<div class="st"><img src="${K.pub('platforms/' + s + '.svg')}"></div>`).join('') + '<div class="stl">drafts in your own stores ·<br>paid from your partner account</div>' });
+const stEls = [...stores.querySelectorAll('.st')];
+const conceptTag4 = K.demoTag('Concept products · AI-generated', tall ? 65 : 60, L.tagY);
+
+const sweepL = K.box(0, 0, W, H, { cls: 'lsweep' });
+const vig = K.box(0, 0, W, H, { cls: 'vig' });
+const barT = K.box(0, 0, W, 0, { cls: 'bars' }), barB = K.box(0, H, W, 0, { cls: 'bars' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Describe it. Review it.<br>Sell it.' });
+
+// ---------- timing (fitted to Marian’s takes; impacts in the breaths) ----------
+const VO = [[0.3, 'It starts with one sentence.', 1.02], [2.2, 'MakeAndList makes the files, the images, the listing.', 1.05],
+  [6.45, 'You review it. Nothing goes live without your yes.', 1.05], [9.6, 'Your own print partner prints each order.']];
+const T_TYPE = [0.12, 1.55], T_BURST = 1.95, T_FORM = 2.4;
+const T_W = [3.95, 4.67, 5.6];               // files · images · listing, as she says them
+const T_CAT = 6.05, T_PH = 6.3, T_DR = 6.9, T_C3B = 7.7, T_YES = 9.7, T_LIGHT = 9.95, T_S4 = 10.2;
+
+K.run({
+  id: 'G16', title: 'The Flagship Film', dur: DUR, bpm: BPM, music: 'transcendental-earth-people', mood: 'drive', key: 'G', intro: 0.0, cover: 4.9,
+  technique: 'One cinematic take in four movements: a sentence types itself in light in a black void and bursts into sparks that materialise the product in a bloom; the product on a black glossy set while its files, listing images and copy fly out on floating planes in depth and a catalogue arcs in behind (depth of field, reflections, light cone, dust); the real app rises on a phone as the proof, the lime Yes is pressed and the studio floods with light; an ivory studio with the printed edition and the parcel',
+  caption: 'MakeAndList in fifteen seconds: describe a product in one sentence and it makes the files, the listing images and the listing — you review it, and nothing goes live without your yes. Printed products are printed per order by your own print partner, paid from your partner account. Start free at makeandlist.com',
+  short: 'Describe it. Review it. Sell it.',
+  vo: VO,
+  beats: ['0–2.4 s: one sentence types itself in light; it bursts into sparks that form the product', '2.4–6 s: “MakeAndList makes the files, the images, the listing” — each flies out as she names it', '6–6.3 s: the camera pulls back; a catalogue arcs in behind', '6.3–9.9 s: the real app on a phone — a Draft to review; “nothing goes live without your yes”; Yes is pressed', '9.9–13 s: the studio floods with light; printed per order by your own partner; drafts in your own stores', '13–15 s: end card'],
+  cues: [[0.0, 'riser'], [0.12, 'type'], [0.85, 'type'], [T_BURST, 'whoosh'], [T_FORM, 'hit'], [3.2, 'swish'], [T_W[0] - 0.1, 'pop'], [T_W[1] - 0.1, 'pop'], [T_W[2] - 0.1, 'pop'],
+    [T_CAT - 0.05, 'whoosh'], [T_PH, 'swish'], [T_DR, 'pop'], [T_YES, 'click'], [T_LIGHT - 0.05, 'hit'], [T_S4 + 0.95, 'box'], [11.5, 'pop'], [12.85, 'chime'], [13.0, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const light = K.p(T, T_LIGHT, T_LIGHT + 0.5, E.inOutCubic);
+  grain.style.mixBlendMode = light > 0.5 ? 'multiply' : 'screen';
+  bgL.style.opacity = light; floorL.style.opacity = light; floorD.style.opacity = 1 - light;
+  bgL.style.visibility = floorL.style.visibility = light > 0 ? 'visible' : 'hidden';
+  horizon.style.background = light > 0.5 ? 'linear-gradient(180deg, rgba(255,255,255,0), rgba(255,253,246,.7) 50%, rgba(255,255,255,0))' : 'linear-gradient(180deg, rgba(255,250,235,0), rgba(255,250,235,.08) 50%, rgba(255,250,235,0))';
+  vig.style.background = `radial-gradient(110% 80% at 50% 48%, rgba(0,0,0,0) 50%, rgba(0,0,0,${0.55 - 0.4 * light}))`;
+  const room = K.p(T, 1.6, 2.6, E.outCubic) * (1 - light);
+  cone.style.opacity = room * (0.85 + 0.1 * Math.sin(T * 1.6)); pool.style.opacity = room;
+  hazes.forEach((h, i) => { h.style.transform = `translate(${L.cx - 450 + Math.sin(T * 0.3 + i * 2) * 300}px, ${L.floor - 800 + Math.cos(T * 0.25 + i) * 160}px)`; h.style.opacity = 1 - light; });
+  dust.forEach((d, i) => {
+    const x = L.cx - 420 + seed(i) * 840 + Math.sin(T * 0.4 + i) * 40;
+    const y = ((seed(i + 30) * L.floor - T * (8 + seed(i + 4) * 18)) % L.floor + L.floor) % L.floor;
+    d.style.transform = `translate(${x}px, ${y}px)`;
+    d.style.opacity = room * (0.2 + 0.5 * (0.5 + 0.5 * Math.sin(T * 2.2 + i * 1.3)));
+    d.style.filter = i % 4 ? 'none' : 'blur(3px)';
+  });
+  // letterbox breathes in for the dark movements, opens with the light
+  const bar = (tall ? 70 : 40) * K.p(T, 0, 0.6, E.outCubic) * (1 - light);
+  barT.style.height = bar + 'px'; barB.style.height = bar + 'px'; barB.style.top = H - bar + 'px';
+
+  // ---------- shot 1 ----------
+  const nT = Math.round(SENT.length * K.p(T, T_TYPE[0], T_TYPE[1], E.linear));
+  const burst = K.p(T, T_BURST, T_BURST + 0.35, E.inCubic);
+  chars.forEach((c, i) => {
+    const on = i < nT;
+    const d = seed(i + 100);
+    c.style.opacity = on ? 1 - K.p(T, T_BURST + d * 0.2, T_BURST + 0.15 + d * 0.2, E.linear) : 0;
+    c.style.transform = `translateY(${-burst * d * 30}px)`;
+    c.style.filter = on && burst > 0 ? `blur(${burst * 6}px)` : 'none';
+    c.style.textShadow = on ? `0 0 ${18 + 30 * burst}px rgba(255,236,190,${0.25 + 0.6 * burst})` : 'none';
+  });
+  caret.style.opacity = T < T_BURST && (nT < SENT.length || Math.floor(T * 4) % 2 === 0) ? 1 : 0;
+  kick1.style.opacity = K.p(T, 0.05, 0.35, E.linear) * (1 - K.p(T, T_BURST - 0.1, T_BURST + 0.1, E.linear));
+  sent.style.visibility = T < T_BURST + 0.6 ? 'visible' : 'hidden';
+  // sparks: from the sentence's lines down to the floor where the product forms
+  const heroCy = L.floor - L.heroW * RATIO['k13-wedding-planner'] * 0.5;
+  sparks.forEach((s, i) => {
+    const a = T_BURST + seed(i) * 0.18, b = T_FORM + 0.05 + seed(i + 1) * 0.15;
+    const p = K.p(T, a, b, E.inCubic);
+    const sx = L.kx + 60 + seed(i + 7) * (W - 2 * L.kx - 120), sy = L.sentY + 20 + seed(i + 8) * L.sentFs * 2.2;
+    const ex = L.cx + (seed(i + 9) - 0.5) * L.heroW * 0.6, ey = heroCy + (seed(i + 10) - 0.5) * L.heroW * 0.4;
+    const curve = Math.sin(p * Math.PI) * (seed(i + 11) - 0.5) * 260;
+    s.style.transform = `translate(${K.lerp(sx, ex, p) + curve}px, ${K.lerp(sy, ey, p)}px) scale(${1 - 0.5 * p})`;
+    s.style.opacity = T >= a && T < b + 0.05 ? 0.9 : 0;
+  });
+  const bl = K.p(T, T_FORM - 0.15, T_FORM + 0.1, E.outCubic) * (1 - K.p(T, T_FORM + 0.1, T_FORM + 0.9, E.inOutCubic));
+  bloom.style.transform = `translate(${L.cx - 450}px, ${heroCy - 450}px) scale(${0.5 + bl})`;
+  bloom.style.opacity = bl;
+
+  // ---------- shot 2 ----------
+  const form = K.p(T, T_FORM - 0.1, T_FORM + 0.5, E.outExpo);
+  const orbit = Math.sin(T * 0.6) * 22 + K.p(T, T_FORM, T_PH, E.linear) * -30;
+  const back = K.p(T, T_CAT, T_CAT + 0.6, E.inOutCubic);               // camera pulls back
+  const toPh = K.p(T, T_PH - 0.1, T_PH + 0.5, E.inOutCubic);           // hero recedes behind the phone
+  const out2 = K.p(T, T_LIGHT - 0.1, T_LIGHT + 0.2, E.inCubic);
+  const heroS = (0.92 + 0.08 * form) * (1 - 0.28 * back) * (1 - 0.15 * toPh) * (1 + 0.03 * K.p(T, T_FORM, T_CAT, E.linear));
+  const heroX = L.cx + orbit + toPh * (tall ? 0 : 180);
+  const heroSweep = K.clamp((T - T_FORM - 0.3) / 1.0) * 1.2 - 0.1;
+  hero.set(heroX, L.floor - back * (tall ? 60 : 50), heroS, 0, 0, form * (1 - out2), (1 - form) * 18 + toPh * 6, heroSweep, 1 + (1 - form) * 1.5);
+  // the catalogue arcs in behind (depth: smaller, softer, higher)
+  cat.forEach((c, i) => {
+    const side = i % 2 ? 1 : -1, rank = Math.floor(i / 2);
+    const p = K.p(T, T_CAT + rank * 0.08, T_CAT + 0.6 + rank * 0.08, E.outExpo);
+    const x = L.cx + side * (230 + rank * 120) * (0.6 + 0.4 * p) + orbit * (0.6 - rank * 0.15) + toPh * (tall ? 0 : 160);
+    const fy = L.floor - (tall ? 110 : 90) - rank * (tall ? 70 : 55);
+    const sc = (0.78 - rank * 0.12) * (0.9 + 0.1 * p);
+    c.set(x, fy, sc, 0, 0, p * (1 - out2) * (0.95 - rank * 0.12), 2 + rank * 2.5 + toPh * 4, -1, 1 - rank * 0.08);
+    c.root.style.zIndex = 14 - rank;
+  });
+  // caption: MakeAndList makes the kit — and the three words light up as she says them
+  const c2in = K.p(T, 2.6, 3.1, E.outExpo), c2out = K.p(T, T_PH - 0.3, T_PH, E.inCubic);
+  cap2W.forEach((w, i) => {
+    const p = K.p(T, 2.62 + i * 0.09, 3.12 + i * 0.09, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.5) * (1 - c2out);
+    w.style.transform = `translateY(${(1 - p) * 50 - c2out * 30}px)`;
+  });
+  cap2.style.visibility = c2in > 0 && c2out < 1 ? 'visible' : 'hidden';
+  wds.forEach((w, i) => {
+    const p = K.p(T, T_W[i] - 0.1, T_W[i] + 0.3, E.outBack);
+    w.className = 'wd' + (T >= T_W[i] - 0.1 ? ' on' : '');
+    w.style.opacity = K.p(T, 3.2, 3.5, E.linear) * (1 - c2out);
+    w.style.transform = `scale(${T >= T_W[i] - 0.1 ? 0.9 + 0.1 * p : 0.95})`;
+  });
+  words.style.visibility = cap2.style.visibility;
+  [fFiles, fImgs, fList].forEach((c, i) => {
+    const p = K.p(T, T_W[i] - 0.1, T_W[i] + 0.5, E.outBack);
+    const o = K.p(T, T_CAT - 0.05, T_CAT + 0.35, E.inCubic);
+    const r = [L.files, L.imgs, L.list][i];
+    const fx = heroX - r[0] - r[2] / 2, fyy = heroCy - r[1] - r[3] / 2;
+    const depth = [0.85, 0.9, 1.05][i];
+    const float = Math.sin(T * 1.2 + i * 2) * 8;
+    c.style.opacity = Math.min(1, p * 2) * (1 - o);
+    c.style.transform = `translate(${(1 - p) * fx + orbit * depth * 0.8 - o * (i === 1 ? -140 : 140)}px, ${(1 - p) * fyy + float}px) scale(${(0.3 + 0.7 * p) * depth}) rotate(${(1 - p) * (i - 1) * 14 + (i - 1) * 2}deg)`;
+    c.style.filter = i === 0 && p >= 1 ? 'blur(1.2px)' : 'none';
+    c.style.visibility = p > 0 && o < 1 ? 'visible' : 'hidden';
+    c.style.zIndex = [22, 23, 30][i];
+  });
+  conceptTag.style.opacity = K.p(T, T_FORM, T_FORM + 0.3, E.linear) * (1 - K.p(T, T_PH, T_PH + 0.2, E.linear));
+
+  // ---------- shot 3: the phone ----------
+  const phIn = K.p(T, T_PH, T_PH + 0.6, E.outExpo), phOut = K.p(T, T_S4 + 0.75, T_S4 + 1.15, E.inCubic); // the Send screen holds in the light, then leaves
+  const swipe = K.p(T, T_YES + 0.1, T_YES + 0.55, E.inOutCubic);
+  deck.draw(swipe, [0.0, 0.43], swipe - K.p(T - 1 / 30, T_YES + 0.1, T_YES + 0.55, E.inOutCubic));
+  const phX = -phOut * (tall ? 700 : 600);
+  deck.root.style.opacity = phIn;
+  deck.root.style.transform = `translate(${phX}px, ${(1 - phIn) * 520 + Math.sin(T * 0.9) * 6}px) rotate(${-2 + (1 - phIn) * 6 + Math.sin(T * 0.7) * 0.6}deg)`;
+  // display, not visibility: the deck sets its own layers visible, which would show through a hidden parent
+  deck.root.style.display = phIn > 0 && phOut < 1 ? 'block' : 'none';
+  const phVis = phIn > 0 && phOut < 1 ? 'visible' : 'hidden';
+  phRefl.style.opacity = phIn * (1 - light) * 0.8; phRefl.style.transform = deck.root.style.transform;
+  phRefl.style.visibility = phVis;
+  realTag.style.left = L.ph.x + 'px'; realTag.style.top = (tall ? L.ph.y - 48 : L.ph.y - 44) + 'px';
+  realTag.style.opacity = phIn * (1 - phOut); realTag.style.visibility = phVis;
+  realTag.style.transform = deck.root.style.transform.split(' rotate')[0];
+  // captions
+  const c3o = K.p(T, T_C3B - 0.25, T_C3B, E.inCubic);
+  cap3W.forEach((w, i) => {
+    const p = K.p(T, 6.55 + i * 0.1, 7.05 + i * 0.1, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.5) * (1 - c3o); w.style.transform = `translateY(${(1 - p) * 50 - c3o * 30}px)`;
+  });
+  cap3.style.visibility = T > 6.5 && c3o < 1 ? 'visible' : 'hidden';
+  const c3bo = K.p(T, T_LIGHT - 0.15, T_LIGHT + 0.05, E.inCubic);
+  cap3bW.forEach((w, i) => {
+    const p = K.p(T, T_C3B + i * 0.1, T_C3B + 0.5 + i * 0.1, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.5) * (1 - c3bo); w.style.transform = `translateY(${(1 - p) * 50}px)`;
+  });
+  cap3b.style.visibility = T > T_C3B && c3bo < 1 ? 'visible' : 'hidden';
+  if (!tall) { cap3.style.left = cap3b.style.left = '560px'; cap3.style.top = cap3b.style.top = '300px'; }
+  const dp = K.p(T, T_DR, T_DR + 0.4, E.outBack), dOut = K.p(T, T_YES, T_YES + 0.2, E.linear);
+  draft.style.left = (tall ? L.ph.x + L.ph.w - 120 : 560) + 'px'; draft.style.top = (tall ? L.ph.y + 120 : 520) + 'px';
+  draft.style.opacity = Math.min(1, dp * 2) * (1 - dOut);
+  draft.style.transform = `scale(${0.8 + 0.2 * dp}) rotate(${tall ? 3 : 0}deg)`;
+  draft.style.visibility = T >= T_DR && dOut < 1 ? 'visible' : 'hidden';
+  const yp = K.p(T, 8.6, 9.0, E.outBack), press = T >= T_YES && T < T_YES + 0.16, yOut = K.p(T, T_LIGHT + 0.1, T_LIGHT + 0.4, E.inCubic);
+  yes.style.opacity = Math.min(1, yp * 2) * (1 - yOut);
+  yes.style.transform = `translateY(${(1 - yp) * 60}px) scale(${(0.8 + 0.2 * yp) * (press ? 0.92 : 1) * (1 + yOut * 0.3)})`;
+  yes.style.visibility = T >= 8.6 && yOut < 1 ? 'visible' : 'hidden';
+  const ycx = L.yesX + 200, ycy = L.yesY + 46, cuP = K.p(T, 9.15, T_YES, E.inOutCubic);
+  cursor.at(ycx + 220 * (1 - cuP), ycy + 200 * (1 - cuP), press);
+  cursor.hide(K.p(T, 9.1, 9.2, E.linear) * (1 - K.p(T, T_YES + 0.25, T_YES + 0.4, E.linear)));
+  cursor.ripple(ycx, ycy, T, T_YES);
+  flash.style.opacity = K.p(T, T_LIGHT - 0.05, T_LIGHT + 0.12, E.outCubic) * (1 - K.p(T, T_LIGHT + 0.12, T_LIGHT + 0.8, E.inOutCubic));
+
+  // ---------- shot 4 ----------
+  const s4 = (a, d = 0.6) => K.p(T, a, a + d, E.outExpo);
+  const drift = K.p(T, T_S4, 13, E.linear);
+  const g = tall ? { t: [300, 1220], h: [700, 1250], p: [880, 1000], c: [560, 1390] } : { t: [270, 1060], h: [640, 1090], p: [880, 880], c: [470, 1210] };
+  const p1 = s4(T_S4 + 0.95), p2 = s4(T_S4 + 0.12), p3 = s4(T_S4 + 0.24);
+  tee4.set(g.t[0] - drift * 20, g.t[1], 0.95 + 0.05 * p1, (1 - p1) * 60, 0, p1, 0, K.clamp((T - T_S4 - 0.5) / 0.9) * 1.2 - 0.1);
+  hero4.set(g.h[0] + drift * 14, g.h[1], 0.95 + 0.05 * p2, (1 - p2) * 60, 0, p2, 0, K.clamp((T - T_S4 - 0.6) / 0.9) * 1.2 - 0.1);
+  print4.set(g.p[0] + drift * 8, g.p[1], 0.9, (1 - p3) * 50, 0, p3 * 0.95, 2.5, -1);
+  // the parcel slides in from the side and settles in front
+  const pc = K.p(T, T_S4 + 0.55, T_S4 + 0.95, E.outCubic), pland = T - (T_S4 + 0.95);
+  const bounce = pland > 0 && pland < 0.4 ? Math.sin(pland / 0.4 * Math.PI) * 18 * Math.exp(-pland * 4) : 0;
+  parcel4.set(g.c[0] + (1 - pc) * 700, g.c[1], 1, bounce, (1 - pc) * 14, pc > 0 ? 1 : 0, (1 - pc) * 10, K.clamp((T - T_S4 - 1.2) / 0.8) * 1.2 - 0.1);
+  kick4.style.opacity = s4(T_S4 + 0.1, 0.4);
+  cap4W.forEach((w, i) => {
+    const p = K.p(T, T_S4 + 0.15 + i * 0.07, T_S4 + 0.65 + i * 0.07, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.5); w.style.transform = `translateY(${(1 - p) * 50}px)`;
+  });
+  cap4H.forEach((h, i) => { h.style.backgroundSize = `${K.p(T, 11.0 + i * 0.12, 11.35 + i * 0.12, E.outCubic) * 100}% 100%`; });
+  cap4.style.visibility = kick4.style.visibility = T > T_S4 ? 'visible' : 'hidden';
+  stores.style.top = (tall ? 560 : 300) + 'px';
+  stEls.forEach((s, i) => {
+    const p = K.p(T, 11.5 + i * 0.09, 11.9 + i * 0.09, E.outBack);
+    s.style.opacity = Math.min(1, p * 2); s.style.transform = `translateY(${(1 - p) * 30}px) scale(${0.7 + 0.3 * p})`;
+  });
+  stores.querySelector('.stl').style.opacity = K.p(T, 11.8, 12.1, E.linear);
+  stores.style.visibility = T > 11.4 ? 'visible' : 'hidden';
+  conceptTag4.style.opacity = K.p(T, T_S4 + 1.0, T_S4 + 1.3, E.linear);
+  // sweeps on the big beats
+  const ls = K.p(T, T_LIGHT + 0.1, T_LIGHT + 1.4, E.inOutCubic);
+  sweepL.style.transform = `translateX(${(ls * 2 - 1) * W * 1.1}px)`;
+  sweepL.style.opacity = ls > 0 && ls < 1 ? 1 : 0;
+  sweepL.style.mixBlendMode = 'soft-light';
+  end(T);
+});
+</script></body></html>

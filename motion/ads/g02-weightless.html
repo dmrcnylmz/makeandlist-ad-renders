@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>G02 · Weightless</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #E9DFD0; }
+.sky { position: absolute; inset: 0; }
+.floor { position: absolute; left: 0; right: 0; }
+.glow { position: absolute; border-radius: 50%; pointer-events: none; }
+.pf { position: absolute; left: 0; top: 0; transform-origin: 50% 50%; }
+.pf img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+.pf .sw { filter: brightness(1.45) saturate(1.05); opacity: 0; }
+.fsh { position: absolute; left: 0; top: 0; border-radius: 50%; background: radial-gradient(closest-side, rgba(70,50,30,.42), rgba(70,50,30,0)); }
+.mote { position: absolute; left: 0; top: 0; border-radius: 50%; background: rgba(255,252,244,.95); }
+.kick { position: absolute; z-index: 60; font: 500 21px 'IBM Plex Mono', monospace; letter-spacing: .26em; text-transform: uppercase; color: rgba(69,64,58,.7); text-align: center; white-space: nowrap; }
+.cap { position: absolute; z-index: 60; text-align: center; font: 700 100px/1.03 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; text-shadow: 0 2px 30px rgba(250,247,238,.7); }
+.cap em { font-style: italic; font-weight: 500; }
+.sub { position: absolute; z-index: 60; text-align: center; font: 500 30px/1.3 'Archivo'; color: #45403A; }
+.chip2 { position: absolute; z-index: 61; display: flex; align-items: center; gap: 14px; padding: 12px 22px 12px 14px; border-radius: 999px; white-space: nowrap;
+  background: rgba(255,253,248,.82); border: 1px solid rgba(31,31,31,.12); backdrop-filter: blur(10px); box-shadow: 0 20px 40px -24px rgba(60,40,20,.45); font: 500 23px 'IBM Plex Mono', monospace; letter-spacing: .03em; color: #1F1F1F; }
+.chip2 s { text-decoration: none; display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #E8A33C; box-shadow: 0 0 0 5px rgba(232,163,60,.22); }
+.chip2 b { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #DFFF5A; color: #1F1F1F; font: 800 18px 'Archivo'; }
+.chip2 u { text-decoration: none; display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; font: 800 17px 'Archivo'; }
+.lead { position: absolute; z-index: 59; height: 2px; background: rgba(31,31,31,.55); transform-origin: 0 50%; }
+.dot { position: absolute; z-index: 59; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #1F1F1F; box-shadow: 0 0 0 5px rgba(223,255,90,.9); }
+.stock { position: absolute; z-index: 60; display: flex; align-items: baseline; gap: 16px; white-space: nowrap; font: 500 24px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #45403A; }
+.stock b { font: 800 64px 'Archivo'; letter-spacing: -0.02em; color: #1F1F1F; }
+.flash { position: absolute; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(255,253,246,.95), rgba(255,253,246,0)); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// G02 — Weightless. A warm dawn studio with no gravity: twelve concept products hang in the air at different depths,
+// drifting on slow orbits with blur by depth, their shadows breathing on a distant floor as the camera dollies through
+// (a whole catalogue, nothing in stock). Focus racks to the hoodie: a draft, waiting for your yes. An order comes in and
+// gravity returns for one product only: the tee falls, lands, and becomes a parcel (your partner prints just that one).
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BPM = 71.8, BEAT = 60 / BPM, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const SZ = { 'k01-mug': [852, 804], 'k02-framed-print': [608, 897], 'k03-tee': [977, 901], 'k04-hoodie': [976, 979], 'k05-tote': [595, 961], 'k06-notebook': [634, 923],
+  'k07-sticker-sheet': [763, 918], 'k08-greeting-card': [540, 928], 'k09-kids-book': [656, 926], 'k10-calendar': [643, 896], 'k11-parcel': [789, 789], 'k13-wedding-planner': [984, 786], 'k14-gift-tag': [596, 906] };
+
+// the product region (screen px) and the floor
+const R = tall ? { x0: 0, x1: W, y0: 600, y1: 1500, floor: 1690 } : { x0: 0, x1: W, y0: 300, y1: 1060, floor: 1230 };
+const capY = tall ? 316 : 70, capFs = tall ? 104 : 88;
+
+// sky + distant floor
+K.box(0, 0, W, H, { cls: 'sky', style: { background: 'linear-gradient(180deg, #F3ECE0 0%, #EFE4D3 45%, #E4D5C0 78%, #D8C6AE 100%)' } });
+const sun = K.box(W * 0.5 - 700, (tall ? 520 : 300) - 700, 1400, 1400, { cls: 'glow', style: { background: 'radial-gradient(closest-side, rgba(255,226,186,.75), rgba(255,226,186,0))' } });
+const sage = K.box(-400, H * 0.55, 1100, 900, { cls: 'glow', style: { background: 'radial-gradient(closest-side, rgba(150,175,150,.28), rgba(150,175,150,0))' } });
+K.box(0, R.floor - 120, W, H - R.floor + 120, { cls: 'floor', style: { background: 'linear-gradient(180deg, rgba(216,198,174,0), rgba(206,186,160,.85) 40%, #C9B597)' } });
+
+// products: [file, bx 0..1, by 0..1 of the region, depth z, width at z = 1]
+const P = [
+  ['k10-calendar', 0.9, 0.02, 0.5, 300], ['k08-greeting-card', 0.6, -0.04, 0.44, 260], ['k14-gift-tag', 0.36, 0.0, 0.42, 250],
+  ['k07-sticker-sheet', 0.06, 0.5, 0.56, 300], ['k06-notebook', 0.1, 0.1, 0.6, 280], ['k01-mug', 0.84, 0.24, 0.72, 340],
+  ['k02-framed-print', 0.16, 0.8, 0.7, 290], ['k05-tote', 0.92, 0.66, 0.78, 280], ['k04-hoodie', 0.3, 0.38, 1.0, 400],
+  ['k13-wedding-planner', 0.42, 0.98, 0.9, 300], ['k03-tee', 0.68, 0.46, 1.12, 400], ['k09-kids-book', 0.06, 1.04, 1.42, 280],
+];
+const HOODIE = 8, TEE = 10;
+const shadows = [], items = P.map(([file, bx, by, z, w0], i) => {
+  const [nw, nh] = SZ[file], h0 = w0 * nh / nw;
+  const sh = K.box(0, 0, w0 * 0.8, w0 * 0.16, { cls: 'fsh' });
+  const g = K.box(0, 0, w0, h0, { cls: 'pf' });
+  const im = K.el('img', { parent: g, src: K.pub('r07/' + file + '.webp') });
+  const sw = K.el('img', { cls: 'sw', parent: g, src: K.pub('r07/' + file + '.webp') });
+  shadows.push(sh);
+  return { g, im, sw, sh, bx, by, z, w0, h0, i };
+});
+const parcelW = tall ? 300 : 260;
+const parcelSh = K.box(0, 0, parcelW, parcelW * 0.18, { cls: 'fsh' });
+const parcel = K.box(0, 0, parcelW, parcelW, { cls: 'pf', html: `<img src="${K.pub('r07/k11-parcel.webp')}">` });
+const flash = K.box(0, 0, 700, 700, { cls: 'flash' });
+const motes = Array.from({ length: 30 }, (_, i) => K.box(0, 0, 3 + seed(i) * 6, 3 + seed(i) * 6, { cls: 'mote' }));
+
+// ---------- type ----------
+const kick = K.box(65, tall ? 284 : 58, W - 130, null, { cls: 'kick', html: 'Product film Nº 02 · weightless' });
+const CAP = [
+  { a: 0.5, b: 2.05, t: 'A whole\n<em>catalogue.</em>' },
+  { a: 2.22, b: 3.55, t: 'Nothing\n<em>in stock.</em>' },
+  { a: 3.72, b: 6.72, t: 'Each one\n<em>a draft.</em>' },
+  { a: 7.15, b: 12.85, t: 'Printed when\n<em>it’s ordered.</em>' },
+];
+const em = (s) => s.replace(/<em>(.*?)<\/em>/g, (m, x) => x.split(' ').map((w) => '<em>' + w + '</em>').join(' '));
+const caps = CAP.map((c) => { const el = K.box(65, capY + (tall ? 30 : 22), W - 130, null, { cls: 'cap', style: { fontSize: capFs + 'px' } }); return { el, ws: K.words(el, em(c.t)), c }; });
+const stock = K.box(0, tall ? 560 : 290, null, null, { cls: 'stock', html: '<span>in stock</span><b>0</b><span>· in the catalogue</span><b>12</b>', style: { width: 'auto', height: 'auto' } });
+const chipD = K.box(0, 0, null, null, { cls: 'chip2', html: '<s></s>Draft · waiting for your yes', style: { width: 'auto', height: 'auto' } });
+const leadD = K.box(0, 0, 10, 2, { cls: 'lead' }), dotD = K.box(0, 0, 14, 14, { cls: 'dot' });
+const chipO = K.box(0, 0, null, null, { cls: 'chip2', html: '<u>1</u>New order · sunset tee · sample', style: { width: 'auto', height: 'auto' } });
+const sub = K.box(65, capY + (tall ? 30 : 22) + capFs * 2.18, W - 130, null, { cls: 'sub', html: 'Your own print partner prints just that one,<br>paid from your partner account.' });
+const tag = K.demoTag('Concept products · AI-generated', 0, 0);
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'A whole catalogue.<br>Nothing in stock.' });
+
+K.run({
+  id: 'G02', title: 'Weightless', dur: DUR, bpm: BPM, music: 'clouds', mood: 'calm', key: 'F', intro: 0.0, cover: 5.2,
+  technique: 'Zero-gravity product film: twelve cut-out products hang at twelve depths in a dawn studio, each drifting on its own slow orbit with blur by distance from a racking focus plane, soft shadows breathing on a distant floor and a light sweep through the set while the camera dollies in; gravity returns for one product only, which falls, lands and turns into a parcel',
+  caption: 'A whole catalogue, and nothing in stock. Every product waits as a draft until you say yes; when an order comes in, your own print partner prints just that one, paid from your partner account. Products shown are concept images. Start free at makeandlist.com',
+  short: 'A whole catalogue. Nothing in stock.',
+  question: 'Can I sell physical products too?', gain: 'Physical products without stock',
+  vo: [[0.35, 'A whole catalogue, and nothing in stock.'], [3.45, 'Every product waits as a draft, until you say yes.'], [6.95, 'When an order comes in, your print partner prints just that one.']],
+  beats: ['0–3.6 s: twelve products hang weightless at different depths; “A whole catalogue. Nothing in stock.” (in stock 0)', '3.6–6.8 s: the camera dollies in, focus racks to the hoodie: “Each one a draft” (Draft · waiting for your yes)', '6.8–10.7 s: a sample order comes in for the tee; gravity returns for that one product', '10.7–13 s: it lands and becomes a parcel: printed by your own partner, paid from your partner account', '13–15 s: end card'],
+  cues: [[0.0, 'swish'], [2.0, 'pop'], [3.35, 'swish'], [6.75, 'notify'], [10.75, 'box'], [13.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const camX = Math.sin(T * 0.22) * 46, camY = Math.cos(T * 0.17) * 22;
+  const dolly = K.k(T, [[0, 0], [13, 0.34]], E.inOutCubic);
+  // focus plane: everything soft at first, then the hoodie, then the tee
+  const focus = K.k(T, [[0, 1.6], [1.1, 1.0], [6.7, 1.0], [7.5, 1.22]], E.inOutCubic);
+  const openBlur = 1 - K.p(T, 0, 1.2, E.outCubic);
+  const sweepAt = (x) => K.k(T, [[0.9, -0.4], [3.3, 1.4]], E.inOutCubic) - x * 0.4; // a band of light crossing left → right
+
+  // gravity for the tee
+  const fall = K.p(T, 10.1, 10.75, E.inCubic);
+  const landed = T >= 10.75;
+  const morph = K.p(T, 10.77, 11.15, E.outCubic);
+  const bounce = Math.sin(K.p(T, 10.75, 11.1, E.linear) * Math.PI);
+  let teeScreen = null, hoodieScreen = null;
+
+  const order = items.map((it) => it).sort((a, b) => a.z - b.z);
+  order.forEach((it, k) => {
+    const i = it.i, ze = it.z * (1 + dolly * it.z * 0.55);
+    const ox = Math.sin(T * (0.16 + seed(i) * 0.12) + i * 1.9) * 30 * it.z, oy = Math.cos(T * (0.14 + seed(i + 3) * 0.1) + i * 1.3) * 26 * it.z;
+    const spread = 0.88 + 0.12 * ze; // depth parallax without collapsing the far layer onto the centre
+    let x = W / 2 + ((R.x0 + it.bx * (R.x1 - R.x0)) - W / 2) * spread - camX * ze + ox;
+    let y = (R.y0 + R.y1) / 2 + ((R.y0 + it.by * (R.y1 - R.y0)) - (R.y0 + R.y1) / 2) * spread - camY * ze + oy;
+    const w = it.w0 * ze * (tall ? 1 : 0.86), h = it.h0 * ze * (tall ? 1 : 0.86);
+    let rot = Math.sin(T * 0.21 + i * 2.3) * 7, ry = Math.sin(T * 0.3 + i) * 14;
+    let sc = 1, op = 1;
+    if (i === TEE) {
+      // falls to the floor, squashes on landing, then hands over to the parcel
+      const yFloor = R.floor - h / 2 + 10;
+      y = K.lerp(y, yFloor, fall); rot = K.lerp(rot, 0, fall); ry = K.lerp(ry, 0, fall);
+      sc = landed ? 1 - 0.08 * bounce : 1;
+      op = 1 - morph;
+      teeScreen = { x, y, w, h };
+    }
+    if (i === HOODIE) hoodieScreen = { x, y, w, h };
+    it.g.style.width = w + 'px'; it.g.style.height = h + 'px';
+    it.g.style.transform = `translate(${x - w / 2}px, ${y - h / 2}px) perspective(1600px) rotateY(${ry}deg) rotate(${rot}deg) scale(${i === TEE && landed ? `${1 + 0.06 * bounce}, ${sc}` : 1})`;
+    const blur = Math.abs(ze - focus) * 9 + openBlur * 10;
+    it.g.style.filter = `${blur > 0.2 ? `blur(${blur.toFixed(2)}px) ` : ''}drop-shadow(0 ${30 * ze}px ${36 * ze}px rgba(80,55,30,${(0.22 * Math.min(1, ze)).toFixed(3)}))`;
+    it.g.style.opacity = op * K.p(T, 0.05 * k, 0.6 + 0.05 * k, E.linear);
+    it.g.style.zIndex = 10 + k;
+    // light sweep
+    const sp = sweepAt(it.bx), sp2 = K.k(T, [[10.9, -0.4], [12.7, 1.4]], E.inOutCubic) - it.bx * 0.4;
+    const s = T < 5 ? sp : sp2;
+    if (s > -0.3 && s < 1.3) { const c = s * 100; it.sw.style.webkitMaskImage = `linear-gradient(105deg, transparent ${c - 25}%, #000 ${c}%, transparent ${c + 25}%)`; it.sw.style.opacity = 0.6; } else it.sw.style.opacity = 0;
+    // shadow on the distant floor: wider and fainter the higher it floats
+    const height = Math.max(0, R.floor - (y + h / 2));
+    const shw = w * (0.7 + height / 1400);
+    it.sh.style.width = shw + 'px'; it.sh.style.height = shw * 0.16 + 'px';
+    it.sh.style.transform = `translate(${x - shw / 2 + height * 0.06}px, ${R.floor - shw * 0.08 + (ze - 1) * 40}px)`;
+    it.sh.style.opacity = (0.55 * Math.min(1.2, ze) * (1 - Math.min(0.85, height / 1500))) * (i === TEE ? 1 - morph : 1) * K.p(T, 0, 1, E.linear);
+    it.sh.style.filter = `blur(${4 + height / 60}px)`;
+    it.sh.style.zIndex = 5;
+  });
+
+  // parcel replaces the tee where it landed
+  const pv = T >= 10.77;
+  parcel.style.visibility = pv ? 'visible' : 'hidden'; parcelSh.style.visibility = pv ? 'visible' : 'hidden';
+  if (teeScreen) {
+    const px = teeScreen.x, py = R.floor - parcelW / 2 + 6;
+    const ps = 0.7 + 0.3 * E.outBack(morph);
+    parcel.style.transform = `translate(${px - parcelW / 2}px, ${py - parcelW / 2}px) scale(${ps})`;
+    parcel.style.transformOrigin = '50% 100%';
+    parcel.style.opacity = morph; parcel.style.zIndex = 40;
+    parcel.style.filter = 'drop-shadow(0 24px 30px rgba(80,55,30,.28))';
+    parcelSh.style.transform = `translate(${px - parcelW / 2}px, ${R.floor - parcelW * 0.09}px)`; parcelSh.style.opacity = morph * 0.8; parcelSh.style.filter = 'blur(6px)'; parcelSh.style.zIndex = 6;
+    const fl = K.p(T, 10.75, 10.9, E.outCubic) * (1 - K.p(T, 10.9, 11.55, E.inOutCubic));
+    flash.style.transform = `translate(${px - 350}px, ${py - 350}px) scale(${0.6 + fl * 0.6})`; flash.style.opacity = fl * 0.9; flash.style.zIndex = 41;
+  }
+
+  // ambient
+  sun.style.transform = `translate(${Math.sin(T * 0.1) * 40}px, ${Math.cos(T * 0.12) * 20}px) scale(${1 + 0.04 * Math.sin(T * 0.4)})`;
+  sage.style.transform = `translate(${Math.sin(T * 0.08) * 60}px, 0)`;
+  motes.forEach((m, i) => {
+    const x = (seed(i + 11) * W + Math.sin(T * 0.25 + i) * 50) % W, y = ((seed(i + 17) * H - T * (6 + seed(i + 5) * 12)) % H + H) % H;
+    m.style.transform = `translate(${x}px, ${y}px)`; m.style.zIndex = 50;
+    m.style.opacity = (0.25 + 0.55 * seed(i + 23)) * (0.5 + 0.5 * Math.sin(T * 1.2 + i * 2)) * K.p(T, 0.2, 1.2, E.linear);
+  });
+
+  // ---------- type ----------
+  kick.style.opacity = 0.9 * K.win(T, 0.3, 3.55, 0.35);
+  caps.forEach(({ el, ws, c }) => {
+    el.style.visibility = T > c.a - 0.05 && T < c.b + 0.4 ? 'visible' : 'hidden';
+    K.reveal(ws, T, c.a, { kind: 'blur', stagger: 0.1, dur: 0.8, ease: E.outCubic, out: c.b });
+  });
+  const sk = K.win(T, 2.3, 3.6, 0.3);
+  stock.style.left = (W - stock.offsetWidth) / 2 + 'px'; stock.style.opacity = sk; stock.style.transform = `translateY(${(1 - K.p(T, 2.3, 2.75, E.outExpo)) * 24}px)`;
+
+  // the draft chip, tied to the hoodie by a leader line
+  const dP = K.win(T, 4.1, 6.75, 0.35);
+  if (hoodieScreen) {
+    const ax = hoodieScreen.x + hoodieScreen.w * 0.08, ay = hoodieScreen.y - hoodieScreen.h * 0.05;
+    const cx = tall ? 520 : 560, cy = tall ? 760 : 420;
+    chipD.style.left = cx + 'px'; chipD.style.top = cy - 29 + 'px';
+    const dx = cx - ax, dy = cy - ay, len = Math.hypot(dx, dy) * K.p(T, 4.1, 4.6, E.outCubic);
+    leadD.style.left = ax + 'px'; leadD.style.top = ay + 'px'; leadD.style.width = len + 'px'; leadD.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+    dotD.style.left = ax + 'px'; dotD.style.top = ay + 'px';
+  }
+  [chipD, leadD, dotD].forEach((n) => { n.style.opacity = dP; });
+  chipD.style.transform = `translateX(${(1 - K.p(T, 4.4, 5.0, E.outExpo)) * 30}px)`;
+  chipD.style.opacity = dP * K.p(T, 4.4, 4.7, E.linear);
+
+  // the order chip drops onto the tee, then gravity
+  const oP = K.win(T, 6.75, 10.15, 0.25);
+  if (teeScreen) {
+    chipO.style.left = Math.min(W - 65 - chipO.offsetWidth, Math.max(65, teeScreen.x - chipO.offsetWidth / 2)) + 'px';
+    chipO.style.top = teeScreen.y - teeScreen.h / 2 - 76 + 'px';
+  }
+  chipO.style.opacity = oP; chipO.style.transform = `scale(${0.85 + 0.15 * K.p(T, 6.75, 7.15, E.outBack)})`;
+  const sbP = K.win(T, 11.0, 12.85, 0.4);
+  sub.style.opacity = sbP; sub.style.transform = `translateY(${(1 - K.p(T, 11.0, 11.6, E.outCubic)) * 16}px)`;
+
+  tag.style.left = (tall ? 65 : 60) + 'px'; tag.style.top = (tall ? 1204 : 1256) + 'px';
+  tag.style.opacity = 0.95 * K.p(T, 1.0, 1.4, E.linear) * (1 - K.p(T, 12.6, 13, E.linear));
+
+  end(T);
+});
+</script></body></html>

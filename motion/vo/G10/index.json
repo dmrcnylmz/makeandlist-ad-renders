@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.35,
+  "text": "Tonight, your idea takes the stage.",
+  "file": "01-4d97c7ceba.wav",
+  "dur": 2.37
+ },
+ {
+  "t": 2.69,
+  "text": "You check every file.",
+  "file": "02-0c0d533950.wav",
+  "dur": 2.04
+ },
+ {
+  "t": 5.45,
+  "text": "It waits in your store as a draft.",
+  "file": "03-c390cd6b42.wav",
+  "dur": 2.28
+ },
+ {
+  "t": 8,
+  "text": "Your print partner prints each order.",
+  "file": "04-b301593d2f.wav",
+  "dur": 2.51
+ },
+ {
+  "t": 10.28,
+  "text": "And off it goes.",
+  "file": "05-f73eb523b6.wav",
+  "dur": 2.51
+ }
+]
