@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C13 · Orders From Your Stores</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EDE8DC; }
+.bgrid { position: absolute; inset: -200px; background-image: radial-gradient(circle, rgba(31,31,31,.13) 2px, transparent 2.5px); background-size: 44px 44px; }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+svg.pipes { position: absolute; left: 0; top: 0; overflow: visible; }
+.node { position: absolute; border-radius: 28px; background: #FFFDF8; display: grid; place-items: center; z-index: 12;
+  box-shadow: 0 30px 50px -30px rgba(31,31,31,.7), 0 0 0 4px #1F1F1F; }
+.node img { max-width: 64%; max-height: 40%; }
+.node.dark { background: #1F1F1F; }
+.node em { position: absolute; bottom: -38px; left: 50%; transform: translateX(-50%); font: 600 19px 'IBM Plex Mono', monospace; font-style: normal; letter-spacing: .08em; color: #45403A; white-space: nowrap; text-transform: uppercase; }
+.valve { position: absolute; width: 190px; height: 190px; margin: -95px 0 0 -95px; border-radius: 50%; z-index: 14; background: #1F1F1F;
+  box-shadow: 0 40px 60px -30px rgba(31,31,31,.8), 0 0 0 6px #DFFF5A, 0 0 0 10px #1F1F1F; }
+.valve svg { position: absolute; inset: 0; }
+.vchip { position: absolute; z-index: 15; transform: translateX(-50%); white-space: nowrap; padding: 12px 22px; border-radius: 999px; background: #DFFF5A; color: #1F1F1F;
+  font: 800 26px 'Archivo'; box-shadow: 0 18px 30px -18px rgba(31,31,31,.7), 0 0 0 3px #1F1F1F; }
+.partner { position: absolute; z-index: 12; border-radius: 28px; background: #1F1F1F; color: #FAF7EE; display: flex; align-items: center; gap: 18px; padding: 0 26px;
+  box-shadow: 0 30px 50px -30px rgba(31,31,31,.8); }
+.partner b { display: block; font: 800 30px/1.1 'Archivo'; }
+.partner span { display: block; margin-top: 4px; font: 500 18px 'IBM Plex Mono', monospace; letter-spacing: .06em; color: #DFFF5A; text-transform: uppercase; }
+.pk { position: absolute; z-index: 13; width: 168px; height: 54px; margin: -27px 0 0 -84px; border-radius: 14px; background: #FFFDF8; display: flex; align-items: center; gap: 10px; padding: 0 14px;
+  font: 600 19px 'IBM Plex Mono', monospace; color: #1F1F1F; white-space: nowrap; box-shadow: 0 14px 24px -14px rgba(31,31,31,.8), 0 0 0 3px #1F1F1F; }
+.pk i { width: 14px; height: 14px; border-radius: 50%; background: #7E9A7E; flex: none; }
+.pk.red { background: #FCE3DA; }
+.pk.red i { background: #E8603C; }
+.held { position: absolute; z-index: 16; white-space: nowrap; padding: 10px 18px; border-radius: 12px; background: #E8603C; color: #FFFDF8; font: 700 21px 'Archivo'; transform: translateX(-50%); }
+.box { position: absolute; z-index: 11; width: 70px; height: 56px; margin: -28px 0 0 -35px; border-radius: 8px; background: #C9A77A; box-shadow: inset 0 0 0 3px #1F1F1F, 0 14px 20px -12px rgba(31,31,31,.7); }
+.box::after { content: ''; position: absolute; left: 30px; top: 0; width: 10px; height: 100%; background: #EFE0C4; border-left: 3px solid #1F1F1F; border-right: 3px solid #1F1F1F; }
+.trk { position: absolute; z-index: 16; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 4px #1F1F1F, 0 0 30px 8px rgba(223,255,90,.6); }
+.tlabel { position: absolute; z-index: 16; white-space: nowrap; padding: 10px 18px; border-radius: 12px; background: #1F1F1F; color: #DFFF5A; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .04em; transform: translateX(-50%); }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 88px/0.98 'Playfair Display'; letter-spacing: -0.02em; }
+.cap { position: absolute; z-index: 55; text-align: center; }
+.cap .k { font: 600 23px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #45403A; }
+.cap .t { margin-top: 10px; font: 800 66px/1 'Playfair Display'; letter-spacing: -0.02em; }
+.shot { position: absolute; z-index: 50; overflow: hidden; border-radius: 34px; background: #FFFDF8; box-shadow: 0 60px 120px -50px rgba(31,31,31,.8), 0 0 0 3px #1F1F1F; transform-origin: 50% 50%; }
+.shot img { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: block; }
+.shot .strip { position: absolute; left: 0; right: 0; top: 0; height: 60px; z-index: 2; background: #1F1F1F; color: #DFFF5A; display: flex; align-items: center; justify-content: space-between; padding: 0 28px;
+  font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+.shot .strip b { color: #FAF7EE; font-weight: 500; }
+.hring { position: absolute; z-index: 3; border: 6px solid #1F1F1F; border-radius: 18px; pointer-events: none; }
+.dim { position: absolute; inset: 0; z-index: 45; background: #1F1F1F; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// C13 — a pipe network. Paid orders leave three stores as packets, flow down lit pipes and stop at a valve that
+// says "Waiting for you". The camera dives into the valve: it is the real order panel with the buyer's payment, the
+// partner's cost and what the sale leaves. One tap and the valve turns; the approved orders flow on to the seller's
+// own partner, parcels leave, tracking runs back to the store. An order that would lose money stays held.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 0.5, B = (n) => +(n * BEAT).toFixed(3);
+const NS = 'http://www.w3.org/2000/svg';
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const STORES = { ikas: ['ikas.svg', 'ikas'], woo: ['woocommerce.svg', 'WooCommerce'], wix: ['wix.svg', 'Wix'] };
+const L = tall
+  ? { S: { ikas: [210, 590], woo: [540, 590], wix: [870, 590] }, nw: 250, nh: 108, V: [540, 880], P: [540, 1150], pw: 380, ph: 112,
+      ret: 'M 730 1150 L 990 1150 Q 1010 1150 1010 1130 L 1010 500 Q 1010 480 990 480 L 560 480 Q 540 480 540 500 L 540 536',
+      slots: [[-262, -44], [262, -44], [-262, 30], [262, 30]], hookY: 290, capY: 292, chipDy: 120, boxDir: [-1, 0.25],
+      shot: { w: 780, y: 330 }, store: { w: 900, y: 500 } }
+  : { S: { ikas: [190, 470], wix: [190, 680], woo: [190, 890] }, nw: 240, nh: 104, V: [580, 680], P: [880, 680], pw: 300, ph: 120,
+      ret: 'M 880 740 L 880 1040 Q 880 1070 850 1070 L 220 1070 Q 190 1070 190 1040 L 190 942',
+      slots: [[0, -158], [0, -222], [0, 158], [0, 222]], hookY: 66, capY: 70, chipDy: 128, boxDir: [1, 0.15],
+      shot: { w: 680, y: 250 }, store: { w: 720, y: 320 } };
+const [vx, vy] = L.V, [px, py] = L.P;
+
+K.box(0, 0, W, H, { cls: 'bgrid' });
+const world = K.box(0, 0, W, H, { cls: 'world', style: { zIndex: 5 } });
+const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'pipes'); svg.setAttribute('width', W); svg.setAttribute('height', H); world.appendChild(svg);
+const mk = (tag, a, parent) => { const n = document.createElementNS(NS, tag); Object.entries(a).forEach(([k, v]) => n.setAttribute(k, v)); (parent || svg).appendChild(n); return n; };
+
+// pipe paths
+const inPath = (key) => {
+  const [sx, sy] = L.S[key];
+  if (tall) return sx === vx ? `M ${sx} ${sy + 54} L ${vx} ${vy - 95}` : `M ${sx} ${sy + 54} C ${sx} ${sy + 190} ${vx} ${vy - 230} ${vx} ${vy - 95}`;
+  return sy === vy ? `M ${sx + 120} ${sy} L ${vx - 95} ${vy}` : `M ${sx + 120} ${sy} C ${sx + 270} ${sy} ${vx - 250} ${vy} ${vx - 95} ${vy}`;
+};
+const outD = tall ? `M ${vx} ${vy + 95} L ${px} ${py - L.ph / 2}` : `M ${vx + 95} ${vy} L ${px - L.pw / 2} ${py}`;
+function pipe(d, w) {
+  const cas = mk('path', { d, fill: 'none', stroke: '#1F1F1F', 'stroke-width': w + 14, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  const inn = mk('path', { d, fill: 'none', stroke: '#E2DBCC', 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  const flow = mk('path', { d, fill: 'none', stroke: '#DFFF5A', 'stroke-width': w * 0.42, 'stroke-linecap': 'round', 'stroke-dasharray': '18 30' });
+  const len = cas.getTotalLength();
+  return { cas, inn, flow, len, d };
+}
+const ret = (() => { const p = pipe(L.ret, 10); p.cas.setAttribute('stroke-width', 18); p.flow.setAttribute('stroke-dasharray', '10 16'); return p; })();
+const ins = Object.keys(STORES).map((k) => ({ key: k, ...pipe(inPath(k), 26) }));
+const out = pipe(outD, 26);
+const pipes = [...ins, out];
+
+// nodes
+const nodes = Object.entries(STORES).map(([k, [logo, name]], i) => {
+  const [x, y] = L.S[k];
+  return K.box(x - L.nw / 2, y - L.nh / 2, L.nw, L.nh, { parent: world, cls: 'node' + (k === 'wix' ? ' dark' : ''), html: `<img src="${K.pub('platforms/' + logo)}">` });
+});
+const valve = K.box(vx, vy, 190, 190, { parent: world, cls: 'valve', html: `<svg viewBox="-100 -100 200 200"><g id="wheel" stroke="#DFFF5A" stroke-width="12" fill="none" stroke-linecap="round"><circle r="56"/><line x1="-56" y1="0" x2="56" y2="0"/><line x1="0" y1="-56" x2="0" y2="56"/><circle r="14" fill="#DFFF5A"/></g></svg>` });
+const wheel = valve.querySelector('#wheel');
+const vchip = K.box(vx, vy + L.chipDy, null, null, { parent: world, cls: 'vchip', html: 'Waiting for you', style: { width: 'auto', height: 'auto' } });
+const partner = K.box(px - L.pw / 2, py - L.ph / 2, L.pw, L.ph, { parent: world, cls: 'partner',
+  html: `<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#DFFF5A" stroke-width="1.8" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z" fill="#1F1F1F"/></svg><div><b>Your print partner</b><span>Your own account</span></div>` });
+
+// packets: [store, label, depart, slot]
+const PK = [['woo', '#1088 · Woo', B(4), 0], ['ikas', '#3412 · ikas', B(5), 1], ['wix', '#2041 · Wix', B(6), 2], ['woo', '#1090 · Woo', B(7), 3]];
+const TRAVEL = 1.05;
+const packets = PK.map(([k, lab], i) => K.box(0, 0, 168, 54, { parent: world, cls: 'pk' + (i === 3 ? ' red' : ''), html: `<i></i>${lab}` }));
+const held = K.box(0, 0, null, null, { parent: world, cls: 'held', html: 'Would lose money · needs its own yes', style: { width: 'auto', height: 'auto' } });
+const boxes = [0, 1, 2].map(() => K.box(0, 0, 70, 56, { parent: world, cls: 'box' }));
+const trk = K.box(0, 0, 30, 30, { parent: world, cls: 'trk' });
+const tlabel = K.box(0, 0, null, null, { parent: world, cls: 'tlabel', html: 'Tracking → your store order', style: { width: 'auto', height: 'auto' } });
+
+// timing
+const PUSH = B(10), TAP = B(14), PULL = B(15), GO = [B(16), B(16.5), B(17)], PRINT = B(17.5), TRK = B(19), STORE = B(21);
+
+// the real order panel (35-production-order-shipping, x 920–1375, y 310–770)
+const dim = K.box(0, 0, W, H, { cls: 'dim' });
+const SX = 920, SY = 310, SW = 455, SH = 460;
+const ks = L.shot.w / SW, shotH = 60 + SH * ks;
+const shot = K.box((W - L.shot.w) / 2, L.shot.y, L.shot.w, shotH, { cls: 'shot', html: '<div class="strip"><span>Order #1088</span><b>Waiting for you</b></div>' });
+K.el('img', { src: K.screen('35-production-order-shipping'), parent: shot, style: { width: 1440 * ks + 'px', transform: `translate(${-SX * ks}px, ${60 - SY * ks}px)` } });
+const ring = K.el('div', { cls: 'hring', parent: shot, style: { left: (935 - SX - 8) * ks + 'px', top: 60 + (625 - SY - 8) * ks + 'px', width: (424 + 16) * ks + 'px', height: (48 + 16) * ks + 'px', borderColor: '#1F1F1F' } });
+// the store switches (82-phone-store-orders, y 1880–2480)
+const ss = L.store.w / 780;
+const store = K.box((W - L.store.w) / 2, L.store.y, L.store.w, 60 + 600 * ss, { cls: 'shot', html: '<div class="strip"><span>Store orders</span><b>Off until you say</b></div>' });
+K.el('img', { src: K.screen('82-phone-store-orders'), parent: store, style: { width: 780 * ss + 'px', transform: `translate(0px, ${60 - 1880 * ss}px)` } });
+const ring2 = K.el('div', { cls: 'hring', parent: store, style: { left: 56 * ss + 'px', top: 60 + (2212 - 1880) * ss + 'px', width: 56 * ss + 'px', height: 56 * ss + 'px', borderColor: '#DFFF5A', boxShadow: '0 0 0 3px #1F1F1F' } });
+const tag = K.demoTag('Real app · demo workspace', 0, 0); tag.style.zIndex = 60;
+
+// captions
+const hook = K.box(60, L.hookY, W - 120, null, { cls: 'hook' });
+const hookW = K.words(hook, 'Store orders,\nstraight to print.');
+const CAPS = [
+  [B(4) - 0.1, B(8), '01 · Paid in your store', 'Orders flow in.'],
+  [B(8), PUSH, '02 · Nothing prints yet', 'It waits for you.'],
+  [PULL + 0.1, B(20.5), '03 · Approved by you', 'Printed. Shipped. Tracked.'],
+  [STORE + 0.05, 12.85, '04 · Your switches', 'Each store, only when you say.'],
+];
+const caps = CAPS.map(([a, b, k, t]) => K.box(65, L.capY, W - 130, null, { cls: 'cap', html: `<div class="k">${k}</div><div class="t">${t}</div>` }));
+const cursor = K.cursor();
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your stores. Your yes.<br>Then it prints.' });
+
+const pathPt = (p, u) => { const q = p.cas.getPointAtLength(K.clamp(u) * p.len); return [q.x, q.y]; };
+const pipeOf = (key) => ins.find((p) => p.key === key);
+
+K.run({
+  id: 'C13', title: 'Orders From Your Stores', dur: DUR, bpm: 120, mood: 'drive', key: 'E', intro: 0.5, cover: 6.4,
+  technique: 'A pipe network: order packets flow from ikas, WooCommerce and Wix nodes down lit pipes into a “Waiting for you” valve; the camera dives into the valve, which becomes the real order panel; one tap turns the wheel and the approved orders flow on to the partner, parcels leave and tracking runs back to the store, while a losing order stays held',
+  caption: 'Paid print orders from your stores wait for you first: you see what the buyer paid, the partner’s cost and what the sale leaves, then approve. Your own partner prints and ships, and the tracking goes back to the store order. Start free at makeandlist.com',
+  short: 'Store orders, straight to print.',
+  beats: ['0–2 s: “Store orders, straight to print.” — the pipes draw on, stores pop', '2–5 s: paid orders flow in and stop at the valve: waiting for you', '5–7.5 s: into the valve — buyer paid, partner cost, what the sale leaves; tap approve', '7.5–10.5 s: approved orders flow to your partner, parcels leave, tracking returns; a losing order stays held', '10.5–13 s: the real switches — each store off until you turn it on', '13–15 s: end card'],
+  cues: [[0.05, 'riser'], [B(1), 'pop'], [B(1.5), 'pop'], [B(2), 'pop'], [B(2.5), 'pop'], [B(3), 'pop'],
+    ...PK.map((p) => [p[2], 'swish']), ...PK.map((p) => [+(p[2] + TRAVEL).toFixed(3), 'pop']),
+    [PUSH - 1.4, 'riser'], [PUSH - 0.05, 'whoosh'], [PUSH + 0.3, 'hit'], [TAP, 'click'], [TAP + 0.1, 'chime'], [PULL, 'whoosh'],
+    [GO[0], 'swish'], [PRINT, 'printer'], [B(18.5), 'box'], [TRK + 0.8, 'pop'], [STORE - 0.05, 'swish'], [STORE + 1.2, 'click'], [13.0, 'hit']],
+}, (T) => {
+  const fr = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(fr) - 0.5) * 60}px, ${(seed(fr + 7) - 0.5) * 60}px)`;
+  cursor.ripple(0, 0, T, -10);
+
+  // camera: slow drift, a dive into the valve, a pull back, then a side step for the switches
+  const dive = K.p(T, PUSH - 0.25, PUSH + 0.35, E.inOutExpo) * (1 - K.p(T, PULL - 0.1, PULL + 0.45, E.inOutExpo));
+  const zs = 1 + dive * 2.6, drift = 1 + 0.02 * Math.sin(T * 0.6);
+  const s = zs * drift;
+  const fx = K.lerp(W / 2, vx, dive), fy = K.lerp(H / 2, vy, dive);
+  const ox = W / 2 - fx * s + Math.sin(T * 0.5) * 10, oy = H / 2 - fy * s + Math.cos(T * 0.4) * 8;
+  const away = K.p(T, STORE - 0.2, STORE + 0.4, E.inOutCubic);
+  world.style.transform = `translate(${ox}px, ${oy - away * 60}px) scale(${s * (1 - away * 0.08)})`;
+  world.style.filter = dive + away > 0.05 ? `blur(${Math.max(dive, away) * 7}px)` : 'none';
+
+  // pipes draw on, then flow (the out pipe only after the tap)
+  pipes.forEach((p, i) => {
+    const dp = K.p(T, 0.15 + i * 0.12, 1.25 + i * 0.12, E.inOutCubic);
+    [p.cas, p.inn].forEach((el) => { el.setAttribute('stroke-dasharray', `${dp * p.len} 99999`); el.setAttribute('opacity', K.clamp((dp - 0.04) * 12)); });
+    const on = p === out ? K.p(T, TAP + 0.1, TAP + 0.4, E.linear) : K.p(T, 1.4, 1.8, E.linear);
+    p.flow.setAttribute('opacity', on * dp);
+    p.flow.setAttribute('stroke-dashoffset', -T * (p === out ? 240 : 160));
+  });
+  const rd = K.p(T, TRK - 0.3, TRK + 0.3, E.outCubic);
+  [ret.cas, ret.inn].forEach((el) => { el.setAttribute('stroke-dasharray', `${rd * ret.len} 99999`); el.setAttribute('opacity', rd > 0.01 ? 1 : 0); });
+  ret.flow.setAttribute('opacity', rd); ret.flow.setAttribute('stroke-dashoffset', -T * 120);
+
+  nodes.forEach((n, i) => {
+    const p = K.p(T, B(1 + i * 0.5), B(1 + i * 0.5) + 0.45, E.outBack);
+    const key = Object.keys(STORES)[i];
+    const bump = PK.reduce((a, pk) => a + (pk[0] === key ? Math.exp(-Math.max(0, T - pk[2]) * 8) * (T > pk[2] ? 1 : 0) : 0), 0);
+    n.style.opacity = K.clamp(p * 2); n.style.transform = `scale(${0.4 + 0.6 * p + 0.06 * bump}) translateY(${Math.sin(T * 1.4 + i * 2) * 3}px)`;
+  });
+  const vp = K.p(T, B(2.5), B(2.5) + 0.5, E.outBack);
+  const open = K.p(T, TAP + 0.05, TAP + 0.9, E.outCubic);
+  valve.style.transform = `scale(${vp * (1 + 0.04 * Math.sin(T * 5) * (T < TAP ? 1 : 0))})`;
+  wheel.setAttribute('transform', `rotate(${open * 270 + Math.sin(T * 3) * 3})`);
+  valve.style.boxShadow = `0 40px 60px -30px rgba(31,31,31,.8), 0 0 0 6px ${T > TAP ? '#DFFF5A' : '#E8603C'}, 0 0 0 10px #1F1F1F, 0 0 ${60 + 30 * Math.sin(T * 6)}px ${T < TAP ? 'rgba(232,96,60,.35)' : 'rgba(223,255,90,.45)'}`;
+  const nWait = PK.filter((p, i) => T >= p[2] + TRAVEL && (T < GO[i] || i === 3)).length;
+  vchip.innerHTML = T < TAP ? (nWait ? `${nWait} waiting for you` : 'Waiting for you') : 'Approved by you';
+  vchip.style.background = T < TAP ? '#DFFF5A' : '#1F1F1F'; vchip.style.color = T < TAP ? '#1F1F1F' : '#DFFF5A';
+  const cp = K.p(T, B(3), B(3) + 0.45, E.outBack);
+  vchip.style.opacity = cp; vchip.style.transform = `translateX(-50%) scale(${0.6 + 0.4 * cp})`;
+  const pp = K.p(T, B(3), B(3) + 0.5, E.outBack), pulse = T > PRINT && T < PRINT + 1 ? 1 + 0.04 * Math.sin((T - PRINT) * 40) * (1 - (T - PRINT)) : 1;
+  partner.style.opacity = K.clamp(pp * 2); partner.style.transform = `scale(${(0.5 + 0.5 * pp) * pulse})`;
+
+  // packets
+  packets.forEach((el, i) => {
+    const [key, , dep, slot] = PK[i];
+    const P = pipeOf(key);
+    const u = K.clamp((T - dep) / TRAVEL);
+    let x, y, sc = 1, op = T >= dep - 0.15 ? K.p(T, dep - 0.15, dep + 0.1, E.linear) : 0;
+    const [ax, ay] = pathPt(P, E.inOutCubic(u));
+    const [sx, sy] = [vx + L.slots[slot][0], vy + L.slots[slot][1]];
+    const toSlot = K.p(T, dep + TRAVEL - 0.08, dep + TRAVEL + 0.32, E.outBack);
+    x = K.lerp(ax, sx, toSlot); y = K.lerp(ay, sy, toSlot);
+    if (i < 3) {
+      const g = K.clamp((T - GO[i]) / 0.75);
+      if (g > 0) {
+        const into = E.inOutCubic(K.clamp(g / 0.35));
+        x = K.lerp(sx, vx, into); y = K.lerp(sy, vy, into);
+        if (g > 0.35) { const [qx, qy] = pathPt(out, E.inOutCubic((g - 0.35) / 0.65)); x = qx; y = qy; }
+        sc = 1 - 0.3 * K.clamp((g - 0.8) / 0.2); op *= 1 - K.clamp((g - 0.88) / 0.12);
+      }
+    }
+    const wob = T > dep + TRAVEL && T < (GO[i] || 99) ? Math.sin(T * 4 + i * 1.3) * 3 : 0;
+    el.style.left = x + 'px'; el.style.top = y + wob + 'px'; el.style.opacity = op;
+    el.style.transform = `scale(${sc * (0.8 + 0.2 * K.p(T, dep, dep + 0.3, E.outBack))})`;
+  });
+  // the losing order stays held and says why
+  const hp = K.p(T, GO[2] + 0.4, GO[2] + 0.8, E.outBack);
+  const hs = L.slots[3];
+  held.style.left = vx + hs[0] + (tall ? 30 : 0) + 'px'; held.style.top = vy + hs[1] + (tall ? 46 : 40) + 'px';
+  held.style.opacity = K.clamp(hp * 2) * (1 - K.p(T, STORE - 0.2, STORE, E.linear)); held.style.transform = `translateX(-50%) scale(${0.6 + 0.4 * hp})`;
+  if (tall) held.style.left = Math.min(W - 230, vx + hs[0]) + 'px';
+  // parcels leave the partner
+  boxes.forEach((b, i) => {
+    const t0 = B(18) + i * 0.22, u = K.clamp((T - t0) / 1.1);
+    const [dx, dy] = L.boxDir;
+    const bx = px + (tall ? -L.pw / 2 - 40 : L.pw / 2 - 40) * (u > 0 ? 1 : 0) + dx * u * 260, by = py + dy * u * 260 + (tall ? 0 : 70) - Math.sin(u * Math.PI) * 50;
+    b.style.left = bx + 'px'; b.style.top = by + 'px';
+    b.style.opacity = u > 0 && u < 1 ? Math.min(1, u * 6, (1 - u) * 4) : 0;
+    b.style.transform = `rotate(${u * 40 * dx}deg) scale(${0.6 + 0.4 * K.clamp(u * 4)})`;
+  });
+  // tracking runs home
+  const tu = K.clamp((T - TRK) / 0.8);
+  const [tx, ty] = (() => { const q = ret.cas.getPointAtLength(E.inOutCubic(tu) * ret.len); return [q.x, q.y]; })();
+  trk.style.left = tx + 'px'; trk.style.top = ty + 'px'; trk.style.opacity = tu > 0 && T < STORE ? 1 : 0;
+  const lp = K.p(T, TRK + 0.75, TRK + 1.15, E.outBack);
+  const wpos = L.S.woo;
+  tlabel.style.left = (tall ? wpos[0] : wpos[0] + 60) + 'px'; tlabel.style.top = (tall ? wpos[1] - 150 : wpos[1] + 88) + 'px';
+  tlabel.style.opacity = K.clamp(lp * 2) * (1 - K.p(T, STORE - 0.2, STORE, E.linear)); tlabel.style.transform = `translateX(-50%) scale(${0.6 + 0.4 * lp})`;
+
+  // the order panel rises out of the valve
+  const sh = K.p(T, PUSH + 0.1, PUSH + 0.6, E.outExpo) * (1 - K.p(T, PULL - 0.15, PULL + 0.2, E.inCubic));
+  shot.style.visibility = sh > 0.001 ? 'visible' : 'hidden';
+  shot.style.opacity = K.clamp(sh * 1.5);
+  shot.style.transform = `translateY(${(1 - sh) * 120}px) scale(${0.6 + 0.4 * sh}) rotate(${(1 - sh) * 3}deg)`;
+  shot.querySelector('img').style.marginTop = -K.p(T, PUSH + 0.3, TAP, E.inOutCubic) * 20 + 'px';
+  dim.style.opacity = sh * 0.72 + K.p(T, STORE - 0.1, STORE + 0.4, E.outCubic) * (1 - K.p(T, 12.9, 13.1, E.linear)) * 0.72;
+  const rp = T > TAP ? 1 + 0.12 * Math.exp(-(T - TAP) * 6) * Math.sin((T - TAP) * 24) : 1;
+  ring.style.opacity = K.win(T, TAP - 0.6, PULL, 0.15); ring.style.transform = `scale(${rp})`;
+  // store switches card
+  const st = K.p(T, STORE, STORE + 0.6, E.outExpo) * (1 - K.p(T, 12.75, 13.0, E.inCubic));
+  store.style.visibility = st > 0.001 ? 'visible' : 'hidden';
+  store.style.opacity = K.clamp(st * 1.5);
+  store.style.transform = `translateY(${(1 - st) * 160 + Math.sin(T * 1.2) * 4}px) rotate(${(1 - st) * -4}deg)`;
+  const r2 = K.p(T, STORE + 1.15, STORE + 1.5, E.outBack);
+  ring2.style.opacity = K.win(T, STORE + 1.15, 13, 0.1); ring2.style.transform = `scale(${0.5 + 0.5 * r2})`;
+  // tag follows the shown card
+  const shown = sh > 0.5 ? shot : st > 0.5 ? store : null;
+  if (shown) { const r = shown.getBoundingClientRect(); tag.style.left = r.left + 20 + 'px'; tag.style.top = r.bottom + 18 + 'px'; }
+  else { tag.style.left = (tall ? 65 : 60) + 'px'; tag.style.top = (tall ? 1196 : 1260) + 'px'; }
+  tag.style.opacity = shown ? 1 : K.win(T, 2.0, 12.9, 0.3) * 0;
+  if (!shown) tag.style.opacity = 0;
+
+  // cursor taps the approve button, then the store switch
+  const btn = [shot, (935 + 212 - SX) * ks, 60 + (649 - SY) * ks];
+  const chk = [store, 84 * ss, 60 + (2240 - 1880) * ss];
+  let cv = 0;
+  [[btn, TAP, PUSH + 0.7, PULL - 0.2], [chk, STORE + 1.2, STORE + 0.5, 12.8]].forEach(([[el, lx, ly], t, a, b]) => {
+    if (T < a - 0.25 || T > b) return;
+    const r = el.getBoundingClientRect(), sc = r.width / parseFloat(el.style.width);
+    const tx = r.left + lx * sc, ty = r.top + ly * sc;
+    const u = K.p(T, a, t - 0.05, E.inOutCubic);
+    cursor.at(K.lerp(W * 0.82, tx, u) - 8, K.lerp(H * 0.86, ty, u) - 6, T > t - 0.06 && T < t + 0.1);
+    cursor.ripple(tx, ty, T, t);
+    cv = K.win(T, a - 0.25, b, 0.2);
+  });
+  cursor.hide(cv);
+
+  // words
+  K.reveal(hookW, T, 0.1, { kind: 'up', stagger: 0.08, out: B(3.5) });
+  caps.forEach((c, i) => {
+    const [a, b] = CAPS[i];
+    const [k, t] = c.children;
+    const p = K.p(T, a, a + 0.5, E.outExpo), o = 1 - K.p(T, b - 0.25, b, E.inCubic);
+    k.style.opacity = p * o; t.style.opacity = K.p(T, a + 0.08, a + 0.58, E.outExpo) * o;
+    t.style.transform = `translateY(${(1 - K.p(T, a + 0.08, a + 0.58, E.outExpo)) * 40 - (1 - o) * 20}px)`;
+    const dark = (i === 3) || (i === 1 && sh > 0.3);
+    c.style.color = dark ? '#FAF7EE' : '#1F1F1F'; k.style.color = dark ? '#DFFF5A' : '#45403A';
+  });
+  // in 9:16 the order-panel caption sits above the panel; in 4:5 too
+  end(T);
+});
+</script></body></html>

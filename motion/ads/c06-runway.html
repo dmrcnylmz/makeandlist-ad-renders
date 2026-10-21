@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C06 · The Try-On Runway</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EDE7DB; }
+.backwall { position: absolute; left: 0; right: 0; top: 0; background: linear-gradient(#F6F2E9, #E4DCCC); }
+.drape { position: absolute; top: 0; bottom: 0; width: 100%; background: repeating-linear-gradient(90deg, rgba(31,31,31,0) 0 46px, rgba(31,31,31,.045) 46px 60px, rgba(31,31,31,0) 60px 92px); }
+.wallword { position: absolute; left: 0; right: 0; text-align: center; font: 800 300px/1 'Playfair Display'; letter-spacing: -0.04em; color: rgba(31,31,31,.05); white-space: nowrap; }
+svg.floor { position: absolute; left: 0; top: 0; overflow: visible; z-index: 3; }
+.cone { position: absolute; z-index: 4; pointer-events: none; mix-blend-mode: screen; transform-origin: 50% 0; }
+.pool { position: absolute; z-index: 5; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,253,240,.55), rgba(255,253,240,0)); pointer-events: none; }
+.g { position: absolute; z-index: 10; transform-origin: 50% 100%; -webkit-box-reflect: below 6px linear-gradient(transparent 62%, rgba(255,255,255,.28)); }
+.g svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.pa { position: absolute; border: 3px dashed rgba(31,31,31,.55); border-radius: 4px; }
+.artw { position: absolute; overflow: hidden; transform-origin: 50% 0; }
+.artw img { position: absolute; max-width: none; }
+.cap { position: absolute; left: 60px; right: 60px; text-align: center; font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; z-index: 40; }
+.panel { position: absolute; z-index: 42; height: 100px; border-radius: 26px; background: #FFFDF8; box-shadow: 0 30px 50px -26px rgba(31,31,31,.6), 0 0 0 2px #1F1F1F; display: flex; align-items: center; padding: 0 30px; gap: 22px; }
+.panel .k { font: 700 26px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.panel .v { font: 600 22px 'IBM Plex Mono', monospace; color: #45403A; white-space: nowrap; margin-left: auto; }
+.sw { width: 50px; height: 50px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(31,31,31,.25); position: relative; flex: none; }
+.ring { position: absolute; width: 66px; height: 66px; border-radius: 50%; border: 4px solid #1F1F1F; margin: -8px 0 0 -8px; }
+.track { position: relative; flex: 1; height: 10px; border-radius: 5px; background: #E2DBCE; }
+.track b { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: #1F1F1F; }
+.track i { position: absolute; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: #1F1F1F; box-shadow: 0 0 0 5px #DFFF5A; }
+.lab { position: absolute; z-index: 41; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .04em; color: #45403A; background: rgba(250,247,238,.9); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; white-space: nowrap; }
+.shot { position: absolute; z-index: 30; border-radius: 28px; overflow: hidden; background: #FAF7EE; box-shadow: 0 60px 110px -50px rgba(31,31,31,.6), 0 0 0 2px #1F1F1F; }
+.shot img { position: absolute; max-width: none; display: block; }
+.shot .demo { right: 14px; bottom: 12px; }
+.flash { position: absolute; inset: 0; z-index: 35; background: #FFFDF8; pointer-events: none; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// C06 — a lit catwalk in true perspective. A tee, a hoodie and a tote walk the runway on the beat toward camera,
+// stepping (bob and sway locked to the beat), reflected in the gloss floor under a following spotlight. On the tee
+// the colour changes on every beat; on the hoodie the artwork-size slider grows and shrinks the print; on the tote
+// the print area pulses. Then the real try-on board. Every blank is drawn: not a partner mockup.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const B = 60 / 124, b = (n) => n * B;
+const NS = 'http://www.w3.org/2000/svg';
+const L = K.v({
+  '9x16': { hz: 560, hg: 800, gh: 560, capY: 292, capFs: 100, panelY: 1240, word: 330 },
+  '4x5': { hz: 300, hg: 700, gh: 500, capY: 60, capFs: 84, panelY: 1150, word: 80 },
+});
+const ZF = 11, ZN = 1.42;
+const proj = (z, x = 0) => [W / 2 + x * L.hg / z, L.hz + L.hg / z];
+
+// ---------- the room ----------
+const wall = K.box(0, 0, W, L.hz + 40, { cls: 'backwall' });
+K.el('div', { cls: 'drape', parent: wall });
+const word = K.box(0, L.word, W, null, { cls: 'wallword', html: 'try&nbsp;on' });
+const fl = document.createElementNS(NS, 'svg'); fl.setAttribute('class', 'floor'); fl.setAttribute('width', W); fl.setAttribute('height', H);
+document.getElementById('stage').appendChild(fl);
+fl.innerHTML = `<defs><linearGradient id="rw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A4540"/><stop offset=".35" stop-color="#2A2724"/><stop offset="1" stop-color="#151413"/></linearGradient>
+<linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCD3C2"/><stop offset="1" stop-color="#C9BFAC"/></linearGradient></defs>`;
+const mk = (tag, attrs, parent = fl) => { const n = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); parent.appendChild(n); return n; };
+mk('rect', { x: -10, y: L.hz, width: W + 20, height: H - L.hz + 10, fill: 'url(#fl)' });
+const HW = 0.46, z0 = 0.6;
+const [fx1] = proj(ZF + 6, -HW), [fx2] = proj(ZF + 6, HW), [, fyF] = proj(ZF + 6);
+const [nx1, nyN] = proj(z0, -HW), [nx2] = proj(z0, HW);
+mk('polygon', { points: `${fx1},${fyF} ${fx2},${fyF} ${nx2},${nyN} ${nx1},${nyN}`, fill: 'url(#rw)' });
+const center = mk('line', { x1: W / 2, y1: fyF, x2: W / 2, y2: nyN, stroke: '#DFFF5A', 'stroke-width': 4, 'stroke-dasharray': '30 40', opacity: 0.55 });
+// runway edge lights
+const bulbs = [];
+for (let z = 1.0; z < ZF + 4; z *= 1.22) [-1, 1].forEach((side) => {
+  const [x, y] = proj(z, side * (HW + 0.03));
+  const r = Math.max(2.5, 18 / z);
+  const halo = mk('circle', { cx: x, cy: y, r: r * 3.2, fill: '#F4FFB8', opacity: 0 });
+  const c = mk('circle', { cx: x, cy: y, r, fill: '#5A5550' });
+  bulbs.push({ c, halo, z, side, i: bulbs.length });
+});
+const cones = [-1, 1].map((s) => K.box(W / 2 - 500 + s * 260, -80, 1000, L.hz + 720, { cls: 'cone', html: '', style: { background: 'linear-gradient(rgba(255,252,232,.75), rgba(255,252,232,0))', clipPath: 'polygon(46% 0, 54% 0, 100% 100%, 0 100%)', opacity: 0 } }));
+const pool = K.box(0, 0, 600, 140, { cls: 'pool' });
+
+// ---------- concept artworks (drawn for this ad) ----------
+const SUNSET = `<svg viewBox="0 0 200 200"><defs><clipPath id="sc"><circle cx="100" cy="92" r="70"/></clipPath></defs>
+  <circle cx="100" cy="92" r="70" fill="#E8603C"/><g clip-path="url(#sc)" fill="#F6F2E9">${[0, 1, 2, 3, 4].map((i) => `<rect x="20" y="${102 + i * 13}" width="160" height="${3 + i * 1.6}"/>`).join('')}</g>
+  <path d="M16 162 L64 112 L92 138 L124 98 L184 162 Z" fill="none" stroke="#1F1F1F" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M16 162 H184" stroke="#1F1F1F" stroke-width="5"/>
+  <text x="100" y="192" text-anchor="middle" font-family="IBM Plex Mono" font-weight="600" font-size="17" letter-spacing="5" fill="#1F1F1F">SLOW SUNDAYS</text></svg>`;
+const MONSTERA = `<svg viewBox="0 0 200 200"><circle cx="128" cy="66" r="34" fill="#DFFF5A"/>
+  <path d="M100 182 C 98 140, 96 110, 92 84" fill="none" stroke="#1F1F1F" stroke-width="5" stroke-linecap="round"/>
+  <path d="M92 86 C 48 92, 22 60, 34 26 C 62 10, 104 22, 120 52 C 128 68, 112 84, 92 86 Z" fill="#7E9A7E" stroke="#1F1F1F" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M92 86 C 74 64, 60 46, 46 30 M80 72 L58 76 M70 58 L44 56 M60 44 L50 30 M86 66 L100 40 M92 80 L116 62" fill="none" stroke="#1F1F1F" stroke-width="4" stroke-linecap="round"/>
+  <path d="M98 150 C 120 130, 150 132, 168 150 C 150 166, 120 168, 98 150 Z" fill="#7E9A7E" stroke="#1F1F1F" stroke-width="5" stroke-linejoin="round"/></svg>`;
+const ART = { x: 1066, y: 762, w: 524, h: 732 };
+
+// ---------- the three garments (drawn blanks) ----------
+// each: svg silhouette in a 300 × 320 box, print area in the same units, artwork inside it
+const SH = {
+  tee: { vb: '0 0 300 320', d: 'M104 16 C 118 34 182 34 196 16 L 258 40 L 292 108 L 246 128 L 236 102 L 236 314 L 64 314 L 64 102 L 54 128 L 8 108 L 42 40 Z', collar: 'M104 16 C 114 42 186 42 196 16', pa: [96, 70, 108, 150] },
+  hoodie: { vb: '0 0 300 320', d: 'M112 30 C 104 4 196 4 188 30 L 254 52 L 294 186 L 254 198 L 236 130 L 236 314 L 64 314 L 64 130 L 46 198 L 6 186 L 46 52 Z', collar: 'M112 30 C 120 64 180 64 188 30 M150 62 L150 100 M136 62 L132 96 M164 62 L168 96', pa: [92, 108, 116, 116], pocket: 'M96 238 H204 L214 290 H86 Z' },
+  tote: { vb: '0 0 300 320', d: 'M50 110 H250 L262 314 H38 Z', collar: 'M96 110 C 96 20, 204 20, 204 110 M112 110 C 112 40, 188 40, 188 110', pa: [82, 140, 136, 136] },
+};
+function garment(kind, fill, artHtml) {
+  const S = SH[kind];
+  const gw = L.gh * 300 / 320;
+  const g = K.box(0, 0, gw, L.gh, { cls: 'g' });
+  g.innerHTML = `<svg viewBox="${S.vb}"><path class="body" d="${S.d}" fill="${fill}" stroke="#1F1F1F" stroke-width="3" stroke-linejoin="round"/>
+    ${S.pocket ? `<path d="${S.pocket}" fill="none" stroke="rgba(31,31,31,.35)" stroke-width="3" stroke-linejoin="round"/>` : ''}
+    <path d="${S.collar}" fill="none" stroke="${kind === 'tote' ? '#1F1F1F' : 'rgba(31,31,31,.35)'}" stroke-width="${kind === 'tote' ? 8 : 3}" stroke-linecap="round"/>
+    <path d="${S.d}" fill="url(#shadeG)" opacity=".5"/></svg>`;
+  const k = gw / 300;
+  const [px, py, pw, ph] = S.pa.map((v) => v * k);
+  const pa = K.el('div', { cls: 'pa', parent: g, style: { left: px + 'px', top: py + 'px', width: pw + 'px', height: ph + 'px' } });
+  const aw = K.el('div', { cls: 'artw', parent: g, html: artHtml || '', style: { left: px + 'px', top: py + 'px', width: pw + 'px', height: ph + 'px' } });
+  return { g, body: g.querySelector('.body'), pa, aw, pw, ph };
+}
+fl.insertAdjacentHTML('beforeend', '<defs><linearGradient id="shadeG" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".18"/><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop offset=".65" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient></defs>');
+const tee = garment('tee', '#F3EEE4');
+{ const s = tee.pw / ART.w; const sh = ART.h * s; K.el('img', { src: K.canvas('PrintArea'), parent: tee.aw, style: { width: 2880 * s + 'px', left: -ART.x * s + 'px', top: -ART.y * s + (tee.ph - sh) / 2 + 'px' } }); }
+const hood = garment('hoodie', '#E6DCC6', SUNSET);
+const tote = garment('tote', '#F3EEE4', MONSTERA);
+[hood, tote].forEach((G) => { const sv = G.aw.querySelector('svg'); sv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;transform-origin:50% 0'; });
+
+// ---------- UI ----------
+const capEls = [];
+function cap(text, fs) { const c = K.box(60, L.capY, W - 120, null, { cls: 'cap', style: { fontSize: (fs || L.capFs) + 'px' } }); capEls.push(c); return K.words(c, text); }
+const CAPS = [cap('Try it on\nbefore it exists.'), cap('Any colour.', L.capFs * 0.9), cap('Any artwork size.', L.capFs * 0.9), cap('Inside the print area.', L.capFs * 0.8), cap('Nothing is ordered\nuntil you approve.', L.capFs * 0.78)];
+const COLS = [['#F3EEE4', 'Natural'], ['#232120', 'Black'], ['#8FA58F', 'Sage'], ['#2E3B55', 'Navy'], ['#E6DCC6', 'Sand']];
+const PW = tall ? 820 : 820;
+const pSw = K.box((W - PW) / 2, L.panelY - 100, PW, 100, { cls: 'panel', html: `<span class="k">Colour</span>${COLS.map(([c]) => `<span class="sw" style="background:${c}"></span>`).join('')}<span class="v"></span>` });
+const swEls = [...pSw.querySelectorAll('.sw')], swV = pSw.querySelector('.v');
+const ring = K.el('div', { cls: 'ring', parent: pSw });
+const pSl = K.box((W - PW) / 2, L.panelY - 100, PW, 100, { cls: 'panel', html: '<span class="k">Artwork size</span><span class="track"><b></b><i></i></span><span class="v"></span>' });
+const slB = pSl.querySelector('b'), slI = pSl.querySelector('i'), slV = pSl.querySelector('.v');
+const pPa = K.box((W - PW) / 2, L.panelY - 100, PW, 100, { cls: 'panel', html: '<span class="k">Tote bag</span><span class="v">35 × 35 cm print area</span>' });
+const labs = [K.box(0, 0, null, null, { cls: 'lab', html: 'Product design · sample artwork' }), K.box(0, 0, null, null, { cls: 'lab', html: 'Concept · drawn for this ad' }), K.box(0, 0, null, null, { cls: 'lab', html: 'Concept · drawn for this ad' })];
+labs.forEach((l) => { l.style.width = 'auto'; l.style.height = 'auto'; });
+const blank = K.box(0, 0, null, null, { cls: 'lab', html: 'Drawn blank · not a partner mockup', style: { width: 'auto', height: 'auto' } });
+
+// ---------- the real try-on board ----------
+function shot(r, w, x, y, tagTxt) {
+  const s = w / r[2], h = Math.round(r[3] * s);
+  const el = K.box(x, y, w, h, { cls: 'shot' });
+  K.el('img', { src: K.canvas('AppTryOn'), parent: el, style: { width: 2880 * s + 'px', left: -r[0] * s + 'px', top: -r[1] * s + 'px' } });
+  if (tagTxt) K.el('div', { cls: 'demo', parent: el, html: tagTxt });
+  return { el, h };
+}
+const SL = K.v({
+  '9x16': { tee: [60, 480, 560], ctl: [520, 500, 500], pay: [520, 946, 500] },
+  '4x5': { tee: [60, 230, 520], ctl: [540, 230, 480], pay: [540, 660, 480] },
+});
+const shTee = shot([596, 330, 1294, 1290], SL.tee[2], SL.tee[0], SL.tee[1], 'Product design · sample data');
+const shCtl = shot([1924, 344, 880, 780], SL.ctl[2], SL.ctl[0], SL.ctl[1]);
+const shPay = shot([1924, 1384, 866, 506], SL.pay[2], SL.pay[0], SL.pay[1]);
+const flash = K.box(0, 0, W, H, { cls: 'flash' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Try it on.<br>Then you decide.' });
+
+// ---------- choreography (beats) ----------
+// tee walks 3–7, colour on 8, 9, 10, 11, exits 12; hoodie walks 10.5–14, size on 14, 15, 16, exits 18; tote walks 16.5–19.5, area pulses 20, 21; board on 22
+const WALK = [
+  { G: tee, inA: b(3), inB: b(7), out: b(12) },
+  { G: hood, inA: b(10.5), inB: b(14), out: b(18) },
+  { G: tote, inA: b(16.5), inB: b(19.5), out: b(22) },
+];
+const BOARD = b(22);
+const COLT = [b(8), b(9), b(10), b(11)];
+const SIZE = [[0, 0.62], [b(14), 1.0], [b(15), 0.7], [b(16), 0.86]];
+
+K.run({
+  id: 'C06', title: 'The Try-On Runway', dur: DUR, bpm: 124, mood: 'drive', key: 'D', intro: 1.45, cover: 4.9,
+  technique: 'A catwalk in true perspective: drawn blanks (a tee with a sample artwork, a hoodie and a tote with new concept art) walk the lit runway toward camera with beat-locked steps, gloss-floor reflections and a following spotlight; the tee changes colour on every beat, the hoodie’s artwork scales with a slider, the tote’s print area pulses; then the real try-on board',
+  caption: 'Try your artwork on a tee, a hoodie or a tote before anything exists: change the colour, the artwork size and see the print area. When it looks right it becomes a draft edition, and nothing is ordered until a buyer pays and you approve. Start free at makeandlist.com',
+  short: 'Try it on before it exists.',
+  beats: ['0–1.9 s: “Try it on before it exists.” — the runway lights up', '1.9–5.8 s: the tee walks — a new colour on every beat', '5.8–8.7 s: a hoodie — the artwork size grows and shrinks', '8.7–10.6 s: a tote — inside the print area', '10.6–13 s: the real try-on board — nothing is ordered until you approve', '13–15 s: end card'],
+  cues: [[0.1, 'swish'], [0.3, 'click'], [0.5, 'click'], [0.7, 'click'], [0.9, 'click'], [b(1.5), 'riser'], [b(3), 'whoosh'], [b(4.5), 'hit'],
+    ...COLT.map((t) => [t, 'pop']), [b(12) - 0.25, 'whoosh'], [b(14), 'swish'], [b(15), 'swish'], [b(16), 'swish'], [b(18) - 0.25, 'whoosh'], [b(20), 'pop'], [b(21), 'pop'],
+    [BOARD - 0.25, 'whoosh'], [BOARD, 'shutter'], [BOARD + b(1), 'pop'], [BOARD + b(2), 'pop'], [13.0, 'hit']],
+}, (T) => {
+  // lights: bulbs come on front-to-back, then chase on the beat
+  const beatN = Math.floor(T / B);
+  bulbs.forEach((bl) => {
+    const on = T > 0.2 + (bl.i >> 1) * 0.07;
+    const chase = on && T > b(4) ? (((bl.i >> 1) + beatN) % 3 === 0 ? 1 : 0.35) : on ? 1 : 0;
+    bl.c.setAttribute('fill', on ? '#F4FFB8' : '#5A5550');
+    bl.halo.setAttribute('opacity', 0.55 * chase);
+  });
+  center.setAttribute('stroke-dashoffset', -T * 120);
+  cones.forEach((c, i) => {
+    c.style.opacity = K.p(T, 0.6 + i * 0.2, 1.1 + i * 0.2, E.outCubic) * 0.75;
+    c.style.transform = `rotate(${(i ? -1 : 1) * (10 + 6 * Math.sin(T * 0.9 + i))}deg)`;
+  });
+  word.style.transform = `translateX(${Math.sin(T * 0.3) * 30}px)`;
+
+  // garments walk
+  let hero = null;
+  WALK.forEach((w, k) => {
+    const G = w.G;
+    const pw = K.p(T, w.inA, w.inB, E.outCubic);
+    const z = K.lerp(ZF, ZN, pw);
+    const exitP = K.p(T, w.out - 0.2, w.out + 0.3, E.inCubic);
+    let [x, y] = proj(z);
+    const sc = ZN / z;
+    // steps: two per beat while walking, an idle sway while posing
+    const walking = T > w.inA && T < w.inB;
+    const ph = Math.PI * T / B;
+    const bob = walking ? -Math.abs(Math.sin(ph)) * 26 * sc : -Math.abs(Math.sin(ph * 0.5)) * 6;
+    const sway = walking ? Math.sin(ph) * 2.4 : Math.sin(T * 2) * 1.2;
+    x += exitP * (k % 2 ? -1 : 1) * W * 0.9;
+    const vis = T > w.inA - 0.05 && exitP < 1;
+    G.g.style.visibility = vis ? 'visible' : 'hidden';
+    G.g.style.left = x - G.g.offsetWidth / 2 + 'px'; G.g.style.top = y - L.gh + 'px';
+    G.g.style.transform = `translateY(${bob}px) scale(${sc}) rotate(${sway + exitP * (k % 2 ? -8 : 8)}deg)`;
+    G.g.style.filter = exitP > 0.05 && exitP < 0.95 ? `blur(${exitP * 8}px)` : `brightness(${0.75 + 0.25 * pw})`;
+    G.g.style.zIndex = 10 + Math.round(20 - z);
+    if (vis && pw > 0.4 && exitP < 0.5) hero = { x, y, sc, k, G };
+    const lp = K.p(T, w.inB - 0.2, w.inB + 0.2, E.outCubic) * (1 - exitP);
+    const lab = labs[k];
+    lab.style.left = x + G.g.offsetWidth * 0.36 * sc + 'px'; lab.style.top = y - L.gh * sc * 0.97 + 'px';
+    lab.style.opacity = lp; lab.style.transform = `translateX(-50%) translateY(${(1 - lp) * 12}px)`;
+  });
+  if (hero) {
+    pool.style.left = hero.x - 300 * hero.sc + 'px'; pool.style.top = hero.y - 70 * hero.sc + 'px';
+    pool.style.transform = `scale(${hero.sc})`; pool.style.opacity = 1;
+  } else pool.style.opacity = 0;
+  blank.style.left = '65px'; blank.style.top = (tall ? 470 : L.panelY + 14) + 'px';
+  blank.style.opacity = K.win(T, b(6.5), BOARD - 0.1, 0.3);
+
+  // tee: colour per beat
+  let ci = 0; COLT.forEach((t, i) => { if (T >= t) ci = i + 1; });
+  tee.body.setAttribute('fill', COLS[ci][0]);
+  tee.pa.style.borderColor = ci === 1 || ci === 3 ? 'rgba(250,247,238,.7)' : 'rgba(31,31,31,.55)';
+  const cpop = ci > 0 ? Math.exp(-(T - COLT[ci - 1]) * 8) : 0;
+  tee.g.querySelector('svg').style.transform = `scale(${1 + 0.04 * cpop})`;
+  // hoodie: artwork size
+  let sv = SIZE[0][1]; for (let i = 1; i < SIZE.length; i++) { const p = K.p(T, SIZE[i][0], SIZE[i][0] + 0.32, E.outBack); sv = K.lerp(sv, SIZE[i][1], p); }
+  hood.aw.querySelector('svg').style.transform = `scale(${sv})`;
+  // tote: the print area pulses
+  const pa = K.p(T, b(20), b(20) + 0.4, E.outCubic) + K.p(T, b(21), b(21) + 0.4, E.outCubic);
+  const pulse = Math.max(0, Math.sin(Math.PI * (pa % 1))) * (pa > 0 ? 1 : 0);
+  tote.pa.style.boxShadow = `0 0 0 ${pulse * 10}px rgba(223,255,90,.75)`;
+  tote.pa.style.borderColor = pa > 0 ? '#1F1F1F' : 'rgba(31,31,31,.55)';
+  tote.pa.style.borderWidth = pa > 0 ? '4px' : '3px';
+
+  // panels
+  const panel = (el, a, z) => {
+    const p = K.p(T, a, a + 0.4, E.outExpo) * (1 - K.p(T, z - 0.3, z, E.inCubic));
+    el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * 40}px)`; el.style.visibility = p > 0 ? 'visible' : 'hidden';
+  };
+  panel(pSw, b(6.5), b(12)); panel(pSl, b(13), b(18)); panel(pPa, b(19), BOARD);
+  const sr = swEls[ci].getBoundingClientRect(), pr = pSw.getBoundingClientRect();
+  ring.style.left = (sr.left - pr.left) / (pr.width / PW || 1) + 'px'; ring.style.top = (sr.top - pr.top) + 'px';
+  swV.textContent = COLS[ci][1] + ' · on screen';
+  const f = (sv - 0.5) / 0.5;
+  slB.style.width = f * 100 + '%'; slI.style.left = f * 100 + '%';
+  slV.textContent = Math.round(sv * 100) + '% of the area';
+
+  // captions
+  const WIN = [[0, b(6)], [b(6.5), b(12)], [b(13), b(18)], [b(19), BOARD], [BOARD, 99]];
+  CAPS.forEach((w, i) => K.reveal(w, T, WIN[i][0] + 0.05, { kind: 'up', stagger: 0.07, out: i < 4 ? WIN[i][1] - 0.35 : undefined }));
+  capEls.forEach((c, i) => { c.style.visibility = T >= WIN[i][0] - 0.05 && T < WIN[i][1] + 0.05 ? 'visible' : 'hidden'; });
+
+  // the real board
+  [[shTee, 0], [shCtl, 1], [shPay, 2]].forEach(([S, i]) => {
+    const t0 = BOARD + b(i);
+    const p = K.p(T, t0, t0 + 0.55, E.outExpo);
+    S.el.style.opacity = Math.min(1, p * 1.6); S.el.style.visibility = p > 0 ? 'visible' : 'hidden';
+    S.el.style.transform = `translateY(${(1 - p) * 180 + Math.sin(T * 1.3 + i) * 4}px) rotate(${(1 - p) * (i ? 4 : -4) + (i - 1) * 0.6}deg) scale(${0.94 + 0.06 * p})`;
+  });
+  const dimRoom = K.p(T, BOARD - 0.2, BOARD + 0.3, E.linear);
+  fl.style.opacity = 1 - 0.75 * dimRoom; wall.style.opacity = 1 - 0.5 * dimRoom;
+  flash.style.opacity = T >= BOARD && T < BOARD + 0.15 ? 0.7 * (1 - (T - BOARD) / 0.15) : 0;
+  end(T);
+});
+</script></body></html>

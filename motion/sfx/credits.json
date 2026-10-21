@@ -1,0 +1,634 @@
+[
+ {
+  "file": "click/click-01.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "click_001.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "click/click-02.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "click_002.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "click/click-03.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "click_003.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "click/click-04.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "click_004.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "click/click-05.wav",
+  "source": "Kenney \u00b7 Ui Audio",
+  "title": "click1.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/ui-audio",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "click/click-06.wav",
+  "source": "Kenney \u00b7 Ui Audio",
+  "title": "click2.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/ui-audio",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "click/click-07.wav",
+  "source": "Universal UI Soundpack",
+  "title": "Minimalist1.wav",
+  "author": "Nathan Gibson",
+  "url": "https://cyrex-studios.itch.io/universal-ui-soundpack",
+  "license": "CC BY 4.0"
+ },
+ {
+  "file": "click/click-08.wav",
+  "source": "Universal UI Soundpack",
+  "title": "Minimalist2.wav",
+  "author": "Nathan Gibson",
+  "url": "https://cyrex-studios.itch.io/universal-ui-soundpack",
+  "license": "CC BY 4.0"
+ },
+ {
+  "file": "pop/pop-01.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "drop_001.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "pop/pop-02.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "drop_002.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "pop/pop-03.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "drop_003.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "pop/pop-04.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "pluck_001.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "pop/pop-05.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "pluck_002.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "pop/pop-06.wav",
+  "source": "Universal UI Soundpack",
+  "title": "Modern1.wav",
+  "author": "Nathan Gibson",
+  "url": "https://cyrex-studios.itch.io/universal-ui-soundpack",
+  "license": "CC BY 4.0"
+ },
+ {
+  "file": "pop/pop-07.wav",
+  "source": "Universal UI Soundpack",
+  "title": "Modern2.wav",
+  "author": "Nathan Gibson",
+  "url": "https://cyrex-studios.itch.io/universal-ui-soundpack",
+  "license": "CC BY 4.0"
+ },
+ {
+  "file": "pop/pop-08.wav",
+  "source": "Universal UI Soundpack",
+  "title": "Modern3.wav",
+  "author": "Nathan Gibson",
+  "url": "https://cyrex-studios.itch.io/universal-ui-soundpack",
+  "license": "CC BY 4.0"
+ },
+ {
+  "file": "chime/chime-01.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "confirmation_001.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "chime/chime-02.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "confirmation_002.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "chime/chime-03.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "confirmation_003.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "chime/chime-04.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "confirmation_004.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "chime/chime-05.wav",
+  "source": "Universal UI Soundpack",
+  "title": "Minimalist10.wav",
+  "author": "Nathan Gibson",
+  "url": "https://cyrex-studios.itch.io/universal-ui-soundpack",
+  "license": "CC BY 4.0"
+ },
+ {
+  "file": "chime/chime-06.wav",
+  "source": "Universal UI Soundpack",
+  "title": "Minimalist11.wav",
+  "author": "Nathan Gibson",
+  "url": "https://cyrex-studios.itch.io/universal-ui-soundpack",
+  "license": "CC BY 4.0"
+ },
+ {
+  "file": "notify/notify-01.wav",
+  "source": "Freesound",
+  "title": "Notification 7.ogg",
+  "author": "melokacool",
+  "url": "https://freesound.org/people/melokacool/sounds/616699/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "notify/notify-02.wav",
+  "source": "Freesound",
+  "title": "Soft-Notifications - Bell - Ding-Dong.mp3",
+  "author": "LegitCheese",
+  "url": "https://freesound.org/people/LegitCheese/sounds/571513/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "notify/notify-03.wav",
+  "source": "Universal UI Soundpack",
+  "title": "Coffee1.wav",
+  "author": "Nathan Gibson",
+  "url": "https://cyrex-studios.itch.io/universal-ui-soundpack",
+  "license": "CC BY 4.0"
+ },
+ {
+  "file": "notify/notify-04.wav",
+  "source": "Universal UI Soundpack",
+  "title": "Coffee2.wav",
+  "author": "Nathan Gibson",
+  "url": "https://cyrex-studios.itch.io/universal-ui-soundpack",
+  "license": "CC BY 4.0"
+ },
+ {
+  "file": "whoosh/whoosh-01.wav",
+  "source": "Freesound",
+  "title": "whoosh_short_mid.wav",
+  "author": "DJT4NN3R",
+  "url": "https://freesound.org/people/DJT4NN3R/sounds/449996/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "whoosh/whoosh-02.wav",
+  "source": "Freesound",
+  "title": "Whoosh For Whip Zoom",
+  "author": "BennettFilmTeacher",
+  "url": "https://freesound.org/people/BennettFilmTeacher/sounds/486234/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "whoosh/whoosh-03.wav",
+  "source": "Freesound",
+  "title": "Little Whoosh 2",
+  "author": "ch_ase",
+  "url": "https://freesound.org/people/ch_ase/sounds/423799/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "whoosh/whoosh-04.wav",
+  "source": "Freesound",
+  "title": "Whoosh 03 (Mouth Fx)",
+  "author": "Flying_Deer_Fx",
+  "url": "https://freesound.org/people/Flying_Deer_Fx/sounds/369011/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "whoosh/whoosh-05.wav",
+  "source": "Freesound",
+  "title": "whoosh_grendel.wav",
+  "author": "gecop",
+  "url": "https://freesound.org/people/gecop/sounds/571279/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "whoosh/whoosh-06.wav",
+  "source": "Freesound",
+  "title": "Whoosh",
+  "author": "thatkellytrna",
+  "url": "https://freesound.org/people/thatkellytrna/sounds/445229/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "whoosh/whoosh-07.wav",
+  "source": "Kronbits 200 Free SFX",
+  "title": "Swoosh/Retro Swooosh 02.wav",
+  "author": "Kronbits",
+  "url": "https://kronbits.itch.io/freesfx",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "swish/swish-01.wav",
+  "source": "Freesound",
+  "title": "Swishes_4_strong_fast.wav",
+  "author": "videofueralle",
+  "url": "https://freesound.org/people/videofueralle/sounds/614170/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "swish/swish-02.wav",
+  "source": "Freesound",
+  "title": "COUCH HIT AND SWISH_44100.wav",
+  "author": "stevielematt",
+  "url": "https://freesound.org/people/stevielematt/sounds/538067/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "swish/swish-03.wav",
+  "source": "Freesound",
+  "title": "Swish wipe HZA 16-05-2022.wav",
+  "author": "hz37",
+  "url": "https://freesound.org/people/hz37/sounds/667419/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "swish/swish-04.wav",
+  "source": "Freesound",
+  "title": "Knife Swish 2.wav",
+  "author": "jawbutch",
+  "url": "https://freesound.org/people/jawbutch/sounds/344408/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "swish/swish-05.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "maximize_001.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "swish/swish-06.wav",
+  "source": "Kenney \u00b7 Interface Sounds",
+  "title": "minimize_001.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/interface-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "riser/riser-01.wav",
+  "source": "Freesound",
+  "title": "Riser sound effect short.wav",
+  "author": "syntheffects",
+  "url": "https://freesound.org/people/syntheffects/sounds/685256/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "riser/riser-02.wav",
+  "source": "Freesound",
+  "title": "Riser Hit sfx 012.wav",
+  "author": "AudioPapkin",
+  "url": "https://freesound.org/people/AudioPapkin/sounds/511858/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "riser/riser-03.wav",
+  "source": "Freesound",
+  "title": "Riser Hit sfx 042.wav",
+  "author": "AudioPapkin",
+  "url": "https://freesound.org/people/AudioPapkin/sounds/649065/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "riser/riser-04.wav",
+  "source": "Freesound",
+  "title": "Riser Hit sfx 092",
+  "author": "AudioPapkin",
+  "url": "https://freesound.org/people/AudioPapkin/sounds/754284/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "hit/hit-01.wav",
+  "source": "Freesound",
+  "title": "Sound Design Elements Impact SFX PS 075",
+  "author": "AudioPapkin",
+  "url": "https://freesound.org/people/AudioPapkin/sounds/812741/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "hit/hit-02.wav",
+  "source": "Freesound",
+  "title": "Sound Design Elements Impact SFX PS 087",
+  "author": "AudioPapkin",
+  "url": "https://freesound.org/people/AudioPapkin/sounds/812753/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "hit/hit-03.wav",
+  "source": "Freesound",
+  "title": "Sound Design Elements Impact SFX PS 083",
+  "author": "AudioPapkin",
+  "url": "https://freesound.org/people/AudioPapkin/sounds/812749/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "hit/hit-04.wav",
+  "source": "Kronbits 200 Free SFX",
+  "title": "Cinematic/Retro Cinematic Short 02.wav",
+  "author": "Kronbits",
+  "url": "https://kronbits.itch.io/freesfx",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "hit/hit-05.wav",
+  "source": "Kenney \u00b7 Impact Sounds",
+  "title": "impactSoft_heavy_000.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/impact-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "hit/hit-06.wav",
+  "source": "Kenney \u00b7 Impact Sounds",
+  "title": "impactSoft_heavy_002.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/impact-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "type/type-01.wav",
+  "source": "Freesound",
+  "title": "Typing on Keyboard and Confirming an Action.wav",
+  "author": "collieryouthservices",
+  "url": "https://freesound.org/people/collieryouthservices/sounds/587777/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "type/type-02.wav",
+  "source": "Freesound",
+  "title": "keyboard typing.wav",
+  "author": "Yoshicakes77",
+  "url": "https://freesound.org/people/Yoshicakes77/sounds/645921/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "paper/paper-01.wav",
+  "source": "Freesound",
+  "title": "55_Coger_Foto.wav (Sliding Paper)",
+  "author": "Atrius1",
+  "url": "https://freesound.org/people/Atrius1/sounds/470189/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "paper/paper-02.wav",
+  "source": "Freesound",
+  "title": "dropping and sliding paper.wav",
+  "author": "123jorre456",
+  "url": "https://freesound.org/people/123jorre456/sounds/46625/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "paper/paper-03.wav",
+  "source": "Freesound",
+  "title": "SlidePaperOnPaper.mp3",
+  "author": "Korczu",
+  "url": "https://freesound.org/people/Korczu/sounds/648387/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "paper/paper-04.wav",
+  "source": "Freesound",
+  "title": "PaperSlide.wav",
+  "author": "eyesonlegs",
+  "url": "https://freesound.org/people/eyesonlegs/sounds/464302/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "paper/paper-05.wav",
+  "source": "Kenney \u00b7 Casino Audio",
+  "title": "card-slide-1.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/casino-audio",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "paper/paper-06.wav",
+  "source": "Kenney \u00b7 Casino Audio",
+  "title": "card-slide-3.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/casino-audio",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "paper/paper-07.wav",
+  "source": "Kenney \u00b7 Casino Audio",
+  "title": "card-place-1.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/casino-audio",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "paper/paper-08.wav",
+  "source": "Kenney \u00b7 Casino Audio",
+  "title": "card-place-2.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/casino-audio",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "printer/printer-01.wav",
+  "source": "Freesound",
+  "title": "Label Printer - Printing a Label",
+  "author": "Philip_Berger",
+  "url": "https://freesound.org/people/Philip_Berger/sounds/546605/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "stamp/stamp-01.wav",
+  "source": "Freesound",
+  "title": "traditional stamp.wav",
+  "author": "I.fekry",
+  "url": "https://freesound.org/people/I.fekry/sounds/470710/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "stamp/stamp-02.wav",
+  "source": "Freesound",
+  "title": "Thump.mp3",
+  "author": "mpuffenbarger",
+  "url": "https://freesound.org/people/mpuffenbarger/sounds/683031/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "stamp/stamp-03.wav",
+  "source": "Kenney \u00b7 Impact Sounds",
+  "title": "impactPlank_medium_000.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/impact-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "stamp/stamp-04.wav",
+  "source": "Kenney \u00b7 Impact Sounds",
+  "title": "impactSoft_medium_001.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/impact-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "shutter/shutter-01.wav",
+  "source": "Freesound",
+  "title": "Contarex camera shutter.wav",
+  "author": "Tonik1105",
+  "url": "https://freesound.org/people/Tonik1105/sounds/520684/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "shutter/shutter-02.wav",
+  "source": "Freesound",
+  "title": "Camera Shutter Click",
+  "author": "Kodack",
+  "url": "https://freesound.org/people/Kodack/sounds/271010/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "shutter/shutter-03.wav",
+  "source": "Freesound",
+  "title": "Camera shutter.wav",
+  "author": "jdaniel1999",
+  "url": "https://freesound.org/people/jdaniel1999/sounds/376205/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "marker/marker-01.wav",
+  "source": "Freesound",
+  "title": "Sharpie Marker Cap Open and Shut",
+  "author": "el_boss",
+  "url": "https://freesound.org/people/el_boss/sounds/669920/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "marker/marker-02.wav",
+  "source": "Freesound",
+  "title": "Writing with pencil.wav",
+  "author": "theshuggie",
+  "url": "https://freesound.org/people/theshuggie/sounds/371026/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "marker/marker-03.wav",
+  "source": "Freesound",
+  "title": "Pencil Writing on Paper",
+  "author": "elliotlp",
+  "url": "https://freesound.org/people/elliotlp/sounds/277312/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "coin/coin-01.wav",
+  "source": "Freesound",
+  "title": "Coin Rolling 1",
+  "author": "humanoide9000",
+  "url": "https://freesound.org/people/humanoide9000/sounds/329033/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "coin/coin-02.wav",
+  "source": "Freesound",
+  "title": "Natural Metal Coin Sound 5.wav",
+  "author": "The-Sacha-Rush",
+  "url": "https://freesound.org/people/The-Sacha-Rush/sounds/400116/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "coin/coin-03.wav",
+  "source": "Freesound",
+  "title": "coin 3",
+  "author": "arseniiv",
+  "url": "https://freesound.org/people/arseniiv/sounds/257347/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "coin/coin-04.wav",
+  "source": "Kenney \u00b7 Casino Audio",
+  "title": "chip-lay-1.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/casino-audio",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "coin/coin-05.wav",
+  "source": "Kenney \u00b7 Casino Audio",
+  "title": "chips-collide-1.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/casino-audio",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "box/box-01.wav",
+  "source": "Freesound",
+  "title": "Cardboard Box Drop.wav",
+  "author": "VSokorelos",
+  "url": "https://freesound.org/people/VSokorelos/sounds/346169/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "box/box-02.wav",
+  "source": "Freesound",
+  "title": "Box Falling Down",
+  "author": "danlucaz",
+  "url": "https://freesound.org/people/danlucaz/sounds/500283/",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "box/box-03.wav",
+  "source": "Kenney \u00b7 Impact Sounds",
+  "title": "impactWood_heavy_000.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/impact-sounds",
+  "license": "CC0 1.0"
+ },
+ {
+  "file": "box/box-04.wav",
+  "source": "Kenney \u00b7 Impact Sounds",
+  "title": "impactSoft_heavy_001.ogg",
+  "author": "Kenney (kenney.nl)",
+  "url": "https://kenney.nl/assets/impact-sounds",
+  "license": "CC0 1.0"
+ }
+]

@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C02 · Margin, Before You Say Yes</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F1ECE1; }
+.ledger { position: absolute; inset: -40px; background-image: repeating-linear-gradient(0deg, rgba(31,31,31,.05) 0 2px, transparent 2px 64px); }
+.bignum { position: absolute; font: 800 520px/1 'Playfair Display'; color: rgba(31,31,31,.045); white-space: nowrap; letter-spacing: -0.04em; }
+.cap { position: absolute; left: 60px; right: 60px; text-align: center; font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; z-index: 40; }
+.cardW { position: absolute; z-index: 20; perspective: 2200px; }
+.card { position: absolute; inset: 0; border-radius: 40px; background: #FFFDF8; transform-origin: 50% 50%;
+  box-shadow: 0 80px 130px -60px rgba(31,31,31,.6), 0 18px 40px -26px rgba(31,31,31,.35), 0 0 0 2px #E2DBCE; overflow: hidden; }
+.card .hd { position: absolute; left: 48px; right: 48px; top: 44px; height: 140px; }
+.thumb { position: absolute; left: 0; top: 0; width: 104px; height: 132px; border-radius: 14px; overflow: hidden; background: #F3EBDD; box-shadow: 0 0 0 2px #E2DBCE; }
+.thumb img { position: absolute; max-width: none; }
+.meta { position: absolute; left: 132px; top: 2px; font: 500 22px 'IBM Plex Mono', monospace; color: #45403A; letter-spacing: .02em; white-space: nowrap; }
+.ttl { position: absolute; left: 132px; top: 38px; right: 0; font: 800 40px/1.08 'Archivo'; letter-spacing: -0.015em; color: #1F1F1F; }
+.paid { position: absolute; left: 132px; top: 96px; font: 700 21px 'Archivo'; color: #1E5E3E; background: #E1F1E6; border: 2px solid #BFDCC9; border-radius: 99px; padding: 5px 14px; white-space: nowrap; }
+.sample { position: absolute; right: 48px; top: 48px; font: 600 18px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #8A8378; border: 1.5px dashed #B5AD9F; border-radius: 8px; padding: 5px 10px; }
+.track { position: absolute; left: 48px; height: 96px; }
+.seg { position: absolute; top: 0; height: 96px; border-radius: 18px; }
+.buyer { position: absolute; top: -14px; height: 124px; border-radius: 24px; border: 3px dashed #8A8378; }
+.mark { position: absolute; top: -36px; width: 4px; height: 168px; background: #1F1F1F; border-radius: 2px; }
+.markL { position: absolute; top: -66px; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .06em; color: #1F1F1F; white-space: nowrap; transform: translateX(-100%); }
+.over { position: absolute; top: 0; height: 96px; border-radius: 0 18px 18px 0; background: repeating-linear-gradient(-45deg, #E5484D 0 12px, #C9343A 12px 24px); }
+.rows { position: absolute; left: 48px; right: 48px; }
+.row { position: absolute; left: 0; right: 0; height: 54px; display: flex; align-items: center; justify-content: space-between; font: 500 31px 'Archivo'; color: #1F1F1F; border-bottom: 1.5px solid #ECE6DA; }
+.row .k { display: flex; align-items: center; gap: 16px; }
+.row .k i { width: 22px; height: 22px; border-radius: 6px; display: block; }
+.row .v { font: 600 31px 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+.row.tot { border-bottom: 0; font-weight: 800; }
+.row.tot .v { font-weight: 700; padding: 6px 16px; border-radius: 12px; }
+.btn { position: absolute; left: 48px; right: 48px; height: 90px; border-radius: 22px; display: grid; place-items: center; font: 800 34px 'Archivo'; white-space: nowrap; }
+.foot { position: absolute; left: 48px; right: 48px; text-align: center; font: 500 21px 'IBM Plex Mono', monospace; color: #6B655C; }
+.dim { position: absolute; inset: 0; background: rgba(31,31,31,.5); z-index: 5; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; background: #FFFDF8; border-radius: 40px 40px 0 0; padding: 44px 48px; box-shadow: 0 -30px 60px -30px rgba(0,0,0,.5); }
+.sheet h3 { margin: 0 0 12px; font: 800 44px/1.05 'Archivo'; letter-spacing: -0.015em; color: #B42A30; }
+.sheet p { margin: 0 0 30px; font: 500 28px/1.35 'Archivo'; color: #45403A; }
+.sheet .b2 { display: flex; gap: 18px; }
+.sheet .b2 div { flex: 1; height: 92px; border-radius: 20px; display: grid; place-items: center; font: 800 30px 'Archivo'; white-space: nowrap; }
+.shot { position: absolute; z-index: 30; border-radius: 30px; overflow: hidden; background: #FAF7EE; box-shadow: 0 60px 110px -50px rgba(31,31,31,.6), 0 0 0 2px #E2DBCE; }
+.shot img { position: absolute; max-width: none; display: block; }
+.shot .demo { right: 14px; bottom: 12px; }
+.hl { position: absolute; border: 5px solid #E5484D; border-radius: 16px; z-index: 2; }
+</style></head>
+<body><div id="stage" class="grain"><div class="ledger"></div></div>
+<script src="kit.js"></script>
+<script>
+// C02 — one order card does the arithmetic out loud. Buyer paid is the track; the partner's price and shipping
+// slide in as solid blocks; what is left lights lime and counts up. A second order's costs overrun the buyer-paid
+// marker into a red hatched overflow, the card turns, and a sheet asks for its own confirmation. Then the real
+// screens, where the same two orders sit side by side. All figures are the demo order's sample figures.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const B = 60 / 108, b = (n) => n * B;
+const L = K.v({
+  '9x16': { capY: 292, capFs: 80, cardX: 80, cardY: 468, cardW: 920, cardH: 800, shotW: 940, shotY: 520 },
+  '4x5': { capY: 64, capFs: 72, cardX: 100, cardY: 250, cardW: 880, cardH: 800, shotW: 900, shotY: 250 },
+});
+const CW = L.cardW, TW = CW - 96;
+const eur = (v) => (v < 0 ? '−' : '') + '€' + Math.abs(v).toFixed(2);
+
+// ---------- ambient ----------
+const big = K.box(-200, tall ? 1180 : 860, null, null, { cls: 'bignum', html: '€24.61 · €48.00 · €18.40 · €4.99 · €24.61 · €48.00', style: { width: 'auto', height: 'auto' } });
+
+// ---------- captions ----------
+const caps = [
+  K.box(60, L.capY, W - 120, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }),
+  K.box(60, L.capY, W - 120, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }),
+  K.box(60, L.capY, W - 120, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }),
+];
+const capW = [K.words(caps[0], 'See your margin\nbefore you approve.'), K.words(caps[1], 'A losing order?\nIt asks first.'), K.words(caps[2], 'A loss needs\nits own yes.')];
+
+// ---------- the order card ----------
+const wrap = K.box(L.cardX, L.cardY, CW, L.cardH, { cls: 'cardW' });
+const card = K.el('div', { cls: 'card', parent: wrap });
+const hd = K.el('div', { cls: 'hd', parent: card });
+const thumb = K.el('div', { cls: 'thumb', parent: hd });
+K.el('img', { src: K.canvas('PrintArea'), parent: thumb, style: { width: 2880 * 0.2 + 'px', left: -1066 * 0.2 + 'px', top: -770 * 0.2 + 'px' } });
+const meta = K.el('div', { cls: 'meta', parent: hd });
+const ttl = K.el('div', { cls: 'ttl', parent: hd, html: 'Quiet Botanicals · art print' });
+const paid = K.el('div', { cls: 'paid', parent: hd, html: '● Paid by the buyer' });
+K.el('div', { cls: 'sample', parent: card, html: 'SAMPLE FIGURES' });
+const TY = 250;
+const track = K.el('div', { cls: 'track', parent: card, style: { top: TY + 'px', width: TW + 'px' } });
+const buyerBox = K.el('div', { cls: 'buyer', parent: track });
+const segP = K.el('div', { cls: 'seg', parent: track, style: { background: '#1F1F1F' } });
+const segS = K.el('div', { cls: 'seg', parent: track, style: { background: '#B9A27A' } });
+const segM = K.el('div', { cls: 'seg', parent: track, style: { background: '#DFFF5A', boxShadow: 'inset 0 0 0 3px #1F1F1F' } });
+const over = K.el('div', { cls: 'over', parent: track });
+const mark = K.el('div', { cls: 'mark', parent: track });
+const markL = K.el('div', { cls: 'markL', parent: mark, html: 'BUYER PAID' });
+const rows = K.el('div', { cls: 'rows', parent: card, style: { top: TY + 138 + 'px' } });
+const ROWS = [['Buyer paid', 'transparent', 'dashed'], ['Partner price · Printful', '#1F1F1F'], ['Shipping · standard', '#B9A27A'], ['Tax', 'repeating-linear-gradient(-45deg,#B5AD9F 0 4px,transparent 4px 8px)'], ['What the sale leaves', '#DFFF5A']];
+const rowEls = ROWS.map(([k, c, dash], i) => {
+  const r = K.el('div', { cls: 'row' + (i === 4 ? ' tot' : ''), parent: rows, style: { top: i * 57 + 'px' }, html: `<span class="k"><i style="background:${c};${dash ? 'border:2.5px dashed #8A8378;' : ''}${i === 4 ? 'box-shadow:inset 0 0 0 2px #1F1F1F' : ''}"></i>${k}</span><span class="v"></span>` });
+  return { r, v: r.querySelector('.v') };
+});
+const btn = K.el('div', { cls: 'btn', parent: card, style: { top: L.cardH - 120 + 'px' } });
+const dim = K.el('div', { cls: 'dim', parent: card });
+const sheet = K.el('div', { cls: 'sheet', parent: card, html: '<h3>This order loses €4.39.</h3><p>It stays out of production unless you approve it at a loss.</p><div class="b2"><div class="keep">Keep it out</div><div class="loss">Approve at a loss</div></div>' });
+const keep = sheet.querySelector('.keep'), lossB = sheet.querySelector('.loss');
+const cursor = K.cursor();
+
+// ---------- the real screens ----------
+function shot(src, nat, r, w, tagTxt) {
+  const s = w / r[2], h = Math.round(r[3] * s);
+  const el = K.box(0, 0, w, h, { cls: 'shot' });
+  K.el('img', { src, parent: el, style: { width: nat * s + 'px', left: -r[0] * s + 'px', top: -r[1] * s + 'px' } });
+  K.el('div', { cls: 'demo', parent: el, html: tagTxt });
+  return { el, h, s, r };
+}
+const shotA = shot(K.canvas('AppOrders'), 2880, [600, 600, 1230, 360], L.shotW, 'Product design · sample data');
+const shotB = shot(K.screen('34-production-approve-several'), 1440, [214, 688, 748, 248], L.shotW, 'Real app · demo workspace');
+const hlA = K.el('div', { cls: 'hl', parent: shotA.el });
+const hlB = K.el('div', { cls: 'hl', parent: shotB.el });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'See the margin.<br>Then say yes.' });
+
+// ---------- the two orders ----------
+const O = [
+  { meta: '#1088 · WooCommerce · to DE', ttl: 'Quiet Botanicals · art print 40 × 50', buyer: 48.0, partner: 18.4, ship: 4.99 },
+  { meta: '#1090 · WooCommerce · to FR', ttl: 'Quiet Botanicals · art print 30 × 40', buyer: 19.0, partner: 18.4, ship: 4.99 },
+];
+// beats: card in 1, buyer 4, partner 6, shipping 8, tax 9, margin 10, tap 12; flip 13; costs 15, overrun 16, sheet 17.5, keep 19; screens 20
+const T1 = { buyer: b(4), partner: b(6), ship: b(8), tax: b(9), margin: b(10), tap: b(12) };
+const FLIP = b(13);
+const T2 = { buyer: b(13.6), partner: b(14.5), ship: b(15), margin: b(16), sheet: b(17.5), tap: b(19) };
+const SHOTS = b(20) - 0.1;
+
+K.run({
+  id: 'C02', title: 'Margin, Before You Say Yes', dur: DUR, bpm: 108, mood: 'bright', key: 'G', intro: 0.55, cover: 6.4,
+  technique: 'A live order card does the sum as stacked bars on the beat: buyer paid as a dashed track, partner price and shipping slide in as solid blocks, the remainder lights lime and counts up; a second order overruns the buyer-paid marker into red hatching and a sheet asks for its own confirmation',
+  caption: 'Before anything is printed you see what the buyer paid, what the partner charges, shipping, and what the sale leaves. An order that would lose money is kept out unless you approve it at a loss. Start free at makeandlist.com',
+  short: 'See your margin before you approve.',
+  beats: ['0–2.2 s: “See your margin before you approve.” — an order card lands', '2.2–6.7 s: buyer paid, partner price, shipping, what it leaves — then approved by you', '6.7–8.9 s: a second order — its costs overrun what the buyer paid', '8.9–11 s: it asks first: keep it out, or approve at a loss', '11–13 s: the real orders, side by side', '13–15 s: end card'],
+  cues: [[0.1, 'swish'], [b(1), 'pop'], [T1.buyer, 'coin'], [T1.partner, 'pop'], [T1.ship, 'pop'], [T1.tax, 'click'], [T1.margin, 'coin'], [T1.margin + 0.05, 'hit'],
+    [T1.tap, 'click'], [T1.tap + 0.1, 'chime'], [FLIP - 0.3, 'whoosh'], [T2.buyer, 'coin'], [T2.partner, 'pop'], [T2.ship, 'pop'], [T2.margin, 'hit'], [T2.sheet, 'swish'],
+    [T2.tap, 'click'], [SHOTS - 0.25, 'whoosh'], [SHOTS + 0.1, 'pop'], [SHOTS + 0.5, 'pop'], [11.6, 'riser'], [13.0, 'hit']],
+}, (T) => {
+  big.style.transform = `translateX(${-T * 38}px)`;
+  // captions
+  K.reveal(capW[0], T, 0.1, { kind: 'up', stagger: 0.07, out: FLIP - 0.35 });
+  K.reveal(capW[1], T, FLIP + 0.1, { kind: 'up', stagger: 0.07, out: SHOTS - 0.35 });
+  K.reveal(capW[2], T, SHOTS + 0.05, { kind: 'up', stagger: 0.07 });
+  caps.forEach((c, i) => { c.style.visibility = (i === 0 ? T < FLIP : i === 1 ? T > FLIP - 0.1 && T < SHOTS : T > SHOTS - 0.1) ? 'visible' : 'hidden'; });
+
+  // card entrance, flip to the second order, exit to the screens
+  const cin = K.p(T, 0.35, 1.1, E.outExpo);
+  const fl = K.p(T, FLIP - 0.3, FLIP + 0.3, E.inOutCubic);
+  const cout = K.p(T, SHOTS - 0.3, SHOTS + 0.1, E.inCubic);
+  const which = fl >= 0.5 ? 1 : 0;
+  const rot = fl < 0.5 ? fl * 180 : (fl - 1) * 180;
+  const lossNow = which === 1 && T >= T2.margin;
+  const shake = lossNow && T < T2.margin + 0.25 ? Math.sin((T - T2.margin) * 90) * 10 * (1 - (T - T2.margin) / 0.25) : 0;
+  card.style.transform = `translateY(${(1 - cin) * 420 + cout * 160}px) translateX(${shake}px) rotateX(${rot}deg) rotateZ(${(1 - cin) * -4}deg) scale(${0.94 + 0.06 * cin})`;
+  card.style.opacity = Math.min(1, cin * 1.5) * (1 - cout);
+  card.style.boxShadow = lossNow ? '0 80px 130px -60px rgba(120,20,24,.55), 0 0 0 5px #E5484D' : '';
+  wrap.style.transform = `translateY(${Math.sin(T * 1.1) * 6}px)`;
+
+  const o = O[which], tt = which ? T2 : T1;
+  meta.textContent = o.meta; ttl.textContent = o.ttl;
+  // the bar
+  const cost = o.partner + o.ship, px = TW / Math.max(o.buyer, cost);
+  const pb = K.p(T, tt.buyer, tt.buyer + 0.5, E.outExpo);
+  const pp = K.p(T, tt.partner, tt.partner + 0.45, E.outExpo);
+  const ps = K.p(T, tt.ship, tt.ship + 0.45, E.outExpo);
+  const pm = K.p(T, tt.margin, tt.margin + 0.5, E.outBack);
+  const bw = o.buyer * px * pb;
+  buyerBox.style.width = Math.max(0, bw + 28) + 'px'; buyerBox.style.left = '-14px'; buyerBox.style.opacity = pb;
+  mark.style.left = bw - 2 + 'px'; mark.style.opacity = pb;
+  const wP = o.partner * px * pp, wS = o.ship * px * ps;
+  segP.style.left = '0px'; segP.style.width = wP + 'px'; segP.style.opacity = pp > 0 ? 1 : 0;
+  segP.style.transform = `translateX(${(1 - pp) * 300}px)`;
+  segS.style.left = wP + 6 + 'px'; segS.style.width = Math.max(0, wS - 6) + 'px'; segS.style.opacity = ps > 0 ? 1 : 0;
+  segS.style.transform = `translateX(${(1 - ps) * 240}px)`;
+  const left = o.buyer - cost;
+  if (left >= 0) {
+    segM.style.left = wP + wS + 6 + 'px'; segM.style.width = Math.max(0, (o.buyer * px - wP - wS - 6)) * pm + 'px'; segM.style.opacity = pm > 0 ? 1 : 0;
+    over.style.opacity = 0;
+  } else {
+    segM.style.opacity = 0;
+    const ov = K.p(T, tt.margin, tt.margin + 0.35, E.outCubic);
+    over.style.left = o.buyer * px + 'px'; over.style.width = (cost - o.buyer) * px * ov + 2 + 'px'; over.style.opacity = ov > 0 ? 1 : 0;
+  }
+  // the rows count as their blocks land
+  const vals = [
+    T >= tt.buyer ? eur(K.lerp(0, o.buyer, pb)) : '',
+    T >= tt.partner ? eur(o.partner * pp) : '',
+    T >= tt.ship ? eur(o.ship * ps) : '',
+    which === 0 ? (T >= T1.tax ? 'unknown · never zero' : '') : (T >= tt.ship ? 'unknown · never zero' : ''),
+    T >= tt.margin ? (left >= 0 ? 'At most ' + eur(left * K.p(T, tt.margin, tt.margin + 0.7, E.outCubic)) : 'Loss · ' + eur(left * K.p(T, tt.margin, tt.margin + 0.5, E.outCubic))) : '',
+  ];
+  rowEls.forEach((R, i) => {
+    R.v.textContent = vals[i];
+    R.v.style.fontSize = i === 3 ? '24px' : '';
+    R.v.style.color = i === 3 ? '#8A8378' : '';
+    const on = [tt.buyer, tt.partner, tt.ship, which ? tt.ship : T1.tax, tt.margin][i];
+    const rp = K.p(T, on - 0.05, on + 0.35, E.outExpo);
+    R.r.style.opacity = 0.35 + 0.65 * rp;
+    R.r.style.transform = `translateX(${(1 - rp) * 16}px)`;
+  });
+  const tv = rowEls[4].v;
+  tv.style.background = left >= 0 ? '#DFFF5A' : '#FBE3E4'; tv.style.color = left >= 0 ? '#1F1F1F' : '#B42A30';
+  tv.style.visibility = T >= tt.margin ? 'visible' : 'hidden';
+  tv.style.transform = `scale(${T >= tt.margin ? 1 + 0.1 * Math.exp(-(T - tt.margin) * 6) * Math.sin((T - tt.margin) * 20) : 1})`;
+  // the button
+  let label, bg, fg;
+  if (which === 0) {
+    const ok = T >= T1.tap;
+    label = ok ? '✓ Approved · paid by your partner account' : 'Approve and send to the partner'; bg = ok ? '#1F1F1F' : '#DFFF5A'; fg = ok ? '#DFFF5A' : '#1F1F1F';
+  } else if (T < T2.tap) { label = 'Left out unless you approve'; bg = '#EFEADF'; fg = '#8A8378'; }
+  else { label = 'Kept out · waiting for you'; bg = '#EFEADF'; fg = '#1F1F1F'; }
+  btn.textContent = label; btn.style.background = bg; btn.style.color = fg;
+  const bp = K.p(T, which ? tt.margin : T1.margin + 0.3, (which ? tt.margin : T1.margin + 0.3) + 0.4, E.outExpo);
+  const press = (T > T1.tap - 0.06 && T < T1.tap + 0.1) ? 0.96 : 1;
+  btn.style.opacity = bp; btn.style.transform = `translateY(${(1 - bp) * 20}px) scale(${press})`;
+  // the loss sheet
+  const sp = K.p(T, T2.sheet, T2.sheet + 0.5, E.outExpo) * (1 - K.p(T, T2.tap + 0.25, T2.tap + 0.6, E.inCubic));
+  sheet.style.transform = `translateY(${(1 - sp) * 105}%)`;
+  sheet.style.visibility = which === 1 && sp > 0.001 ? 'visible' : 'hidden';
+  dim.style.opacity = which === 1 ? sp : 0;
+  keep.style.background = T >= T2.tap ? '#DFFF5A' : '#1F1F1F'; keep.style.color = T >= T2.tap ? '#1F1F1F' : '#FAF7EE';
+  keep.style.transform = `scale(${T > T2.tap - 0.06 && T < T2.tap + 0.1 ? 0.95 : 1})`;
+  lossB.style.border = '3px solid #E5484D'; lossB.style.color = '#B42A30';
+  // cursor: first the approve button, then "Keep it out"
+  const cr = card.getBoundingClientRect();
+  const b1x = cr.left + CW * 0.7, b1y = cr.top + L.cardH - 75;
+  const kr = keep.getBoundingClientRect();
+  const b2x = kr.left + kr.width * 0.6, b2y = kr.top + kr.height * 0.55;
+  if (T < FLIP) {
+    const ca = K.p(T, T1.margin + 0.4, T1.tap - 0.04, E.outCubic);
+    cursor.at(K.lerp(W * 0.9, b1x, ca), K.lerp(cr.top + L.cardH + 140, b1y, ca), T > T1.tap - 0.06 && T < T1.tap + 0.1);
+    cursor.hide(K.win(T, T1.margin + 0.35, T1.tap + 0.5, 0.15));
+    cursor.ripple(b1x, b1y, T, T1.tap);
+  } else {
+    const ca = K.p(T, T2.sheet + 0.45, T2.tap - 0.04, E.outCubic);
+    cursor.at(K.lerp(W * 0.9, b2x, ca), K.lerp(cr.top + L.cardH + 120, b2y, ca), T > T2.tap - 0.06 && T < T2.tap + 0.1);
+    cursor.hide(K.win(T, T2.sheet + 0.4, T2.tap + 0.45, 0.15));
+    cursor.ripple(b2x, b2y, T, T2.tap);
+  }
+  // the real screens
+  const gap = 44;
+  [[shotA, 0], [shotB, 1]].forEach(([S, i]) => {
+    const t0 = SHOTS + i * 0.28;
+    const p = K.p(T, t0, t0 + 0.6, E.outExpo);
+    const y = L.shotY + (i ? shotA.h + gap : 0);
+    S.el.style.left = (W - L.shotW) / 2 + 'px'; S.el.style.top = y + 'px';
+    S.el.style.opacity = Math.min(1, p * 1.5);
+    S.el.style.visibility = p > 0 ? 'visible' : 'hidden';
+    S.el.style.transform = `translateY(${(1 - p) * 200 + Math.sin(T * 1.3 + i) * 4}px) rotate(${(1 - p) * (i ? 3 : -3)}deg)`;
+  });
+  // highlight the loss on both
+  const hp = K.p(T, SHOTS + 0.9, SHOTS + 1.3, E.outBack);
+  const hA = [1600, 856, 172, 42], hB = [635, 820, 100, 22];
+  [[hlA, shotA, hA, 16], [hlB, shotB, hB, 10]].forEach(([el, S, r, pad]) => {
+    el.style.left = (r[0] - S.r[0]) * S.s - pad + 'px'; el.style.top = (r[1] - S.r[1]) * S.s - pad + 'px';
+    el.style.width = r[2] * S.s + pad * 2 + 'px'; el.style.height = r[3] * S.s + pad * 2 + 'px';
+    el.style.opacity = hp > 0 ? 1 : 0; el.style.transform = `scale(${0.6 + 0.4 * hp})`;
+  });
+  end(T);
+});
+</script></body></html>

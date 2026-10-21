@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C12 · One Day With MakeAndList</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F3E2CF; }
+svg.dial { position: absolute; left: 0; top: 0; overflow: visible; z-index: 30; }
+.sky { position: absolute; inset: 0; }
+.sun { position: absolute; width: 190px; height: 190px; margin: -95px 0 0 -95px; border-radius: 50%; z-index: 2;
+  background: radial-gradient(circle at 40% 38%, #F6A27F 0, #E8603C 58%, #D9522F 100%); box-shadow: 0 0 120px 40px rgba(232,96,60,.22); }
+.star { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #FAF7EE; z-index: 1; }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 96px/0.98 'Playfair Display'; letter-spacing: -0.02em; }
+.read { position: absolute; z-index: 41; text-align: center; transform: translateX(-50%); white-space: nowrap; }
+.read b { display: block; font: 600 50px 'IBM Plex Mono', monospace; letter-spacing: .02em; }
+.read span { display: block; margin-top: 2px; font: 500 19px 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; opacity: .7; }
+.moment { position: absolute; inset: 0; z-index: 20; overflow: hidden; }
+.moment .big { position: absolute; font: 800 760px/0.8 'Playfair Display'; letter-spacing: -0.04em; white-space: nowrap; pointer-events: none; }
+.cap { position: absolute; z-index: 5; }
+.cap .k { font: 600 26px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; display: flex; gap: 14px; align-items: center; }
+.cap .k em { font-style: normal; padding: 4px 12px; border-radius: 8px; background: #1F1F1F; color: #DFFF5A; }
+.cap .t { margin-top: 18px; font: 800 74px/0.98 'Playfair Display'; letter-spacing: -0.02em; }
+.cap .s { margin-top: 22px; font: 500 25px/1.4 'IBM Plex Mono', monospace; }
+.typed { position: absolute; font: 500 27px/1.4 'Archivo'; color: #1F1F1F; background: #FFFDF8; z-index: 2; }
+.typed u { text-decoration: none; display: inline-block; width: 3px; height: 1.1em; vertical-align: -0.15em; background: #1F1F1F; margin-left: 2px; }
+.hl { position: absolute; border: 5px solid #DFFF5A; border-radius: 999px; box-shadow: 0 0 0 3px #1F1F1F; z-index: 3; pointer-events: none; }
+.note { position: absolute; z-index: 6; left: 16px; right: 16px; top: 66px; border-radius: 26px; padding: 20px 20px; display: flex; gap: 18px; align-items: center;
+  background: #FFFDF8; box-shadow: 0 30px 50px -20px rgba(0,0,0,.75), 0 0 0 2px #1F1F1F; }
+.note i { flex: none; width: 50px; height: 50px; border-radius: 16px; background: #1F1F1F; display: grid; place-items: center; }
+.phone .screen .note i img { position: static; width: 30px; height: auto; }
+.note div { font: 500 19px/1.3 'Archivo'; color: #45403A; }
+.note div b { display: block; font: 800 22px 'Archivo'; color: #1F1F1F; }
+.stamp { position: absolute; z-index: 8; padding: 20px 34px; border-radius: 999px; background: #DFFF5A; color: #1F1F1F; font: 800 36px 'Archivo'; white-space: nowrap;
+  box-shadow: 0 26px 40px -20px rgba(0,0,0,.7), 0 0 0 3px #1F1F1F; }
+.ring { position: absolute; border-radius: 50%; border: 6px solid #DFFF5A; z-index: 31; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// C12 — one day on a clock. The hand sweeps from 07:00; at 09, 12, 15 and 19 h the dial opens like an iris into a
+// phone moment (an idea typed, the product made, the listing sent as a draft, a print order the seller approves),
+// then folds back into the dial and the hand races on. By 19:00 the lime day-arc closes the circle.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 104, B = (n) => +(n * BEAT).toFixed(3);
+const NS = 'http://www.w3.org/2000/svg';
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const L = tall
+  ? { cx: 540, cy: 900, R: 330, hookY: 296, bx: 190, by: 420, bR: 118, phX: 530, phY: 300, phW: 450, capX: 65, capY: 590, capW: 450, tagY: 1186 }
+  : { cx: 540, cy: 760, R: 360, hookY: 62, bx: 190, by: 230, bR: 112, phX: 600, phY: 120, phW: 410, capX: 60, capY: 420, capW: 500, tagY: 1220 };
+
+// ---------- timing (beat grid) ----------
+const OPEN = [B(3), B(7.5), B(12), B(16.5)];        // 1.731 4.327 6.923 9.519
+const CLOSE = [B(6.5), B(11), B(15.5), B(21.5)];     // 3.750 6.346 8.942 12.404
+const HOURS = [9, 12, 15, 18.75];
+const CREEP = [0.33, 0.33, 0.33, 0.25];
+function hod(T) {
+  if (T < OPEN[0]) return K.lerp(7, HOURS[0], E.inOutCubic(K.clamp((T - 0.35) / (OPEN[0] - 0.35))));
+  for (let i = 0; i < 4; i++) {
+    if (T < CLOSE[i]) return HOURS[i] + CREEP[i] * K.clamp((T - OPEN[i]) / (CLOSE[i] - OPEN[i]));
+    if (i < 3 && T < OPEN[i + 1]) return K.lerp(HOURS[i] + CREEP[i], HOURS[i + 1], E.inOutExpo(K.clamp((T - CLOSE[i]) / (OPEN[i + 1] - CLOSE[i]))));
+  }
+  return 19;
+}
+// how far the dial is folded into the badge (0 = big dial, 1 = badge) and how open the iris is
+function fold(T) {
+  let f = 0;
+  for (let i = 0; i < 4; i++) f = Math.max(f, K.p(T, OPEN[i] - 0.1, OPEN[i] + 0.45, E.inOutExpo) * (1 - K.p(T, CLOSE[i], CLOSE[i] + 0.4, E.inOutCubic)));
+  return f;
+}
+const irisOf = (T, i) => K.p(T, OPEN[i], OPEN[i] + 0.6, E.outExpo) * (1 - K.p(T, CLOSE[i], CLOSE[i] + 0.38, E.inCubic));
+
+// ---------- sky: colour of the hour ----------
+const SKY = [[7, [243, 226, 207]], [9, [250, 241, 226]], [12, [250, 247, 238]], [15, [242, 233, 216]], [17.8, [236, 205, 170]], [19, [43, 38, 34]]];
+function skyAt(h) {
+  for (let i = 1; i < SKY.length; i++) if (h <= SKY[i][0]) { const a = SKY[i - 1], b = SKY[i]; const u = (h - a[0]) / (b[0] - a[0]); return a[1].map((c, j) => Math.round(K.lerp(c, b[1][j], u))); }
+  return SKY[SKY.length - 1][1];
+}
+const rgb = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const sky = K.box(0, 0, W, H, { cls: 'sky' });
+const stars = Array.from({ length: 26 }, (_, i) => K.box(seed(i) * W, seed(i + 40) * H * 0.55, 5, 5, { cls: 'star' }));
+const sun = K.box(0, 0, 260, 260, { cls: 'sun' });
+
+// ---------- the dial ----------
+const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'dial'); svg.setAttribute('width', W); svg.setAttribute('height', H);
+document.getElementById('stage').appendChild(svg);
+const mk = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); (parent || svg).appendChild(n); return n; };
+const R = 1000; // dial drawn at unit radius 1000, scaled to the layout
+const G = mk('g', {});
+const shadow = mk('circle', { r: R * 1.02, cx: 0, cy: 60, fill: 'rgba(31,31,31,.16)', filter: 'blur(0)' }, G);
+const face = mk('circle', { r: R, fill: '#FFFDF8', stroke: '#1F1F1F', 'stroke-width': 26 }, G);
+const track = mk('circle', { r: R * 0.86, fill: 'none', stroke: '#EFEADF', 'stroke-width': 70 }, G);
+const ARC_R = R * 0.86, ARC_L = 2 * Math.PI * ARC_R;
+// the day arc starts at 7 o'clock (210° clockwise from 12)
+const arc = mk('circle', { r: ARC_R, fill: 'none', stroke: '#DFFF5A', 'stroke-width': 70, 'stroke-linecap': 'round', transform: 'rotate(120)', 'stroke-dasharray': `0 ${ARC_L}` }, G);
+const arcEdge = mk('circle', { r: ARC_R, fill: 'none', stroke: '#1F1F1F', 'stroke-width': 6, transform: 'rotate(120)', 'stroke-dasharray': `0 ${ARC_L}`, opacity: 0.0 }, G);
+const ticks = [];
+for (let i = 0; i < 60; i++) {
+  const a = i / 60 * Math.PI * 2, big = i % 5 === 0;
+  const r0 = big ? R * 0.66 : R * 0.72, r1 = R * 0.76;
+  ticks.push(mk('line', { x1: Math.sin(a) * r0, y1: -Math.cos(a) * r0, x2: Math.sin(a) * r1, y2: -Math.cos(a) * r1, stroke: big ? '#1F1F1F' : '#BDB5A8', 'stroke-width': big ? 16 : 7, 'stroke-linecap': 'round' }, G));
+}
+const nums = [];
+for (let h = 1; h <= 12; h++) {
+  const a = h / 12 * Math.PI * 2, r = R * 0.52;
+  if (h % 3 || h === 6) continue;
+  const t = mk('text', { x: Math.sin(a) * r, y: -Math.cos(a) * r + 52, 'text-anchor': 'middle', 'font-family': 'Playfair Display', 'font-weight': 800, 'font-size': 160, fill: '#1F1F1F' }, G);
+  t.textContent = h; nums.push(t);
+}
+// the four moments, marked on the track
+const MK = HOURS.map((h, i) => {
+  const a = ((Math.round(h) % 12) / 12) * Math.PI * 2;
+  const g = mk('g', { transform: `translate(${Math.sin(a) * ARC_R} ${-Math.cos(a) * ARC_R})` }, G);
+  const c = mk('circle', { r: 46, fill: '#FFFDF8', stroke: '#1F1F1F', 'stroke-width': 12 }, g);
+  return { g, c, a };
+});
+// hands, with ghost copies for the fast sweeps
+const ghosts = [0, 1, 2, 3].map((k) => mk('line', { x1: 0, y1: 0, x2: 0, y2: -R * 0.74, stroke: '#1F1F1F', 'stroke-width': 26 - k * 4, 'stroke-linecap': 'round', opacity: 0 }, G));
+const hourH = mk('line', { x1: 0, y1: R * 0.08, x2: 0, y2: -R * 0.44, stroke: '#1F1F1F', 'stroke-width': 46, 'stroke-linecap': 'round' }, G);
+const minH = mk('line', { x1: 0, y1: R * 0.12, x2: 0, y2: -R * 0.74, stroke: '#1F1F1F', 'stroke-width': 26, 'stroke-linecap': 'round' }, G);
+mk('circle', { r: 58, fill: '#DFFF5A', stroke: '#1F1F1F', 'stroke-width': 14 }, G);
+
+const read = K.box(0, 0, null, null, { cls: 'read', html: '<b>07:00</b><span>Morning</span>', style: { width: 'auto', height: 'auto' } });
+const readT = read.querySelector('b'), readL = read.querySelector('span');
+const ring = K.box(0, 0, 10, 10, { cls: 'ring' });
+
+const hook = K.box(60, L.hookY, W - 120, null, { cls: 'hook' });
+const hookW = K.words(hook, 'Morning idea.\nEvening order.');
+
+// ---------- the four moments ----------
+const MOM = [
+  { src: '22-phone-create', y0: 110, y1: 150, k: '09:00', part: 'Morning', t: 'Type the idea.', s: 'Nothing is made until you approve a quote.', bg: ['#FBF3E6', '#F3E4CF'], ink: '#1F1F1F' },
+  { src: '24-phone-product', y0: 300, y1: 420, k: '12:00', part: 'Noon', t: 'It’s made. You check it.', s: 'Pages, listing images, a video.', bg: ['#FFFDF8', '#F1EDE2'], ink: '#1F1F1F' },
+  { src: '72-phone-listing-send', y0: 1560, y1: 1900, k: '15:00', part: 'Afternoon', t: 'Sent as a draft.', s: 'Not for sale until you confirm.', bg: ['#F6ECDA', '#EAD9BD'], ink: '#1F1F1F' },
+  { src: '52-phone-order', y0: 380, y1: 960, k: '19:00', part: 'Evening', t: 'A print order. You approve.', s: 'Printing is paid from your partner account, never Credits.', bg: ['#2E2925', '#1C1917'], ink: '#FAF7EE' },
+];
+const SS = (L.phW - 28) / 780; // screen scale
+const moments = MOM.map((m, i) => {
+  const layer = K.box(0, 0, W, H, { cls: 'moment', style: { background: `radial-gradient(120% 90% at 70% 40%, ${m.bg[0]}, ${m.bg[1]})` } });
+  const big = K.el('div', { cls: 'big', parent: layer, html: m.k.slice(0, 2), style: { color: i === 3 ? 'rgba(250,247,238,.05)' : 'rgba(31,31,31,.05)' } });
+  const ph = K.phone(L.phX, L.phY, L.phW, K.screen(m.src), { parent: layer });
+  const cap = K.box(L.capX, L.capY, L.capW, null, { cls: 'cap', parent: layer, html: `<div class="k"><em>${m.k}</em><span>${m.part}</span></div><div class="t">${m.t}</div><div class="s">${m.s}</div>`, style: { color: m.ink } });
+  cap.querySelector('.s').style.color = i === 3 ? '#D9D3C9' : '#45403A';
+  const tag = K.demoTag('Real app · demo workspace', 0, 0); layer.appendChild(tag);
+  tag.style.left = L.capX + 'px'; tag.style.top = L.tagY + 'px';
+  return { layer, big, ph, cap, tag, m };
+});
+// 09:00 — the idea typed into the real field (x 66–714, y 630–818 of the shot), then "Plan it" (y 1628–1706)
+const scr0 = moments[0].ph.root.querySelector('.screen');
+const typed = K.el('div', { cls: 'typed', parent: scr0, style: { left: 84 * SS + 'px', width: 612 * SS + 'px', height: 150 * SS + 'px', fontSize: 30 * SS + 'px' } });
+const SENT = 'A botanical wedding planner, 36 pages, printable';
+// 12:00 — the Ready chip (x 32–156, y 1034–1076)
+const scr1 = moments[1].ph.root.querySelector('.screen');
+const hl1 = K.el('div', { cls: 'hl', parent: scr1 });
+// 19:00 — a notification, then the seller's yes
+const scr3 = moments[3].ph.root.querySelector('.screen');
+const note = K.el('div', { cls: 'note', parent: scr3, html: `<i><img src="${K.brand('makeandlist-monogram-ivory.svg')}"></i><div><b>New print order #1088</b>Paid by the buyer · waiting for you</div>` });
+const stamp = K.box(0, 0, null, null, { cls: 'stamp', parent: moments[3].layer, html: '✓ Approved by you', style: { width: 'auto', height: 'auto' } });
+const cursor = K.cursor();
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Idea at nine.<br>Order by seven.', dark: true });
+
+const TAP0 = OPEN[0] + 1.45, TAP2 = OPEN[2] + 1.35, NOTE = OPEN[3] + 0.35, TAP3 = OPEN[3] + 1.6;
+const fmt = (h) => { const hh = Math.floor(h), mm = Math.floor((h - hh) * 60); return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0'); };
+const part = (h) => (h < 11 ? 'Morning' : h < 14 ? 'Noon' : h < 17.5 ? 'Afternoon' : 'Evening');
+
+K.run({
+  id: 'C12', title: 'One Day With MakeAndList', dur: DUR, bpm: 104, mood: 'warm', key: 'F', intro: 0.6, cover: 7.6,
+  technique: 'A clock dial sweeps one day while the sky changes colour; at 09, 12, 15 and 19 h the dial folds into a corner badge and an iris opens from its centre into a phone moment, then closes back as the hand races on, until the lime day-arc closes the circle at 19:00',
+  caption: 'Nine in the morning you type an idea. By noon the files are made and checked by you, at three the listing goes to your store as a draft, and at seven a print order waits for your yes. Printing is paid from your own partner account. Start free at makeandlist.com',
+  short: 'Morning idea. Evening order.',
+  beats: ['0–1.7 s: “Morning idea. Evening order.” — the dial draws on at 07:00', '1.7–3.8 s: 09:00 — the dial opens: an idea typed, “Plan it”', '4.3–6.3 s: 12:00 — it is made; you check it', '6.9–8.9 s: 15:00 — sent to ikas as a draft', '9.5–12.4 s: 19:00 — a print order arrives; approved by you', '12.4–15 s: the day-arc closes, end card'],
+  cues: [[0.05, 'riser'], [0.35, 'pop'], [B(2) - 0.05, 'swish'], [OPEN[0] - 0.08, 'whoosh'], [OPEN[0] + 0.05, 'hit'], [OPEN[0] + 0.55, 'type'], [TAP0, 'click'],
+    [CLOSE[0], 'swish'], [OPEN[1] - 0.08, 'whoosh'], [OPEN[1] + 0.05, 'pop'], [OPEN[1] + 0.9, 'chime'],
+    [CLOSE[1], 'swish'], [OPEN[2] - 0.08, 'whoosh'], [OPEN[2] + 0.05, 'pop'], [TAP2, 'click'],
+    [CLOSE[2], 'swish'], [OPEN[3] - 0.08, 'whoosh'], [NOTE, 'notify'], [TAP3, 'click'], [TAP3 + 0.12, 'chime'],
+    [CLOSE[3], 'swish'], [B(22.5) - 0.12, 'hit'], [13.0, 'pop']],
+}, (T) => {
+  const h = hod(T), f = fold(T);
+  const fr = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(fr) - 0.5) * 60}px, ${(seed(fr + 7) - 0.5) * 60}px)`;
+  const dusk = K.clamp((h - 17.6) / 1.4);
+  // sky
+  const c = skyAt(h);
+  sky.style.background = `radial-gradient(110% 80% at 50% ${tall ? 38 : 45}%, ${rgb(c.map((x) => Math.min(255, x + 8)))}, ${rgb(c.map((x) => Math.max(0, x - 18)))})`;
+  stars.forEach((s, i) => { s.style.opacity = dusk * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(T * 2.3 + i * 1.7))); });
+  // the sun travels its arc behind the dial (07 → 19 h)
+  const su = K.clamp((h - 7) / 12);
+  const sa = Math.PI * (1 - su), sr = L.R + (tall ? 150 : 110);
+  const sunX = L.cx + Math.cos(sa) * sr, sunY = L.cy - Math.sin(sa) * sr * (tall ? 1.05 : 0.95) + 40;
+  sun.style.left = sunX + 'px'; sun.style.top = sunY + 'px';
+  sun.style.opacity = K.p(T, 0.2, 0.9, E.linear) * (1 - K.clamp((h - 18.4) / 0.6));
+  sun.style.transform = `scale(${0.85 + 0.15 * Math.sin(su * Math.PI)})`;
+
+  // dial: big ↔ badge
+  const s = K.lerp(L.R, L.bR, f) / R;
+  const dx = K.lerp(L.cx, L.bx, f), dy = K.lerp(L.cy, L.by, f);
+  const intro = K.p(T, 0.15, 0.95, E.outExpo);
+  const endPull = K.p(T, 12.6, 13.1, E.inCubic);
+  const sc = s * (0.7 + 0.3 * intro) * (1 + 0.012 * Math.sin(T * 1.6)) * (1 + 0.25 * endPull);
+  G.setAttribute('transform', `translate(${dx} ${dy}) rotate(${(1 - intro) * -25}) scale(${sc})`);
+  svg.style.opacity = intro * (1 - endPull);
+  shadow.setAttribute('cy', K.lerp(70, 30, f));
+  ticks.forEach((t, i) => t.setAttribute('opacity', K.p(T, 0.2 + i * 0.012, 0.5 + i * 0.012, E.linear)));
+  nums.forEach((n, i) => { const p = K.p(T, 0.4 + i * 0.04, 0.8 + i * 0.04, E.outBack); n.setAttribute('opacity', p); });
+  // hands
+  const ha = (h % 12) / 12 * 360, ma = (h % 1) * 360;
+  hourH.setAttribute('transform', `rotate(${ha})`); minH.setAttribute('transform', `rotate(${ma})`);
+  const vel = Math.abs(hod(T) - hod(T - 1 / 30)) * 30; // hours per second
+  ghosts.forEach((g, k) => {
+    const hp = hod(T - (k + 1) * 0.022);
+    g.setAttribute('transform', `rotate(${(hp % 1) * 360})`);
+    g.setAttribute('opacity', vel > 0.8 ? Math.min(0.5, vel / 10) * (1 - k * 0.22) : 0);
+  });
+  // the day arc and the four marks
+  const dayP = K.clamp((h - 7) / 12);
+  arc.setAttribute('stroke-dasharray', `${dayP * ARC_L} ${ARC_L}`);
+  arc.setAttribute('opacity', K.p(T, 0.5, 0.9, E.linear));
+  MK.forEach((m, i) => {
+    const done = h >= HOURS[i] - 0.01;
+    const pulse = done ? 1 + 0.35 * Math.exp(-Math.max(0, T - OPEN[i]) * 5) : 1;
+    m.c.setAttribute('fill', done ? '#1F1F1F' : '#FFFDF8');
+    m.c.setAttribute('r', 46 * pulse * K.p(T, 0.6 + i * 0.1, 1.0 + i * 0.1, E.outBack));
+  });
+  // readout inside the dial
+  readT.textContent = fmt(h); readL.textContent = part(h);
+  read.style.left = dx + 'px'; read.style.top = dy + L.R * 0.17 * (1 - f) + 'px';
+  read.style.opacity = K.p(T, 0.7, 1.1, E.linear) * (1 - Math.min(1, f * 2)) * (1 - endPull);
+  read.style.color = '#1F1F1F';
+  read.style.transform = `translateX(-50%) scale(${1 - 0.3 * f})`;
+
+  // hook
+  K.reveal(hookW, T, 0.15, { kind: 'up', stagger: 0.08, out: OPEN[0] - 0.3 });
+  hook.style.color = '#1F1F1F';
+
+  // moments: an iris from the dial's centre
+  let ringR = 0, ringO = 0;
+  moments.forEach((M, i) => {
+    const ir = irisOf(T, i);
+    const maxR = Math.hypot(W, H) * 1.05;
+    const r = K.lerp(L.R * 0.86, maxR, ir);
+    const ox = K.lerp(L.cx, L.bx, f), oy = K.lerp(L.cy, L.by, f);
+    M.layer.style.visibility = ir > 0.001 ? 'visible' : 'hidden';
+    M.layer.style.clipPath = `circle(${ir > 0.001 ? r : 0}px at ${ox}px ${oy}px)`;
+    if (ir > 0.001 && ir < 0.98) { ringR = r; ringO = Math.max(ringO, Math.min(1, (1 - ir) * 3)); ring.style.left = ox - r + 'px'; ring.style.top = oy - r + 'px'; }
+    const local = T - OPEN[i];
+    // phone rises, screen drifts
+    const pin = K.p(T, OPEN[i], OPEN[i] + 0.7, E.outExpo);
+    M.ph.root.style.transform = `translateY(${(1 - pin) * 140 + Math.sin(T * 1.3 + i) * 6}px) rotate(${(1 - pin) * 4 + Math.sin(T * 0.9 + i) * 0.4}deg)`;
+    const dr = K.p(T, OPEN[i] + 0.3, CLOSE[i] + 0.2, E.inOutCubic);
+    M.ph.scroll(K.lerp(M.m.y0, M.m.y1, dr) * SS);
+    M.big.style.left = (tall ? -40 : -60) - local * 22 + 'px'; M.big.style.top = (tall ? 820 : 620) + 'px';
+    // caption: key, title, sub stagger in
+    const [ck, ct, cs] = M.cap.children;
+    [ck, ct, cs].forEach((el, j) => { const p = K.p(T, OPEN[i] + 0.25 + j * 0.12, OPEN[i] + 0.8 + j * 0.12, E.outExpo); el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * 34}px)`; });
+    M.tag.style.opacity = K.p(T, OPEN[i] + 0.6, OPEN[i] + 0.9, E.linear);
+  });
+  ring.style.width = ring.style.height = ringR * 2 + 'px'; ring.style.opacity = ringO;
+
+  // 09:00 typing
+  const n = Math.round(K.p(T, OPEN[0] + 0.55, OPEN[0] + 1.25, E.linear) * SENT.length);
+  typed.innerHTML = SENT.slice(0, n) + (Math.floor(T * 4) % 2 === 0 ? '<u></u>' : '');
+  const dr0 = K.p(T, OPEN[0] + 0.3, CLOSE[0] + 0.2, E.inOutCubic);
+  const sc0 = K.lerp(MOM[0].y0, MOM[0].y1, dr0);
+  typed.style.top = (652 - sc0) * SS + 'px';
+  // 12:00 ready chip ring
+  const sc1 = K.lerp(MOM[1].y0, MOM[1].y1, K.p(T, OPEN[1] + 0.3, CLOSE[1] + 0.2, E.inOutCubic));
+  const hp1 = K.p(T, OPEN[1] + 0.85, OPEN[1] + 1.3, E.outBack);
+  Object.assign(hl1.style, { left: 22 * SS + 'px', top: (1024 - sc1) * SS + 'px', width: 144 * SS + 'px', height: 62 * SS + 'px', opacity: K.win(T, OPEN[1] + 0.85, CLOSE[1], 0.2), transform: `scale(${0.6 + 0.4 * hp1})` });
+  // 19:00 notification drops, then approval
+  const np = K.p(T, NOTE, NOTE + 0.5, E.outBack) * (1 - K.p(T, OPEN[3] + 1.2, OPEN[3] + 1.5, E.inCubic));
+  note.style.transform = `translateY(${(1 - np) * -220}px)`; note.style.opacity = K.clamp(np * 1.5);
+  const stp = K.p(T, TAP3 + 0.05, TAP3 + 0.5, E.outBack);
+  const pr = moments[3].ph.root;
+  stamp.style.left = (tall ? L.phX - 60 : L.phX - 70) + 'px'; stamp.style.top = L.phY + (tall ? 640 : 580) + 'px';
+  stamp.style.opacity = T > TAP3 ? 1 : 0;
+  stamp.style.transform = `scale(${0.5 + 0.5 * stp}) rotate(${-4 + (1 - stp) * -10}deg)`;
+  // the cursor: taps "Plan it" (09:00), "Review what will be sent" (15:00), the order (19:00)
+  const taps = [
+    [OPEN[0] + 0.8, TAP0, CLOSE[0], 0, 140, 1667],
+    [OPEN[2] + 0.7, TAP2, CLOSE[2], 2, 254, 3400],
+    [OPEN[3] + 1.1, TAP3, CLOSE[3] - 0.6, 3, 388, 1935],
+  ];
+  let shown = 0; cursor.ripple(0, 0, T, -10);
+  taps.forEach(([a, t, b, mi, sx, sy]) => {
+    if (T < a - 0.2 || T > b) return;
+    const Mm = MOM[mi];
+    const scy = K.lerp(Mm.y0, Mm.y1, K.p(T, OPEN[mi] + 0.3, CLOSE[mi] + 0.2, E.inOutCubic));
+    const tx = L.phX + 14 + sx * SS, ty = L.phY + 14 + (sy - scy) * SS;
+    const u = K.p(T, a, t - 0.05, E.inOutCubic);
+    cursor.at(K.lerp(W - 90, tx, u) - 8, K.lerp(H * (tall ? 0.6 : 0.8), ty, u) - 6, T > t - 0.06 && T < t + 0.1);
+    cursor.ripple(tx, ty, T, t);
+    shown = K.win(T, a - 0.2, b, 0.2);
+  });
+  cursor.hide(shown);
+
+  end(T);
+});
+</script></body></html>

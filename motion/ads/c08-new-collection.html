@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C08 · A Collection in One Go</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F3EEE3; }
+.wash { position: absolute; inset: 0; background: radial-gradient(110% 70% at 50% 35%, #FBF8F0 0, #F1EBDF 58%, #E7E0D2 100%); }
+.tile { position: absolute; left: 0; top: 0; transform-origin: 0 0; border-radius: 22px; background: #FFFDF8; z-index: 20;
+  box-shadow: 0 30px 50px -32px rgba(31,31,31,.55), 0 0 0 1.5px #E2DBCE; overflow: hidden; }
+.tile svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.tile.hero { border-radius: 8px; background: transparent; box-shadow: 0 50px 80px -40px rgba(31,31,31,.6), 0 14px 26px -16px rgba(31,31,31,.35); overflow: visible; z-index: 25; }
+.tl { position: absolute; left: 10px; top: 10px; font: 600 14px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #6B645A; z-index: 2; }
+.dr { position: absolute; right: 10px; top: 8px; font: 700 14px 'Archivo'; color: #1F1F1F; background: #DFFF5A; padding: 3px 9px; border-radius: 99px; z-index: 2; transform-origin: 100% 0; }
+.glowT { position: absolute; inset: 0; border-radius: 22px; box-shadow: inset 0 0 0 4px #DFFF5A; z-index: 3; pointer-events: none; }
+.band { position: absolute; z-index: 30; pointer-events: none; mix-blend-mode: multiply; background: linear-gradient(90deg, rgba(223,255,90,0), rgba(223,255,90,.95) 35%, rgba(223,255,90,.95) 65%, rgba(223,255,90,0)); }
+.cap { position: absolute; z-index: 50; text-align: center; font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; color: #1F1F1F; }
+.cap em { font-style: normal; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); }
+.pill { position: absolute; z-index: 45; display: flex; align-items: center; gap: 14px; font: 800 34px 'Archivo'; color: #DFFF5A; background: #1F1F1F; padding: 18px 30px; border-radius: 99px; white-space: nowrap; box-shadow: 0 30px 50px -24px rgba(31,31,31,.8); }
+.pill i { width: 16px; height: 16px; border-radius: 50%; background: #DFFF5A; display: block; }
+.crop { position: absolute; z-index: 40; overflow: hidden; border-radius: 30px; background: #FFFDF8; box-shadow: 0 60px 110px -50px rgba(31,31,31,.7), 0 0 0 2px #1F1F1F; }
+.crop img { position: absolute; left: 0; top: 0; }
+.ring { position: absolute; border: 5px solid #DFFF5A; border-radius: 18px; box-shadow: 0 0 0 2px #1F1F1F; z-index: 3; }
+.rowHl { position: absolute; z-index: 35; border-radius: 26px; border: 4px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; pointer-events: none; }
+.chipF { position: absolute; z-index: 50; font: 600 25px 'IBM Plex Mono', monospace; color: #DFFF5A; background: #1F1F1F; padding: 14px 24px; border-radius: 14px; white-space: nowrap; }
+.name { position: absolute; z-index: 26; font: 600 18px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #45403A; white-space: nowrap; text-align: center; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// C08 — four new concept artworks, drawn line by line (stroke draw-on, then the one warm accent fills in), become the
+// top row of a collection grid; each design multiplies down into a tee, a mug and a tote (twelve products). A lime
+// sweep "drops" the collection — every tile turns into a draft — and the design board shows the partner's own blank
+// families each row maps to. Everything here is a concept drawn for this ad; nothing is a customer's product or sale.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 122, B = (n) => +(n * BEAT).toFixed(3);
+const T_GRID = B(6), T_ROWS = [B(7), B(8), B(9)], T_SWEEP = B(12), T_PILL = B(14), T_SPLIT = B(16), T_RINGS = [B(17), B(18), B(19), B(20)], T_BACK = B(22);
+const NS = 'http://www.w3.org/2000/svg';
+const INK = '#2A2724', BG = '#F6F1E6';
+
+// ---------- the four concept artworks (300 × 400), every stroke drawable ----------
+const S = (d, extra = '') => `<path class="st" pathLength="1" d="${d}" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+const SF = (d, fill) => `<path class="st" pathLength="1" d="${d}" fill="${fill}" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round"/>`;
+const mirror = (d) => d.replace(/(-?\d+(\.\d+)?) (-?\d+(\.\d+)?)/g, (m, x, _a, y) => `${300 - Number(x)} ${y}`);
+function leaf(x, y, ang, len, fill) {
+  const w = len * 0.26;
+  return `<g transform="translate(${x} ${y}) rotate(${ang})">${SF(`M0 0 C ${len * 0.3} ${-w} ${len * 0.72} ${-w} ${len} 0 C ${len * 0.72} ${w} ${len * 0.3} ${w} 0 0 Z`, fill || BG)}${S(`M2 0 L ${len * 0.86} 0`, 'stroke-width="1.6"')}</g>`;
+}
+// slits: narrow wedges from the leaf edge in toward the midrib
+const SL = ['M40 114 L 138 150 L 40 126 Z', 'M36 160 L 136 188 L 36 172 Z', 'M36 212 L 138 226 L 36 224 Z', 'M54 256 L 140 262 L 60 272 Z'];
+const LEAF = 'M150 100 C 140 90 126 86 112 88 C 74 94 50 136 54 190 C 58 250 100 294 146 290 L 150 286 L 154 290 C 200 294 242 250 246 190 C 250 136 226 94 188 88 C 174 86 160 90 150 100 Z';
+const ARTS = [
+  { name: 'Monstera', accent: '#E8603C', svg: `
+    <circle class="ac" cx="204" cy="126" r="66" fill="#E8603C"/>
+    ${S('M150 340 C 153 320 146 304 150 290')}
+    <defs><clipPath id="leafc"><path d="${LEAF}"/></clipPath></defs>
+    <g class="pre">${S(LEAF)}</g>
+    <g class="ac2"><path d="${LEAF}" fill="${INK}"/>
+    <g clip-path="url(#leafc)">${SL.map((w) => `<path d="${w}" fill="${BG}"/><path d="${mirror(w)}" fill="${BG}"/>`).join('')}</g>
+    <ellipse cx="118" cy="176" rx="7" ry="4" fill="${BG}"/><ellipse cx="182" cy="176" rx="7" ry="4" fill="${BG}"/><ellipse cx="121" cy="212" rx="6" ry="3.5" fill="${BG}"/><ellipse cx="179" cy="212" rx="6" ry="3.5" fill="${BG}"/>
+    <path d="M150 284 C 149 230 149 160 150 106" fill="none" stroke="${BG}" stroke-width="3" stroke-linecap="round"/></g>
+    ${S('M110 340 L 190 340', 'stroke-width="2"')}${S('M84 76 L 90 82 M 96 70 L 98 78', 'stroke-width="2"')}
+    <text class="tx" x="150" y="374" text-anchor="middle" font-family="Archivo" font-weight="800" font-size="15" letter-spacing="5" fill="${INK}">MONSTERA · Nº 01</text>` },
+  { name: 'Slow mornings', accent: '#E3A33B', svg: `
+    <circle class="ac" cx="150" cy="176" r="80" fill="#E3A33B"/>
+    ${S('M128 170 C 114 150 142 140 128 116')}${S('M150 164 C 136 140 166 130 150 102')}${S('M172 170 C 158 150 186 140 172 116')}
+    ${SF('M60 300 C 60 290 100 284 150 284 C 200 284 240 290 240 300 C 240 310 200 316 150 316 C 100 316 60 310 60 300 Z', BG)}
+    ${SF('M88 196 L 98 274 C 100 288 112 296 126 296 L 174 296 C 188 296 200 288 202 274 L 212 196 Z', BG)}
+    ${S('M88 196 C 88 188 116 184 150 184 C 184 184 212 188 212 196 C 212 204 184 208 150 208 C 116 208 88 204 88 196 Z')}
+    ${S('M210 214 C 250 210 252 260 203 264')}${S('M208 228 C 230 228 230 250 205 250', 'stroke-width="1.8"')}
+    ${S('M112 232 C 130 238 170 238 188 232', 'stroke-width="1.6"')}
+    <text class="tx" x="150" y="362" text-anchor="middle" font-family="Playfair Display" font-style="italic" font-weight="600" font-size="34" fill="${INK}">slow mornings</text>` },
+  { name: 'Golden hour', accent: '#EF7A55', svg: `
+    <defs><clipPath id="sky"><rect x="0" y="0" width="300" height="250"/></clipPath></defs>
+    <g clip-path="url(#sky)"><circle class="ac" cx="150" cy="226" r="100" fill="#EF7A55"/>
+    <rect x="30" y="178" width="240" height="3" fill="${BG}"/><rect x="30" y="192" width="240" height="5" fill="${BG}"/><rect x="30" y="208" width="240" height="7" fill="${BG}"/><rect x="30" y="225" width="240" height="9" fill="${BG}"/><rect x="30" y="242" width="240" height="10" fill="${BG}"/></g>
+    ${SF('M24 250 L 84 178 L 120 214 L 166 150 L 224 226 L 248 200 L 276 236 L 276 250 Z', BG)}
+    ${S('M84 178 L 96 200 L 90 214', 'stroke-width="1.8"')}${S('M166 150 L 176 180 L 166 198 L 172 214', 'stroke-width="1.8"')}${S('M248 200 L 254 214', 'stroke-width="1.8"')}
+    ${S('M18 250 L 282 250')}
+    <g class="ac"><rect x="104" y="262" width="92" height="5" rx="2.5" fill="#EF7A55"/><rect x="122" y="277" width="56" height="4" rx="2" fill="#EF7A55"/><rect x="138" y="290" width="24" height="3" rx="1.5" fill="#EF7A55"/></g>
+    ${S('M60 270 L 92 270', 'stroke-width="2"')}${S('M208 270 L 240 270', 'stroke-width="2"')}${S('M88 286 L 112 286', 'stroke-width="2"')}${S('M188 286 L 212 286', 'stroke-width="2"')}
+    ${S('M64 92 Q 71 85 78 92 Q 85 85 92 92', 'stroke-width="2"')}${S('M98 70 Q 103 65 108 70 Q 113 65 118 70', 'stroke-width="1.8"')}${S('M214 96 Q 219 91 224 96 Q 229 91 234 96', 'stroke-width="1.8"')}
+    <text class="tx" x="150" y="350" text-anchor="middle" font-family="Archivo" font-weight="800" font-size="24" letter-spacing="7" fill="${INK}">GOLDEN HOUR</text>
+    <text class="tx" x="150" y="374" text-anchor="middle" font-family="IBM Plex Mono" font-weight="500" font-size="11" letter-spacing="3" fill="${INK}">SEVEN FORTY-TWO PM</text>` },
+  { name: 'Limoni', accent: '#F2C94C', svg: `
+    ${S('M48 300 C 96 252 150 196 252 96')}${S('M150 196 C 168 170 176 150 174 126')}
+    ${leaf(78, 270, -118, 56)}${leaf(100, 250, -8, 58)}${leaf(128, 222, -128, 60)}${leaf(158, 190, 4, 58)}${leaf(196, 150, -40, 56)}${leaf(222, 122, -132, 50)}${leaf(238, 108, -34, 46)}${leaf(174, 126, -70, 44)}
+    ${S('M116 236 L 112 262')}${S('M184 170 L 190 204')}${S('M84 266 L 76 296')}
+    <g class="ac"><ellipse cx="114" cy="286" rx="30" ry="23" fill="#F2C94C" transform="rotate(-8 114 286)"/><ellipse cx="192" cy="228" rx="29" ry="22" fill="#F2C94C" transform="rotate(12 192 228)"/><ellipse cx="74" cy="318" rx="24" ry="19" fill="#F2C94C" transform="rotate(-22 74 318)"/></g>
+    ${S('M84 286 C 84 272 98 263 114 263 C 130 263 144 272 144 286 C 144 300 130 309 114 309 C 98 309 84 300 84 286 Z')}${S('M82 280 L 78 278 M 146 292 L 150 294', 'stroke-width="2"')}
+    ${S('M163 228 C 163 214 177 206 192 206 C 207 206 221 214 221 228 C 221 242 207 250 192 250 C 177 250 163 242 163 228 Z')}${S('M222 232 L 226 236', 'stroke-width="2"')}
+    ${S('M50 318 C 50 306 61 299 74 299 C 87 299 98 306 98 318 C 98 330 87 337 74 337 C 61 337 50 330 50 318 Z')}
+    ${S('M100 282 C 104 276 110 274 116 275', 'stroke-width="1.6"')}${S('M178 222 C 182 216 188 214 194 215', 'stroke-width="1.6"')}
+    <text class="tx" x="150" y="378" text-anchor="middle" font-family="Playfair Display" font-weight="800" font-size="30" letter-spacing="8" fill="${INK}">LIMONI</text>` },
+];
+const defs = document.createElementNS(NS, 'svg'); defs.setAttribute('width', 0); defs.setAttribute('height', 0); defs.style.position = 'absolute';
+defs.innerHTML = '<defs>' + ARTS.map((a, i) => `<symbol id="art${i}" viewBox="0 0 300 400"><rect width="300" height="400" fill="${BG}"/><g class="artg" data-i="${i}">${a.svg}</g></symbol>`).join('') + `
+  <clipPath id="mugc"><path d="M40 40 H230 V214 Q230 238 206 238 H64 Q40 238 40 214 Z"/></clipPath></defs>`;
+document.getElementById('stage').appendChild(defs);
+const artG = [...defs.querySelectorAll('.artg')].map((g) => ({ st: [...g.querySelectorAll('.st')], ac: [...g.querySelectorAll('.ac')], ac2: [...g.querySelectorAll('.ac2')], pre: [...g.querySelectorAll('.pre')], tx: [...g.querySelectorAll('.tx')] }));
+
+// ---------- products (each uses the artwork symbol) ----------
+const TEE = 'M104 16 Q150 50 196 16 L258 40 L292 108 L246 128 L236 102 L236 314 L64 314 L64 102 L54 128 L8 108 L42 40 Z';
+const TEEC = ['#FFFDF8', '#E9E1D0', '#D3DBC9', '#ECE3CF'];
+const prod = {
+  poster: (i) => ({ vb: '0 0 300 400', svg: `<use href="#art${i}" x="0" y="0" width="300" height="400"/>` }),
+  tee: (i) => ({ vb: '0 0 300 330', svg: `<path d="${TEE}" fill="${TEEC[i]}" stroke="#1F1F1F" stroke-width="4" stroke-linejoin="round"/><path d="M118 22 Q150 44 182 22" fill="none" stroke="#1F1F1F" stroke-width="3"/>
+      <use href="#art${i}" x="100" y="70" width="100" height="133"/><path d="M64 110 L64 314" stroke="rgba(31,31,31,.06)" stroke-width="14"/><path d="M236 110 L236 314" stroke="rgba(31,31,31,.08)" stroke-width="14"/>` }),
+  mug: (i) => ({ vb: '0 0 300 260', svg: `<ellipse cx="135" cy="40" rx="95" ry="14" fill="#E9E3D6" stroke="#1F1F1F" stroke-width="4"/>
+      <path d="M230 80 Q290 80 290 140 Q290 200 230 200" fill="none" stroke="#1F1F1F" stroke-width="16" stroke-linecap="round"/><path d="M230 80 Q290 80 290 140 Q290 200 230 200" fill="none" stroke="#FFFDF8" stroke-width="8" stroke-linecap="round"/>
+      <path d="M40 40 H230 V214 Q230 238 206 238 H64 Q40 238 40 214 Z" fill="#FFFDF8" stroke="#1F1F1F" stroke-width="4"/>
+      <g clip-path="url(#mugc)"><use href="#art${i}" x="76" y="52" width="118" height="157"/><rect x="40" y="40" width="34" height="200" fill="rgba(31,31,31,.06)"/><rect x="196" y="40" width="34" height="200" fill="rgba(31,31,31,.09)"/></g>` }),
+  tote: (i) => ({ vb: '0 0 300 340', svg: `<path d="M100 92 C 100 20 200 20 200 92" fill="none" stroke="#1F1F1F" stroke-width="12"/><path d="M100 92 C 100 20 200 20 200 92" fill="none" stroke="#DCCDB0" stroke-width="6"/>
+      <path d="M50 90 H250 L262 330 H38 Z" fill="#E8DCC4" stroke="#1F1F1F" stroke-width="4" stroke-linejoin="round"/>
+      <use href="#art${i}" x="95" y="140" width="110" height="147"/><path d="M50 90 H250 L252 112 H48 Z" fill="rgba(31,31,31,.07)"/>` }),
+};
+const KINDS = ['poster', 'tee', 'mug', 'tote'];
+
+// ---------- grid geometry (grid space) ----------
+const G = tall ? { cw: 190, gap: 16, y0: 520, ph: 253 } : { cw: 196, gap: 16, y0: 236, ph: 261 };
+const GW = G.cw * 4 + G.gap * 3, GX = (W - GW) / 2;
+const rowY = (r) => (r === 0 ? 0 : G.ph + G.gap + (r - 1) * (G.cw + G.gap));
+const rowH = (r) => (r === 0 ? G.ph : G.cw);
+const GH = rowY(3) + G.cw;
+// grid placement per phase: full, then small on the left beside the board crop, then full again
+const SPLIT = tall ? { x: 60, y: 540, s: 0.52 } : { x: 60, y: 250, s: 0.55 };
+const FINAL = { y: G.y0, s: 1 };
+function gridT(T) {
+  const a = K.p(T, T_SPLIT - 0.1, T_SPLIT + 0.55, E.inOutExpo) * (1 - K.p(T, T_BACK - 0.1, T_BACK + 0.55, E.inOutExpo));
+  const f = K.p(T, T_BACK - 0.1, T_BACK + 0.55, E.inOutExpo);
+  const breathe = 1 + 0.008 * Math.sin(T * 1.2);
+  const s0 = K.lerp(1, FINAL.s, f), y0 = K.lerp(G.y0, FINAL.y, f), x0 = (W - GW * s0) / 2;
+  const s = K.lerp(s0, SPLIT.s, a) * breathe;
+  const x = K.lerp(x0, SPLIT.x, a) - (breathe - 1) * GW * s / 2, y = K.lerp(y0, SPLIT.y, a);
+  return { x, y, s, a };
+}
+const cellStage = (r, c, g) => [g.x + (c * (G.cw + G.gap)) * g.s, g.y + rowY(r) * g.s, G.cw * g.s, rowH(r) * g.s];
+
+// ---------- tiles ----------
+function tileSvg(kind, i, w, h) {
+  const p = prod[kind](i);
+  const [, , vw, vh] = p.vb.split(' ').map(Number);
+  const pad = kind === 'poster' ? 0 : 0.09;
+  const sw = w * (1 - pad * 2), sh = h * (1 - pad * 2) - (kind === 'poster' ? 0 : 14);
+  const k = Math.min(sw / vw, sh / vh), dw = vw * k, dh = vh * k;
+  return `<svg width="${dw}" height="${dh}" viewBox="${p.vb}" style="left:${(w - dw) / 2}px;top:${(h - dh) / 2 + (kind === 'poster' ? 0 : 10)}px">${p.svg}</svg>`;
+}
+const tiles = [];
+for (let r = 1; r < 4; r++) for (let c = 0; c < 4; c++) {
+  const d = K.box(0, 0, G.cw, rowH(r), { cls: 'tile', html: tileSvg(KINDS[r], c, G.cw, rowH(r)) + `<div class="tl">Concept</div><div class="dr">Draft</div><div class="glowT"></div>` });
+  tiles.push({ d, r, c, dr: d.querySelector('.dr'), gl: d.querySelector('.glowT') });
+}
+// the designs: big while they draw, then the top row of the grid
+const HERO = tall ? { w: 330, gx: 36, gy: 36, x0: (W - 696) / 2, y0: 470 } : { w: 290, gx: 30, gy: 26, x0: (W - 610) / 2, y0: 230 };
+HERO.h = HERO.w * 4 / 3;
+const heroRect = (i) => [HERO.x0 + (i % 2) * (HERO.w + HERO.gx), HERO.y0 + Math.floor(i / 2) * (HERO.h + HERO.gy), HERO.w, HERO.h];
+const heroes = ARTS.map((a, i) => {
+  const d = K.box(0, 0, HERO.w, HERO.h, { cls: 'tile hero', html: `<svg width="${HERO.w}" height="${HERO.h}" viewBox="0 0 300 400"><use href="#art${i}" width="300" height="400"/></svg><div class="tl" style="top:${HERO.h + 10}px;left:0">Concept · ${a.name}</div><div class="tl tl2" style="transform-origin:0 0;background:rgba(246,241,230,.9);padding:2px 6px;border-radius:6px">Concept</div><div class="dr">Draft</div><div class="glowT" style="border-radius:8px"></div>` });
+  return { d, tl: d.querySelector('.tl'), tl2: d.querySelector('.tl2'), dr: d.querySelector('.dr'), gl: d.querySelector('.glowT') };
+});
+
+const band = K.box(0, 0, 520, 3400, { cls: 'band' });
+const pill = K.box(0, 0, null, null, { cls: 'pill', html: '<i></i>The Botanica drop · 12 drafts', style: { width: 'auto', height: 'auto' } });
+
+// ---------- the design board: blank families (MakePhysical, x 500–985, y 170–870) ----------
+const CR = tall ? { x: 560, y: 520, w: 460 } : { x: 600, y: 250, w: 420 };
+const FAM = { x: 500, y: 170, w: 485, h: 700 };
+const cs = CR.w / FAM.w;
+const crop = K.box(CR.x, CR.y, CR.w, FAM.h * cs, { cls: 'crop' });
+K.el('img', { parent: crop, src: K.canvas('MakePhysical'), style: { width: 2880 * cs + 'px', transform: `translate(${-FAM.x * cs}px, ${-FAM.y * cs}px)` } });
+// family rows on the board: art prints 232–348, apparel 368–472, bags 496–600, mugs 624–728
+const FROWS = [[232, 348], [368, 472], [624, 728], [496, 600]]; // in grid-row order: poster, tee, mug, tote
+const fring = K.el('div', { parent: crop, cls: 'ring', style: { left: 14 * cs + 'px', width: (FAM.w - 28) * cs + 'px' } });
+const rowHl = K.box(0, 0, 10, 10, { cls: 'rowHl' });
+
+// ---------- captions ----------
+const L = tall ? { capY: 292, capFs: 86 } : { capY: 58, capFs: 72 };
+const CAPS = [
+  [0.1, T_SWEEP - 0.05, 'Four new designs.\n<em>Twelve</em> products.', [0, 3]],
+  [T_SWEEP + 0.05, T_SPLIT - 0.05, 'One drop.\nTwelve drafts.', null],
+  [T_SPLIT + 0.05, T_BACK - 0.05, 'Each on your partner’s\nown blanks.', null],
+  [T_BACK + 0.05, 12.95, 'Listed only\nafter your yes.', null],
+];
+const caps = CAPS.map(([a, b, t]) => { const c = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }); return { c, a, b, w: K.words(c, t) }; });
+const tagC = K.demoTag('Concept · drawn for this ad', 0, 0);
+const tagB = K.demoTag('Product design · sample data', 0, 0);
+const chipF = K.box(0, 0, null, null, { cls: 'chipF', html: 'Printing: your partner account · never Credits', style: { width: 'auto', height: 'auto' } });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Four designs.<br>A whole collection, drafted.' });
+
+const DRAW = (i) => 0.15 + i * 0.42; // each artwork starts drawing
+
+K.run({
+  id: 'C08', title: 'A Collection in One Go', dur: DUR, bpm: 122, mood: 'drive', key: 'D', intro: 0.0, cover: 5.0,
+  technique: 'Four new concept artworks draw on stroke by stroke (pathLength draw-on, then the warm accent fills in), fly into the top row of a grid and multiply down into tees, mugs and totes through shared SVG symbols; a lime multiply sweep “drops” the collection as every tile turns draft, then the grid docks beside the design board’s blank families',
+  caption: 'Four designs, one go: each one on a tee, a mug and a tote, every product a draft until you say yes, printed on your partner’s own blanks and paid from your partner account. These are concepts drawn for this ad. Start free at makeandlist.com',
+  short: 'Four designs. Twelve products.',
+  beats: ['0–3 s: “Four new designs.” — four concept artworks draw on', '3–5.9 s: “Twelve products.” — each design multiplies into a tee, a mug and a tote', '5.9–7.9 s: a lime sweep drops the collection: twelve drafts', '7.9–10.8 s: each row is a blank family from your partner’s catalogue (design board)', '10.8–13 s: listed only after your yes; printing from your partner account', '13–15 s: end card'],
+  cues: [[0.0, 'hit'], ...ARTS.map((_, i) => [+(DRAW(i) + 0.05).toFixed(3), 'marker']), ...ARTS.map((_, i) => [+(DRAW(i) + 1.05).toFixed(3), 'pop']),
+    [T_GRID - 0.05, 'whoosh'], ...T_ROWS.map((t) => [t, 'pop']), [T_SWEEP - 1.4, 'riser'], [T_SWEEP, 'swish'], [T_SWEEP + 0.7, 'hit'], [T_PILL, 'pop'],
+    [T_SPLIT, 'whoosh'], ...T_RINGS.map((t) => [t, 'click']), [T_BACK, 'whoosh'], [T_BACK + 0.9, 'chime'], [B(24), 'coin'], [13.0, 'hit']],
+}, (T) => {
+  // ---------- draw-on of the artworks (one shared symbol per design: every product follows) ----------
+  artG.forEach((g, i) => {
+    const t0 = DRAW(i), n = g.st.length;
+    g.st.forEach((p, k) => {
+      const a = t0 + (k / n) * 0.75;
+      p.style.strokeDasharray = '1 1';
+      p.style.strokeDashoffset = 1 - K.p(T, a, a + 0.4, E.inOutCubic);
+    });
+    const ap = K.p(T, t0 + 0.75, t0 + 1.15, E.outBack);
+    g.ac.forEach((a) => { a.style.transformBox = 'fill-box'; a.style.transformOrigin = '50% 50%'; a.style.transform = `scale(${Math.max(0.001, ap)})`; a.style.opacity = Math.min(1, ap * 1.5); });
+    g.tx.forEach((x) => { x.style.opacity = K.p(T, t0 + 0.95, t0 + 1.3, E.linear); });
+    g.ac2.forEach((x) => { x.style.opacity = K.p(T, t0 + 0.7, t0 + 1.05, E.inOutCubic); });
+    g.pre.forEach((x) => { x.style.opacity = 1 - K.p(T, t0 + 0.9, t0 + 1.1, E.linear); });
+  });
+
+  const g = gridT(T);
+  // ---------- designs: hero 2×2 → top row ----------
+  const toGrid = (i) => K.p(T, T_GRID - 0.1 + i * 0.05, T_GRID + 0.55 + i * 0.05, E.inOutExpo);
+  heroes.forEach((h, i) => {
+    const a = heroRect(i), b = cellStage(0, i, g), p = toGrid(i);
+    const ent = K.p(T, DRAW(i) - 0.15, DRAW(i) + 0.4, E.outExpo);
+    const x = K.lerp(a[0], b[0], p), y = K.lerp(a[1], b[1], p), w = K.lerp(a[2], b[2], p);
+    const fl = (1 - p) * Math.sin(T * 1.3 + i * 1.7) * 6;
+    const lift = sweepLift(T, x + w / 2, y + w * 0.66);
+    h.d.style.transform = `translate(${x}px, ${y + fl + (1 - ent) * 60 - lift * 10}px) scale(${(w / HERO.w) * (0.94 + 0.06 * ent) * (1 + lift * 0.04)}) rotate(${(1 - p) * (i % 2 ? 1.2 : -1.2)}deg)`;
+    h.d.style.opacity = ent;
+    h.tl.style.opacity = 1 - p;
+    h.d.style.boxShadow = p > 0.5 ? '0 30px 50px -32px rgba(31,31,31,.55), 0 0 0 1.5px #E2DBCE' : '';
+    const dp = K.p(T, dropT(x + w / 2, y + w * 0.66), dropT(x + w / 2, y + w * 0.66) + 0.35, E.outBack);
+    h.dr.style.opacity = T >= dropT(x + w / 2, y + w * 0.66) ? 1 : 0;
+    h.dr.style.transform = `scale(${(0.6 + 0.4 * dp) * g.s * HERO.w / w})`;
+    h.tl2.style.opacity = p; h.tl2.style.transform = `scale(${g.s * HERO.w / w})`;
+    h.gl.style.opacity = lift;
+  });
+
+  // ---------- products multiply down from their design ----------
+  tiles.forEach((t) => {
+    const b = cellStage(t.r, t.c, g), src = cellStage(t.r - 1, t.c, g);
+    const t0 = T_ROWS[t.r - 1] + t.c * 0.06;
+    const p = K.p(T, t0, t0 + 0.5, E.outBack);
+    const x = b[0], y = K.lerp(src[1], b[1], K.p(T, t0, t0 + 0.45, E.outExpo));
+    const lift = sweepLift(T, x + b[2] / 2, b[1] + b[3] / 2);
+    t.d.style.transform = `translate(${x}px, ${y - lift * 10}px) scale(${g.s * (0.7 + 0.3 * p) * (1 + lift * 0.04)})`;
+    t.d.style.opacity = K.p(T, t0, t0 + 0.12, E.linear);
+    t.d.style.zIndex = 20 + t.r;
+    const dt = dropT(x + b[2] / 2, b[1] + b[3] / 2), dp = K.p(T, dt, dt + 0.35, E.outBack);
+    t.dr.style.opacity = T >= dt ? 1 : 0; t.dr.style.transform = `scale(${0.6 + 0.4 * dp})`;
+    t.gl.style.opacity = lift;
+  });
+
+  // ---------- the lime sweep ----------
+  const sw = K.p(T, T_SWEEP, T_SWEEP + 1.0, E.inOutCubic);
+  const bx = K.lerp(-900, W + 400, sw);
+  band.style.transform = `translate(${bx}px, -700px) rotate(28deg)`;
+  band.style.opacity = T > T_SWEEP && T < T_SWEEP + 1.05 ? 1 : 0;
+  const pp = K.p(T, T_PILL, T_PILL + 0.5, E.outBack), po = K.p(T, T_SPLIT - 0.3, T_SPLIT, E.inCubic);
+  pill.style.left = (W - pill.offsetWidth) / 2 + 'px';
+  pill.style.top = (G.y0 + G.ph + G.gap / 2 - 45) + 'px';
+  pill.style.opacity = K.p(T, T_PILL, T_PILL + 0.1, E.linear) * (1 - po);
+  pill.style.transform = `scale(${(0.7 + 0.3 * pp) * (1 - 0.2 * po)})`;
+
+  // ---------- the board: blank families, rung to the grid rows ----------
+  const cp = K.p(T, T_SPLIT + 0.1, T_SPLIT + 0.7, E.outExpo) * (1 - K.p(T, T_BACK - 0.2, T_BACK + 0.2, E.inCubic));
+  crop.style.opacity = cp; crop.style.transform = `translateX(${(1 - cp) * 300}px) rotate(${(1 - cp) * 3}deg)`;
+  let ri = -1; T_RINGS.forEach((t, i) => { if (T >= t) ri = i; });
+  if (ri >= 0) {
+    const [a, b] = FROWS[ri], rp = K.p(T, T_RINGS[ri], T_RINGS[ri] + 0.4, E.outBack);
+    fring.style.top = (a - FAM.y - 6) * cs + 'px'; fring.style.height = (b - a + 12) * cs + 'px';
+    fring.style.opacity = cp; fring.style.transform = `scale(${1.06 - 0.06 * rp})`;
+    const rc = cellStage(ri, 0, g);
+    rowHl.style.left = rc[0] - 10 + 'px'; rowHl.style.top = rc[1] - 10 + 'px';
+    rowHl.style.width = GW * g.s + 20 + 'px'; rowHl.style.height = rowH(ri) * g.s + 20 + 'px';
+    rowHl.style.opacity = cp; rowHl.style.transform = `scale(${1.04 - 0.04 * rp})`;
+  } else { fring.style.opacity = 0; rowHl.style.opacity = 0; }
+
+  // ---------- captions, tags, chip ----------
+  caps.forEach((c, i) => K.reveal(c.w, T, c.a, { kind: 'up', stagger: i === 0 ? 0.08 : 0.07, dur: 0.55, out: c.b < 12.9 ? c.b - 0.3 : undefined }));
+  // the hook's second line waits for the grid
+  if (T < T_GRID) caps[0].w.slice(3).forEach((s) => { s.style.transform = 'translateY(110%)'; s.style.opacity = 0; });
+  else K.reveal(caps[0].w.slice(3), T, T_GRID, { kind: 'up', stagger: 0.08, dur: 0.55, out: CAPS[0][1] - 0.3 });
+  tagC.style.opacity = K.win(T, 0.5, 12.95, 0.2);
+  const gb = g.y + GH * g.s;
+  tagC.style.left = (g.a > 0.5 ? SPLIT.x : (W - tagC.offsetWidth) / 2) + 'px';
+  tagC.style.top = (T < T_GRID + 0.3 ? (tall ? 418 : 150) : g.a > 0.5 ? gb + 18 : (tall ? 476 : 208)) + 'px';
+  tagB.style.opacity = cp; tagB.style.left = CR.x + 'px'; tagB.style.top = CR.y + FAM.h * cs + 16 + 'px';
+  const fp = K.p(T, B(24), B(24) + 0.5, E.outBack);
+  chipF.style.left = (W - chipF.offsetWidth) / 2 + 'px';
+  chipF.style.top = (G.y0 + G.ph + G.gap / 2 - 36) + 'px';
+  chipF.style.opacity = K.p(T, B(24), B(24) + 0.12, E.linear); chipF.style.transform = `scale(${0.85 + 0.15 * fp})`;
+
+  end(T);
+});
+
+// the sweep reaches a point (stage px) at this time: its band moves left → right, tilted 28°
+function dropT(x, y) {
+  const along = x + (y - 900) * Math.tan(28 * Math.PI / 180) * -1; // the band is rotated: higher points are reached later
+  const f = K.clamp((along + 900 - 260) / (W + 1300));
+  return T_SWEEP + f * 1.0;
+}
+function sweepLift(T, x, y) { const t = dropT(x, y); return Math.max(0, 1 - Math.abs(T - t) / 0.28) * (T > T_SWEEP ? 1 : 0); }
+</script></body></html>

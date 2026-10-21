@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C16 · Credits, Explained</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F4F0E6; }
+.bg { position: absolute; inset: 0; background: radial-gradient(90% 70% at 50% 42%, #FFFDF8, #ECE6D8); }
+.glow { position: absolute; width: 1200px; height: 1200px; border-radius: 50%; background: radial-gradient(circle, rgba(223,255,90,.42), rgba(223,255,90,0) 60%); }
+.orbitline { position: absolute; border-radius: 50%; border: 2px dashed rgba(31,31,31,.14); }
+svg.ring { position: absolute; left: 0; top: 0; overflow: visible; z-index: 20; }
+.num { position: absolute; z-index: 21; text-align: center; transform: translate(-50%, -50%); white-space: nowrap; }
+.num b { display: block; font: 800 120px/0.9 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.num span { display: block; margin-top: 8px; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #45403A; }
+.part { position: absolute; z-index: 22; padding: 12px 20px; border-radius: 999px; background: #1F1F1F; color: #FAF7EE; font: 700 25px 'Archivo'; white-space: nowrap; transform: translate(-50%, -50%);
+  box-shadow: 0 16px 30px -16px rgba(31,31,31,.8); display: flex; gap: 10px; align-items: center; }
+.part i { width: 12px; height: 12px; border-radius: 50%; background: #DFFF5A; display: block; }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 100px/0.98 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.cap { position: absolute; z-index: 40; text-align: center; }
+.cap .k { font: 600 23px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #45403A; }
+.cap .t { margin-top: 10px; font: 800 66px/1 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.sub { position: absolute; z-index: 40; text-align: center; font: 500 24px/1.4 'IBM Plex Mono', monospace; color: #45403A; }
+.win { position: absolute; z-index: 30; overflow: hidden; border-radius: 30px; background: #1F1F1F; box-shadow: 0 60px 110px -50px rgba(31,31,31,.8); }
+.win img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.board { position: absolute; z-index: 30; overflow: hidden; border-radius: 30px; background: #FFFDF8; box-shadow: 0 60px 110px -50px rgba(31,31,31,.7), 0 0 0 2px #E2DBCE; }
+.board img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.rowhl { position: absolute; z-index: 2; border-radius: 12px; background: rgba(223,255,90,.55); mix-blend-mode: multiply; }
+.pack { position: absolute; z-index: 30; border-radius: 26px; background: #FFFDF8; padding: 24px 22px; box-shadow: 0 40px 70px -40px rgba(31,31,31,.7), 0 0 0 2px #1F1F1F; }
+.pack b { display: block; font: 800 64px/1 'Playfair Display'; letter-spacing: -0.02em; }
+.pack span { display: block; margin-top: 6px; font: 700 22px 'Archivo'; }
+.pack em { display: block; margin-top: 14px; font: 500 17px/1.35 'IBM Plex Mono', monospace; font-style: normal; color: #45403A; }
+.pack.hi { background: #DFFF5A; }
+.plan { position: absolute; z-index: 31; padding: 12px 20px; border-radius: 14px; background: #1F1F1F; color: #DFFF5A; font: 600 21px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; transform: translateX(-50%); }
+.col { position: absolute; z-index: 30; text-align: center; transform: translateX(-50%); width: 420px; }
+.col .ic { margin: 0 auto; width: 150px; height: 150px; border-radius: 40px; display: grid; place-items: center; }
+.col .h { margin-top: 24px; font: 800 40px/1.05 'Archivo'; letter-spacing: -0.01em; }
+.col .d { margin-top: 12px; font: 500 22px/1.4 'IBM Plex Mono', monospace; color: #45403A; }
+.divider { position: absolute; z-index: 29; width: 4px; margin-left: -2px; background: repeating-linear-gradient(#1F1F1F 0 16px, transparent 16px 30px); transform-origin: 50% 0; }
+.coin { position: absolute; z-index: 33; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #F6E7B8, #D9B45A 60%, #B48F3A); box-shadow: 0 0 0 3px #1F1F1F; display: grid; place-items: center; font: 800 26px 'Archivo'; color: #1F1F1F; }
+.no { position: absolute; z-index: 34; padding: 10px 18px; border-radius: 12px; background: #E8603C; color: #FFFDF8; font: 700 22px 'Archivo'; white-space: nowrap; transform: translateX(-50%); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// C16 — Credits, explained around one ring. The parts of a sample product orbit in and dock on the ring, which
+// fills to that product's one quote (100 Credits, the real demo quote); the ring parks beside the real quote, then
+// under the real price table; packs slide in to top it up; and finally the ring stands on one side of a line and
+// the seller's own print-partner account on the other: printing is never paid in Credits.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 98, B = (n) => +(n * BEAT).toFixed(3);
+const NS = 'http://www.w3.org/2000/svg';
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// ---------- timing ----------
+const LANDS = [3, 4, 5, 6, 7, 8].map(B);           // 1.84 … 4.90
+const QUOTE = B(9), RANGES = B(13), PACKS = B(15.5), SPLIT = B(18.5);   // 5.51 7.96 9.49 11.33
+const ROWS = [B(13.75), B(14.25), B(14.75), B(15.1)];
+const PACK_IN = [B(16), B(16.5), B(17)];
+
+// ring keyframes per scene: [t, cx, cy, R]
+const RK = tall
+  ? { A: [540, 820, 250], Q: [250, 700, 150], R: [540, 1110, 100], P: [540, 640, 170], S: [290, 720, 140] }
+  : { A: [540, 740, 250], Q: [250, 640, 150], R: [540, 1000, 90], P: [540, 520, 160], S: [290, 640, 140] };
+const RT = [[0, RK.A], [QUOTE - 0.3, RK.A], [QUOTE + 0.3, RK.Q], [RANGES - 0.3, RK.Q], [RANGES + 0.3, RK.R], [PACKS - 0.3, RK.R], [PACKS + 0.3, RK.P], [SPLIT - 0.3, RK.P], [SPLIT + 0.3, RK.S]];
+function ringAt(T) {
+  let a = RT[0], b = RT[0];
+  for (let i = 1; i < RT.length; i++) { if (T <= RT[i][0]) { a = RT[i - 1]; b = RT[i]; break; } a = b = RT[i]; }
+  const u = a === b ? 1 : E.inOutExpo(K.clamp((T - a[0]) / (b[0] - a[0])));
+  return a[1].map((v, j) => K.lerp(v, b[1][j], u));
+}
+
+K.box(0, 0, W, H, { cls: 'bg' });
+const glow = K.box(0, 0, 1200, 1200, { cls: 'glow' });
+const orbits = [1.55, 2.1].map(() => K.box(0, 0, 10, 10, { cls: 'orbitline' }));
+const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'ring'); svg.setAttribute('width', W); svg.setAttribute('height', H);
+document.getElementById('stage').appendChild(svg);
+const mk = (tag, a, parent) => { const n = document.createElementNS(NS, tag); Object.entries(a).forEach(([k, v]) => n.setAttribute(k, v)); (parent || svg).appendChild(n); return n; };
+const G = mk('g', {});
+const RU = 100; // unit radius, scaled
+const face = mk('circle', { r: RU * 1.18, fill: '#FFFDF8', stroke: '#1F1F1F', 'stroke-width': 3 }, G);
+const track = mk('circle', { r: RU, fill: 'none', stroke: '#E6E0D2', 'stroke-width': 22 }, G);
+const C = 2 * Math.PI * RU, GAP = 2.2;
+const segs = LANDS.map((_, i) => mk('circle', { r: RU, fill: 'none', stroke: i % 2 ? '#C9EA3C' : '#DFFF5A', 'stroke-width': 22, transform: `rotate(${-90 + i * 60})`, 'stroke-dasharray': `0 ${C}` }, G));
+const bal = mk('circle', { r: RU, fill: 'none', stroke: '#DFFF5A', 'stroke-width': 22, 'stroke-linecap': 'round', transform: 'rotate(-90)', 'stroke-dasharray': `0 ${C}` }, G);
+const edge = mk('circle', { r: RU + 11, fill: 'none', stroke: '#1F1F1F', 'stroke-width': 2.5 }, G);
+const edge2 = mk('circle', { r: RU - 11, fill: 'none', stroke: '#1F1F1F', 'stroke-width': 2.5 }, G);
+const num = K.box(0, 0, null, null, { cls: 'num', html: '<b>0</b><span>Credits</span>', style: { width: 'auto', height: 'auto' } });
+const numB = num.querySelector('b'), numS = num.querySelector('span');
+
+// the parts of a sample product
+const PARTS = ['37 pages', '1 AI image', 'Writing model', 'Image model', 'Listing copy', 'Images + video'];
+const parts = PARTS.map((p) => K.box(0, 0, null, null, { cls: 'part', html: `<i></i>${p}`, style: { width: 'auto', height: 'auto' } }));
+
+// the real quote (65-phone-configure: dark card x 32–748, y 2404 → scrolls to the total)
+const QW = tall ? 560 : 560, qs = QW / 716, QH = tall ? 560 : 520;
+const win = K.box(tall ? 455 : 460, tall ? 470 : 300, QW, QH, { cls: 'win' });
+const qimg = K.el('img', { src: K.screen('65-phone-configure'), parent: win, style: { width: 780 * qs + 'px' } });
+// the price table (AppCredits board, x 1700–2790, y 270–800)
+const BW = tall ? 950 : 900, bs = BW / 1090;
+const board = K.box((W - BW) / 2, tall ? 480 : 270, BW, 530 * bs, { cls: 'board' });
+K.el('img', { src: K.canvas('AppCredits'), parent: board, style: { width: 2880 * bs + 'px', transform: `translate(${-1700 * bs}px, ${-270 * bs}px)` } });
+const ROWY = [425, 482, 540, 597];
+const rowhl = K.el('div', { cls: 'rowhl', parent: board });
+// packs
+const PK = [['500', 'Credits'], ['2,000', 'Credits'], ['5,000', 'Credits']];
+const pw = tall ? 296 : 290, pgap = tall ? 24 : 30;
+const packs = PK.map(([n, l], i) => K.box((W - (3 * pw + 2 * pgap)) / 2 + i * (pw + pgap), tall ? 900 : 780, pw, null, { cls: 'pack' + (i === 1 ? ' hi' : ''), html: `<b>${n}</b><span>${l}</span><em>One-time pack<br>valid 12 months<br>no plan needed</em>` }));
+const plan = K.box(W / 2, tall ? 840 : 712, null, null, { cls: 'plan', html: '+ a plan adds Credits every month', style: { width: 'auto', height: 'auto' } });
+// split: Credits | your partner account
+const colL = K.box(RK.S[0], 0, 420, null, { cls: 'col', html: `<div class="ic" style="visibility:hidden;height:300px"></div><div class="h">Credits</div><div class="d">make the designs:<br>pages, images, listing</div>` });
+const colR = K.box(W - RK.S[0], 0, 420, null, { cls: 'col', html: `<div class="ic" style="background:#1F1F1F;margin:75px auto"><svg width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="#DFFF5A" stroke-width="1.7" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z" fill="#1F1F1F"/></svg></div><div class="h">Your partner account</div><div class="d">pays printing<br>and shipping</div>` });
+const divider = K.box(W / 2, 0, 4, 10, { cls: 'divider' });
+const coins = [0, 1, 2].map(() => K.box(0, 0, 56, 56, { cls: 'coin', html: '€' }));
+const no = K.box(0, 0, null, null, { cls: 'no', html: 'Never from Credits', style: { width: 'auto', height: 'auto' } });
+
+const tagQ = K.demoTag('Real app · demo workspace', 0, 0);
+const tagB = K.demoTag('Product design · sample data', 0, 0);
+
+const hook = K.box(60, tall ? 292 : 70, W - 120, null, { cls: 'hook' });
+const hookW = K.words(hook, 'What does a\nproduct cost?');
+const CAPY = tall ? 292 : 60;
+const CAPS = [
+  [B(3) - 0.15, QUOTE, '01 · A sample product', 'One quote covers it all.'],
+  [QUOTE, RANGES, '02 · Before anything is made', 'You see the quote first.'],
+  [RANGES, PACKS, '03 · Bigger product, bigger quote', 'From 100 Credits.'],
+  [PACKS, SPLIT, '04 · Top up when you need', 'Packs, valid 12 months.'],
+  [SPLIT, 12.9, '05 · Who pays the printing', 'Never paid in Credits.'],
+];
+const caps = CAPS.map(([, , kk, t]) => K.box(65, CAPY, W - 130, null, { cls: 'cap', html: `<div class="k">${kk}</div><div class="t">${t}</div>` }));
+const SUBS = [
+  [LANDS[5] + 0.2, QUOTE, 'Preschool pack · the real demo quote'],
+  [QUOTE + 0.4, RANGES, 'Nothing is charged until you confirm.'],
+  [SPLIT + 0.5, 12.9, 'The buyer pays your store.'],
+];
+const SUBY = tall ? 1200 : 1180;
+const subs = SUBS.map(([, , t]) => K.box(65, SUBY, W - 130, null, { cls: 'sub', html: t }));
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Credits make.<br>Your partner prints.' });
+
+K.run({
+  id: 'C16', title: 'Credits, Explained', dur: DUR, bpm: 98, mood: 'calm', key: 'Bb', intro: 0.6, cover: 4.6,
+  technique: 'One Credits ring is the hero: a sample product’s parts orbit in on the beat and dock as segments while the count rises to its real quote, then the ring glides from scene to scene — beside the real quote, under the price table, above sliding packs — and ends on one side of a dashed line with the seller’s partner account on the other',
+  caption: 'Credits pay for making a product: the pages, the images, the listing. You see the exact quote before anything is made, and packs top you up when you need them. Printing and shipping are paid from your own print partner account, never in Credits. Start free at makeandlist.com',
+  short: 'What does a product cost?',
+  beats: ['0–1.8 s: “What does a product cost?” — the ring draws on, empty', '1.8–5.5 s: the parts of a sample product orbit in and dock; 100 Credits', '5.5–8 s: the real quote — nothing charged until you confirm', '8–9.5 s: the price table: from 100 Credits', '9.5–11.3 s: packs slide in, valid 12 months', '11.3–13 s: Credits make; your partner account pays printing; end card'],
+  cues: [[0.05, 'riser'], [0.35, 'pop'], ...LANDS.map((t, i) => [t, i === 5 ? 'hit' : 'pop']), [QUOTE - 0.05, 'whoosh'], [QUOTE + 0.3, 'swish'],
+    [RANGES - 0.05, 'whoosh'], ...ROWS.map((t) => [t, 'click']), [PACKS - 0.05, 'swish'], ...PACK_IN.map((t) => [t, 'coin']),
+    [SPLIT - 0.05, 'whoosh'], [SPLIT + 0.5, 'coin'], [SPLIT + 0.8, 'printer'], [SPLIT + 0.9, 'stamp'], [13.0, 'pop']],
+}, (T) => {
+  const fr = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(fr) - 0.5) * 60}px, ${(seed(fr + 7) - 0.5) * 60}px)`;
+  const [cx, cy, R] = ringAt(T);
+  const intro = K.p(T, 0.2, 1.1, E.outExpo);
+  const out = K.p(T, 12.75, 13.05, E.inCubic);
+  const s = R / RU * (0.6 + 0.4 * intro) * (1 + 0.01 * Math.sin(T * 1.4));
+  G.setAttribute('transform', `translate(${cx} ${cy}) rotate(${(1 - intro) * -60}) scale(${s})`);
+  svg.style.opacity = intro * (1 - out);
+  glow.style.left = cx - 600 + Math.sin(T * 0.7) * 40 + 'px'; glow.style.top = cy - 600 + Math.cos(T * 0.6) * 30 + 'px';
+  orbits.forEach((o, i) => { const r = R * [1.55, 2.1][i]; o.style.left = cx - r + 'px'; o.style.top = cy - r + 'px'; o.style.width = o.style.height = 2 * r + 'px'; o.style.opacity = K.win(T, 0.8 + i * 0.2, QUOTE - 0.1, 0.4) * 0.9; o.style.transform = `rotate(${T * (i ? -8 : 12)}deg)`; });
+  // segments: one per docked part; then the balance arc (packs scene)
+  const segOn = 1 - K.p(T, PACKS - 0.2, PACKS + 0.3, E.linear);
+  segs.forEach((sg, i) => { const p = K.p(T, LANDS[i] - 0.1, LANDS[i] + 0.35, E.outCubic); sg.setAttribute('stroke-dasharray', `${Math.max(0, C / 6 * p - GAP)} ${C}`); sg.setAttribute('opacity', segOn); });
+  const bp = K.p(T, PACKS + 0.1, PACKS + 1.0, E.outCubic) * 0.77 + K.p(T, PACK_IN[0], PACK_IN[2] + 0.4, E.outCubic) * 0.2;
+  bal.setAttribute('stroke-dasharray', `${C * bp} ${C}`); bal.setAttribute('opacity', 1 - segOn);
+  [track, face, edge, edge2].forEach((e) => e.setAttribute('opacity', K.p(T, 0.3, 0.9, E.linear)));
+  // the number inside
+  let n = 0;
+  LANDS.forEach((t, i) => { n += K.p(T, t - 0.05, t + 0.35, E.outCubic) * (i === 5 ? 100 - 5 * 17 : 17); });
+  let label = 'Credits';
+  if (T > PACKS) { n = K.lerp(100, 1850, K.p(T, PACKS + 0.1, PACKS + 1.0, E.outCubic)) + K.p(T, PACK_IN[1], PACK_IN[1] + 0.4, E.outCubic) * 2000; label = 'Sample balance'; }
+  if (T > SPLIT) { label = 'Credits'; }
+  numB.textContent = T > SPLIT ? '' : Math.round(n).toLocaleString('en-US');
+  numS.textContent = label;
+  num.style.left = cx + 'px'; num.style.top = cy + 'px';
+  const ns = R / 250;
+  numB.style.fontSize = Math.round((T > PACKS ? 92 : 120) * Math.max(0.55, ns * (T > PACKS ? 1.3 : 1))) + 'px';
+  numS.style.fontSize = Math.round(22 * Math.max(0.75, ns)) + 'px';
+  num.style.opacity = K.p(T, 0.6, 1.0, E.linear) * (1 - out) * (T > SPLIT - 0.3 && T < SPLIT + 0.3 ? 0 : 1);
+
+  // parts: spiral in, dock on the ring's segment, then sit as a legend outside it
+  parts.forEach((p, i) => {
+    const t1 = LANDS[i], t0 = t1 - 1.1;
+    const segA = (-90 + i * 60 + 30) * Math.PI / 180;
+    const u = K.clamp((T - t0) / (t1 - t0));
+    const eu = E.outCubic(u);
+    const ang = segA - (1 - eu) * 2.4;
+    const rad = K.lerp(R * 2.6, R + (tall ? 118 : 112), eu);
+    const lx = cx + Math.cos(ang) * rad * (tall ? 1 : 1.12), ly = cy + Math.sin(ang) * rad;
+    const vis = T > t0 ? K.p(T, t0, t0 + 0.25, E.linear) : 0;
+    const leave = K.p(T, QUOTE - 0.4, QUOTE - 0.05, E.inCubic);
+    p.style.left = lx + 'px'; p.style.top = ly - leave * 40 + 'px';
+    p.style.opacity = vis * (1 - leave);
+    const dock = T > t1 ? 1 + 0.12 * Math.exp(-(T - t1) * 7) * Math.sin((T - t1) * 24) : 1;
+    p.style.transform = `translate(-50%, -50%) scale(${(0.6 + 0.4 * eu) * dock})`;
+    p.style.background = T > t1 ? '#1F1F1F' : '#45403A';
+  });
+
+  // quote window: scrolls down the real dark card to the total
+  const qp = K.p(T, QUOTE + 0.05, QUOTE + 0.6, E.outExpo) * (1 - K.p(T, RANGES - 0.3, RANGES, E.inCubic));
+  win.style.visibility = qp > 0.001 ? 'visible' : 'hidden';
+  win.style.opacity = K.clamp(qp * 1.6); win.style.transform = `translateX(${(1 - qp) * 160}px) rotate(${(1 - qp) * 3}deg)`;
+  const qy = K.lerp(2404, 3520 - QH / qs, K.p(T, QUOTE + 0.5, RANGES - 0.5, E.inOutCubic));
+  qimg.style.transform = `translate(${-32 * qs}px, ${-qy * qs}px)`;
+  // board: rows light up one by one
+  const bpn = K.p(T, RANGES + 0.05, RANGES + 0.6, E.outExpo) * (1 - K.p(T, PACKS - 0.3, PACKS, E.inCubic));
+  board.style.visibility = bpn > 0.001 ? 'visible' : 'hidden';
+  board.style.opacity = K.clamp(bpn * 1.6); board.style.transform = `translateY(${(1 - bpn) * 120}px)`;
+  let row = -1; ROWS.forEach((t, i) => { if (T >= t) row = i; });
+  if (row >= 0) { const rp = K.p(T, ROWS[row], ROWS[row] + 0.25, E.outCubic); Object.assign(rowhl.style, { left: 40 * bs + 'px', width: 1010 * bs + 'px', top: (ROWY[row] - 270 - 26) * bs + 'px', height: 52 * bs + 'px', opacity: 1, transform: `scaleX(${rp})`, transformOrigin: '0 50%' }); }
+  else rowhl.style.opacity = 0;
+  // packs
+  packs.forEach((pk, i) => {
+    const p = K.p(T, PACK_IN[i] - 0.15, PACK_IN[i] + 0.45, E.outBack) * (1 - K.p(T, SPLIT - 0.3, SPLIT, E.inCubic));
+    pk.style.visibility = p > 0.001 ? 'visible' : 'hidden';
+    pk.style.opacity = K.clamp(p * 2);
+    pk.style.transform = `translateX(${(1 - p) * 260}px) translateY(${Math.sin(T * 1.3 + i) * 5}px) rotate(${(1 - p) * 6}deg)`;
+  });
+  const plp = K.p(T, PACKS + 0.4, PACKS + 0.8, E.outBack) * (1 - K.p(T, SPLIT - 0.3, SPLIT, E.inCubic));
+  plan.style.opacity = K.clamp(plp * 2); plan.style.transform = `translateX(-50%) scale(${0.6 + 0.4 * plp})`;
+  // split
+  const sp = K.p(T, SPLIT + 0.1, SPLIT + 0.6, E.outExpo) * (1 - out);
+  const colY = RK.S[1] - 150;
+  colL.style.top = colY + 'px'; colR.style.top = colY + 'px';
+  colL.style.opacity = sp; colR.style.opacity = K.p(T, SPLIT + 0.25, SPLIT + 0.75, E.outExpo) * (1 - out);
+  colR.style.transform = `translateX(-50%) translateY(${(1 - K.p(T, SPLIT + 0.25, SPLIT + 0.75, E.outExpo)) * 40}px)`;
+  colL.style.transform = `translateX(-50%) translateY(${(1 - sp) * 40}px)`;
+  divider.style.top = colY - 40 + 'px'; divider.style.height = (tall ? 520 : 480) + 'px';
+  divider.style.transform = `scaleY(${K.p(T, SPLIT, SPLIT + 0.6, E.outExpo) * (1 - out)})`;
+  // coins: from the buyer's store into the partner card (never toward the ring)
+  coins.forEach((c, i) => {
+    const t0 = SPLIT + 0.45 + i * 0.18, u = K.clamp((T - t0) / 0.6);
+    const tx = W - RK.S[0], ty = colY + 150;
+    c.style.left = K.lerp(W + 40, tx, E.outCubic(u)) + 'px'; c.style.top = ty - Math.sin(u * Math.PI) * 120 + 'px';
+    c.style.opacity = u > 0 && u < 1 ? 1 : 0; c.style.transform = `scale(${1 - 0.4 * u}) rotate(${u * 360}deg)`;
+  });
+  const nop = K.p(T, SPLIT + 0.9, SPLIT + 1.2, E.outBack);
+  no.style.left = W - RK.S[0] + 'px'; no.style.top = colY + 450 + 'px';
+  no.style.opacity = K.clamp(nop * 2) * (1 - out); no.style.transform = `translateX(-50%) scale(${0.5 + 0.5 * nop}) rotate(-4deg)`;
+
+  // tags
+  const wr = win.getBoundingClientRect();
+  tagQ.style.left = wr.left + 'px'; tagQ.style.top = wr.bottom + 18 + 'px'; tagQ.style.opacity = qp > 0.5 ? 1 : 0;
+  const br = board.getBoundingClientRect();
+  tagB.style.left = br.left + 'px'; tagB.style.top = br.bottom + 18 + 'px'; tagB.style.opacity = bpn > 0.5 ? 1 : 0;
+
+  // words
+  K.reveal(hookW, T, 0.12, { kind: 'up', stagger: 0.08, out: B(3) - 0.5 });
+  caps.forEach((c, i) => {
+    const [a, b] = CAPS[i];
+    const o = 1 - K.p(T, b - 0.25, b, E.inCubic);
+    [...c.children].forEach((el, j) => { const p = K.p(T, a + j * 0.1, a + 0.55 + j * 0.1, E.outExpo); el.style.opacity = p * o; el.style.transform = `translateY(${(1 - p) * 34 - (1 - o) * 16}px)`; });
+  });
+  subs.forEach((sb, i) => { const [a, b] = SUBS[i]; sb.style.opacity = K.win(T, a, b, 0.3); });
+  end(T);
+});
+</script></body></html>

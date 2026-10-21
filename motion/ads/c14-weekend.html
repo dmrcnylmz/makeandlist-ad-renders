@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C14 · The Weekend Test</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #E6DCC8; }
+svg.desk { position: absolute; left: 0; top: 0; z-index: 1; }
+.after { position: absolute; inset: 0; z-index: 20; overflow: hidden; background: radial-gradient(120% 90% at 60% 30%, #FFFDF8, #F1ECE1); }
+.after .ghost { position: absolute; font: 800 560px/0.8 'Playfair Display'; color: rgba(31,31,31,.045); white-space: nowrap; letter-spacing: -0.04em; }
+.cap { position: absolute; z-index: 4; }
+.cap .k { font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #45403A; display: flex; gap: 12px; align-items: center; }
+.cap .k em { font-style: normal; padding: 4px 12px; border-radius: 8px; background: #1F1F1F; color: #DFFF5A; }
+.cap .t { margin-top: 14px; font: 800 68px/1 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.cap .s { margin-top: 16px; font: 500 23px/1.4 'IBM Plex Mono', monospace; color: #45403A; }
+svg.lead { position: absolute; left: 0; top: 0; z-index: 30; overflow: visible; pointer-events: none; }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 98px/0.98 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.hookbg { position: absolute; z-index: 39; left: 0; right: 0; background: linear-gradient(180deg, rgba(230,220,200,0), rgba(250,247,238,.92) 30%, rgba(250,247,238,.92) 70%, rgba(230,220,200,0)); }
+.chip2 { position: absolute; z-index: 41; font: 500 19px 'IBM Plex Mono', monospace; color: #45403A; background: rgba(250,247,238,.9); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; white-space: nowrap; }
+.day { position: absolute; z-index: 41; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; padding: 10px 18px; border-radius: 999px; background: #1F1F1F; color: #DFFF5A; white-space: nowrap; }
+.line { position: absolute; inset: 0; z-index: 25; background: radial-gradient(120% 90% at 50% 40%, #FFFDF8, #EFEADF); }
+.cover { position: absolute; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 40px 60px -34px rgba(31,31,31,.7), 0 0 0 1px #E0D9CC; }
+.cover img { width: 100%; display: block; }
+.cover b { position: absolute; left: 12px; top: 12px; padding: 6px 12px; border-radius: 999px; background: #1F1F1F; color: #DFFF5A; font: 600 17px 'IBM Plex Mono', monospace; letter-spacing: .06em; }
+.lt { position: absolute; z-index: 3; text-align: center; }
+.lt .t { font: 800 80px/1 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.lt .s { margin-top: 18px; font: 500 24px/1.4 'IBM Plex Mono', monospace; color: #45403A; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// C14 — the weekend test. A drawn desk (an illustration: a pricing spreadsheet, a laptop with many tabs, a notebook
+// of listing drafts, an upload form) and, wiped in by a pencil that hatches across the frame, the same step in the
+// real app. Four passes, Saturday to Sunday; then the product line, as drafts waiting for the seller's yes.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 112, B = (n) => +(n * BEAT).toFixed(3);
+const NS = 'http://www.w3.org/2000/svg';
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const mk = (tag, a, parent, txt) => { const n = document.createElementNS(NS, tag); Object.entries(a).forEach(([k, v]) => n.setAttribute(k, v)); parent.appendChild(n); if (txt !== undefined) n.textContent = txt; return n; };
+const INK = '#1F1F1F', IV = '#FFFDF8', SAND = '#EFEADF', MUTE = '#BDB5A8';
+
+// ---------- the drawn desk (world units, 2100 × 2000) ----------
+const desk = document.createElementNS(NS, 'svg'); desk.setAttribute('class', 'desk'); desk.setAttribute('width', W); desk.setAttribute('height', H);
+document.getElementById('stage').appendChild(desk);
+const D = mk('g', {}, desk);
+mk('rect', { x: -1400, y: -1400, width: 4900, height: 4800, fill: '#E6DCC8' }, D);
+for (let i = 0; i < 46; i++) mk('path', { d: `M -1400 ${-1400 + i * 105 + seed(i) * 30} C 0 ${-1380 + i * 105} 1500 ${-1420 + i * 105 + seed(i + 3) * 60} 3500 ${-1400 + i * 105}`, stroke: '#DDD1BA', 'stroke-width': 5, fill: 'none' }, D);
+const S = { stroke: INK, 'stroke-width': 7, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
+const shadowed = (g, x, y, w, h, r = 22) => { mk('rect', { x: x + 16, y: y + 22, width: w, height: h, rx: r, fill: 'rgba(31,31,31,.14)' }, g); return mk('rect', { x, y, width: w, height: h, rx: r, fill: IV, ...S }, g); };
+const txt = (g, x, y, s, size, extra = {}) => mk('text', { x, y, 'font-family': 'IBM Plex Mono', 'font-size': size, fill: INK, ...extra }, g, s);
+
+// Z1: a pricing spreadsheet and a calculator
+const z1 = mk('g', {}, D);
+shadowed(z1, 100, 230, 800, 560);
+mk('rect', { x: 100, y: 230, width: 800, height: 64, rx: 22, fill: SAND, ...S }, z1);
+txt(z1, 130, 272, 'pricing-v4.xlsx', 26, { 'font-weight': 600 });
+mk('rect', { x: 120, y: 312, width: 760, height: 46, rx: 8, fill: '#FAF7EE', stroke: MUTE, 'stroke-width': 4 }, z1);
+txt(z1, 136, 343, 'fx  =B4*1.2+C4+shipping?', 22, { fill: '#45403A' });
+const cells = [];
+for (let r = 0; r < 9; r++) for (let c = 0; c < 6; c++) {
+  const x = 120 + c * 127, y = 372 + r * 44;
+  mk('rect', { x, y, width: 127, height: 44, fill: r === 0 ? SAND : IV, stroke: '#CFC7B8', 'stroke-width': 3 }, z1);
+  if (r > 0 && c > 0 && seed(r * 7 + c) > 0.35) txt(z1, x + 14, y + 30, ['4.99', '12.00', '18.40', '?', '9.5%', '=SUM', '3.20'][Math.floor(seed(r * 3 + c * 5) * 7)], 20, { fill: '#45403A' });
+  if (r > 0 && c === 0) txt(z1, x + 14, y + 30, ['A4', 'Letter', 'tee', 'mug', 'tote', 'fees', 'tax', 'ship'][r - 1], 20, { fill: '#45403A' });
+}
+['size', 'cost', 'ship', 'fee', 'price'].forEach((h, c) => txt(z1, 120 + (c + 1) * 127 + 14, 402, h, 20, { 'font-weight': 600 }));
+const cellSel = mk('rect', { x: 0, y: 0, width: 127, height: 44, fill: 'none', stroke: '#E8603C', 'stroke-width': 6 }, z1);
+// calculator
+shadowed(z1, 640, 840, 220, 320, 26);
+mk('rect', { x: 666, y: 866, width: 168, height: 62, rx: 8, fill: '#DCE3C8', stroke: INK, 'stroke-width': 4 }, z1);
+const calc = txt(z1, 820, 910, '18.40', 30, { 'text-anchor': 'end', 'font-weight': 600 });
+for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) mk('rect', { x: 666 + c * 43, y: 950 + r * 50, width: 34, height: 38, rx: 8, fill: c === 3 ? '#E8603C' : SAND, stroke: INK, 'stroke-width': 3 }, z1);
+
+// Z2: a laptop with many tabs
+const z2 = mk('g', {}, D);
+shadowed(z2, 1060, 210, 900, 580);
+const TABS = ['mockup tpl', 'fonts', 'A4 vs Letter', 'page sizes', 'resize x10', 'SEO tips', 'bleed?', 'export PDF', 'colour'];
+TABS.forEach((t, i) => {
+  const x = 1080 + i * 96;
+  mk('path', { d: `M ${x} 288 L ${x + 8} 246 L ${x + 90} 246 L ${x + 98} 288`, fill: i === 4 ? IV : SAND, stroke: INK, 'stroke-width': 4 }, z2);
+  txt(z2, x + 14, 274, t.slice(0, 7), 15, { fill: '#45403A' });
+});
+mk('line', { x1: 1060, y1: 288, x2: 1960, y2: 288, stroke: INK, 'stroke-width': 5 }, z2);
+mk('rect', { x: 1090, y: 312, width: 190, height: 450, rx: 10, fill: SAND, stroke: MUTE, 'stroke-width': 4 }, z2);
+for (let i = 0; i < 7; i++) { mk('rect', { x: 1106, y: 330 + i * 58, width: 158, height: 40, rx: 6, fill: IV, stroke: MUTE, 'stroke-width': 3 }, z2); txt(z2, 1118, 357 + i * 58, 'layer ' + (7 - i), 17, { fill: '#45403A' }); }
+mk('rect', { x: 1310, y: 312, width: 620, height: 450, rx: 10, fill: '#F6F2E8', stroke: MUTE, 'stroke-width': 4 }, z2);
+mk('rect', { x: 1500, y: 340, width: 250, height: 360, fill: IV, stroke: INK, 'stroke-width': 4, 'stroke-dasharray': '14 10' }, z2);
+txt(z2, 1520, 740, 'page 1 of ?', 20, { fill: '#45403A' });
+const spin = mk('circle', { cx: 1625, cy: 520, r: 40, fill: 'none', stroke: '#E8603C', 'stroke-width': 9, 'stroke-dasharray': '170 90' }, z2);
+mk('path', { d: 'M 980 790 L 2040 790 L 2000 860 L 1020 860 Z', fill: SAND, ...S }, z2);
+
+// Z3: a notebook of listing drafts
+const z3 = mk('g', {}, D);
+mk('rect', { x: 146, y: 1132, width: 760, height: 600, rx: 18, fill: 'rgba(31,31,31,.14)' }, z3);
+mk('rect', { x: 130, y: 1110, width: 760, height: 600, rx: 18, fill: '#FBF6E9', ...S }, z3);
+for (let i = 0; i < 11; i++) mk('line', { x1: 170, y1: 1190 + i * 48, x2: 860, y2: 1190 + i * 48, stroke: '#D6E0E6', 'stroke-width': 3 }, z3);
+for (let i = 0; i < 12; i++) mk('circle', { cx: 160 + i * 62, cy: 1110, r: 14, fill: '#E6DCC8', stroke: INK, 'stroke-width': 5 }, z3);
+const notes = [['Title, take one', 1, 1180], ['Wedding planner (botanical?)', 1, 1228], ['Printable planner, 36 p, A4 + …', 1, 1276], ['tags: wedding, planner, …', 0, 1372], ['description — later', 0, 1420]];
+const strikes = [];
+notes.forEach(([t, st, y], i) => {
+  mk('text', { x: 180, y, 'font-family': 'Playfair Display', 'font-style': 'italic', 'font-size': 36, fill: '#45403A' }, z3, t);
+  if (st) strikes.push(mk('line', { x1: 176, y1: y - 12, x2: 176 + t.length * 15.5, y2: y - 10, stroke: '#E8603C', 'stroke-width': 6, 'stroke-linecap': 'round' }, z3));
+});
+// a lime sticky note
+mk('rect', { x: 580, y: 1470, width: 250, height: 210, fill: 'rgba(31,31,31,.12)', transform: 'rotate(6 700 1570)' }, z3);
+const sticky = mk('g', { transform: 'rotate(4 700 1570)' }, z3);
+mk('rect', { x: 568, y: 1456, width: 250, height: 210, fill: '#DFFF5A', stroke: INK, 'stroke-width': 5 }, sticky);
+mk('text', { x: 590, y: 1520, 'font-family': 'Playfair Display', 'font-style': 'italic', 'font-size': 32, fill: INK }, sticky, 'ask the printer');
+mk('text', { x: 590, y: 1565, 'font-family': 'Playfair Display', 'font-style': 'italic', 'font-size': 32, fill: INK }, sticky, 'about A3?');
+
+// Z4: an upload form on a tablet
+const z4 = mk('g', {}, D);
+shadowed(z4, 1100, 1060, 860, 660, 36);
+mk('rect', { x: 1130, y: 1090, width: 800, height: 600, rx: 14, fill: '#FAF7EE', stroke: MUTE, 'stroke-width': 4 }, z4);
+txt(z4, 1160, 1140, 'New item', 28, { 'font-weight': 600 });
+[['Title', 1170], ['Price', 1250], ['Tags (13)', 1330]].forEach(([l, y], i) => { txt(z4, 1160, y + 14, l, 20, { fill: '#45403A' }); mk('rect', { x: 1160, y: y + 26, width: 740, height: 40, rx: 8, fill: IV, stroke: MUTE, 'stroke-width': 3 }, z4); });
+txt(z4, 1160, 1460, 'Images', 20, { fill: '#45403A' });
+const ups = [];
+for (let i = 0; i < 5; i++) { mk('rect', { x: 1160 + i * 148, y: 1474, width: 130, height: 130, rx: 10, fill: i < 2 ? '#DCE3C8' : SAND, stroke: MUTE, 'stroke-width': 3, 'stroke-dasharray': i < 2 ? '' : '10 8' }, z4); }
+mk('rect', { x: 1160, y: 1630, width: 740, height: 22, rx: 11, fill: SAND, stroke: MUTE, 'stroke-width': 3 }, z4);
+const bar = mk('rect', { x: 1160, y: 1630, width: 220, height: 22, rx: 11, fill: '#E8603C' }, z4);
+const upl = txt(z4, 1160, 1682, 'uploading image 3 of 10…', 20, { fill: '#45403A' });
+
+// mug with steam, a phone, a pencil cup
+const mug = mk('g', {}, D);
+mk('ellipse', { cx: 985, cy: 1010, rx: 100, ry: 40, fill: 'rgba(31,31,31,.14)' }, mug);
+mk('circle', { cx: 970, cy: 975, r: 86, fill: '#E8603C', ...S }, mug);
+mk('circle', { cx: 970, cy: 975, r: 62, fill: '#7A4A35', stroke: INK, 'stroke-width': 5 }, mug);
+mk('path', { d: 'M 1050 945 q 50 0 50 32 q 0 32 -50 32', fill: 'none', ...S, 'stroke-width': 14 }, mug);
+const steam = [0, 1, 2].map((i) => mk('path', { d: '', fill: 'none', stroke: 'rgba(255,253,248,.85)', 'stroke-width': 8, 'stroke-linecap': 'round' }, mug));
+mk('rect', { x: 1990, y: 900, width: 150, height: 290, rx: 26, fill: INK, transform: 'rotate(12 2065 1045)' }, D);
+mk('rect', { x: -120, y: 860, width: 180, height: 280, rx: 18, fill: '#FBF6E9', ...S, transform: 'rotate(-8 -30 1000)' }, D);
+
+// ---------- camera framings (world centre, width shown) ----------
+const ZONES = [[500, 620, 940], [1510, 520, 1000], [520, 1400, 900], [1530, 1380, 980]];
+const WIDE = tall ? [1030, 1000, 1500] : [1050, 980, 2300];
+const BEFORE = ['pricing-v4.xlsx', '9 tabs open', 'Title, take three', 'Image 3 of 10'];
+
+// ---------- the real app, one step at a time ----------
+const STEPS = [
+  ['Sat · 10:00', 'Plan it. See the price.', 'Quote first · nothing made until you approve', '65-phone-configure', 2080, 2330],
+  ['Sat · 14:00', 'It makes the pages.', 'Pages, listing images, a video', '69-phone-making', 0, 260],
+  ['Sun · 11:00', 'The listing, written.', 'Title, price and copy · you edit it', '51-phone-listing', 1300, 1900],
+  ['Sun · 16:00', 'Sent as drafts.', 'Not for sale until you confirm', '72-phone-listing-send', 1700, 1980],
+];
+const PH = tall ? { x: (W - 420) / 2, y: 520, w: 420, h: 720 } : { x: 600, y: 230, w: 400, h: 860 };
+const CP = tall ? { x: 65, y: 290, w: W - 130, align: 'center' } : { x: 60, y: 430, w: 500, align: 'left' };
+const SSC = (PH.w - 28) / 780;
+const afters = STEPS.map(([k, t, s, src], i) => {
+  const lay = K.box(0, 0, W, H, { cls: 'after' });
+  const ghost = K.el('div', { cls: 'ghost', parent: lay, html: k.slice(0, 3), style: { left: tall ? '-30px' : '-40px', top: tall ? '1080px' : '820px' } });
+  const ph = K.phone(PH.x, PH.y, PH.w, K.screen(src), { parent: lay, h: PH.h });
+  const cap = K.box(CP.x, CP.y, CP.w, null, { cls: 'cap', parent: lay, html: `<div class="k"><em>${k}</em><span>0${i + 1} / 04</span></div><div class="t">${t}</div><div class="s">${s}</div>`, style: { textAlign: CP.align } });
+  if (tall) cap.querySelector('.k').style.justifyContent = 'center';
+  const tag = K.demoTag('Real app · demo workspace', 0, 0); lay.appendChild(tag);
+  tag.style.left = (tall ? PH.x + 20 : 60) + 'px'; tag.style.top = (tall ? PH.y - 44 : 1210) + 'px';
+  return { lay, ghost, ph, cap };
+});
+// finale: the product line, as drafts
+const line = K.box(0, 0, W, H, { cls: 'line' });
+const COV = ['christmas-preschool-pack', 'halloween-preschool-pack', 'fall-activity-pack', 'thanksgiving-kids-table'];
+const cw = tall ? 270 : 240, cgap = tall ? 34 : 30;
+const covers = COV.map((c, i) => K.box(0, 0, cw, null, { cls: 'cover', parent: line, html: `<img src="${K.pub('showcase/' + c + '/cover.webp')}"><b>Draft</b>` }));
+const lt = K.box(65, tall ? 290 : 120, W - 130, null, { cls: 'lt', parent: line, html: '<div class="t">Sunday night:<br>a product line.</div><div class="s">Four drafts. Live only on your yes.</div>' });
+const ltag = K.box(0, 0, null, null, { cls: 'chip2', parent: line, html: 'Examples made with MakeAndList by its owner', style: { width: 'auto', height: 'auto', zIndex: 5 } });
+
+// pencil + lead line
+const lead = document.createElementNS(NS, 'svg'); lead.setAttribute('class', 'lead'); lead.setAttribute('width', W); lead.setAttribute('height', H);
+document.getElementById('stage').appendChild(lead);
+const trail = mk('polyline', { fill: 'none', stroke: '#45403A', 'stroke-width': 9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.55 }, lead);
+const pencil = mk('g', {}, lead);
+(() => { const g = mk('g', { transform: 'rotate(-38)' }, pencil);
+  mk('path', { d: 'M 0 0 L -16 -48 L 16 -48 Z', fill: '#F1D9B5', stroke: INK, 'stroke-width': 4, 'stroke-linejoin': 'round' }, g);
+  mk('path', { d: 'M 0 0 L -6 -18 L 6 -18 Z', fill: INK }, g);
+  mk('rect', { x: -16, y: -380, width: 32, height: 332, fill: IV, stroke: INK, 'stroke-width': 4 }, g);
+  mk('rect', { x: -5, y: -380, width: 10, height: 332, fill: '#EFEADF' }, g);
+  mk('rect', { x: -17, y: -420, width: 34, height: 40, fill: '#BDB5A8', stroke: INK, 'stroke-width': 4 }, g);
+  mk('rect', { x: -17, y: -470, width: 34, height: 52, rx: 10, fill: '#DFFF5A', stroke: INK, 'stroke-width': 4 }, g); })();
+
+const hookbg = K.box(0, tall ? 230 : 20, W, tall ? 340 : 300, { cls: 'hookbg' });
+const hook = K.box(60, tall ? 290 : 70, W - 120, null, { cls: 'hook' });
+const hookW = K.words(hook, 'One weekend.\nOne product line.');
+const illus = K.box(0, 0, null, null, { cls: 'chip2', html: 'Illustration · the usual way', style: { width: 'auto', height: 'auto' } });
+const day = K.box(0, 0, null, null, { cls: 'day', html: 'Saturday · 09:00', style: { width: 'auto', height: 'auto' } });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'One weekend.<br>Your product line.' });
+
+// ---------- timing ----------
+const WIPE = [B(4), B(9), B(14), B(19)];   // 2.143 4.821 7.500 10.179
+const WD = 0.62;                            // the pencil's pass
+const LEAVE = [B(8), B(13), B(18), B(22)];  // the step slides away
+const LINE = B(22);                         // 11.786
+// the scribble: zig points across the frame, along the wipe direction (down in 9:16, right in 4:5)
+const ACROSS = tall ? W : H, ALONG = tall ? H : W, NZ = 7;
+const ZP = Array.from({ length: NZ + 1 }, (_, j) => [j % 2 ? ACROSS + 80 : -80, K.lerp(-160, ALONG + 160, j / NZ) + (j % 2 ? 90 : 0)]);
+const toXY = ([a, b]) => (tall ? [a, b] : [b, a]);
+const ZL = []; let zacc = 0; ZL.push(0); for (let j = 1; j < ZP.length; j++) { zacc += Math.hypot(ZP[j][0] - ZP[j - 1][0], ZP[j][1] - ZP[j - 1][1]); ZL.push(zacc); }
+function scrib(u) {
+  const s = K.clamp(u) * zacc; let j = 1; while (j < ZL.length - 1 && ZL[j] < s) j++;
+  const f = (s - ZL[j - 1]) / (ZL[j] - ZL[j - 1] || 1);
+  return { j, c: [K.lerp(ZP[j - 1][0], ZP[j][0], f), K.lerp(ZP[j - 1][1], ZP[j][1], f)] };
+}
+function revealPoly(u) {
+  if (u <= 0) return null; if (u >= 1) return 'none';
+  const { j, c } = scrib(u);
+  const prev = j >= 2 ? ZP[j - 2] : [ZP[1][0], -400];
+  // above the polyline prev → pencil → segment start: each zig shades in the next wedge
+  const a = ZP[j - 1];
+  const P = [[-200, -400], [ACROSS + 200, -400], a[0] < 0 ? [ACROSS + 200, prev[1]] : [ACROSS + 200, a[1]], c, a[0] < 0 ? [-200, a[1]] : [-200, prev[1]]];
+  return 'polygon(' + P.map(toXY).map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',') + ')';
+}
+
+function camera(T) {
+  // establishing wide shot, then each zone, eased between
+  const keys = [[0, WIDE], [WIPE[0] - 0.85, WIDE], [WIPE[0] - 0.2, ZONES[0]]];
+  for (let i = 1; i < 4; i++) { keys.push([LEAVE[i - 1] - 0.1, ZONES[i - 1]]); keys.push([WIPE[i] - 0.25, ZONES[i]]); }
+  let a = keys[0], b = keys[0];
+  for (let i = 1; i < keys.length; i++) { if (T <= keys[i][0]) { a = keys[i - 1]; b = keys[i]; break; } a = b = keys[i]; }
+  const u = a === b ? 1 : E.inOutCubic(K.clamp((T - a[0]) / (b[0] - a[0])));
+  const cx = K.lerp(a[1][0], b[1][0], u), cy = K.lerp(a[1][1], b[1][1], u), cw = K.lerp(a[1][2], b[1][2], u);
+  return { cx: cx + Math.sin(T * 0.5) * 14, cy: cy + Math.cos(T * 0.45) * 10, s: (W / cw) * (1 + 0.02 * Math.sin(T * 0.8)), rot: Math.sin(T * 0.35) * 0.8 };
+}
+
+K.run({
+  id: 'C14', title: 'The Weekend Test', dur: DUR, bpm: 112, mood: 'bright', key: 'G', intro: 0.5, cover: 5.6,
+  technique: 'A before/after wipe drawn by a pencil: it hatches across the frame and every zig reveals more of the real app over a drawn desk illustration (a pricing spreadsheet, a laptop full of tabs, a notebook of crossed-out titles, an upload form); the camera pans the desk zone by zone, Saturday to Sunday, and ends on the product line as drafts',
+  caption: 'A weekend with a spreadsheet, nine tabs and a notebook of titles, or a weekend with MakeAndList: plan it and see the price, let it make the pages, get the listing written, send drafts to your stores. Nothing goes live until you say so. Start free at makeandlist.com',
+  short: 'One weekend. One product line.',
+  beats: ['0–2 s: “One weekend. One product line.” over a drawn desk', '2–4.3 s: Saturday — the spreadsheet, wiped into the real quote', '4.8–7 s: the laptop of tabs, wiped into “It makes the pages”', '7.5–9.7 s: Sunday — the notebook of titles, wiped into the written listing', '10.2–11.8 s: the upload form, wiped into “Sent as drafts”', '11.8–15 s: a product line of drafts, live on your yes; end card'],
+  cues: [[0.05, 'paper'], [0.3, 'pop'], [B(2), 'swish'], ...WIPE.flatMap((w, i) => [[+(w - 0.85).toFixed(3), i ? 'whoosh' : 'riser'], [w, 'marker'], [+(w + WD).toFixed(3), 'pop']]),
+    ...LEAVE.slice(0, 3).map((l) => [l, 'swish']), [B(15), 'type'], [LINE, 'whoosh'], [LINE + 0.25, 'hit'], [LINE + 0.6, 'paper'], [13.0, 'pop']],
+}, (T) => {
+  const fr = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(fr) - 0.5) * 60}px, ${(seed(fr + 7) - 0.5) * 60}px)`;
+  const C = camera(T);
+  D.setAttribute('transform', `translate(${W / 2} ${H / 2}) rotate(${C.rot}) scale(${C.s}) translate(${-C.cx} ${-C.cy})`);
+  // ambient life on the desk
+  const ci = Math.floor(T * 2.2) % 20;
+  cellSel.setAttribute('x', 120 + (1 + ci % 5) * 127); cellSel.setAttribute('y', 372 + (1 + Math.floor(ci / 5) % 8) * 44);
+  calc.textContent = ['18.40', '18.40+', '4.99', '23.39', '×1.2', '28.07'][Math.floor(T * 1.6) % 6];
+  spin.setAttribute('transform', `rotate(${T * 260} 1625 520)`);
+  steam.forEach((p, i) => { const ph = T * 1.2 + i * 0.33, y0 = 900 - (ph % 1) * 160; p.setAttribute('d', `M ${930 + i * 40} ${y0} q 20 -30 0 -60 q -20 -30 0 -60`); p.setAttribute('opacity', Math.sin((ph % 1) * Math.PI)); });
+  bar.setAttribute('width', 140 + 90 * (0.5 + 0.5 * Math.sin(T * 2)));
+  sticky.setAttribute('transform', `rotate(${4 + Math.sin(T * 2.4) * 1.2} 700 1570)`);
+
+  // the after layers: wiped in by the pencil, slid away on the next step
+  let pen = null;
+  afters.forEach((A, i) => {
+    const u = (T - WIPE[i]) / WD;
+    const leave = K.p(T, LEAVE[i] - 0.05, LEAVE[i] + 0.4, E.inCubic);
+    const clip = revealPoly(u);
+    A.lay.style.visibility = clip && leave < 1 ? 'visible' : 'hidden';
+    if (clip && clip !== 'none') A.lay.style.clipPath = clip; else A.lay.style.clipPath = 'none';
+    A.lay.style.transform = tall ? `translateY(${-leave * H}px)` : `translateX(${-leave * W}px)`;
+    if (u > 0 && u < 1) pen = scrib(u);
+    const pin = K.p(T, WIPE[i] + 0.1, WIPE[i] + 0.8, E.outExpo);
+    A.ph.root.style.transform = `translateY(${(1 - pin) * 70 + Math.sin(T * 1.3 + i) * 5}px) rotate(${(1 - pin) * -3 + Math.sin(T + i) * 0.4}deg)`;
+    const [, , , , y0, y1] = STEPS[i];
+    A.ph.scroll(K.lerp(y0, y1, K.p(T, WIPE[i] + 0.4, LEAVE[i] + 0.3, E.inOutCubic)) * SSC);
+    [...A.cap.children].forEach((el, j) => { const p = K.p(T, WIPE[i] + 0.25 + j * 0.1, WIPE[i] + 0.8 + j * 0.1, E.outExpo); el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * 30}px)`; });
+    A.ghost.style.transform = `translateX(${-(T - WIPE[i]) * 30}px)`;
+  });
+  // pencil and its lead
+  if (pen) {
+    const [px, py] = toXY(pen.c);
+    pencil.setAttribute('transform', `translate(${px} ${py}) rotate(${tall ? 0 : -60})`);
+    pencil.setAttribute('opacity', 1);
+    const pts = ZP.slice(Math.max(0, pen.j - 2), pen.j).concat([pen.c]).map(toXY);
+    trail.setAttribute('points', pts.map((p) => p.join(',')).join(' '));
+    trail.setAttribute('opacity', 0.5);
+  } else { pencil.setAttribute('opacity', 0); trail.setAttribute('opacity', 0); }
+
+  // hook over the wide desk
+  K.reveal(hookW, T, 0.15, { kind: 'up', stagger: 0.08, out: WIPE[0] - 0.8 });
+  hookbg.style.opacity = K.p(T, 0, 0.4, E.linear) * (1 - K.p(T, WIPE[0] - 0.8, WIPE[0] - 0.4, E.linear));
+  // the illustration chip and the day pill ride over the desk
+  const onDesk = afters.every((A) => A.lay.style.visibility === 'hidden' || A.lay.style.clipPath !== 'none');
+  illus.style.left = (tall ? 65 : 60) + 'px'; illus.style.top = (tall ? 1196 : 1260) + 'px';
+  illus.style.opacity = onDesk && T < LINE ? K.p(T, 0.5, 0.8, E.linear) : 0;
+  const di = WIPE.findIndex((w, i) => T < w + WD && T > (i ? LEAVE[i - 1] - 0.1 : 0));
+  day.innerHTML = di <= 0 ? 'Saturday · 09:00' : ['Saturday · 09:00', 'Saturday · 13:00', 'Sunday · 10:00', 'Sunday · 15:00'][di] + ' · ' + BEFORE[di];
+  if (di <= 0 && T > WIPE[0] - 0.85) day.innerHTML = 'Saturday · ' + BEFORE[0];
+  day.style.left = (tall ? 65 : 60) + 'px'; day.style.top = (tall ? 1130 : 1190) + 'px';
+  day.style.opacity = di >= 0 && T > 0.6 ? 1 : 0;
+
+  // finale: the line of drafts
+  const lp = K.p(T, LINE, LINE + 0.45, E.outExpo);
+  line.style.visibility = lp > 0.001 ? 'visible' : 'hidden';
+  line.style.clipPath = `inset(${(1 - lp) * 100}% 0 0 0)`;
+  covers.forEach((cv, i) => {
+    const p = K.p(T, LINE + 0.25 + i * 0.12, LINE + 0.85 + i * 0.12, E.outBack);
+    const cols = 2, r = Math.floor(i / cols), c = i % cols;
+    const x = (W - (cols * cw + (cols - 1) * cgap)) / 2 + c * (cw + cgap);
+    const y = (tall ? 520 : 390) + r * (cw * 4 / 3 + 30);
+    cv.style.left = x + 'px'; cv.style.top = y + 'px';
+    cv.style.opacity = K.clamp(p * 2);
+    cv.style.transform = `translateY(${(1 - p) * 140 + Math.sin(T * 1.4 + i) * 5}px) rotate(${(1 - p) * (i % 2 ? 8 : -8) + (i - 1.5) * 1.4}deg)`;
+    cv.style.height = cw * 4 / 3 + 'px';
+  });
+  [...lt.children].forEach((el, j) => { const p = K.p(T, LINE + 0.3 + j * 0.15, LINE + 0.9 + j * 0.15, E.outExpo); el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * 30}px)`; });
+  ltag.style.left = (W - ltag.offsetWidth) / 2 + 'px'; ltag.style.top = (tall ? 1196 : 1100) + 'px'; ltag.style.opacity = K.p(T, LINE + 0.8, LINE + 1.1, E.linear);
+
+  end(T);
+});
+</script></body></html>

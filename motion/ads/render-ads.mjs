@@ -36,7 +36,7 @@ function run(cmd, a, input, capture) {
 
 async function compositions() {
   const ids = args.filter((a) => !a.startsWith('--'));
-  const files = (await readdir(here)).filter((f) => /^[ab]\d\d-.*\.html$/.test(f)).sort();
+  const files = (await readdir(here)).filter((f) => /^[a-z]\d\d-.*\.html$/.test(f)).sort();
   return files.filter((f) => !ids.length || ids.some((id) => f.startsWith(id)));
 }
 

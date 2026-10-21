@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C01 · The Print Journey</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F3EEE3; }
+svg.world { position: absolute; left: 0; top: 0; overflow: visible; z-index: 5; }
+.vign { position: absolute; inset: 0; z-index: 6; pointer-events: none; background: radial-gradient(120% 80% at 50% 55%, rgba(243,238,227,0) 55%, rgba(214,205,188,.55) 100%); }
+.mon { position: absolute; left: 0; top: 0; transform-origin: 0 0; border-radius: 26px; background: #FFFDF8; overflow: hidden;
+  box-shadow: 0 0 0 3px #1F1F1F; will-change: transform; }
+.mon .strip { position: absolute; left: 0; right: 0; top: 0; height: 66px; background: #1F1F1F; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; z-index: 2; }
+.mon .strip b { font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #A9A296; }
+.mon .strip span { font: 800 32px 'Archivo'; color: #DFFF5A; letter-spacing: -0.01em; white-space: nowrap; }
+.mon .crop { position: absolute; left: 0; right: 0; bottom: 0; overflow: hidden; background: #FAF7EE; }
+.mon .crop img { position: absolute; display: block; max-width: none; }
+.mon .demo { right: 14px; bottom: 14px; font-size: 17px; }
+.mon .glare { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(255,255,255,.55) 47%, rgba(255,255,255,0) 60%); }
+.fact { position: absolute; z-index: 45; left: 50%; display: flex; align-items: center; gap: 12px; padding: 16px 28px; border-radius: 999px; white-space: nowrap;
+  font: 700 30px 'Archivo'; box-shadow: 0 24px 40px -24px rgba(31,31,31,.7); }
+.fact i { width: 14px; height: 14px; border-radius: 50%; background: currentColor; display: block; }
+.head { position: absolute; z-index: 46; left: 60px; right: 60px; text-align: center; font-weight: 800; letter-spacing: -0.02em; line-height: .98; }
+.ctag { position: absolute; z-index: 46; font: 500 18px 'IBM Plex Mono', monospace; color: #45403A; background: rgba(250,247,238,.9); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; white-space: nowrap; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// C01 — an isometric conveyor. The artwork file lies on the belt and rides through eight lit gantries: partner,
+// try-on, sharpness check, draft, your store, order, your approval, print & ship. Each gantry carries a monitor
+// showing that step's real screen; as the file arrives the monitor un-shears out of the iso plane and flies forward
+// to face the viewer, then folds back as the belt moves on. The file collects a DRAFT tag, your APPROVED stamp,
+// and at the last gantry a box closes around it: a parcel.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const B = 60 / 120;
+const NS = 'http://www.w3.org/2000/svg';
+const C30 = Math.cos(Math.PI / 6), S30 = 0.5;
+const L = K.v({
+  '9x16': { ax: 540, ay: 1240, s: 0.66, sOv: 0.27, cardY: 318, maxW: 920, maxH: 560, headY: 300, headFs: 112, finS: 0.56 },
+  '4x5': { ax: 560, ay: 1060, s: 0.5, sOv: 0.22, cardY: 70, maxW: 900, maxH: 440, headY: 76, headFs: 96, finS: 0.44 },
+});
+
+// ---------- timing (beats of 0.5 s) ----------
+const ARR = [4, 7, 9, 12, 14, 17, 19, 22].map((b) => b * B); // 2.0 … 11.0
+const TRAVEL = 0.42;
+const TAP = 20 * B; // 10.0: your approval
+const CLOSE = 24 * B; // 12.0: the parcel closes
+const D = 1000; // world units between gantries
+const SU = ARR.map((_, i) => i * D);
+function tokU(T) {
+  if (T < 1.3) return -760 + T * 60;
+  if (T < ARR[0]) return K.lerp(-760 + 1.3 * 60, 0, E.inOutCubic((T - 1.3) / (ARR[0] - 1.3)));
+  for (let i = 0; i < 7; i++) {
+    const dep = ARR[i + 1] - TRAVEL;
+    if (T < dep) return SU[i];
+    if (T < ARR[i + 1]) return K.lerp(SU[i], SU[i + 1], E.inOutCubic((T - dep) / TRAVEL));
+  }
+  return SU[7];
+}
+
+// ---------- the eight stations: [label, src, natural width, crop x,y,w,h, tag, fact] ----------
+const ST = [
+  ['Your partner', K.screen('62-phone-production-partners'), 780, [24, 744, 732, 350], 'Real app · demo workspace', 'Your own partner account'],
+  ['Try it on', K.canvas('AppTryOn'), 2880, [600, 330, 1290, 1290], 'Product design · sample data', 'Colour, size, print area'],
+  ['Sharpness check', K.canvas('PrintArea'), 2880, [2134, 196, 676, 612], 'Product design · sample data', "Checked to the partner's spec"],
+  ['A draft first', K.screen('33-phone-sell-physical'), 780, [40, 20, 700, 470], 'Real app · demo workspace', 'The edition starts as a draft'],
+  ['Your store', K.screen('61-publishing-printed'), 1440, [292, 1040, 680, 306], 'Real app · demo workspace', 'Listed after you confirm'],
+  ['An order', K.canvas('Orders'), 2880, [512, 444, 1018, 316], 'Product design · sample data', 'A buyer orders. It waits for you.'],
+  ['Your approval', K.canvas('Orders'), 2880, [1604, 1272, 1176, 606], 'Product design · sample data', 'Paid by your partner account'],
+  ['Print & ship', K.screen('81-phone-orders'), 780, [36, 2662, 708, 368], 'Real app · demo workspace', 'Tracking goes back to your store'],
+];
+
+// ---------- the iso world (SVG) ----------
+const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'world'); svg.setAttribute('width', W); svg.setAttribute('height', H);
+document.getElementById('stage').appendChild(svg);
+const defs = document.createElementNS(NS, 'defs'); svg.appendChild(defs);
+defs.innerHTML = `<radialGradient id="pool"><stop offset="0" stop-color="#DFFF5A" stop-opacity=".75"/><stop offset=".55" stop-color="#DFFF5A" stop-opacity=".22"/><stop offset="1" stop-color="#DFFF5A" stop-opacity="0"/></radialGradient>
+<radialGradient id="lampG"><stop offset="0" stop-color="#F4FFB8"/><stop offset=".5" stop-color="#DFFF5A" stop-opacity=".7"/><stop offset="1" stop-color="#DFFF5A" stop-opacity="0"/></radialGradient>
+<linearGradient id="scanG" x1="0" x2="1"><stop offset="0" stop-color="#DFFF5A" stop-opacity="0"/><stop offset=".8" stop-color="#DFFF5A" stop-opacity=".55"/><stop offset="1" stop-color="#F4FFB8" stop-opacity="1"/></linearGradient>`;
+const cam = document.createElementNS(NS, 'g'); svg.appendChild(cam);
+const g = (parent, attrs = {}) => { const n = document.createElementNS(NS, 'g'); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); parent.appendChild(n); return n; };
+const sh = (tag, parent, attrs) => { const n = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); parent.appendChild(n); return n; };
+// plane matrices (screen = M · (a, b))
+const GROUND = (z = 0) => `matrix(${C30} ${-S30} ${C30} ${S30} 0 ${-z})`; // (u, v)
+const FACE_V = (v0) => `matrix(${C30} ${-S30} 0 -1 ${C30 * v0} ${S30 * v0})`; // (u, z), plane v = v0, faces down-right
+const FACE_U = (u0) => `matrix(${C30} ${S30} 0 -1 ${C30 * u0} ${-S30 * u0})`; // (v, z), plane u = u0, faces down-left
+const P = (u, v, z) => [C30 * (u + v), S30 * (v - u) - z];
+
+// floor grid
+const floor = g(cam, { transform: GROUND() });
+for (let u = -3000; u <= 10000; u += 250) sh('line', floor, { x1: u, y1: -2600, x2: u, y2: 2600, stroke: '#E4DCCB', 'stroke-width': 4 });
+for (let v = -2600; v <= 2600; v += 250) sh('line', floor, { x1: -3000, y1: v, x2: 10000, y2: v, stroke: '#E4DCCB', 'stroke-width': 4 });
+// belt
+const BV = 130, U0 = -2600, U1 = 9600;
+const beltSide = g(cam, { transform: FACE_V(BV) });
+sh('rect', beltSide, { x: U0, y: -84, width: U1 - U0, height: 84, fill: '#1F1F1F' });
+const rollers = g(beltSide, {});
+for (let u = U0; u < U1; u += 160) sh('circle', rollers, { cx: u, cy: -42, r: 15, fill: '#3A3632' });
+const shadowG = g(cam, { transform: GROUND(-84) });
+sh('rect', shadowG, { x: U0, y: BV, width: U1 - U0, height: 70, fill: 'rgba(31,31,31,.12)' });
+const belt = g(cam, { transform: GROUND() });
+sh('rect', belt, { x: U0, y: -BV, width: U1 - U0, height: BV * 2, fill: '#2A2724' });
+const slats = g(belt, {});
+for (let u = U0; u < U1; u += 90) sh('line', slats, { x1: u, y1: -BV + 8, x2: u, y2: BV - 8, stroke: '#3A3632', 'stroke-width': 10 });
+sh('rect', belt, { x: U0, y: -BV, width: U1 - U0, height: 10, fill: '#45403A' });
+sh('rect', belt, { x: U0, y: BV - 8, width: U1 - U0, height: 8, fill: '#DFFF5A', opacity: 0.9 });
+// light pools and gantries
+const pools = SU.map((u) => sh('ellipse', g(cam, { transform: GROUND(0.5) }), { cx: u, cy: 0, rx: 380, ry: 300, fill: 'url(#pool)', opacity: 0 }));
+const gantry = SU.map((u, i) => {
+  const root = g(cam, {});
+  // posts: down-left face and down-right face of each
+  [-200, 200].forEach((v) => {
+    sh('rect', g(root, { transform: FACE_U(u - 22) }), { x: v - 22, y: 0, width: 44, height: 360, fill: '#2A2724' });
+    sh('rect', g(root, { transform: FACE_V(v + 22) }), { x: u - 22, y: 0, width: 44, height: 360, fill: '#1F1F1F' });
+  });
+  // crossbar
+  sh('rect', g(root, { transform: FACE_U(u - 22) }), { x: -222, y: 320, width: 444, height: 48, fill: '#1F1F1F' });
+  sh('rect', g(root, { transform: GROUND(368) }), { x: u - 22, y: -222, width: 44, height: 444, fill: '#45403A' });
+  // number plate + lamp
+  const fu = g(root, { transform: FACE_U(u - 23) });
+  const halo = sh('circle', fu, { cx: 0, cy: 344, r: 70, fill: 'url(#lampG)', opacity: 0 });
+  const lamp = sh('circle', fu, { cx: 0, cy: 344, r: 15, fill: '#5A5550' });
+  const num = sh('text', g(fu, { transform: 'translate(-150 358) scale(1 -1)' }), { x: 0, y: 0, fill: '#A9A296', 'font-family': 'IBM Plex Mono', 'font-size': 34, 'font-weight': 600 });
+  num.textContent = '0' + (i + 1);
+  // the mast the monitor sits on
+  sh('rect', g(root, { transform: FACE_U(u - 6) }), { x: -8, y: 368, width: 16, height: 40, fill: '#1F1F1F' });
+  return { root, lamp, halo };
+});
+// the file on the belt: artwork from the Print area board, lying flat
+const ART = { x: 1066, y: 762, w: 524, h: 732 };
+const tok = g(cam, {});
+const tokShadow = sh('rect', g(tok, { transform: GROUND(0.5) }), { x: -118, y: -88, width: 236, height: 186, rx: 10, fill: 'rgba(0,0,0,.35)' });
+const sheetG = g(tok, {}); // local: x → +v, y → −u (top of the art points into the frame)
+const SWID = 170, SHGT = 238;
+sh('rect', sheetG, { x: -8, y: -8, width: SWID + 16, height: SHGT + 16, fill: '#FBF8F0' });
+const artSvg = sh('svg', sheetG, { x: 0, y: 0, width: SWID, height: SHGT, viewBox: `${ART.x} ${ART.y} ${ART.w} ${ART.h}`, preserveAspectRatio: 'xMidYMid slice' });
+sh('image', artSvg, { href: K.canvas('PrintArea'), x: 0, y: 0, width: 2880, height: 2360 });
+const scan = sh('rect', sheetG, { x: -14, y: 0, width: SWID + 28, height: 40, fill: 'url(#scanG)', opacity: 0 });
+const draftTag = g(sheetG, {});
+sh('rect', draftTag, { x: -20, y: SHGT - 70, width: 104, height: 40, rx: 6, fill: '#FFFDF8', stroke: '#1F1F1F', 'stroke-width': 3 });
+sh('text', draftTag, { x: 32, y: SHGT - 42, 'text-anchor': 'middle', 'font-family': 'IBM Plex Mono', 'font-weight': 600, 'font-size': 22, fill: '#1F1F1F' }).textContent = 'DRAFT';
+const okStamp = g(sheetG, {});
+sh('rect', okStamp, { x: 22, y: 70, width: 126, height: 54, rx: 8, fill: 'rgba(223,255,90,.92)', stroke: '#1F1F1F', 'stroke-width': 4 });
+sh('text', okStamp, { x: 85, y: 106, 'text-anchor': 'middle', 'font-family': 'Archivo', 'font-weight': 800, 'font-size': 26, fill: '#1F1F1F' }).textContent = 'YOURS ✓';
+// the parcel that closes around it
+const box = g(cam, {});
+const bxL = sh('polygon', box, { fill: '#C9A878' }), bxR = sh('polygon', box, { fill: '#B48F5E' }), bxT = sh('polygon', box, { fill: '#DCC19A' });
+const tape = sh('polyline', box, { fill: 'none', stroke: '#E9D9BC', 'stroke-width': 16 });
+const label = sh('polygon', box, { fill: '#FFFDF8', stroke: '#1F1F1F', 'stroke-width': 2 });
+// the artwork twin for preloading
+K.el('img', { src: K.canvas('PrintArea'), style: { position: 'absolute', width: '1px', height: '1px', opacity: 0 } });
+K.box(0, 0, W, H, { cls: 'vign' });
+
+// ---------- monitors (HTML, mapped onto each gantry's plane, flown forward when active) ----------
+const mons = ST.map(([lab, src, nat, r, tagTxt], i) => {
+  const s = Math.min(L.maxW / r[2], L.maxH / r[3]);
+  const fw = Math.round(r[2] * s), fh = Math.round(r[3] * s) + 66;
+  const m = K.box(0, 0, fw, fh, { cls: 'mon', html: `<div class="strip"><b>${String(i + 1).padStart(2, '0')} / 08</b><span>${lab}</span></div>`, style: { zIndex: 20 - i } });
+  const crop = K.el('div', { cls: 'crop', parent: m, style: { top: '66px' } });
+  K.el('img', { src, parent: crop, style: { left: -r[0] * s + 'px', top: -r[1] * s + 'px', width: nat * s + 'px' } });
+  K.el('div', { cls: 'demo', parent: crop, html: tagTxt });
+  const glare = K.el('div', { cls: 'glare', parent: m });
+  return { m, fw, fh, s, r, glare };
+});
+const facts = ST.map(([, , , , , fact], i) => K.box(0, 0, null, null, { cls: 'fact', html: `<i></i><span>${fact}</span>`, style: { width: 'auto', height: 'auto', background: i === 6 ? '#1F1F1F' : '#DFFF5A', color: i === 6 ? '#DFFF5A' : '#1F1F1F' } }));
+const fact7 = facts[6].querySelector('span');
+const cursor = K.cursor();
+const hook = K.box(60, L.headY, W - 120, null, { cls: 'head serif', style: { fontSize: L.headFs + 'px' } });
+const hookW = K.words(hook, 'From a file\nto a parcel.');
+const fin = K.box(60, L.headY, W - 120, null, { cls: 'head serif', style: { fontSize: L.headFs * 0.82 + 'px' } });
+const finW = K.words(fin, 'Printed only\nafter your yes.');
+const finSub = K.box(60, L.headY + L.headFs * 1.92, W - 120, null, { cls: 'head mono', html: 'Paid from your partner account · never Credits', style: { fontSize: (tall ? 27 : 24) + 'px', fontWeight: 500, letterSpacing: '0', color: '#45403A' } });
+const tagArt = K.box(0, 0, null, null, { cls: 'ctag', html: 'Product design · sample artwork', style: { width: 'auto', height: 'auto' } });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your file. Your yes.<br>A parcel.' });
+
+function camAt(T) {
+  const lag = [0, 0.05, 0.1, 0.15].map((d) => tokU(T - d));
+  let cu = lag.reduce((a, b) => a + b, 0) / lag.length;
+  const dive = K.p(T, 1.25, 2.0, E.inOutExpo);
+  let s = K.lerp(L.sOv, L.s, dive);
+  cu = K.lerp(1500 + T * 120, cu, dive);
+  let ax = L.ax, ay = K.lerp(tall ? 1060 : 860, L.ay, dive);
+  // finale: pull back to show the parcel leave
+  const fin = K.p(T, 11.75, 12.7, E.inOutCubic);
+  s = K.lerp(s, L.finS, fin); cu = K.lerp(cu, SU[7] + 260 * fin, fin); ay = K.lerp(ay, tall ? 980 : 820, fin);
+  s *= 1 + 0.01 * Math.sin(T * 1.2);
+  const [px, py] = P(cu, 0, 0);
+  return { s, ox: ax - px * s, oy: ay - py * s };
+}
+// active monitor progress: 0 on its gantry, 1 facing you
+function front(i, T) {
+  const a = ARR[i];
+  const pin = K.p(T, a - 0.32, a + 0.26, E.outExpo);
+  const outAt = i < 7 ? ARR[i + 1] - 0.3 : 11.75;
+  const pout = K.p(T, outAt, outAt + 0.34, E.inOutCubic);
+  return { v: pin * (1 - pout), pin, pout };
+}
+
+K.run({
+  id: 'C01', title: 'The Print Journey', dur: DUR, bpm: 120, mood: 'drive', key: 'E', intro: 2.0, cover: 10.2,
+  technique: 'Isometric conveyor built from plane matrices: the artwork file rides a belt through eight lit gantries, each gantry monitor un-shears out of its iso plane and flies forward to show that step’s real screen, and the file collects a draft tag, your stamp and finally a closing parcel',
+  caption: 'Make it physical: pick your print partner, try the artwork on, check it prints sharp, list the draft in your store. When a buyer orders, it waits for your approval, and printing is paid from your own partner account, never Credits. Start free at makeandlist.com',
+  short: 'From a file to a parcel.',
+  beats: ['0–2 s: “From a file to a parcel.” — the factory line lights up', '2–4.9 s: your partner, try it on, the sharpness check', '4.9–8.4 s: a draft first, your store, an order comes in', '8.4–11 s: it waits for your approval — tap, stamped yours', '11–13 s: print & ship — a parcel, tracking back to your store', '13–15 s: end card'],
+  cues: [[0.1, 'swish'], [0.3, 'click'], [0.55, 'click'], [0.8, 'click'], [0.6, 'riser'], [1.75, 'whoosh'], [ARR[0], 'hit'],
+    ...ARR.slice(1).map((a) => [a - 0.25, 'swish']), [ARR[1], 'pop'], [ARR[2], 'pop'], [ARR[2] + 0.5, 'shutter'], [ARR[3], 'paper'], [ARR[4], 'pop'], [ARR[5], 'notify'], [ARR[6], 'pop'],
+    [TAP, 'click'], [TAP + 0.05, 'stamp'], [TAP + 0.5, 'chime'], [ARR[7], 'pop'], [ARR[7] + 0.25, 'printer'], [CLOSE, 'box'], [11.6, 'riser'], [13.0, 'hit']],
+}, (T) => {
+  const C = camAt(T);
+  cam.setAttribute('transform', `translate(${C.ox} ${C.oy}) scale(${C.s})`);
+  const u = tokU(T);
+  // the belt moves with the file
+  const off = ((u % 90) + 90) % 90, roff = ((u % 160) + 160) % 160;
+  slats.setAttribute('transform', `translate(${off} 0)`);
+  rollers.setAttribute('transform', `translate(${roff} 0)`);
+  // gantries light as the line wakes, the current one glows
+  const atSt = SU.findIndex((x) => Math.abs(u - x) < 2);
+  gantry.forEach((G, i) => {
+    const on = K.p(T, 0.25 + i * 0.12, 0.45 + i * 0.12, E.outBack);
+    const passed = u >= SU[i] - 2 && T >= ARR[0] - 0.05;
+    G.lamp.setAttribute('fill', passed ? '#DFFF5A' : on > 0.5 ? '#E8E2D6' : '#5A5550');
+    G.lamp.setAttribute('r', 15 * (0.6 + 0.4 * on));
+    const here = atSt === i ? 1 : 0;
+    G.halo.setAttribute('opacity', here * (0.75 + 0.25 * Math.sin(T * 8)));
+    pools[i].setAttribute('opacity', K.lerp(0.18 * on, 1, here * K.p(T, ARR[i] - 0.2, ARR[i] + 0.2, E.outCubic)));
+  });
+  // the file
+  const ux = u + SHGT / 2, vx = -SWID / 2;
+  const [tx, ty] = P(ux, vx, 2);
+  sheetG.setAttribute('transform', `matrix(${C30} ${S30} ${-C30} ${S30} ${tx} ${ty})`);
+  tokShadow.parentNode.setAttribute('transform', `${GROUND(0.5)} translate(${u} 0)`);
+  // sharpness scan sweeps the sheet
+  const sc = K.p(T, ARR[2] + 0.05, ARR[2] + 0.9, E.inOutCubic);
+  scan.setAttribute('y', K.lerp(-40, SHGT, sc)); scan.setAttribute('opacity', sc > 0 && sc < 1 ? 1 : 0);
+  const dt = K.p(T, ARR[3] + 0.1, ARR[3] + 0.45, E.outBack);
+  draftTag.setAttribute('transform', `translate(${SWID / 2} ${SHGT - 50}) scale(${dt}) translate(${-SWID / 2} ${-(SHGT - 50)})`);
+  draftTag.setAttribute('opacity', dt > 0 ? 1 : 0);
+  const st = K.p(T, TAP + 0.02, TAP + 0.2, E.outCubic);
+  okStamp.setAttribute('transform', `translate(85 97) scale(${K.lerp(2.2, 1, st)}) rotate(-8) translate(-85 -97)`);
+  okStamp.setAttribute('opacity', st);
+  // the parcel: walls rise around the file, then the lid
+  const wall = K.p(T, ARR[7] + 0.3, CLOSE - 0.1, E.inOutCubic), lid = K.p(T, CLOSE - 0.25, CLOSE, E.outBack);
+  const bh = 150 * wall, u0 = SU[7] - 150, u1 = SU[7] + 150, v0 = -125, v1 = 125;
+  const pt = (a) => a.map((q) => P(...q).join(',')).join(' ');
+  box.setAttribute('opacity', wall > 0 ? 1 : 0);
+  bxL.setAttribute('points', pt([[u0, v0, 0], [u0, v1, 0], [u0, v1, bh], [u0, v0, bh]]));
+  bxR.setAttribute('points', pt([[u0, v1, 0], [u1, v1, 0], [u1, v1, bh], [u0, v1, bh]]));
+  const lh = bh + 1;
+  bxT.setAttribute('points', pt([[u0, v0, lh], [u0, v1, lh], [u1, v1, lh], [u1, v0, lh]]));
+  bxT.setAttribute('opacity', lid);
+  tape.setAttribute('points', pt([[u0, 0, lh], [u1, 0, lh]])); tape.setAttribute('opacity', lid);
+  const lb = K.p(T, CLOSE + 0.1, CLOSE + 0.4, E.outBack);
+  label.setAttribute('points', pt([[u0 + 40, v1, bh * 0.25], [u0 + 40 + 120 * lb, v1, bh * 0.25], [u0 + 40 + 120 * lb, v1, bh * 0.25 + 70 * lb], [u0 + 40, v1, bh * 0.25 + 70 * lb]]));
+  label.setAttribute('opacity', lb > 0 ? 1 : 0);
+  sheetG.setAttribute('opacity', 1 - K.p(T, CLOSE - 0.2, CLOSE, E.linear));
+  // the parcel rolls off at the end
+  const roll = K.p(T, 12.25, 12.95, E.inCubic) * 700;
+  box.setAttribute('transform', `translate(${C30 * roll} ${-S30 * roll})`);
+
+  // monitors
+  let act = -1;
+  mons.forEach((M, i) => {
+    const f = front(i, T);
+    if (f.v > 0.02) act = i;
+    const k = 420 / M.fw, s = C.s;
+    // on the gantry: plane u = SU[i], width along v (−210 … 210), top at z = 408 + height
+    const zTop = 408 + M.fh * k;
+    const [px, py] = P(SU[i], -210, zTop);
+    const iso = [C30 * k * s, S30 * k * s, 0, k * s, C.ox + px * s, C.oy + py * s];
+    const fx = (W - M.fw) / 2, fy = L.cardY + Math.sin(T * 1.4 + i) * 5;
+    const fr = [1, 0, 0, 1, fx, fy];
+    const p = f.v;
+    const mtx = iso.map((a, j) => K.lerp(a, fr[j], p));
+    // a slight bow as it lands: over-scale on the way in
+    const bow = 1 + 0.035 * Math.sin(Math.PI * K.clamp(f.pin)) * (1 - f.pout);
+    M.m.style.transform = `matrix(${mtx.map((x, j) => (j < 4 ? x * bow : x)).join(',')})`;
+    M.m.style.zIndex = p > 0.02 ? 40 : 20 - i;
+    M.m.style.boxShadow = `0 0 0 ${K.lerp(5, 3, p)}px #1F1F1F, 0 ${60 * p}px ${110 * p}px -${50 * p}px rgba(31,31,31,${0.7 * p})`;
+    const vis = i <= 2 || T > 1.2 ? 1 : 0;
+    M.m.style.opacity = vis * (i === 7 ? 1 - K.p(T, 12.4, 12.8, E.linear) * (1 - p) : 1);
+    M.glare.style.transform = `translateX(${K.lerp(-110, 110, K.p(T, ARR[i] - 0.1, ARR[i] + 0.7, E.inOutCubic))}%)`;
+    M.glare.style.opacity = p;
+    // the fact under the card
+    const F = facts[i];
+    const fp = K.p(T, ARR[i] + 0.12, ARR[i] + 0.5, E.outBack) * (1 - f.pout);
+    F.style.top = (fy + M.fh + 30) + 'px'; F.style.left = W / 2 + 'px';
+    F.style.opacity = Math.min(1, fp * 1.4) * (f.v > 0.3 ? 1 : 0);
+    F.style.transform = `translateX(-50%) translateY(${(1 - fp) * 22}px) scale(${0.85 + 0.15 * fp})`;
+  });
+  // approval: cursor taps the real button
+  const M7 = mons[6], m7 = front(6, T);
+  const bx = (W - M7.fw) / 2 + (2220 - M7.r[0]) * M7.s, by = L.cardY + 66 + (1690 - M7.r[1]) * M7.s;
+  const ca = K.p(T, ARR[6] + 0.2, TAP - 0.04, E.outCubic);
+  cursor.at(K.lerp(W * 0.92, bx, ca), K.lerp(L.cardY + M7.fh + 220, by, ca), T > TAP - 0.06 && T < TAP + 0.1);
+  cursor.hide(m7.v > 0.9 ? K.win(T, ARR[6] + 0.15, TAP + 0.45, 0.15) : 0);
+  cursor.ripple(bx, by, T, TAP);
+  const ok = T >= TAP;
+  fact7.textContent = ok ? 'Approved by you · paid by your partner account' : 'Waits for your approval · never Credits';
+  facts[6].style.background = ok ? '#DFFF5A' : '#1F1F1F'; facts[6].style.color = ok ? '#1F1F1F' : '#DFFF5A';
+  // hook over the waking line
+  K.reveal(hookW, T, 0.1, { kind: 'up', stagger: 0.08, out: 1.5 });
+  K.reveal(finW, T, 11.95, { kind: 'up', stagger: 0.07 });
+  const fs2 = K.p(T, 12.2, 12.6, E.outExpo); finSub.style.opacity = fs2; finSub.style.transform = `translateY(${(1 - fs2) * 18}px)`;
+  // the artwork tag rides beside the file while no card is up
+  const [sx, sy] = P(u - 40, BV + 60, 0);
+  tagArt.style.left = (C.ox + sx * C.s + 30) + 'px'; tagArt.style.top = (C.oy + sy * C.s + 10) + 'px';
+  tagArt.style.opacity = K.win(T, 0.4, 2.1, 0.25);
+  end(T);
+});
+</script></body></html>

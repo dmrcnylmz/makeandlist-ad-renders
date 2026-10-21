@@ -2,10 +2,14 @@
 
     python3 score.py meta.json out.wav
 
-meta: {"dur": 15, "bpm": 112, "mood": "warm|bright|calm|drive", "key": "A", "cues": [[t, "whoosh|click|pop|hit|riser|type"], ...]}
+meta: {"dur": 15, "bpm": 112, "mood": "warm|bright|calm|drive", "key": "A", "cues": [[t, kind], ...]}
+kind: click pop chime notify whoosh swish riser hit type paper printer stamp shutter marker coin box — recorded takes
+from motion/sfx (see its CREDITS.md); whoosh/riser/hit/click/pop/type fall back to synthesis when a kind has no takes.
 The mix is left at a safe level; the renderer normalises loudness to -14 LUFS / -1.5 dBTP with ffmpeg.
 """
+import glob
 import json
+import os
 import sys
 import wave
 
@@ -116,6 +120,47 @@ def typing(rng, n=int(0.05 * SR)):
     return (lp_fast(x, 6000) - lp_fast(x, 2500)) * np.exp(-np.arange(n) / SR * 120) * 0.35
 
 
+SFX_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'sfx')
+# Recorded effects (motion/sfx/<kind>/*.wav, CC0 / CC BY — see sfx/CREDITS.md). Gain per kind against the music bed;
+# `peak` kinds are placed so their loudest moment lands on the cue (a whoosh peaks on the cut, a riser on the reveal),
+# the others start on it. `cap` trims long takes (seconds) with a short fade.
+SFX = {
+    'click': dict(gain=0.42, cap=0.35), 'pop': dict(gain=0.48, cap=0.6), 'chime': dict(gain=0.5, cap=1.6),
+    'notify': dict(gain=0.5, cap=1.4), 'whoosh': dict(gain=0.55, cap=1.6, peak=True), 'swish': dict(gain=0.45, cap=0.9, peak=True),
+    'riser': dict(gain=0.5, cap=3.0, peak=True), 'hit': dict(gain=0.7, cap=1.8), 'type': dict(gain=0.4, cap=0.9),
+    'paper': dict(gain=0.5, cap=1.0), 'printer': dict(gain=0.45, cap=1.4), 'stamp': dict(gain=0.62, cap=0.8),
+    'shutter': dict(gain=0.5, cap=0.9), 'marker': dict(gain=0.45, cap=1.0), 'coin': dict(gain=0.42, cap=1.0),
+    'box': dict(gain=0.6, cap=1.0),
+}
+_cache = {}
+
+
+def load_wav(path):
+    if path not in _cache:
+        with wave.open(path, 'rb') as w:
+            ch, n = w.getnchannels(), w.getnframes()
+            x = np.frombuffer(w.readframes(n), dtype=np.int16).astype(np.float64) / 32768.0
+            x = x.reshape(-1, ch).mean(axis=1)
+        _cache[path] = x
+    return _cache[path]
+
+
+def recorded(kind, at, n_cue):
+    """A recorded take for this cue (a different take each time, chosen deterministically), or None."""
+    files = sorted(glob.glob(os.path.join(SFX_DIR, kind, '*.wav')))
+    if kind not in SFX or not files:
+        return None
+    o = SFX[kind]
+    x = load_wav(files[(n_cue * 7 + int(at * 10)) % len(files)])
+    cap = int(o['cap'] * SR)
+    if len(x) > cap:
+        x = x[:cap].copy()
+        f = min(int(0.08 * SR), cap // 4)
+        x[-f:] *= np.linspace(1, 0, f)
+    start = at - (int(np.argmax(np.abs(x))) / SR if o.get('peak') else 0.0)
+    return x * o['gain'], max(0.0, start)
+
+
 def place(buf, sig, at, gain=1.0):
     i = int(at * SR)
     if i >= len(buf):
@@ -189,10 +234,13 @@ def main():
             t += beat
             k += 1
 
-    # Effects at cues
-    for at, kind in meta.get('cues', []):
+    # Effects at cues: a recorded take where the library has one, the synthesised sound otherwise.
+    for n_cue, (at, kind) in enumerate(meta.get('cues', [])):
         at = float(at)
-        if kind == 'whoosh':
+        rec = recorded(kind, at, n_cue)
+        if rec is not None:
+            place(sfx, rec[0], rec[1], 1.0)
+        elif kind == 'whoosh':
             place(sfx, whoosh(rng), max(0, at - 0.3), 0.8)
         elif kind == 'riser':
             place(sfx, riser(rng), max(0, at - 1.4), 0.8)

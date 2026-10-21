@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C04 · The Sharpness Check</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #E9E3D6; }
+.wall { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 40%, #F4EFE4, #DDD5C5); }
+.world { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 0 0; z-index: 5; }
+.frame { position: absolute; background: #2A2724; border-radius: 6px; box-shadow: 0 70px 110px -50px rgba(31,31,31,.7), 0 20px 30px -20px rgba(31,31,31,.5); }
+.mat { position: absolute; background: #FBF8F0; box-shadow: inset 0 3px 8px rgba(0,0,0,.18); }
+.art { position: absolute; overflow: hidden; background: #F3EBDD; }
+.art canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.art img { position: absolute; max-width: none; display: block; }
+.grid { position: absolute; inset: 0; pointer-events: none; }
+.scanl { position: absolute; left: -10px; right: -10px; height: 10px; margin-top: -5px; background: #DFFF5A; box-shadow: 0 0 30px 10px rgba(223,255,90,.7); }
+.flagbox { position: absolute; border: 6px dashed #E5484D; border-radius: 4px; pointer-events: none; }
+.plate { position: absolute; font: 500 20px 'IBM Plex Mono', monospace; color: #45403A; letter-spacing: .06em; white-space: nowrap; transform: translateX(-50%); }
+.cap { position: absolute; left: 60px; right: 60px; text-align: center; font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; z-index: 40; }
+.band { position: absolute; left: 0; right: 0; z-index: 38; background: linear-gradient(rgba(233,227,214,.97) 72%, rgba(233,227,214,0)); pointer-events: none; }
+.chip { position: absolute; z-index: 42; font: 700 32px 'Archivo'; padding: 18px 30px; border-radius: 99px; white-space: nowrap; box-shadow: 0 24px 40px -20px rgba(31,31,31,.6); }
+.chip small { font: 500 22px 'IBM Plex Mono', monospace; opacity: .85; margin-left: 6px; }
+.seal { position: absolute; z-index: 43; width: 250px; height: 250px; margin: -125px 0 0 -125px; border-radius: 50%; background: #DFFF5A; display: grid; place-items: center; text-align: center;
+  box-shadow: 0 0 0 6px #1F1F1F, 0 30px 50px -20px rgba(31,31,31,.6); }
+.seal b { display: block; font: 800 74px/0.9 'Archivo'; letter-spacing: -0.03em; color: #1F1F1F; }
+.seal span { display: block; margin-top: 8px; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #1F1F1F; }
+.seal i { position: absolute; inset: 14px; border-radius: 50%; border: 3px dashed rgba(31,31,31,.45); }
+.shot { position: absolute; z-index: 30; border-radius: 30px; overflow: hidden; background: #FAF7EE; box-shadow: 0 60px 110px -50px rgba(31,31,31,.65), 0 0 0 2px #1F1F1F; }
+.shot img { position: absolute; max-width: none; display: block; }
+.shot .demo { right: 14px; bottom: 12px; }
+.hlr { position: absolute; border-radius: 14px; z-index: 2; pointer-events: none; }
+</style></head>
+<body><div id="stage" class="grain"><div class="wall"></div></div>
+<script src="kit.js"></script>
+<script>
+// C04 — pixel zoom. A framed print on the wall; the camera pushes into it and the file underneath shows its real
+// size: blocky pixels, flagged. The print-ready file then resolves in four scanner passes on the beat (each lime
+// scan line reveals the next resolution) until it is crisp, and a 294 px/in seal lands. Then the real checks:
+// the try-on's estimate, the Print check against the partner's spec, and a size list that says when a size is too big.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const B = 60 / 112, b = (n) => n * B;
+const ART = { x: 1066, y: 762, w: 524, h: 732 };
+const L = K.v({
+  '9x16': { capY: 292, capFs: 92, band: 660, artW: 520, top: 600, fx: 540, fy: 900, zoom: 3.1, chipY: 1110, sealY: 1000, shotW: 860, shotY: 500, sizeW: 590 },
+  '4x5': { capY: 60, capFs: 78, band: 360, artW: 400, top: 300, fx: 540, fy: 760, zoom: 2.9, chipY: 1150, sealY: 960, shotW: 700, shotY: 250, sizeW: 560 },
+});
+const AW = L.artW, AH = Math.round(AW * ART.h / ART.w), MAT = 46, FR = 20;
+const FW = AW + 2 * (MAT + FR), FH = AH + 2 * (MAT + FR);
+const PX = (W - FW) / 2, PY = L.top;
+const ax0 = PX + FR + MAT, ay0 = PY + FR + MAT;
+const FOC = [ax0 + AW * 0.62, ay0 + AH * 0.34]; // the coral sun and the flower
+
+// ---------- the print on the wall ----------
+const world = K.box(0, 0, W, H, { cls: 'world' });
+const frame = K.box(PX, PY, FW, FH, { cls: 'frame', parent: world });
+K.el('div', { cls: 'mat', parent: frame, style: { left: FR + 'px', top: FR + 'px', width: AW + 2 * MAT + 'px', height: AH + 2 * MAT + 'px' } });
+const art = K.el('div', { cls: 'art', parent: frame, style: { left: FR + MAT + 'px', top: FR + MAT + 'px', width: AW + 'px', height: AH + 'px' } });
+const src = K.el('img', { src: K.canvas('PrintArea'), style: { position: 'absolute', width: '1px', height: '1px', opacity: 0 } });
+const cvA = K.el('canvas', { parent: art }), cvB = K.el('canvas', { parent: art });
+const crisp = K.el('img', { src: K.canvas('PrintArea'), parent: art, style: { width: 2880 * AW / ART.w + 'px', left: -ART.x * AW / ART.w + 'px', top: -ART.y * AW / ART.w + 'px' } });
+const grid = K.el('div', { cls: 'grid', parent: art });
+const scanl = K.el('div', { cls: 'scanl', parent: art });
+const flagbox = K.el('div', { cls: 'flagbox', parent: art, style: { inset: '6px' } });
+const plate = K.box(W / 2, PY + FH + 30, null, null, { cls: 'plate', parent: world, html: 'Art print · matte · largest size', style: { width: 'auto', height: 'auto' } });
+const tagArt = K.demoTag('Product design · sample artwork', 0, 0);
+
+// resolution of the file shown, by time (cells across)
+const STEPS = [[0, 34], [b(8), 60], [b(8.5), 104], [b(9), 180], [b(9.5), 300], [b(10), 0]]; // 0 = the crisp file
+function level(T) { let n = STEPS[0][1], i = 0; STEPS.forEach(([t, v], k) => { if (T >= t) { n = v; i = k; } }); return { n, i }; }
+const cache = new Map();
+function paint(cv, n) {
+  if (cv._n === n) return;
+  cv._n = n;
+  const m = Math.round(n * ART.h / ART.w);
+  cv.width = n; cv.height = m;
+  const ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(src, ART.x, ART.y, ART.w, ART.h, 0, 0, n, m);
+}
+
+// ---------- captions ----------
+const band = K.box(0, 0, W, L.band, { cls: 'band' });
+const capEls = [];
+function cap(text) { const c = K.box(60, L.capY, W - 120, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }); capEls.push(c); return K.words(c, text); }
+const C = [cap('Will it print sharp?\nWe check.'), cap('Here’s the\nprint-ready file.'), cap('Checked to your\npartner’s spec.'), cap('Too big for a size?\nIt says so first.')];
+C.forEach((ws) => ws.forEach((w) => { w.style.fontSize = 'inherit'; }));
+capEls.slice(1).forEach((c) => { c.style.fontSize = L.capFs * 0.86 + 'px'; });
+const flag = K.box(0, 0, null, null, { cls: 'chip', html: '⚠ 120 px/in <small>· too small for this size</small>', style: { width: 'auto', height: 'auto', background: '#E5484D', color: '#FFFDF8' } });
+const seal = K.box(0, 0, 250, 250, { cls: 'seal', html: '<i></i><div><b>294</b><span>PX / IN · PASS</span></div>' });
+
+// ---------- real checks ----------
+function shot(srcU, nat, r, w, tagTxt) {
+  const s = w / r[2], h = Math.round(r[3] * s);
+  const el = K.box(0, 0, w, h, { cls: 'shot' });
+  K.el('img', { src: srcU, parent: el, style: { width: nat * s + 'px', left: -r[0] * s + 'px', top: -r[1] * s + 'px' } });
+  K.el('div', { cls: 'demo', parent: el, html: tagTxt });
+  return { el, h, s, r };
+}
+const est = shot(K.screen('54-phone-try-on'), 780, [32, 2866, 716, 262], tall ? 760 : 700, 'Real app · demo workspace');
+const chk = shot(K.canvas('PrintArea'), 2880, [2134, 196, 676, 614], L.shotW, 'Product design · sample data');
+const ROWS = [[2150, 400, 650, 100], [2150, 500, 650, 150], [2150, 676, 650, 120]];
+const rowHL = ROWS.map(() => K.el('div', { cls: 'hlr', parent: chk.el, style: { boxShadow: 'inset 0 0 0 5px #1F1F1F', background: 'rgba(223,255,90,.32)' } }));
+const sz = shot(K.canvas('MakePhysical'), 2880, [2152, 336, 648, 860], L.sizeW, 'Product design · sample data');
+const redHL = K.el('div', { cls: 'hlr', parent: sz.el, style: { boxShadow: '0 0 0 5px #E5484D' } });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Checked before<br>it’s printed.' });
+
+// beats: hook 0–4, zoom 3–6, flag 6, passes 8–9.5, crisp 10, seal 10.5, estimate 12, check 15 (rows 16–18), sizes 19 (flag 21)
+const ZOOM_IN = [b(3), b(5.5)], FLAG = b(6), CRISP = b(10), SEAL = b(10.5), EST = b(12), CHK = b(15), SIZES = b(19), RED = b(21);
+
+K.run({
+  id: 'C04', title: 'The Sharpness Check', dur: DUR, bpm: 112, mood: 'drive', key: 'C', intro: 1.07, cover: 5.9,
+  technique: 'Pixel zoom on a framed print: the camera pushes in until the low-resolution file shows blocky pixels and is flagged, then four beat-locked scanner passes reveal ever finer resolutions until the print-ready file is crisp and a 294 px/in seal lands; real try-on estimate, Print check and size list follow',
+  caption: 'Before anything is printed, the file is checked against your print partner’s spec: effective pixels per inch at the real size, the safe area, the bleed. A size the artwork is too small for is flagged first. Start free at makeandlist.com',
+  short: 'Will it print sharp? We check.',
+  beats: ['0–2.1 s: “Will it print sharp? We check.” — a print on the wall', '2.1–4.3 s: push in: blocky pixels, flagged at 120 px/in, too small for this size', '4.3–6.4 s: four scan passes to the print-ready file — 294 px/in, pass', '6.4–8 s: the try-on’s estimate — the check measures the file itself', '8–10.2 s: the Print check against the partner’s spec', '10.2–13 s: sizes — the one that is too big says so; 13–15 s end card'],
+  cues: [[0.1, 'swish'], [b(2.4), 'riser'], [ZOOM_IN[0], 'whoosh'], [FLAG, 'hit'], [b(8), 'shutter'], [b(8.5), 'click'], [b(9), 'click'], [b(9.5), 'click'], [CRISP, 'hit'], [SEAL, 'stamp'],
+    [EST - 0.25, 'swish'], [EST, 'pop'], [CHK - 0.25, 'whoosh'], [CHK, 'pop'], [b(16), 'click'], [b(17), 'click'], [b(18), 'chime'], [SIZES - 0.25, 'whoosh'], [SIZES, 'pop'], [RED, 'pop'], [11.6, 'riser'], [13.0, 'hit']],
+}, (T) => {
+  // camera: a slow drift, the push in, the pull out after the seal
+  const zin = K.p(T, ZOOM_IN[0], ZOOM_IN[1], E.inOutExpo);
+  const zout = K.p(T, SEAL + 0.1, EST + 0.1, E.inOutCubic);
+  const z = 1 + (L.zoom - 1) * zin * (1 - zout) + 0.02 * Math.sin(T * 0.8);
+  const fx = K.lerp(W / 2, L.fx, zin), fy = K.lerp(PY + FH / 2, L.fy, zin * (1 - zout)) + zout * 0;
+  const ffx = K.lerp(W / 2, FOC[0], zin * (1 - zout)), ffy = K.lerp(PY + FH / 2, FOC[1], zin * (1 - zout));
+  const leave = K.p(T, CHK - 0.35, CHK + 0.2, E.inCubic);
+  const toY = zout * (tall ? -40 : -30);
+  world.style.transform = `translate(${fx + leave * -W * 0.9}px, ${fy + toY}px) scale(${z * (1 - 0.1 * leave)}) translate(${-ffx}px, ${-ffy}px) rotate(${Math.sin(T * 0.6) * 0.3}deg)`;
+  world.style.opacity = 1 - leave;
+  world.style.visibility = leave >= 1 ? 'hidden' : 'visible';
+  // the file: blocky, then four passes, then crisp
+  const { n, i } = level(T);
+  const prev = i > 0 ? STEPS[i - 1][1] : n;
+  const pass = i >= 1 ? K.p(T, STEPS[i][0], STEPS[i][0] + b(0.5) - 0.02, E.inOutCubic) : 1;
+  if (n > 0) {
+    paint(cvA, prev); paint(cvB, n);
+    cvA.style.display = 'block'; cvB.style.display = 'block';
+    cvB.style.clipPath = `inset(0 0 ${(1 - pass) * 100}% 0)`;
+    crisp.style.opacity = 0;
+  } else {
+    paint(cvA, STEPS[STEPS.length - 2][1]);
+    cvB.style.display = 'none';
+    crisp.style.opacity = 1; crisp.style.clipPath = `inset(0 0 ${(1 - pass) * 100}% 0)`;
+  }
+  const cells = n > 0 ? n : 300;
+  const cw = AW / cells;
+  const gp = K.p(T, ZOOM_IN[0] + 0.3, ZOOM_IN[1], E.linear) * (n > 0 ? 1 : 0) * (n > 120 ? 0.35 : 1);
+  grid.style.backgroundImage = `linear-gradient(90deg, rgba(31,31,31,.28) 1px, transparent 1px), linear-gradient(rgba(31,31,31,.28) 1px, transparent 1px)`;
+  grid.style.backgroundSize = `${cw}px ${cw}px`;
+  grid.style.opacity = gp;
+  scanl.style.top = pass * AH + 'px';
+  scanl.style.opacity = i >= 1 && pass < 1 ? 1 : 0;
+  // the flag on the low-res file
+  const fp = K.p(T, FLAG, FLAG + 0.45, E.outBack) * (1 - K.p(T, b(8) - 0.15, b(8) + 0.1, E.inCubic));
+  flagbox.style.opacity = fp > 0 ? Math.min(1, fp * 2) * (0.75 + 0.25 * Math.sin(T * 14)) : 0;
+  flag.style.left = W / 2 + 'px'; flag.style.top = L.chipY + 'px';
+  flag.style.opacity = Math.min(1, fp * 1.5); flag.style.transform = `translateX(-50%) scale(${0.7 + 0.3 * fp}) rotate(${(1 - fp) * -4}deg)`;
+  // the seal
+  const sp = K.p(T, SEAL, SEAL + 0.4, E.outBack) * (1 - K.p(T, CHK - 0.4, CHK - 0.1, E.inCubic));
+  const sx = tall ? W - 230 : W - 210, sy = K.lerp(L.sealY, tall ? 720 : 470, zout);
+  seal.style.left = sx + 'px'; seal.style.top = sy + 'px';
+  seal.style.opacity = sp > 0 ? Math.min(1, sp * 2) : 0;
+  seal.style.transform = `scale(${K.lerp(1.9, 1, K.clamp(sp))}) rotate(${-12 + (1 - sp) * 30 + Math.sin(T * 1.4) * 2}deg)`;
+  // the caption band and captions
+  band.style.opacity = K.p(T, ZOOM_IN[0], ZOOM_IN[0] + 0.4, E.linear) * (1 - zout) * (1 - leave);
+  K.reveal(C[0], T, 0.1, { kind: 'up', stagger: 0.07, out: b(8) - 0.3 });
+  K.reveal(C[1], T, b(8) + 0.05, { kind: 'up', stagger: 0.07, out: CHK - 0.35 });
+  K.reveal(C[2], T, CHK + 0.05, { kind: 'up', stagger: 0.07, out: SIZES - 0.35 });
+  K.reveal(C[3], T, SIZES + 0.05, { kind: 'up', stagger: 0.07 });
+  const wins = [[0, b(8)], [b(8), CHK], [CHK, SIZES], [SIZES, 99]];
+  capEls.forEach((c, k) => { c.style.visibility = T >= wins[k][0] - 0.05 && T < wins[k][1] + 0.05 ? 'visible' : 'hidden'; });
+  // tags
+  const ar = art.getBoundingClientRect();
+  tagArt.style.left = Math.max(65, ar.left) + 'px'; tagArt.style.top = Math.min(tall ? 1200 : 1270, ar.bottom + 18) + 'px';
+  tagArt.style.opacity = (1 - zin) * (1 - leave);
+  // the estimate card, under the pulled-back print
+  const ep = K.p(T, EST, EST + 0.55, E.outExpo) * (1 - K.p(T, CHK - 0.35, CHK - 0.05, E.inCubic));
+  const ew = tall ? 760 : 700;
+  est.el.style.left = (W - ew) / 2 + 'px'; est.el.style.top = (tall ? 1000 : 1000) + 'px';
+  est.el.style.opacity = Math.min(1, ep * 1.5); est.el.style.visibility = ep > 0 ? 'visible' : 'hidden';
+  est.el.style.transform = `translateY(${(1 - ep) * 160 + Math.sin(T * 1.5) * 4}px) rotate(${(1 - ep) * 4 - 1}deg)`;
+  // the Print check
+  const cp = K.p(T, CHK, CHK + 0.6, E.outExpo), cq = K.p(T, SIZES - 0.35, SIZES + 0.1, E.inCubic);
+  chk.el.style.left = (W - L.shotW) / 2 + 'px'; chk.el.style.top = L.shotY + 'px';
+  chk.el.style.opacity = Math.min(1, cp * 1.5) * (1 - cq); chk.el.style.visibility = cp > 0 && cq < 1 ? 'visible' : 'hidden';
+  chk.el.style.transform = `perspective(1800px) translateX(${(1 - cp) * 500 - cq * 500}px) rotateY(${(1 - cp) * -24 + cq * 20}deg) translateY(${Math.sin(T * 1.2) * 4}px)`;
+  rowHL.forEach((el, k) => {
+    const r = ROWS[k];
+    const p = K.p(T, b(16 + k), b(16 + k) + 0.35, E.outBack);
+    el.style.left = (r[0] - chk.r[0]) * chk.s + 'px'; el.style.top = (r[1] - chk.r[1]) * chk.s + 'px';
+    el.style.width = r[2] * chk.s + 'px'; el.style.height = r[3] * chk.s + 'px';
+    el.style.opacity = p > 0 ? Math.min(1, p * 2) : 0; el.style.transform = `scale(${0.9 + 0.1 * p})`;
+  });
+  // the size list
+  const zp = K.p(T, SIZES, SIZES + 0.6, E.outExpo);
+  sz.el.style.left = (W - L.sizeW) / 2 + 'px'; sz.el.style.top = L.shotY + 'px';
+  sz.el.style.opacity = Math.min(1, zp * 1.5); sz.el.style.visibility = zp > 0 ? 'visible' : 'hidden';
+  sz.el.style.transform = `perspective(1800px) translateX(${(1 - zp) * 500}px) rotateY(${(1 - zp) * -24}deg) translateY(${Math.sin(T * 1.2) * 4}px)`;
+  const rp = K.p(T, RED, RED + 0.4, E.outBack);
+  const rr = [2160, 840, 630, 98];
+  redHL.style.left = (rr[0] - sz.r[0]) * sz.s + 'px'; redHL.style.top = (rr[1] - sz.r[1]) * sz.s + 'px';
+  redHL.style.width = rr[2] * sz.s + 'px'; redHL.style.height = rr[3] * sz.s + 'px';
+  redHL.style.opacity = rp > 0 ? 1 : 0; redHL.style.transform = `scale(${1.15 - 0.15 * rp})`;
+  end(T);
+});
+</script></body></html>

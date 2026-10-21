@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C10 · Make It Physical</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+.scene { position: absolute; inset: 0; overflow: hidden; }
+.ringR { position: absolute; border-radius: 50%; pointer-events: none; z-index: 80; }
+.cap { position: absolute; z-index: 50; text-align: center; font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; }
+.cap em { font-style: normal; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); }
+.flipW { position: absolute; perspective: 2200px; z-index: 20; }
+.flip { position: absolute; inset: 0; transform-style: preserve-3d; }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 40px; overflow: hidden; }
+.dig { background: #FFFDF8; box-shadow: 0 0 0 2px #1F1F1F; }
+.dig .art { position: absolute; overflow: hidden; border-radius: 22px; background: #E5DFD4; }
+.dig .art img { position: absolute; }
+.dig .t { position: absolute; font: 800 44px/1.05 'Playfair Display'; letter-spacing: -0.015em; }
+.dig .chips { position: absolute; display: flex; gap: 10px; flex-wrap: wrap; }
+.dig .chips span { font: 500 20px 'IBM Plex Mono', monospace; color: #45403A; border: 2px solid #D9D3C9; border-radius: 99px; padding: 6px 14px; white-space: nowrap; }
+.dig .btn { position: absolute; display: grid; place-items: center; border: 3px dashed #8A8378; border-radius: 20px; font: 800 30px 'Archivo'; color: #1F1F1F; background: #EFEADF; }
+.dig .kind { position: absolute; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #45403A; }
+.back { transform: rotateY(180deg); }
+.obj { position: absolute; z-index: 22; overflow: visible; }
+.shadow { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(31,31,31,.32), rgba(31,31,31,0)); z-index: 18; }
+.tagD { position: absolute; z-index: 30; font: 700 22px 'Archivo'; background: #1F1F1F; color: #DFFF5A; padding: 8px 16px; border-radius: 99px; white-space: nowrap; }
+.ph { position: absolute; z-index: 20; border-radius: 64px; background: #0E0E0D; padding: 14px; box-shadow: 0 80px 140px -50px rgba(0,0,0,.9), inset 0 0 0 2px #333; }
+.ph .scr { position: relative; width: 100%; height: 100%; border-radius: 52px; overflow: hidden; background: #FAF7EE; }
+.ph .scr img { position: absolute; left: 0; top: 0; width: 100%; }
+.ph .notch { position: absolute; left: 50%; top: 26px; width: 110px; height: 32px; margin-left: -55px; border-radius: 20px; background: #0E0E0D; z-index: 3; }
+.ring { position: absolute; border: 6px solid #DFFF5A; border-radius: 22px; box-shadow: 0 0 0 2px #1F1F1F; z-index: 4; }
+.panel { position: absolute; z-index: 20; overflow: hidden; border-radius: 34px; background: #FFFDF8; box-shadow: 0 70px 120px -50px rgba(31,31,31,.6), 0 0 0 2px #1F1F1F; }
+.panel img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.rowHl { position: absolute; border: 5px solid #1F1F1F; border-radius: 18px; z-index: 3; }
+.note { position: absolute; z-index: 30; font: 600 24px/1.3 'IBM Plex Mono', monospace; color: #1F1F1F; }
+.note b { display: inline-block; background: #DFFF5A; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+.store { position: absolute; z-index: 30; height: 110px; border-radius: 26px; background: #FFFDF8; box-shadow: 0 24px 40px -24px rgba(31,31,31,.6), 0 0 0 2px #1F1F1F; display: grid; place-items: center; }
+.store img { max-width: 70%; max-height: 50%; }
+.store em { position: absolute; bottom: -38px; font: 600 18px 'IBM Plex Mono', monospace; font-style: normal; letter-spacing: .08em; color: #45403A; white-space: nowrap; }
+.chipF { position: absolute; z-index: 30; font: 600 25px 'IBM Plex Mono', monospace; color: #DFFF5A; background: #1F1F1F; padding: 14px 24px; border-radius: 14px; white-space: nowrap; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// C10 — one tap on a digital product card sends a ripple across the frame; the card flips in 3D and comes back as
+// a physical edition (poster, with a tee and a mug fanning out behind it). Each later step arrives by its own ripple:
+// the real "Make it physical" screen (a draft edition, a technical pass), the size-by-size print check on the design
+// board, and the stores it lists in after the seller's yes. Printing is paid from the partner account, never Credits.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 110, B = (n) => +(n * BEAT).toFixed(3);
+const T_TAP = B(3), T_R1 = B(3.15), T_FLIP = B(4), T_FAN = B(5), T_R2 = B(8), T_RING1 = B(9.5), T_RING2 = B(11), T_TAP2 = B(12.3), T_R3 = B(12.5), T_R4 = B(19);
+const NS = 'http://www.w3.org/2000/svg';
+const ART = K.canvas('MakePhysical');
+const L = tall
+  ? { capY: 292, capFs: 86, card: [240, 520, 600, 700], stackY: 560, objS: 1, ph: [290, 560, 500], panel: [244, 520, 592, 0.9], stY: 640, chipY: 1146 }
+  : { capY: 58, capFs: 72, card: [270, 290, 540, 660], stackY: 290, objS: 0.88, ph: [345, 290, 390], panel: [270, 290, 540, 0.82], stY: 380, chipY: 900 };
+
+// scenes revealed by circular ripples: ivory → lime → ink → sand → ivory
+const SC = ['#FAF7EE', '#DFFF5A', '#1F1F1F', '#EFE9DD', '#FAF7EE'].map((c, i) => K.box(0, 0, W, H, { cls: 'scene', style: { background: c, zIndex: (i + 1) * 10 } }));
+const rings = [0, 1, 2].map(() => K.box(0, 0, 10, 10, { cls: 'ringR' }));
+// soft light inside every scene
+SC.forEach((s, i) => K.el('div', { parent: s, style: { position: 'absolute', left: '-20%', top: '-10%', width: '140%', height: '90%', background: `radial-gradient(60% 50% at 50% 40%, ${i === 2 ? 'rgba(223,255,90,.12)' : 'rgba(255,253,246,.6)'}, rgba(255,255,255,0) 70%)` } }));
+
+// artwork symbol: Quiet Botanicals Nº01 from the Make-it-physical board (x 1146–1416, y 380–718)
+const defs = document.createElementNS(NS, 'svg'); defs.setAttribute('width', 0); defs.setAttribute('height', 0); defs.style.position = 'absolute';
+defs.innerHTML = `<defs><symbol id="art" viewBox="1146 380 270 338"><image href="${ART}" x="0" y="0" width="2880" height="2360"/></symbol>
+  <clipPath id="mugc"><path d="M40 40 H230 V214 Q230 238 206 238 H64 Q40 238 40 214 Z"/></clipPath></defs>`;
+document.getElementById('stage').appendChild(defs);
+K.el('img', { src: ART, style: { position: 'absolute', width: '1px', height: '1px', opacity: 0 } });
+
+// ---------- scene 1: the digital card, flipping into the poster ----------
+const [cx, cy, cw, ch] = L.card;
+// the card, the tee and the mug live between the lime scene (z 20) and the ink one (z 30): the ripple covers them
+const flipW = K.box(cx, cy, cw, ch, { cls: 'flipW', style: { zIndex: 25 } });
+const flip = K.el('div', { parent: flipW, cls: 'flip' });
+const dig = K.el('div', { parent: flip, cls: 'face dig' });
+const pad = cw * 0.07, aw = cw - pad * 2, ah = ch * 0.5;
+const art1 = K.el('div', { parent: dig, cls: 'art', style: { left: pad + 'px', top: pad + 'px', width: aw + 'px', height: ah + 'px' } });
+const as = ah * 0.86 / 338;
+const art1i = K.el('div', { parent: art1, style: { position: 'absolute', overflow: 'hidden', left: (aw - 270 * as) / 2 + 'px', top: ah * 0.07 + 'px', width: 270 * as + 'px', height: 338 * as + 'px', boxShadow: '0 18px 30px -18px rgba(31,31,31,.5)' } });
+K.el('img', { parent: art1i, src: ART, style: { width: 2880 * as + 'px', left: -1146 * as + 'px', top: -380 * as + 'px' } });
+K.el('div', { parent: dig, cls: 'kind', html: 'Digital download', style: { left: pad + 'px', top: pad + ah + 26 + 'px' } });
+K.el('div', { parent: dig, cls: 't', html: 'Quiet Botanicals Nº01', style: { left: pad + 'px', top: pad + ah + 60 + 'px', width: aw + 'px', fontSize: (tall ? 46 : 38) + 'px' } });
+K.el('div', { parent: dig, cls: 'chips', html: '<span>PNG · 4800 × 6000</span><span>Ready</span>', style: { left: pad + 'px', top: pad + ah + (tall ? 128 : 112) + 'px' } });
+const btnH = tall ? 92 : 80;
+const btn = K.el('div', { parent: dig, cls: 'btn', html: '+ Add printed edition', style: { left: pad + 'px', width: aw + 'px', bottom: pad + 'px', height: btnH + 'px', fontSize: (tall ? 30 : 26) + 'px' } });
+// back face: the framed poster
+const back = K.el('div', { parent: flip, cls: 'face back', style: { background: 'transparent', overflow: 'visible' } });
+back.innerHTML = `<svg width="${cw}" height="${ch}" viewBox="0 0 300 350" preserveAspectRatio="xMidYMid meet" style="overflow:visible">
+  <rect x="18" y="4" width="264" height="342" rx="6" fill="#1F1F1F"/><rect x="30" y="16" width="240" height="318" fill="#FBF8F1"/>
+  <rect x="52" y="38" width="196" height="274" fill="#F3EBDD"/><use href="#art" x="58" y="44" width="184" height="262"/>
+  <rect x="30" y="16" width="240" height="318" fill="url(#glass)" opacity=".5"/>
+  <defs><linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset=".3" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".55"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient></defs></svg>`;
+const shadow = K.box(cx + cw * 0.1, cy + ch - 20, cw * 0.8, 80, { cls: 'shadow', style: { zIndex: 22 } });
+const cursor = K.cursor();
+
+// scene 2 holds the stack (it sits on the lime scene)
+const OS = L.objS * (tall ? 1 : 0.95);
+function mk(parent, w, h, vb, inner) { const d = K.box(0, 0, w, h, { parent, cls: 'obj' }); d.innerHTML = `<svg width="${w}" height="${h}" viewBox="${vb}" style="overflow:visible">${inner}</svg>`; return d; }
+const TEE = 'M104 16 Q150 50 196 16 L258 40 L292 108 L246 128 L236 102 L236 314 L64 314 L64 102 L54 128 L8 108 L42 40 Z';
+const teeSvg = `<path d="${TEE}" fill="#FFFDF8" stroke="#1F1F1F" stroke-width="4" stroke-linejoin="round"/><path d="M118 22 Q150 44 182 22" fill="none" stroke="#1F1F1F" stroke-width="3"/>
+  <use href="#art" x="102" y="74" width="96" height="120"/><path d="M64 102 L64 314" stroke="rgba(31,31,31,.08)" stroke-width="10"/>`;
+const mugSvg = `<ellipse cx="135" cy="40" rx="95" ry="14" fill="#E9E3D6" stroke="#1F1F1F" stroke-width="4"/>
+  <path d="M230 80 Q290 80 290 140 Q290 200 230 200" fill="none" stroke="#1F1F1F" stroke-width="16" stroke-linecap="round"/><path d="M230 80 Q290 80 290 140 Q290 200 230 200" fill="none" stroke="#FFFDF8" stroke-width="8" stroke-linecap="round"/>
+  <path d="M40 40 H230 V214 Q230 238 206 238 H64 Q40 238 40 214 Z" fill="#FFFDF8" stroke="#1F1F1F" stroke-width="4"/>
+  <g clip-path="url(#mugc)"><use href="#art" x="74" y="62" width="122" height="154"/><rect x="40" y="40" width="40" height="200" fill="rgba(31,31,31,.07)"/><rect x="190" y="40" width="40" height="200" fill="rgba(31,31,31,.09)"/></g>`;
+const SW2 = tall ? 1 : 0.86;
+const tee = mk(undefined, 380 * SW2, 404 * SW2, '0 0 300 320', teeSvg); tee.style.zIndex = 24;
+const mug = mk(undefined, 330 * SW2, 290 * SW2, '0 0 300 260', mugSvg); mug.style.zIndex = 24;
+const poster2 = flipW;
+const shadows2 = [0, 1, 2].map(() => K.box(0, 0, 300, 70, { cls: 'shadow', style: { zIndex: 21 } }));
+const drafts = ['Poster · draft', 'Tee · draft', 'Mug · draft'].map((t) => K.box(0, 0, null, null, { cls: 'tagD', html: t, style: { width: 'auto', height: 'auto', zIndex: 27 } }));
+
+// ---------- scene 3: the real screen on a phone ----------
+const [px, py, pw] = L.ph, PH = Math.round(pw * 2.05), PS = (pw - 28) / 780;
+const ph = K.box(px, py, pw, PH, { parent: SC[2], cls: 'ph' });
+const pscr = K.el('div', { parent: ph, cls: 'scr' }); K.el('div', { parent: ph, cls: 'notch' });
+const pimg = K.el('img', { parent: pscr, src: K.screen('33-phone-sell-physical') });
+const r1 = K.el('div', { parent: pscr, cls: 'ring' }), r2 = K.el('div', { parent: pscr, cls: 'ring' });
+const pscroll = (T) => K.k(T, [[T_R2, 0], [T_RING1 + 0.3, 40], [T_RING2 - 0.1, 330], [T_TAP2, 360]]);
+const ringAt = (el, x0, y0, x1, y1, sc) => { el.style.left = x0 * PS - 8 + 'px'; el.style.top = (y0 - sc) * PS - 8 + 'px'; el.style.width = (x1 - x0) * PS + 16 + 'px'; el.style.height = (y1 - y0) * PS + 16 + 'px'; };
+
+// ---------- scene 4: the size-by-size print check (MakePhysical board, panel x 2157–2815, y 170–1240) ----------
+const [qx, qy, qw, qs] = L.panel;
+const PC = { x: 2157, y: 170, w: 658, h: 1070 };
+const QS = qw / PC.w;
+const panel = K.box(qx, qy, qw, PC.h * QS, { parent: SC[3], cls: 'panel' });
+K.el('img', { parent: panel, src: ART, style: { width: 2880 * QS + 'px', transform: `translate(${-PC.x * QS}px, ${-PC.y * QS}px)` } });
+const ROWS = [400, 510, 620, 730, 840];
+const rowHl = K.el('div', { parent: panel, cls: 'rowHl', style: { left: 30 * QS + 'px', width: (PC.w - 60) * QS + 'px', height: 100 * QS + 'px' } });
+const notes = [['pass', '12 × 15 in · 400 px/in'], ['needs review', '24 × 30 in'], ['too small', '40 × 50 in']];
+
+// ---------- scene 5: stores ----------
+const STORES = [['ikas.svg', 'IKAS'], ['woocommerce.svg', 'WOOCOMMERCE'], ['wix.svg', 'WIX']];
+const stW = tall ? 260 : 250, stGap = tall ? 40 : 50;
+const stores = STORES.map(([f, n], i) => K.box((W - (stW * 3 + stGap * 2)) / 2 + i * (stW + stGap), L.stY, stW, 110, { parent: SC[4], cls: 'store', html: `<img src="${K.pub('platforms/' + f)}"><em>${n} · DRAFT</em>`, style: f === 'wix.svg' ? { background: '#1F1F1F' } : {} }));
+const row5 = [mk(SC[4], 200, 233, '0 0 300 350', back.querySelector('svg').innerHTML), mk(SC[4], 220, 235, '0 0 300 320', teeSvg), mk(SC[4], 210, 182, '0 0 300 260', mugSvg)];
+const chipF = K.box(0, L.chipY, null, null, { parent: SC[4], cls: 'chipF', html: 'Printing: your partner account · never Credits', style: { width: 'auto', height: 'auto' } });
+
+// ---------- captions (one per scene, colour per background) ----------
+const CAPS = [
+  [0, 0.1, T_R1 + 0.2, 'One tap:\n<em>digital</em> to physical.', '#1F1F1F'],
+  [1, T_FLIP + 0.1, T_R2, 'Poster. Tee. Mug.', '#1F1F1F'],
+  [2, T_R2 + 0.25, T_R3 + 0.1, 'Its own edition,\nas a draft.', '#FAF7EE'],
+  [3, T_R3 + 0.25, T_R4 + 0.1, 'Checked for print,\nsize by size.', '#1F1F1F'],
+  [4, T_R4 + 0.25, 13.0, 'In your stores\nafter your yes.', '#1F1F1F'],
+];
+const caps = CAPS.map(([s, a, b, t, col]) => { const c = K.box(65, L.capY, W - 130, null, { parent: SC[s], cls: 'cap', style: { fontSize: L.capFs + 'px', color: col } }); return { c, a, b, w: K.words(c, t) }; });
+const tags = [
+  K.demoTag('Product design · sample data', 0, 0), K.demoTag('Real app · demo workspace', 0, 0), K.demoTag('Product design · simulated catalogue, sample data', 0, 0),
+];
+tags.forEach((t) => (t.style.zIndex = 85));
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'One design.<br>Now on paper, cotton, ceramic.' });
+
+// ripple origins
+const tapPt = [cx + cw / 2 + 60, cy + ch - pad - btnH / 2];
+const RIP = [null, [T_R1, tapPt], [T_R2, [W / 2, L.stackY + ch * 0.5]], [T_R3, null], [T_R4, [qx + qw / 2, qy + (ROWS[2] + 50 - PC.y) * QS]]];
+const RMAX = Math.hypot(W, H) * 1.05;
+
+K.run({
+  id: 'C10', title: 'Make It Physical', dur: DUR, bpm: 110, mood: 'bright', key: 'A', intro: 0.0, cover: 3.2,
+  technique: 'Ripple transitions: a tap sends a circular clip-path ripple (with echo rings) across the frame and each new scene grows out of it; the digital product card flips in CSS 3D into a framed poster while a tee and a mug fan out behind it, then the real Make-it-physical screen and the size-by-size print check arrive by their own ripples',
+  caption: 'Tap “Add printed edition” and a digital product gets a physical one: pick your print partner’s product, try the artwork on it, and every size is checked for sharpness. It stays a draft until you confirm, and printing is paid from your partner account. Start free at makeandlist.com',
+  short: 'One tap: digital to physical.',
+  beats: ['0–1.6 s: “One tap: digital to physical.” — the digital product card', '1.6–4.4 s: the tap, a lime ripple; the card flips into a poster, tee and mug fan out (drafts)', '4.4–6.8 s: the real Make-it-physical screen: a draft edition, a technical pass', '6.8–10.4 s: the print check, size by size (design board, sample data)', '10.4–13 s: in your stores after your yes; printing from your partner account', '13–15 s: end card'],
+  cues: [[0.0, 'swish'], [0.35, 'pop'], [T_TAP, 'click'], [T_R1, 'whoosh'], [T_FLIP - 0.05, 'whoosh'], [T_FLIP + 0.3, 'hit'], [T_FAN, 'pop'], [B(5.5), 'pop'], [B(6.5), 'pop'], [T_R2 - 0.05, 'whoosh'], [T_R2 + 0.3, 'pop'],
+    [T_RING1, 'pop'], [T_RING2, 'chime'], [T_TAP2, 'click'], [T_R3, 'whoosh'], [B(14), 'pop'], [B(15.5), 'pop'], [B(17), 'pop'], [T_R4 - 1.4, 'riser'], [T_R4, 'hit'], [B(20), 'pop'], [B(20.5), 'pop'], [B(21), 'pop'], [B(22), 'coin'], [13.0, 'hit']],
+}, (T) => {
+  // ---------- ripples ----------
+  let ringOn = null;
+  RIP.forEach((r, i) => {
+    if (!r) return;
+    let [t, o] = r;
+    if (!o) { // scene 3 → 4 starts at the button the cursor tapped on the phone
+      const sc = pscroll(T_TAP2);
+      o = [px + 14 + 300 * PS, py + 14 + (957 - sc) * PS];
+      r[1] = o;
+    }
+    const p = K.p(T, t, t + 0.75, E.inOutCubic);
+    const rad = Math.max(0.001, p * RMAX);
+    SC[i].style.clipPath = `circle(${rad}px at ${o[0]}px ${o[1]}px)`;
+    SC[i].style.visibility = T >= t ? 'visible' : 'hidden';
+    if (T >= t && T < t + 1.0) ringOn = [t, o, i];
+  });
+  rings.forEach((rg, k) => {
+    if (!ringOn) { rg.style.opacity = 0; return; }
+    const [t, o, i] = ringOn;
+    const p = K.p(T, t + k * 0.07, t + 0.9 + k * 0.07, E.outCubic);
+    const rr = 60 + p * RMAX * (0.55 + 0.25 * k);
+    rg.style.left = o[0] - rr + 'px'; rg.style.top = o[1] - rr + 'px'; rg.style.width = rr * 2 + 'px'; rg.style.height = rr * 2 + 'px';
+    rg.style.border = `${6 - k * 1.5}px solid ${i === 2 ? '#DFFF5A' : '#1F1F1F'}`;
+    rg.style.opacity = (1 - p) * 0.8;
+    rg.style.zIndex = (i + 1) * 10 + 5;
+  });
+
+  // ---------- scene 1: the digital card ----------
+  const cin = K.p(T, 0.05, 0.75, E.outExpo);
+  const fp = K.p(T, T_FLIP - 0.15, T_FLIP + 0.6, E.inOutCubic);
+  const press = T > T_TAP - 0.06 && T < T_TAP + 0.1 ? 0.97 : 1;
+  flip.style.transform = `translateY(${(1 - cin) * 160}px) rotateX(${(1 - cin) * 18}deg) rotateY(${fp * 180 + Math.sin(T * 1.2) * 3}deg) scale(${press})`;
+  flipW.style.opacity = K.p(T, 0.05, 0.3, E.linear);
+  btn.style.background = T > T_TAP ? '#DFFF5A' : '#EFEADF';
+  btn.style.borderStyle = T > T_TAP ? 'solid' : 'dashed';
+  btn.style.borderColor = T > T_TAP ? '#1F1F1F' : '#8A8378';
+  shadow.style.opacity = cin * 0.8; shadow.style.transform = `scaleX(${1 - 0.4 * Math.sin(fp * Math.PI)})`;
+  const bR = btn.getBoundingClientRect();
+  const tp = [bR.left + bR.width * 0.62, bR.top + bR.height * 0.55];
+  const ca = K.p(T, 0.9, T_TAP - 0.05, E.outCubic);
+  const ph2 = pscroll(T_TAP2), tap2 = [px + 14 + 300 * PS, py + 14 + (957 - ph2) * PS];
+  const c2 = K.p(T, T_RING2 + 0.2, T_TAP2 - 0.05, E.inOutCubic);
+  if (T < T_R2) { cursor.at(K.lerp(W * 0.88, tp[0], ca), K.lerp(H * 0.66, tp[1], ca), T > T_TAP - 0.06 && T < T_TAP + 0.1); cursor.hide(K.win(T, 0.9, T_R1 + 0.25, 0.15)); cursor.ripple(tp[0], tp[1], T, T_TAP); }
+  else { cursor.at(K.lerp(W * 0.86, tap2[0], c2), K.lerp(H * 0.62, tap2[1], c2), T > T_TAP2 - 0.06 && T < T_TAP2 + 0.1); cursor.hide(K.win(T, T_RING2 + 0.2, T_R3 + 0.2, 0.15)); cursor.ripple(tap2[0], tap2[1], T, T_TAP2); }
+
+  // ---------- scene 2: poster with tee and mug fanning out ----------
+  const pc = [W / 2, L.stackY];
+  const fanT = K.p(T, T_FAN, T_FAN + 0.6, E.outBack), fanM = K.p(T, B(5.5), B(5.5) + 0.6, E.outBack);
+  const drift = Math.sin(T * 1.1) * 8;
+  // the poster takes over from the flipped card, same box
+  const settle = K.p(T, T_FLIP + 0.4, T_FAN + 0.4, E.inOutCubic);
+  flipW.style.transform = `translateY(${drift * settle - settle * (tall ? 40 : 20)}px) scale(${1 - settle * (tall ? 0.14 : 0.2)})`;
+  const tW = 380 * SW2, mW = 330 * SW2;
+  tee.style.left = W / 2 - tW / 2 + 'px'; tee.style.top = cy + ch * 0.36 + 'px';
+  tee.style.transform = `translate(${-fanT * (tall ? 250 : 300)}px, ${(1 - fanT) * -80 + drift * 0.6}px) rotate(${-fanT * 9}deg) scale(${0.6 + 0.4 * fanT})`;
+  tee.style.opacity = K.p(T, T_FAN, T_FAN + 0.15, E.linear);
+  mug.style.left = W / 2 - mW / 2 + 'px'; mug.style.top = cy + ch * 0.56 + 'px';
+  mug.style.transform = `translate(${fanM * (tall ? 260 : 310)}px, ${(1 - fanM) * -80 - drift * 0.6}px) rotate(${fanM * 7}deg) scale(${0.6 + 0.4 * fanM})`;
+  mug.style.opacity = K.p(T, B(5.5), B(5.5) + 0.15, E.linear);
+  shadows2.forEach((s, i) => {
+    const el = [poster2, tee, mug][i], r = el.getBoundingClientRect();
+    s.style.left = r.left + r.width * 0.1 + 'px'; s.style.width = r.width * 0.8 + 'px'; s.style.top = r.bottom - 30 + 'px';
+    s.style.opacity = i === 0 ? 0.7 : Number(el.style.opacity) * 0.7;
+  });
+  drafts.forEach((d, i) => {
+    const el = [poster2, tee, mug][i], r = el.getBoundingClientRect();
+    const t = [B(6.5), B(6.5) + 0.12, B(6.5) + 0.24][i];
+    const p = K.p(T, t, t + 0.4, E.outBack);
+    d.style.left = r.left + r.width / 2 - d.offsetWidth / 2 + 'px'; d.style.top = Math.min(r.bottom - 10, tall ? 1200 : 1270) + 'px';
+    d.style.opacity = K.p(T, t, t + 0.1, E.linear); d.style.transform = `scale(${0.7 + 0.3 * p})`;
+  });
+
+  // ---------- scene 3: phone ----------
+  const phin = K.p(T, T_R2 + 0.1, T_R2 + 0.8, E.outExpo);
+  ph.style.transform = `translateY(${(1 - phin) * 400 + Math.sin(T * 1.3) * 5}px) rotate(${(1 - phin) * 5}deg)`;
+  const sc = pscroll(T);
+  pimg.style.transform = `translateY(${-sc * PS}px)`;
+  ringAt(r1, 76, 244, 236, 356, sc); ringAt(r2, 74, 720, 706, 880, sc);
+  const rp1 = K.p(T, T_RING1, T_RING1 + 0.4, E.outBack), rp2 = K.p(T, T_RING2, T_RING2 + 0.4, E.outBack);
+  r1.style.opacity = K.p(T, T_RING1, T_RING1 + 0.1, E.linear) * (1 - K.p(T, T_RING2 - 0.3, T_RING2, E.linear)); r1.style.transform = `scale(${1.08 - 0.08 * rp1})`;
+  r2.style.opacity = K.p(T, T_RING2, T_RING2 + 0.1, E.linear); r2.style.transform = `scale(${1.05 - 0.05 * rp2})`;
+
+  // ---------- scene 4: the print check ----------
+  const pin = K.p(T, T_R3 + 0.15, T_R3 + 0.85, E.outExpo);
+  panel.style.transform = `translateY(${(1 - pin) * 200 + Math.sin(T * 1.2) * 5}px) scale(${0.94 + 0.06 * pin})`;
+  const rowIdx = T < B(15.5) ? 1 : T < B(17) ? 3 : 4;
+  const rt = [B(14), B(15.5), B(17)][[1, 3, 4].indexOf(rowIdx)];
+  const rhp = K.p(T, rt, rt + 0.4, E.outBack);
+  const rowY = K.k(T, [[B(14), ROWS[1]], [B(15.5) - 0.2, ROWS[1]], [B(15.5), ROWS[3]], [B(17) - 0.2, ROWS[3]], [B(17), ROWS[4]]], E.inOutCubic);
+  rowHl.style.top = (rowY - PC.y - 4) * QS + 'px';
+  rowHl.style.opacity = K.p(T, B(14), B(14) + 0.1, E.linear);
+  rowHl.style.transform = `scale(${1.04 - 0.04 * rhp})`;
+  rowHl.style.borderColor = rowIdx === 1 ? '#7E9A7E' : rowIdx === 3 ? '#C98A1E' : '#E8603C';
+
+  // ---------- scene 5: the row of editions and the stores ----------
+  const objs = [[W / 2 - (tall ? 290 : 300), 0], [W / 2 - 110, 0], [W / 2 + (tall ? 90 : 100), 0]];
+  row5.forEach((o, i) => {
+    const t = B(20) + i * BEAT * 0.5;
+    const p = K.p(T, t, t + 0.55, E.outBack);
+    o.style.left = objs[i][0] + 'px'; o.style.top = (tall ? 880 : 590) + (i === 2 ? 40 : i === 1 ? -6 : -20) + 'px';
+    o.style.transform = `translateY(${(1 - p) * 160 + Math.sin(T * 1.4 + i) * 6}px) scale(${0.7 + 0.3 * p}) rotate(${(i - 1) * 3}deg)`;
+    o.style.opacity = K.p(T, t, t + 0.12, E.linear);
+  });
+  stores.forEach((s, i) => {
+    const t = T_R4 + 0.3 + i * 0.12;
+    const p = K.p(T, t, t + 0.5, E.outBack);
+    s.style.opacity = K.p(T, t, t + 0.1, E.linear); s.style.transform = `translateY(${(1 - p) * 60}px) scale(${0.8 + 0.2 * p})`;
+  });
+  const cp = K.p(T, B(22), B(22) + 0.5, E.outBack);
+  chipF.style.left = (W - chipF.offsetWidth) / 2 + 'px';
+  chipF.style.opacity = K.p(T, B(22), B(22) + 0.12, E.linear); chipF.style.transform = `scale(${0.85 + 0.15 * cp})`;
+
+  // ---------- captions ----------
+  caps.forEach((c) => K.reveal(c.w, T, c.a, { kind: 'up', stagger: 0.07, dur: 0.55, out: c.b < 12.9 ? c.b - 0.3 : undefined }));
+
+  // ---------- demo tags ----------
+  const t1 = Math.max(K.win(T, 0.4, T_R2, 0.2), K.win(T, T_R4 + 0.4, 12.95, 0.2)), t2 = K.win(T, T_R2 + 0.5, T_R3 + 0.3, 0.2), t3 = K.win(T, T_R3 + 0.6, T_R4 + 0.2, 0.2);
+  tags[0].style.opacity = t1; tags[1].style.opacity = t2; tags[2].style.opacity = t3;
+  if (T < T_FLIP + 0.3) { tags[0].style.left = cx + 'px'; tags[0].style.top = cy - 50 + 'px'; }
+  else if (T < T_R2) { tags[0].style.left = (W - tags[0].offsetWidth) / 2 + 'px'; tags[0].style.top = (tall ? 470 : 200) + 'px'; }
+  else { tags[0].style.left = (W - tags[0].offsetWidth) / 2 + 'px'; tags[0].style.top = (tall ? 1150 : 860) + 'px'; }
+  tags[1].style.left = px + 24 + 'px'; tags[1].style.top = py - 48 + 'px';
+  tags[2].style.left = qx + 'px'; tags[2].style.top = qy - 46 + 'px';
+  if (T > T_R4 + 0.3) { tags[0].style.top = (tall ? 1212 : 980) + 'px'; }
+
+  end(T);
+});
+</script></body></html>

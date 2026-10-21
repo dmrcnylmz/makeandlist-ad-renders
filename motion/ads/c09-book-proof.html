@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C09 · Your Book, Proofed</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EDE6D8; }
+.lamp { position: absolute; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgba(255,250,236,.95), rgba(255,250,236,0)); }
+.table { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(201,178,140,0), rgba(201,178,140,.35)); }
+.world { position: absolute; width: 0; height: 0; perspective: 2400px; z-index: 20; }
+.book { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
+.f { position: absolute; left: 0; top: 0; transform-origin: 0 0; backface-visibility: visible; }
+.pageF { background: #FFFDF8; overflow: hidden; }
+.pageF img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.edgeX { background: repeating-linear-gradient(0deg, #FBF8F1 0 2px, #E3DCCD 2px 3px); }
+.edgeY { background: repeating-linear-gradient(90deg, #FBF8F1 0 2px, #E3DCCD 2px 3px); }
+.spine { background: #E9B8BF; display: grid; place-items: center; overflow: hidden; }
+.spine span { white-space: nowrap; transform: rotate(90deg); font: 800 15px 'Archivo'; letter-spacing: .06em; color: #7A2E39; }
+.hinge { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transform-origin: 0 0; }
+.cv { position: absolute; left: 0; top: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; border-radius: 2px 8px 8px 2px; }
+.cv img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.cv.in { background: #FBF5F0; transform: rotateY(180deg); box-shadow: inset 0 0 0 2px #F0DCDF; }
+.fly { position: absolute; left: 0; top: 0; transform-origin: 0 0; background: #FFFDF8; overflow: hidden; box-shadow: 0 20px 40px -20px rgba(31,31,31,.4); }
+.fly img { width: 100%; height: 100%; display: block; }
+.shadowB { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(60,45,25,.38), rgba(60,45,25,0)); z-index: 10; }
+.cap { position: absolute; z-index: 50; text-align: center; font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; color: #1F1F1F; }
+.cnt { position: absolute; z-index: 50; text-align: center; }
+.cnt .n { font: 800 150px/1 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cnt .l { font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #45403A; margin-top: 6px; }
+.crop { position: absolute; z-index: 40; overflow: hidden; border-radius: 30px; background: #FAF7EE; box-shadow: 0 60px 110px -50px rgba(31,31,31,.7), 0 0 0 2px #1F1F1F; }
+.crop img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.ring { position: absolute; border: 6px solid #DFFF5A; border-radius: 14px; box-shadow: 0 0 0 2px #1F1F1F; z-index: 3; }
+.ann { position: absolute; z-index: 45; font: 700 26px/1.2 'Archivo'; color: #1F1F1F; background: #DFFF5A; padding: 10px 18px; border-radius: 12px; white-space: nowrap; }
+.chipF { position: absolute; z-index: 50; font: 600 24px 'IBM Plex Mono', monospace; color: #DFFF5A; background: #1F1F1F; padding: 13px 22px; border-radius: 14px; white-space: nowrap; }
+.dim { position: absolute; z-index: 30; font: 600 20px 'IBM Plex Mono', monospace; color: #45403A; white-space: nowrap; }
+.dimL { position: absolute; z-index: 30; border-left: 2px solid #1F1F1F; border-right: 2px solid #1F1F1F; height: 18px; }
+.dimL i { position: absolute; left: 0; right: 0; top: 8px; border-top: 2px solid #1F1F1F; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// C09 — a printed book, built in CSS 3D. The owner's real colouring pages fly in and stack (a counter runs to the
+// page plan's 56 interior pages, the block and its spine thicken with every page); the cover swings over from the
+// table and wraps it; then the proof: a real spread from the Book proof design board with the gutter ringed, and the
+// cost card — design costs no Credits for existing pages, printing is money to the partner. The book line is still in
+// design and not open to customers, and the ad says so.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 96, B = (n) => +(n * BEAT).toFixed(3);
+const T_STACK = B(2), T_FULL = B(6.5), T_WRAP = B(7.5), T_SHUT = B(9.5), T_PROOF = B(11), T_GUT = B(12.5), T_COST = B(15), T_CHIP = B(17.5);
+const PK = (p) => K.pub('showcase/coloring-christmas/' + p);
+const PAGES = ['interior-01.webp', 'interior-02.webp', 'interior-03.webp', 'interior-04.webp'];
+const L = tall
+  ? { cx: 540, cy: 800, bw: 470, capY: 292, capFs: 84, cntY: 1068, spread: [65, 520, 950], plan: [65, 800, 460], cost: [555, 800, 460], bookEnd: [540, 600, 0.62], tagY: 1200 }
+  : { cx: 560, cy: 690, bw: 360, capY: 60, capFs: 70, cntY: 1060, spread: [100, 300, 880], plan: [470, 230, 560], cost: [470, 630, 560], bookEnd: [250, 700, 0.6], tagY: 1240 };
+const BW = L.bw, BD = Math.round(BW * 1164 / 900);
+const TMAX = tall ? 34 : 30; // block thickness at 56 pages (px)
+
+const lamp = K.box(L.cx - 800, L.cy - 900, 1600, 1500, { cls: 'lamp' });
+const table = K.box(0, H * 0.55, W, H * 0.45, { cls: 'table' });
+const shadowB = K.box(L.cx - BW * 0.75, L.cy - BD * 0.2, BW * 1.5, BD * 0.55, { cls: 'shadowB' });
+
+// ---------- the book ----------
+const world = K.box(L.cx, L.cy, 0, 0, { cls: 'world' });
+const book = K.el('div', { parent: world, cls: 'book' });
+const face = (cls, w, h, html) => K.el('div', { parent: book, cls: 'f ' + cls, html: html || '', style: { width: w + 'px', height: h + 'px' } });
+const topF = face('pageF', BW, BD, `<img src="${PK('interior-01.webp')}">`);
+const topImg = topF.firstChild;
+const edgeFront = face('edgeY', BW, 10), edgeRight = face('edgeX', 10, BD), spine = face('spine', 10, BD, '<span>Christmas Coloring Book for Kids</span>');
+const hinge = K.el('div', { parent: book, cls: 'hinge' });
+const cvOut = K.el('div', { parent: hinge, cls: 'cv', html: `<img src="${PK('cover.webp')}">`, style: { width: BW + 'px', height: BD + 'px' } });
+const cvIn = K.el('div', { parent: hinge, cls: 'cv in', style: { width: BW + 'px', height: BD + 'px' } });
+// pages flying in (8 shown, the counter does the rest)
+const FLY = [0, 1, 2, 3, 0, 1, 2, 3].map((k, i) => {
+  const d = K.el('div', { parent: book, cls: 'fly', html: `<img src="${PK(PAGES[k])}">`, style: { width: BW + 'px', height: BD + 'px' } });
+  const a = (10 + ((i * 67) % 160)) * Math.PI / 180; // from the sides and the front, never across the caption
+  const t = i < 4 ? 0.15 + i * 0.22 : B(2.6) + (i - 4) * B(0.75);
+  return { d, t, ang: a, k };
+});
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// page count → thickness
+const pagesAt = (T) => {
+  const p1 = K.p(T, 0.15, 0.15 + 3 * 0.22 + 0.4, E.linear) * 8; // first quick pages
+  const p2 = K.p(T, B(2.6), T_FULL, E.inOutCubic) * 48;
+  return Math.round(Math.min(56, p1 + p2));
+};
+const thick = (n) => 2 + (TMAX - 2) * Math.pow(n / 56, 0.9);
+
+// spine dimension line
+const dimL = K.box(0, 0, 10, 18, { cls: 'dimL', html: '<i></i>' });
+const dim = K.box(0, 0, null, null, { cls: 'dim', html: '', style: { width: 'auto', height: 'auto' } });
+
+// ---------- counter ----------
+const cnt = K.box(65, L.cntY, W - 130, null, { cls: 'cnt', html: '<div class="n">2</div><div class="l">Interior pages · page plan</div>' });
+const cntN = cnt.querySelector('.n');
+
+// ---------- crops from the Book proof board ----------
+const BP = K.canvas('BookProof');
+function crop(x, y, w, sx, sy, sw, sh) {
+  const s = w / sw;
+  const c = K.box(x, y, w, sh * s, { cls: 'crop' });
+  K.el('img', { parent: c, src: BP, style: { width: 2880 * s + 'px', transform: `translate(${-sx * s}px, ${-sy * s}px)` } });
+  return { c, s, sx, sy, x, y, w, h: sh * s };
+}
+const spread = crop(L.spread[0], L.spread[1], L.spread[2], 509, 394, 1642, 917);
+const gut = K.el('div', { parent: spread.c, cls: 'ring', style: { left: (1286 - 509) * spread.s + 'px', top: (440 - 394) * spread.s + 'px', width: 64 * spread.s + 'px', height: 810 * spread.s + 'px' } });
+const gutAnn = K.box(0, 0, null, null, { cls: 'ann', html: 'Gutter kept clear of the binding', style: { width: 'auto', height: 'auto' } });
+const plan = crop(L.plan[0], L.plan[1], L.plan[2], 2176, 280, 640, 430);
+const cost = crop(L.cost[0], L.cost[1], L.cost[2], 2176, 744, 640, 492);
+const costRing = K.el('div', { parent: cost.c, cls: 'ring', style: { left: 36 * cost.s + 'px', top: (968 - 744) * cost.s + 'px', width: 568 * cost.s + 'px', height: 210 * cost.s + 'px' } });
+const chipF = K.box(0, 0, null, null, { cls: 'chipF', html: 'Printing is paid to your partner · never Credits', style: { width: 'auto', height: 'auto' } });
+
+// ---------- captions ----------
+const CAPS = [
+  [0.1, T_STACK + 0.6, 'Coming next:\nyour book.'],
+  [T_STACK + 0.7, T_WRAP - 0.05, 'Every page\nthickens the spine.'],
+  [T_WRAP + 0.05, T_PROOF - 0.05, 'Then the cover\nwraps it.'],
+  [T_PROOF + 0.05, T_COST - 0.05, 'Proof every spread\nbefore it prints.'],
+  [T_COST + 0.05, 12.9, 'Your pages: no Credits.\nPrinting: your partner.'],
+];
+const caps = CAPS.map(([a, b, t]) => { const c = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }); return { c, a, b, w: K.words(c, t) }; });
+const tagEx = K.demoTag('Example made with MakeAndList by its owner', 0, 0);
+const tagPD = K.demoTag('Product design · book line in design, not open yet', 0, 0);
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your pages.<br>A book you can hold.' });
+
+K.run({
+  id: 'C09', title: 'Your Book, Proofed', dur: DUR, bpm: 96, mood: 'warm', key: 'F', intro: 0.6, cover: 6.2,
+  technique: 'A CSS 3D book assembles on a lit table: real colouring pages fly in on arcs and land on the block, a counter runs to the 56 interior pages while the block and spine thicken with a live dimension line, the cover swings over on its hinge and wraps it, then the camera hands off to real Book proof board crops (spread with the gutter ringed, page plan, cost card)',
+  caption: 'Coming next to MakeAndList — printed books. A preview of the design: the page plan counts every interior page, the spine follows the page count, and the cover wraps it. You proof every spread first. Design uses no Credits for existing pages; printing is paid to your print partner. The book line is still in design. Start free at makeandlist.com',
+  short: 'Your pages, proofed as a book.',
+  beats: ['0–1.3 s: “Coming next: your book.” — real pages fly in and land', '1.3–4.7 s: the counter runs to 56 interior pages; the spine thickens', '4.7–6.9 s: the cover swings over and wraps the block', '6.9–9.4 s: proof every spread — the gutter ringed (design board)', '9.4–13 s: page plan and cost: no Credits for design, printing paid to your partner', '13–15 s: end card'],
+  cues: [[0.0, 'swish'], [0.35, 'paper'], [0.57, 'paper'], [0.79, 'paper'], [1.01, 'paper'], ...[0, 1, 2, 3].map((i) => [+(B(2.6) + i * B(0.75) + 0.45).toFixed(3), 'paper']), [B(6.5), 'pop'],
+    [T_WRAP, 'swish'], [T_SHUT - 1.4, 'riser'], [T_SHUT, 'hit'], [T_PROOF - 0.05, 'whoosh'], [T_PROOF + 0.3, 'pop'], [T_GUT, 'marker'], [T_COST - 0.05, 'swish'], [T_COST + 0.3, 'pop'], [B(16.5), 'pop'], [T_CHIP, 'coin'], [13.0, 'hit']],
+}, (T) => {
+  lamp.style.transform = `translate(${Math.sin(T * 0.4) * 40}px, ${Math.cos(T * 0.3) * 30}px)`;
+  const n = pagesAt(T), t = thick(n);
+  // ---------- camera: top-down to three-quarter, a slow orbit, then the book moves aside for the proof ----------
+  const rx = K.k(T, [[0, 30], [T_STACK, 34], [T_FULL, 58], [T_WRAP, 52], [T_SHUT + 0.4, 62], [T_PROOF, 60]]);
+  const rz = K.k(T, [[0, -8], [T_FULL, -26], [T_SHUT, -34], [T_PROOF, -40], [13, -46]]);
+  const ex = K.p(T, T_PROOF - 0.2, T_PROOF + 0.6, E.inOutCubic), back = K.p(T, T_COST - 0.2, T_COST + 0.7, E.outExpo);
+  const out = ex * (1 - back);
+  const bx = K.lerp(L.cx, L.bookEnd[0], back), by = K.lerp(L.cy, L.bookEnd[1], back);
+  const bs = K.lerp(1, L.bookEnd[2], back) * (1 + 0.015 * Math.sin(T * 1.1));
+  world.style.left = bx + 'px'; world.style.top = by + 'px';
+  world.style.opacity = 1 - out;
+  book.style.transform = `translateY(${out * -500}px) scale(${bs * (1 - 0.3 * out)}) rotateX(${rx}deg) rotateZ(${rz}deg) translate3d(${-BW / 2}px, ${-BD / 2}px, 0)`;
+  shadowB.style.left = bx - BW * 0.75 * bs + 'px'; shadowB.style.top = by - BD * 0.1 * bs + 'px';
+  shadowB.style.width = BW * 1.5 * bs + 'px'; shadowB.style.height = BD * 0.5 * bs + 'px';
+  shadowB.style.opacity = (0.5 + t / TMAX * 0.5) * (1 - out);
+
+  // block faces at the current thickness
+  topF.style.transform = `translate3d(0, 0, ${t}px)`;
+  edgeFront.style.height = t + 'px'; edgeFront.style.transform = `translate3d(0, ${BD}px, ${t}px) rotateX(-90deg)`;
+  edgeRight.style.width = t + 'px'; edgeRight.style.transform = `translate3d(${BW}px, 0, ${t}px) rotateY(90deg)`;
+  spine.style.width = t + 'px'; spine.style.transform = `rotateY(-90deg)`;
+  spine.style.opacity = T > T_WRAP ? 1 : 0;
+  spine.querySelector('span').style.opacity = K.p(T, T_SHUT - 0.3, T_SHUT, E.linear);
+  // the visible top page cycles with the landings
+  let lastK = 0; FLY.forEach((f) => { if (T >= f.t + 0.45) lastK = f.k; });
+  const want = PK(PAGES[lastK]); if (topImg.getAttribute('src') !== want) topImg.src = want;
+  topF.style.visibility = T >= FLY[0].t + 0.45 ? 'visible' : 'hidden';
+  edgeFront.style.visibility = edgeRight.style.visibility = topF.style.visibility;
+
+  // flying pages: an arc from off-frame to the top of the block
+  FLY.forEach((f, i) => {
+    const p = K.p(T, f.t, f.t + 0.45, E.outCubic);
+    const on = T >= f.t && T < f.t + 0.5;
+    const r = 900 * (1 - p), lift = Math.sin(p * Math.PI) * 120 + (1 - p) * 120;
+    f.d.style.visibility = on ? 'visible' : 'hidden';
+    f.d.style.transform = `translate3d(${Math.cos(f.ang) * r}px, ${Math.sin(f.ang) * r}px, ${t + lift}px) rotateZ(${(1 - p) * (seed(i) - 0.5) * 70}deg) rotateX(${(1 - p) * 25}deg)`;
+    f.d.style.opacity = K.p(T, f.t, f.t + 0.1, E.linear);
+  });
+
+  // cover: lies open to the left (180°), swings over on its spine hinge, shuts on the beat
+  const wrapIn = K.p(T, T_WRAP - 0.3, T_WRAP + 0.3, E.outExpo);
+  const shut = K.p(T, T_WRAP + 0.25, T_SHUT, E.inOutCubic);
+  const ang = 180 - 180 * shut;
+  const settle = T > T_SHUT ? Math.exp(-(T - T_SHUT) * 9) * Math.sin((T - T_SHUT) * 30) * 3 : 0;
+  hinge.style.transform = `translate3d(0, 0, ${t + 1}px) rotateY(${-ang + settle}deg) translateZ(${(1 - wrapIn) * 400}px)`;
+  cvOut.style.opacity = cvIn.style.opacity = wrapIn; // opacity on the preserve-3d hinge itself would flatten it
+  hinge.style.visibility = T > T_WRAP - 0.3 ? 'visible' : 'hidden';
+
+  // dimension line on the spine edge (screen space, from the block's projected corners)
+  const er = edgeFront.getBoundingClientRect();
+  const dv = K.win(T, T_STACK + 0.8, T_WRAP + 0.2, 0.25);
+  dimL.style.left = er.right + 22 + 'px'; dimL.style.top = er.top + 'px'; dimL.style.width = '18px'; dimL.style.height = Math.max(12, er.height) + 'px';
+  dimL.style.borderLeft = 'none'; dimL.style.borderRight = 'none'; dimL.style.borderTop = '2px solid #1F1F1F'; dimL.style.borderBottom = '2px solid #1F1F1F';
+  dimL.querySelector('i').style.cssText = 'position:absolute;left:8px;top:0;bottom:0;border-left:2px solid #1F1F1F;';
+  dimL.style.opacity = dv;
+  dim.innerHTML = `spine · ${n} pages`;
+  const clampD = er.right + 50 + dim.offsetWidth > W - 65;
+  dim.style.left = (clampD ? W - 65 - dim.offsetWidth : er.right + 50) + 'px'; dim.style.top = (clampD ? er.bottom + 16 : er.top + er.height / 2 - 12) + 'px'; dim.style.opacity = dv;
+
+  // counter
+  cntN.textContent = n;
+  const cp = K.p(T, T_STACK, T_STACK + 0.5, E.outExpo) * (1 - K.p(T, T_WRAP - 0.2, T_WRAP + 0.2, E.inCubic));
+  const pulse = n === 56 ? 1 + 0.08 * Math.exp(-(T - T_FULL) * 6) * (T > T_FULL ? 1 : 0) : 1;
+  cnt.style.opacity = cp; cnt.style.transform = `translateY(${(1 - cp) * 30}px) scale(${pulse})`;
+
+  // ---------- the proof ----------
+  const sp = K.p(T, T_PROOF, T_PROOF + 0.6, E.outExpo), so = K.p(T, T_COST - 0.3, T_COST + 0.2, E.inCubic);
+  spread.c.style.opacity = K.p(T, T_PROOF, T_PROOF + 0.15, E.linear) * (1 - so);
+  spread.c.style.transform = `translateY(${(1 - sp) * 120 - so * 200}px) scale(${0.92 + 0.08 * sp}) rotate(${(1 - sp) * -2}deg)`;
+  const gp = K.p(T, T_GUT, T_GUT + 0.45, E.outBack);
+  gut.style.opacity = K.p(T, T_GUT, T_GUT + 0.1, E.linear); gut.style.transform = `scaleY(${0.3 + 0.7 * gp})`;
+  const ga = K.p(T, T_GUT + 0.2, T_GUT + 0.6, E.outBack) * (1 - so);
+  gutAnn.style.left = (spread.x + (1316 - 509) * spread.s - gutAnn.offsetWidth / 2) + 'px';
+  gutAnn.style.top = (spread.y + spread.h + 24) + 'px';
+  gutAnn.style.opacity = K.p(T, T_GUT + 0.2, T_GUT + 0.3, E.linear) * (1 - so); gutAnn.style.transform = `scale(${0.8 + 0.2 * ga}) translateY(${-so * 200}px)`;
+  // page plan and cost
+  const pp = K.p(T, T_COST, T_COST + 0.6, E.outExpo), cpp = K.p(T, B(16.5), B(16.5) + 0.6, E.outExpo);
+  plan.c.style.opacity = K.p(T, T_COST, T_COST + 0.15, E.linear);
+  plan.c.style.transform = `translateX(${(1 - pp) * 300}px) rotate(${(1 - pp) * 3 + Math.sin(T * 1.2) * 0.3}deg)`;
+  cost.c.style.opacity = K.p(T, B(16.5), B(16.5) + 0.15, E.linear);
+  cost.c.style.transform = `translateX(${(1 - cpp) * 300}px) rotate(${(1 - cpp) * 3 - Math.sin(T * 1.1) * 0.3}deg)`;
+  const crp = K.p(T, T_CHIP - 0.3, T_CHIP + 0.1, E.outBack);
+  costRing.style.opacity = K.p(T, T_CHIP - 0.3, T_CHIP - 0.2, E.linear); costRing.style.transform = `scale(${1.06 - 0.06 * crp})`;
+  const chp = K.p(T, T_CHIP, T_CHIP + 0.5, E.outBack);
+  chipF.style.left = (tall ? (W - chipF.offsetWidth) / 2 : 60) + 'px';
+  chipF.style.top = (tall ? cost.y + cost.h + 24 : cost.y + cost.h + 24) + 'px';
+  chipF.style.opacity = K.p(T, T_CHIP, T_CHIP + 0.12, E.linear); chipF.style.transform = `scale(${0.85 + 0.15 * chp})`;
+
+  // ---------- captions and tags ----------
+  caps.forEach((c) => K.reveal(c.w, T, c.a, { kind: 'up', stagger: 0.07, dur: 0.55, out: c.b < 12.9 ? c.b - 0.3 : undefined }));
+  tagEx.style.opacity = K.win(T, 0.4, T_PROOF - 0.1, 0.2);
+  tagEx.style.left = (W - tagEx.offsetWidth) / 2 + 'px'; tagEx.style.top = (tall ? 486 : 1270) + 'px';
+  tagPD.style.opacity = K.win(T, T_PROOF + 0.2, 12.95, 0.2);
+  tagPD.style.left = (tall ? (W - tagPD.offsetWidth) / 2 : 60) + 'px';
+  tagPD.style.top = (T < T_COST ? spread.y - 48 : (tall ? plan.y - 48 : 1280)) + 'px';
+  if (!tall && T >= T_COST) tagPD.style.left = W - 60 - tagPD.offsetWidth + 'px';
+
+  end(T);
+});
+</script></body></html>

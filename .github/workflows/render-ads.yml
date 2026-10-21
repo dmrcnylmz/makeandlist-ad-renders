@@ -5,7 +5,7 @@ name: Render ads (motion/ads)
 on:
   push:
     branches: ['main']
-    paths: ['motion/ads/**', '.github/workflows/render-ads.yml']
+    paths: ['motion/ads/**', 'motion/sfx/**', '.github/workflows/render-ads.yml']
   workflow_dispatch:
     inputs:
       ads:
@@ -32,7 +32,7 @@ jobs:
           ASKED: ${{ github.event.inputs.ads }}
         run: |
           if [ -f motion/ads/render-list.txt ] && [ -z "$ASKED" ]; then ASKED=$(tr '\n' ' ' < motion/ads/render-list.txt); fi
-          if [ -z "$ASKED" ]; then ASKED=$(ls motion/ads | grep -oE '^[ab][0-9]{2}' | sort -u | tr '\n' ' '); fi
+          if [ -z "$ASKED" ]; then ASKED=$(ls motion/ads | grep -oE '^[a-z][0-9]{2}' | sort -u | tr '\n' ' '); fi
           echo "ads=$(printf '%s\n' $ASKED | jq -R . | jq -cs .)" >> "$GITHUB_OUTPUT"
   render:
     needs: plan

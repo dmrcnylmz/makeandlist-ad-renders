@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C15 · From Ideas to the Shelf</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EFE8DA; }
+.wall { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(31,31,31,.025) 0 2px, transparent 2px 46px), radial-gradient(90% 60% at 50% 30%, #FBF7EE, #EADFCB); }
+.lamp { position: absolute; width: 1300px; height: 1300px; border-radius: 50%; background: radial-gradient(circle, rgba(255,240,200,.55), rgba(255,240,200,0) 60%); pointer-events: none; }
+.world { position: absolute; left: 0; top: 0; width: 100%; height: 100%; perspective: 1700px; perspective-origin: 50% 40%; }
+.panel { position: absolute; overflow: hidden; border-radius: 30px; background: #FAF7EE; box-shadow: 0 60px 110px -50px rgba(31,31,31,.65), 0 0 0 2px #E0D8C8; }
+.panel img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.hole { position: absolute; border-radius: 18px; background: #F3EEE3; border: 3px dashed #CFC6B5; }
+.fly { position: absolute; transform-style: preserve-3d; z-index: 20; }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.face.card { overflow: hidden; border-radius: 18px; background: #FAF7EE; box-shadow: 0 30px 50px -26px rgba(31,31,31,.6); }
+.face.card img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.face.prod { transform: rotateY(180deg); }
+.pack { position: absolute; inset: 0; border-radius: 6px 10px 10px 6px; overflow: hidden; background: #fff; box-shadow: 0 0 0 2px #1F1F1F, 10px 0 0 -2px #E9E3D6, 10px 0 0 0 #1F1F1F; }
+.pack img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pack::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: linear-gradient(90deg, rgba(0,0,0,.25), rgba(0,0,0,0)); }
+.cshadow { position: absolute; height: 26px; border-radius: 50%; background: radial-gradient(closest-side, rgba(31,31,31,.42), rgba(31,31,31,0)); z-index: 6; }
+.plank { position: absolute; z-index: 5; }
+.plank .top { position: absolute; left: 0; right: 0; top: -38px; height: 38px; background: linear-gradient(#E2C9A2, #D3B48A); clip-path: polygon(3% 0, 97% 0, 100% 100%, 0 100%); }
+.plank .front { position: absolute; left: 0; right: 0; top: 0; height: 40px; background: linear-gradient(#B88E5E, #9E764A); border-top: 3px solid #1F1F1F; border-bottom: 3px solid #1F1F1F; }
+.plank .under { position: absolute; left: 4%; right: 4%; top: 40px; height: 60px; background: linear-gradient(rgba(31,31,31,.22), rgba(31,31,31,0)); }
+.plabel { position: absolute; z-index: 7; font: 500 19px 'IBM Plex Mono', monospace; letter-spacing: .06em; color: #45403A; white-space: nowrap; transform: translateX(-50%); }
+.ctag { position: absolute; z-index: 25; font: 500 13px 'IBM Plex Mono', monospace; color: #45403A; background: rgba(255,253,248,.92); padding: 3px 7px; border-radius: 6px; border: 1px dashed #8A8378; white-space: nowrap; transform: translateX(-50%); }
+.draft { position: absolute; z-index: 40; padding: 6px 13px; border-radius: 999px; background: #1F1F1F; color: #DFFF5A; font: 600 17px 'IBM Plex Mono', monospace; letter-spacing: .06em; white-space: nowrap; }
+.obj { position: absolute; z-index: 18; }
+.obj svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.hook { position: absolute; z-index: 40; text-align: center; font: 800 92px/0.98 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.cap { position: absolute; z-index: 40; text-align: center; }
+.cap .k { font: 600 23px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #45403A; }
+.cap .t { margin-top: 10px; font: 800 66px/1 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.cap .s { margin-top: 14px; font: 500 22px/1.4 'IBM Plex Mono', monospace; color: #45403A; }
+.sign { position: absolute; z-index: 8; padding: 14px 28px; border-radius: 14px; background: #DFFF5A; color: #1F1F1F; font: 800 30px 'Archivo'; box-shadow: 0 20px 30px -18px rgba(31,31,31,.7), 0 0 0 3px #1F1F1F; transform-origin: 50% -30px; white-space: nowrap; }
+.mote { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,250,235,.9); z-index: 30; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .07; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// C15 — ideas to the shelf. The idea cards lift off the Ideas board, hover, and as the camera tilts down to a store
+// shelf they fly and flip in 3D, landing as products: the owner's real packs on the top shelf, and the botanical
+// print idea as drawn concept objects (print, tote, mug) on the bottom shelf — printed on demand by the seller's own
+// partner. Every product gets its "Draft" tag: listed only after the seller confirms.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 116, B = (n) => +(n * BEAT).toFixed(3);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const L = tall
+  ? { pX: 65, pY: 530, pW: 950, hookY: 292, capY: 292, pan: 1500, topY: 770, botY: 1170, packW: 158, packGap: 22, tagY: 1196, signY: 0 }
+  : { pX: 150, pY: 300, pW: 780, hookY: 64, capY: 56, pan: 1300, topY: 620, botY: 1035, packW: 150, packGap: 24, tagY: 1270, signY: 0 };
+// the Ideas board crop (AppIdeas canvas, 2x): grid region x 560–2820, y 1180–2840
+const BX = 560, BY = 1180, BW = 2260, BH = 1660, k = L.pW / BW;
+// cards on the board (2x px) → product
+const CARDS = [
+  [592, 1328, 'halloween-preschool-pack'], [1336, 1328, 'thanksgiving-kids-table'], [2080, 1328, 'halloween-party-games'],
+  [592, 2084, 'coloring-christmas'], [1336, 2084, 'fall-activity-pack'], [2080, 2084, 'print'],
+];
+const CW = 700, CH = 712;
+const packH = Math.round(L.packW * 1164 / 900);
+
+K.box(0, 0, W, H, { cls: 'wall' });
+const lamp = K.box(0, 0, 1300, 1300, { cls: 'lamp' });
+const world = K.box(0, 0, W, H, { cls: 'world' });
+const panel = K.box(L.pX, L.pY, L.pW, BH * k, { cls: 'panel', parent: world });
+const pimg = K.el('img', { src: K.canvas('AppIdeas'), parent: panel, style: { width: 2880 * k + 'px', transform: `translate(${-BX * k}px, ${-BY * k}px)` } });
+const holes = CARDS.map(([cx, cy]) => K.box((cx - BX) * k + 6, (cy - BY) * k + 6, CW * k - 12, CH * k - 12, { cls: 'hole', parent: panel, style: { opacity: 0 } }));
+const ptag = K.demoTag('Product design · sample data', 0, 0); world.appendChild(ptag);
+
+// ---------- the shelf (world y + pan) ----------
+const P = L.pan;
+const plankTop = K.box(70, P + L.topY, W - 140, 40, { cls: 'plank', parent: world, html: '<div class="top"></div><div class="front"></div><div class="under"></div>' });
+const plankBot = K.box(70, P + L.botY, W - 140, 40, { cls: 'plank', parent: world, html: '<div class="top"></div><div class="front"></div><div class="under"></div>' });
+const labTop = K.box(W / 2, P + L.topY + 52, null, null, { cls: 'plabel', parent: world, html: 'DIGITAL · PDF PACKS · EXAMPLES MADE WITH MAKEANDLIST BY ITS OWNER', style: { width: 'auto', height: 'auto', fontSize: tall ? '15px' : '15px' } });
+const labBot = K.box(W / 2, P + L.botY + 50, null, null, { cls: 'plabel', parent: world, html: 'PRINTED ON DEMAND · PAID FROM YOUR PARTNER ACCOUNT', style: { width: 'auto', height: 'auto' } });
+
+// slots: top shelf, five packs
+const x0 = (W - (5 * L.packW + 4 * L.packGap)) / 2;
+const slotTop = (i) => [x0 + i * (L.packW + L.packGap), P + L.topY - 38 - packH + 10, L.packW, packH];
+// bottom shelf: tote, print, mug (concepts)
+const PR = { w: tall ? 220 : 230, h: tall ? 275 : 288 };
+const TO = { w: tall ? 230 : 230, h: tall ? 276 : 276 };
+const MU = { w: tall ? 210 : 210, h: tall ? 174 : 174 };
+const botBase = P + L.botY - 30;
+const slotPrint = [(W - PR.w) / 2, botBase - PR.h, PR.w, PR.h];
+const slotTote = [(W - PR.w) / 2 - 40 - TO.w, botBase - TO.h, TO.w, TO.h];
+const slotMug = [(W + PR.w) / 2 + 40, botBase - MU.h, MU.w, MU.h];
+
+const ART = `<circle cx="150" cy="128" r="62" fill="#E8603C"/>
+  <g fill="none" stroke="#1F1F1F" stroke-width="4" stroke-linecap="round"><path d="M120 300 C 118 240 126 190 146 120"/><path d="M128 300 C 140 250 170 210 200 180"/><path d="M118 300 C 100 260 80 230 60 214"/></g>
+  <g fill="#DFFF5A" stroke="#1F1F1F" stroke-width="3"><path d="M146 150 q 26 -18 34 -44 q -30 6 -34 44 z"/><path d="M136 200 q -30 -10 -44 -34 q 32 0 44 34 z"/><path d="M172 214 q 30 -4 46 -26 q -32 -4 -46 26 z"/></g>
+  <circle cx="146" cy="116" r="12" fill="#FFFDF8" stroke="#1F1F1F" stroke-width="3"/>
+  <path d="M96 300 h 60 l -8 -26 h -44 z" fill="#9FB4C8" stroke="#1F1F1F" stroke-width="4" stroke-linejoin="round"/>`;
+const printSVG = `<svg viewBox="0 0 250 312"><rect x="4" y="4" width="242" height="304" fill="#1F1F1F"/><rect x="20" y="20" width="210" height="272" fill="#FFFDF8"/>
+  <g transform="translate(43 44) scale(0.55)"><rect width="300" height="340" fill="#F4EEE2"/>${ART}</g></svg>`;
+const toteSVG = `<svg viewBox="0 0 250 300"><path d="M70 110 C 70 20 180 20 180 110" fill="none" stroke="#1F1F1F" stroke-width="14"/><path d="M70 110 C 70 30 180 30 180 110" fill="none" stroke="#E9DCC2" stroke-width="8"/>
+  <path d="M28 104 h 194 l 12 192 h -218 z" fill="#E9DCC2" stroke="#1F1F1F" stroke-width="5" stroke-linejoin="round"/>
+  <g transform="translate(66 150) scale(0.42)" fill="#DFFF5A" stroke="#1F1F1F" stroke-width="7" stroke-linejoin="round">
+    <path d="M140 290 C 60 280 10 200 30 120 C 50 50 120 10 200 30 C 280 50 320 140 290 210 C 260 280 200 296 140 290 Z"/>
+    <path d="M150 290 C 160 200 170 120 190 50" fill="none"/><path d="M60 150 l 70 20 M70 220 l 70 -10 M220 90 l -40 40 M270 170 l -90 10 M250 240 l -80 -20" fill="none"/></g></svg>`;
+const mugSVG = `<svg viewBox="0 0 230 190"><ellipse cx="100" cy="182" rx="92" ry="8" fill="rgba(31,31,31,.18)"/><path d="M178 60 q 44 0 44 40 q 0 40 -44 40" fill="none" stroke="#1F1F1F" stroke-width="16"/><path d="M178 60 q 36 0 36 40 q 0 34 -36 34" fill="none" stroke="#FFFDF8" stroke-width="6"/>
+  <rect x="14" y="20" width="170" height="160" rx="14" fill="#FFFDF8" stroke="#1F1F1F" stroke-width="5"/><path d="M60 100 a 40 40 0 0 1 80 0 z" fill="#E8603C"/><line x1="44" y1="100" x2="156" y2="100" stroke="#1F1F1F" stroke-width="4"/>
+  <text x="99" y="140" text-anchor="middle" font-family="Playfair Display" font-style="italic" font-weight="700" font-size="19" fill="#1F1F1F">slow mornings</text></svg>`;
+
+// flying cards → products
+const flyers = CARDS.map(([cx, cy, prod], i) => {
+  const f = K.box(0, 0, 10, 10, { cls: 'fly', parent: world });
+  const card = K.el('div', { cls: 'face card', parent: f });
+  const cimg = K.el('img', { src: K.canvas('AppIdeas'), parent: card });
+  const pf = K.el('div', { cls: 'face prod', parent: f, html: prod === 'print' ? `<div class="obj" style="inset:0">${printSVG}</div>` : `<div class="pack"><img src="${K.pub('showcase/' + prod + '/cover.webp')}"></div>` });
+  const sh = K.box(0, 0, 10, 26, { cls: 'cshadow', parent: world });
+  const slot = prod === 'print' ? slotPrint : slotTop(i);
+  return { f, card, cimg, pf, sh, cx, cy, slot, prod };
+});
+const tote = K.box(...slotTote, { cls: 'obj', parent: world, html: toteSVG });
+const mug = K.box(...slotMug, { cls: 'obj', parent: world, html: mugSVG });
+const toteSh = K.box(0, 0, 10, 26, { cls: 'cshadow', parent: world });
+const mugSh = K.box(0, 0, 10, 26, { cls: 'cshadow', parent: world });
+const ctags = [slotTote, slotPrint, slotMug].map((s) => K.box(s[0] + s[2] / 2, botBase + 2, null, null, { cls: 'ctag', parent: world, html: 'Concept · drawn for this ad', style: { width: 'auto', height: 'auto' } }));
+const DRAFT_ON = [...[0, 1, 2, 3, 4].map((i) => slotTop(i)), slotTote, slotPrint, slotMug];
+const drafts = DRAFT_ON.map((s) => K.box(s[0] - 8, s[1] + 10, null, null, { cls: 'draft', parent: world, html: 'Draft', style: { width: 'auto', height: 'auto' } }));
+const motes = Array.from({ length: 16 }, (_, i) => K.box(0, 0, 6, 6, { cls: 'mote' }));
+
+const hook = K.box(60, L.hookY, W - 120, null, { cls: 'hook' });
+const hookW = K.words(hook, 'Pick an idea.\nFill a shelf.');
+const CAPS = [
+  [B(9.5), B(15), '01 · From the Ideas page', 'Ideas become products.', ''],
+  [B(15), B(20), '02 · One artwork, printed', 'On a print, a tote, a mug.', 'Your partner prints · never paid in Credits'],
+  [B(20), 12.85, '03 · Nothing goes live yet', 'All drafts. Your yes lists them.', ''],
+];
+const caps = CAPS.map(([, , kk, t, s]) => K.box(65, L.capY, W - 130, null, { cls: 'cap', html: `<div class="k">${kk}</div><div class="t">${t}</div>${s ? `<div class="s">${s}</div>` : ''}` }));
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Pick an idea.<br>Fill your shelf.' });
+
+// ---------- timing ----------
+const LIFT = [B(3), B(3.5), B(4), B(4.5), B(5), B(5.5)];   // 1.55 … 2.84
+const PAN0 = B(6.5), PAN1 = B(8.5);                          // 3.36 → 4.40
+const LAND = [B(8), B(8.5), B(9), B(9.5), B(10), B(11)];     // 4.14 … 5.69
+const FLY = 1.05;
+const SPLIT = [B(15.5), B(16)];                              // tote, mug slide out
+const STAMP = B(20.5);
+
+const cardPos = (c) => [L.pX + (c.cx - BX) * k, L.pY + (c.cy - BY) * k, CW * k, CH * k];
+
+K.run({
+  id: 'C15', title: 'From Ideas to the Shelf', dur: DUR, bpm: 116, mood: 'warm', key: 'C', intro: 0.5, cover: 9.4,
+  technique: 'Idea cards lift off the real Ideas board and hover; the camera tilts down to a lit 3D store shelf while each card arcs down and flips in 3D into a product: the owner’s real packs on the top shelf, the botanical idea as drawn concept objects on the bottom shelf; a slow dolly orbit, contact shadows and dust motes keep it alive',
+  caption: 'Every idea on the Ideas page is something MakeAndList can make today. Pick one and it becomes a product for your shelf: a printable pack, or an artwork your own print partner puts on a print, a tote or a mug. Everything starts as a draft. Start free at makeandlist.com',
+  short: 'Pick an idea. Fill a shelf.',
+  beats: ['0–1.5 s: “Pick an idea. Fill a shelf.” over the Ideas board', '1.5–3.4 s: the idea cards lift off, one per beat', '3.4–5.7 s: the camera tilts down; the cards fly, flip and land as products', '5.7–10.3 s: the botanical idea becomes a print, a tote and a mug (drawn concepts)', '10.3–12.9 s: every product tagged Draft — your yes lists them', '13–15 s: end card'],
+  cues: [[0.05, 'paper'], [0.3, 'pop'], ...LIFT.map((t) => [t, 'pop']), [PAN0 - 0.05, 'whoosh'], ...LAND.map((t, i) => [t, i === 5 ? 'hit' : 'pop']),
+    [SPLIT[0] - 0.4, 'riser'], [SPLIT[0], 'swish'], [SPLIT[1], 'swish'], [STAMP, 'stamp'], [STAMP + 0.5, 'chime'], [13.0, 'pop']],
+}, (T) => {
+  const fr = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(fr) - 0.5) * 60}px, ${(seed(fr + 7) - 0.5) * 60}px)`;
+  const pan = K.p(T, PAN0, PAN1, E.inOutCubic) * P;
+  const orbit = Math.sin(T * 0.55) * 3.2 * K.p(T, PAN1 - 0.4, PAN1 + 0.6, E.inOutCubic);
+  const breathe = 1 + 0.015 * Math.sin(T * 0.8);
+  world.style.transform = `translateY(${-pan}px) scale(${breathe})`;
+  world.style.transformOrigin = `50% ${pan + H / 2}px`;
+  world.style.perspectiveOrigin = `${50 + orbit * 4}% ${(pan + H * 0.4) / H * 100}%`;
+  lamp.style.left = W / 2 - 650 + Math.sin(T * 0.6) * 80 + 'px'; lamp.style.top = (tall ? 120 : 40) - 300 + Math.cos(T * 0.5) * 40 + 'px';
+  motes.forEach((m, i) => {
+    const sp = 0.05 + seed(i) * 0.06, ph = (seed(i + 9) + T * sp) % 1;
+    m.style.left = (seed(i + 3) * W + Math.sin(T * 0.7 + i) * 30) + 'px'; m.style.top = (H * (1 - ph)) + 'px';
+    m.style.opacity = Math.sin(ph * Math.PI) * 0.7 * K.p(T, PAN1 - 0.5, PAN1, E.linear);
+  });
+
+  // the board: in, then slowly drifts
+  const pin = K.p(T, 0.1, 0.8, E.outExpo);
+  panel.style.opacity = pin; panel.style.transform = `translateY(${(1 - pin) * 80}px) rotateX(${(1 - pin) * 10}deg)`;
+  pimg.style.marginTop = -T * 4 + 'px';
+  ptag.style.left = L.pX + 'px'; ptag.style.top = L.pY + BH * k + 22 + 'px';
+  ptag.style.opacity = K.win(T, 0.5, PAN1, 0.3);
+
+  // cards
+  flyers.forEach((c, i) => {
+    const [cx0, cy0, cw0, ch0] = cardPos(c);
+    const lift = K.p(T, LIFT[i], LIFT[i] + 0.45, E.outBack);
+    holes[i].style.opacity = T >= LIFT[i] ? 1 : 0;
+    const hov = Math.sin(T * 2.2 + i * 1.3) * 6 * lift;
+    let x = cx0, y = cy0 - lift * 48 + hov, w = cw0, h = ch0, ry = 0, rx = -lift * 8, rz = (i % 2 ? 2 : -2) * lift, sc = 1 + 0.05 * lift;
+    const u = K.clamp((T - (LAND[i] - FLY)) / FLY);
+    if (u > 0) {
+      const e = E.inOutCubic(u);
+      const [sx, sy, sw, shh] = c.slot;
+      x = K.lerp(x, sx, e) + Math.sin(u * Math.PI) * (i % 2 ? 90 : -90);
+      y = K.lerp(y, sy, e) - Math.sin(u * Math.PI) * 160;
+      w = K.lerp(cw0, sw, e); h = K.lerp(ch0, shh, e);
+      ry = 180 * E.inOutCubic(K.clamp((u - 0.1) / 0.8)); rx = K.lerp(rx, 0, e); rz = K.lerp(rz, 0, e); sc = K.lerp(sc, 1, e);
+    }
+    const land = T > LAND[i] ? Math.exp(-(T - LAND[i]) * 8) * Math.sin((T - LAND[i]) * 26) * 0.06 : 0;
+    // after landing the shelf orbits a little: depth parallax by shelf
+    const par = T > LAND[i] ? orbit * (c.prod === 'print' ? 3 : 2) : 0;
+    c.f.style.left = x + par + 'px'; c.f.style.top = y + 'px'; c.f.style.width = w + 'px'; c.f.style.height = h + 'px';
+    c.f.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${sc}, ${sc * (1 - land)})`;
+    c.f.style.transformOrigin = '50% 100%';
+    c.f.style.opacity = T >= 0.1 && T > LIFT[i] - 0.01 ? 1 : 0;
+    c.f.style.filter = u > 0.15 && u < 0.85 ? `blur(${Math.sin(u * Math.PI) * 2.5}px)` : 'none';
+    c.f.style.zIndex = u > 0 ? 22 + i : 20;
+    const ks = w / CW;
+    c.cimg.style.width = 2880 * ks + 'px'; c.cimg.style.transform = `translate(${-c.cx * ks}px, ${-c.cy * ks}px)`;
+    // contact shadow on the shelf once it lands
+    const sl = K.p(T, LAND[i] - 0.25, LAND[i] + 0.1, E.outCubic);
+    c.sh.style.left = c.slot[0] - 12 + par + 'px'; c.sh.style.width = c.slot[2] + 24 + 'px'; c.sh.style.top = c.slot[1] + c.slot[3] - 14 + 'px';
+    c.sh.style.opacity = sl; c.sh.style.transform = `scaleX(${0.4 + 0.6 * sl})`;
+  });
+
+  // planks rise in with the tilt; their labels follow
+  const pk = K.p(T, PAN0 + 0.3, PAN1 + 0.2, E.outExpo);
+  [plankTop, plankBot].forEach((p, j) => { p.style.transform = `translateY(${(1 - pk) * (80 + j * 60)}px) translateX(${orbit * (j ? 3 : 2)}px)`; p.style.opacity = pk; });
+  labTop.style.opacity = K.p(T, LAND[4], LAND[4] + 0.4, E.linear) * (1 - K.p(T, STAMP - 0.2, STAMP, E.linear) * 0);
+  labBot.style.opacity = K.p(T, SPLIT[1] + 0.3, SPLIT[1] + 0.7, E.linear);
+  labTop.style.transform = `translateX(calc(-50% + ${orbit * 2}px))`; labBot.style.transform = `translateX(calc(-50% + ${orbit * 3}px))`;
+
+  // the print idea splits: a tote and a mug slide out from behind the print
+  [[tote, toteSh, slotTote, SPLIT[0], 1], [mug, mugSh, slotMug, SPLIT[1], -1]].forEach(([el, sh, s, t0, dir]) => {
+    const p = K.p(T, t0, t0 + 0.6, E.outBack);
+    const fromX = slotPrint[0] + (slotPrint[2] - s[2]) / 2;
+    el.style.left = K.lerp(fromX, s[0], p) + orbit * 3 + 'px';
+    el.style.opacity = K.clamp(p * 3);
+    el.style.transform = `rotate(${(1 - p) * dir * 8}deg) scale(${0.7 + 0.3 * Math.min(1, p)})`;
+    el.style.transformOrigin = '50% 100%';
+    el.style.zIndex = 18;
+    sh.style.left = s[0] - 12 + orbit * 3 + 'px'; sh.style.width = s[2] + 24 + 'px'; sh.style.top = s[1] + s[3] - 14 + 'px'; sh.style.opacity = K.clamp(p);
+  });
+  ctags.forEach((t, i) => {
+    const p = K.p(T, (i === 1 ? LAND[5] + 0.3 : SPLIT[i ? 1 : 0] + 0.4), (i === 1 ? LAND[5] + 0.6 : SPLIT[i ? 1 : 0] + 0.7), E.outExpo);
+    t.style.opacity = p; t.style.transform = `translateX(calc(-50% + ${orbit * 3}px)) translateY(${(1 - p) * 10}px)`;
+  });
+  // drafts tagged on the beat
+  drafts.forEach((d, i) => {
+    const t0 = STAMP + i * BEAT / 4;
+    const p = K.p(T, t0, t0 + 0.35, E.outBack);
+    d.style.opacity = K.clamp(p * 3);
+    d.style.transform = `translateX(${orbit * (i > 4 ? 3 : 2)}px) scale(${0.4 + 0.6 * p}) rotate(${-6 + (1 - p) * -14}deg)`;
+  });
+
+  // words
+  K.reveal(hookW, T, 0.12, { kind: 'up', stagger: 0.08, out: PAN0 - 0.2 });
+  caps.forEach((c, i) => {
+    const [a, b] = CAPS[i];
+    const o = 1 - K.p(T, b - 0.25, b, E.inCubic);
+    [...c.children].forEach((el, j) => { const p = K.p(T, a + j * 0.1, a + 0.55 + j * 0.1, E.outExpo); el.style.opacity = p * o; el.style.transform = `translateY(${(1 - p) * 34 - (1 - o) * 16}px)`; });
+  });
+  end(T);
+});
+</script></body></html>
