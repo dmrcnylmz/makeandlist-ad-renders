@@ -314,8 +314,12 @@ def voice_led_mix(meta, dur, n, music, sfx, vo):
     sfx = to_lufs(sfx, SFX_LUFS) if np.max(np.abs(sfx)) > 1e-5 else sfx
     sfx = sfx * 10 ** (SFX_DUCK_DB * env / 20)
     mix = vo + music + sfx
-    peak = np.max(np.abs(mix))
-    return mix / peak * 0.9 if peak > 0.9 else mix
+    # Gentle master glue: tames the voice's peaks so the -14 LUFS delivery is reached without hitting true peak,
+    # while the voice / bed / effects balance set above stays as it is.
+    mix = ffmpeg_mono(mix / max(1.0, np.max(np.abs(mix)) / 0.95),
+                      'acompressor=threshold=-20dB:ratio=2.5:attack=8:release=160:makeup=1,'
+                      'alimiter=limit=0.8:attack=2:release=80:level=false')
+    return mix
 
 
 def main():

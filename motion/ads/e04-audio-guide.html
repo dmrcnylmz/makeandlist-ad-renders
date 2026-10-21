@@ -148,7 +148,7 @@ const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Printed per
 const stopAt = (T) => K.p(T, STOP[1] - 0.12, STOP[1] + 0.5, E.inOutCubic) + K.p(T, STOP[2] - 0.12, STOP[2] + 0.5, E.inOutCubic) + K.p(T, STOP[3] - 0.12, STOP[3] + 0.5, E.inOutCubic);
 
 K.run({
-  id: 'E04', title: 'The Audio Guide', dur: DUR, bpm: BPM, music: 'new-shoes', mood: 'calm', key: 'E', intro: 0.0, cover: 4.9,
+  id: 'E04', title: 'The Audio Guide', dur: DUR, bpm: BPM, music: 'new-shoes', musicMode: 'none', mood: 'calm', key: 'E', intro: 0.0, cover: 4.9,
   technique: 'Museum audio guide: a handset in the foreground (keypad, LCD whose waveform follows the narrator’s real loudness frame by frame) and a gallery wall; each key press, timed to the breaths, dollies the camera to the next numbered exhibit under its spotlight, with gallery wall text carrying the key words; a brass loupe passes over the print texture, the real try-on sits in a vitrine, the last frame is empty: “Untitled (No Stock)”',
   caption: 'An audio guide to your next product: a botanical print made from one sentence and checked for sharpness, the same idea tried on a tee, printed by your own print partner — per order, with no stock. Start free at makeandlist.com',
   short: 'Printed per order. No stock.',

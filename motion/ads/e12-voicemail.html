@@ -180,7 +180,7 @@ const voAt = (T) => VO.findIndex((v) => T >= v.a && T < v.b);
 const curLine = (T) => { let c = -1; VO.forEach((v, i) => { if (T >= v.a - 0.15) c = i; }); return c; };
 
 K.run({
-  id: 'E12', title: 'You Have One New Message', dur: DUR, bpm: BPM, music: 'puppy-love', mood: 'calm', key: 'F', intro: 0.0, cover: 6.6,
+  id: 'E12', title: 'You Have One New Message', dur: DUR, bpm: BPM, music: 'puppy-love', musicMode: 'none', mood: 'calm', key: 'F', intro: 0.0, cover: 6.6,
   technique: 'A night lock screen: a notification opens a voicemail player and the narrator is the message — the waveform plays with her voice, a live transcript writes her words with key words marked, and under it each line’s proof (the real order, a sample margin breakdown, the real “where it stands” rows), ending on an Approve button a thumb presses in her pause',
   caption: 'An order for a printed product comes in — and it waits for you. You see the partner’s cost and your margin first; nothing is sent to print until you approve, and printing is paid from your own partner account. Start free at makeandlist.com',
   short: 'Press yes when you’re ready.',
