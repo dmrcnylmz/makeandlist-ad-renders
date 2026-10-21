@@ -1,0 +1,93 @@
+{
+  "version": "production-examples-1",
+  "examples": [
+    {
+      "id": "halloween-coloring",
+      "categoryId": "coloring",
+      "productTypeId": "seasonal-coloring",
+      "title": "Halloween Storybook Coloring Pages",
+      "sourceKind": "PRODUCTION",
+      "contentUnitCount": 8,
+      "auxiliaryPageCount": 2,
+      "deliveryPageCount": 10,
+      "uniqueIllustrationCount": 8,
+      "artMode": "AI_ILLUSTRATIONS",
+      "review": "PASS_WITH_NOTES",
+      "assets": {
+        "cover": {
+          "src": "/examples/halloween-coloring-cover.png",
+          "sha256": "0af2603b6776dfedb2b9fc09ddd683cbe3263983af150102054fc435a1119ea6",
+          "width": 849,
+          "height": 1100,
+          "alt": "Halloween Storybook Coloring Pages cover"
+        },
+        "interior": {
+          "src": "/examples/halloween-coloring-interior.png",
+          "sha256": "74f077b2a2a128ce96ddb840bd800c7dabf13a8de0197e9a1eff25953235f369",
+          "width": 849,
+          "height": 1100,
+          "alt": "Halloween Storybook Coloring Pages actual inside page"
+        }
+      }
+    },
+    {
+      "id": "dinosaur-coloring",
+      "categoryId": "coloring",
+      "productTypeId": "seasonal-coloring",
+      "title": "Dinosaur Little Adventures",
+      "sourceKind": "PRODUCTION",
+      "contentUnitCount": 8,
+      "auxiliaryPageCount": 2,
+      "deliveryPageCount": 10,
+      "uniqueIllustrationCount": 8,
+      "artMode": "AI_ILLUSTRATIONS",
+      "review": "PASS_WITH_NOTES",
+      "assets": {
+        "cover": {
+          "src": "/examples/dinosaur-coloring-cover.png",
+          "sha256": "5d31ef1a14da9d3acf48ba849c2294d27f7fb8962ac95b4944d41720052d5a2e",
+          "width": 849,
+          "height": 1100,
+          "alt": "Dinosaur Little Adventures cover"
+        },
+        "interior": {
+          "src": "/examples/dinosaur-coloring-interior.png",
+          "sha256": "a02e4cd1a5454634a83ee86cd6e983a2e63cbf5e08de1a9e7b7977a94d4bf6a8",
+          "width": 849,
+          "height": 1100,
+          "alt": "Dinosaur Little Adventures actual inside page"
+        }
+      }
+    },
+    {
+      "id": "winter-word-search",
+      "categoryId": "activities",
+      "productTypeId": "word-search",
+      "title": "Cozy Winter & Christmas Word Searches",
+      "sourceKind": "PRODUCTION",
+      "contentUnitCount": 20,
+      "auxiliaryPageCount": 12,
+      "deliveryPageCount": 32,
+      "uniqueIllustrationCount": 0,
+      "artMode": "LOCAL_PUZZLE_LAYOUT",
+      "review": "PASS_WITH_NOTES",
+      "assets": {
+        "cover": {
+          "src": "/examples/winter-word-search-cover.png",
+          "sha256": "9949eda7aa5fd3c710d48ebd7c7f4fee658d42e5cb1189033cdc57865c8be42b",
+          "width": 849,
+          "height": 1100,
+          "alt": "Cozy Winter & Christmas Word Searches cover"
+        },
+        "interior": {
+          "src": "/examples/winter-word-search-interior.png",
+          "sha256": "0bc416984824786672288a0a9386ed9adac1330ec70682db4ea372a505fa68ca",
+          "width": 849,
+          "height": 1100,
+          "alt": "Cozy Winter & Christmas Word Searches actual inside page"
+        }
+      }
+    }
+  ],
+  "coverageNote": "Three actual reviewed products. These are examples of their stated product types, not quality verification for every category or configuration."
+}

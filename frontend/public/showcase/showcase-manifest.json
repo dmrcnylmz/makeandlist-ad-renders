@@ -1,0 +1,319 @@
+{
+  "note": "Examples created with MakeAndList by its owner, rendered from the files a buyer downloads. Not customer products and not sales figures.",
+  "products": [
+    {
+      "slug": "halloween-preschool-pack",
+      "product": "Halloween Preschool Learning Pack",
+      "family": "Preschool learning pack",
+      "pages": 37,
+      "answerKeyPages": 10,
+      "ages": "Ages 3-5",
+      "formats": [
+        "US Letter PDF",
+        "A4 PDF",
+        "ZIP with both"
+      ],
+      "cover": "halloween-preschool-pack/cover.webp",
+      "interiors": [
+        {
+          "src": "halloween-preschool-pack/interior-01.webp",
+          "alt": "A maze page: help the bat find the way to the pumpkin",
+          "page": 14
+        },
+        {
+          "src": "halloween-preschool-pack/interior-02.webp",
+          "alt": "A tracing page with a smiling pumpkin and the word pumpkin in dotted letters",
+          "page": 4
+        },
+        {
+          "src": "halloween-preschool-pack/interior-03.webp",
+          "alt": "A coloring page of a haunted house",
+          "page": 21
+        },
+        {
+          "src": "halloween-preschool-pack/interior-04.webp",
+          "alt": "The maze answer key with the path drawn in orange",
+          "page": 32
+        }
+      ],
+      "preview": "halloween-preschool-pack/listing-hero.webp",
+      "photo": "halloween-preschool-pack/photo.webp",
+      "sourceMasterProductId": "d00a3708-43da-4f43-86e5-67a1f3767c7a"
+    },
+    {
+      "slug": "christmas-preschool-pack",
+      "product": "Christmas Preschool Learning Pack",
+      "family": "Preschool learning pack",
+      "pages": 37,
+      "answerKeyPages": 10,
+      "ages": "Ages 3-5",
+      "formats": [
+        "US Letter PDF",
+        "A4 PDF",
+        "ZIP with both"
+      ],
+      "cover": "christmas-preschool-pack/cover.webp",
+      "interiors": [
+        {
+          "src": "christmas-preschool-pack/interior-01.webp",
+          "alt": "A maze page: help the reindeer find the way to the gift",
+          "page": 14
+        },
+        {
+          "src": "christmas-preschool-pack/interior-02.webp",
+          "alt": "A tracing page with a Christmas tree and the word tree in dotted letters",
+          "page": 4
+        },
+        {
+          "src": "christmas-preschool-pack/interior-03.webp",
+          "alt": "A coloring page of a snowman in a hat and scarf",
+          "page": 9
+        },
+        {
+          "src": "christmas-preschool-pack/interior-04.webp",
+          "alt": "The maze answer key with the path drawn in red",
+          "page": 32
+        }
+      ],
+      "preview": "christmas-preschool-pack/listing-hero.webp",
+      "photo": "christmas-preschool-pack/photo.webp",
+      "sourceMasterProductId": "25375f83-f180-4ead-8946-ccbd5343ead0",
+      "listingImages": [
+        "christmas-preschool-pack/listing-01.webp",
+        "christmas-preschool-pack/listing-02.webp",
+        "christmas-preschool-pack/listing-03.webp",
+        "christmas-preschool-pack/listing-04.webp",
+        "christmas-preschool-pack/listing-05.webp",
+        "christmas-preschool-pack/listing-06.webp",
+        "christmas-preschool-pack/listing-07.webp",
+        "christmas-preschool-pack/listing-08.webp",
+        "christmas-preschool-pack/listing-09.webp",
+        "christmas-preschool-pack/listing-10.webp"
+      ]
+    },
+    {
+      "slug": "activity-halloween",
+      "product": "Halloween Activity Book for Kids",
+      "family": "Activity book",
+      "pages": 35,
+      "answerKeyPages": 10,
+      "ages": "Ages 5-9",
+      "formats": [
+        "US Letter PDF",
+        "A4 PDF",
+        "ZIP with both"
+      ],
+      "cover": "activity-halloween/cover.webp",
+      "interiors": [
+        {
+          "src": "activity-halloween/interior-01.webp",
+          "alt": "A Halloween word search with ten words to find",
+          "page": 3
+        },
+        {
+          "src": "activity-halloween/interior-02.webp",
+          "alt": "A ghost maze",
+          "page": 5
+        },
+        {
+          "src": "activity-halloween/interior-03.webp",
+          "alt": "An I spy page: count the pumpkins, bats and ghosts",
+          "page": 6
+        },
+        {
+          "src": "activity-halloween/interior-04.webp",
+          "alt": "A monster word search with words across, down and diagonally",
+          "page": 18
+        }
+      ],
+      "preview": "activity-halloween/listing-hero.webp",
+      "photo": "activity-halloween/photo.webp",
+      "sourceMasterProductId": "38586458-a2c4-43e5-ab56-846b1279d56e"
+    },
+    {
+      "slug": "fall-activity-pack",
+      "product": "Fall Activity & Coloring Pack",
+      "family": "Activity pack",
+      "pages": 29,
+      "answerKeyPages": 6,
+      "ages": "Ages 4-8",
+      "formats": [
+        "US Letter PDF",
+        "A4 PDF",
+        "ZIP with both"
+      ],
+      "cover": "fall-activity-pack/cover.webp",
+      "interiors": [
+        {
+          "src": "fall-activity-pack/interior-01.webp",
+          "alt": "A coloring page of a squirrel holding an acorn",
+          "page": 3
+        },
+        {
+          "src": "fall-activity-pack/interior-02.webp",
+          "alt": "An acorn maze",
+          "page": 7
+        },
+        {
+          "src": "fall-activity-pack/interior-03.webp",
+          "alt": "An I spy page of leaves, acorns, apples and mushrooms",
+          "page": 11
+        },
+        {
+          "src": "fall-activity-pack/interior-04.webp",
+          "alt": "A fall nature walk checklist with pictures",
+          "page": 13
+        }
+      ],
+      "preview": "fall-activity-pack/listing-hero.webp",
+      "photo": "fall-activity-pack/photo.webp",
+      "sourceMasterProductId": "a60b3d05-159f-4482-b5c9-fa4007dec35f"
+    },
+    {
+      "slug": "halloween-party-games",
+      "product": "Halloween Bingo & Party Games",
+      "family": "Party games",
+      "pages": 19,
+      "answerKeyPages": 1,
+      "ages": "Ages 4-10",
+      "formats": [
+        "US Letter PDF",
+        "A4 PDF",
+        "ZIP with both"
+      ],
+      "cover": "halloween-party-games/cover.webp",
+      "interiors": [
+        {
+          "src": "halloween-party-games/interior-01.webp",
+          "alt": "Picture bingo calling cards to cut out",
+          "page": 14
+        },
+        {
+          "src": "halloween-party-games/interior-02.webp",
+          "alt": "An I spy party game",
+          "page": 17
+        },
+        {
+          "src": "halloween-party-games/interior-03.webp",
+          "alt": "How to play picture bingo",
+          "page": 3
+        }
+      ],
+      "preview": "halloween-party-games/listing-hero.webp",
+      "photo": "halloween-party-games/photo.webp",
+      "sourceMasterProductId": "15339484-193a-4d32-9ccb-4b404131e02a"
+    },
+    {
+      "slug": "christmas-party-games",
+      "product": "Christmas Bingo & Party Games",
+      "family": "Party games",
+      "pages": 18,
+      "answerKeyPages": 1,
+      "ages": "Ages 4-10",
+      "formats": [
+        "US Letter PDF",
+        "A4 PDF",
+        "ZIP with both"
+      ],
+      "cover": "christmas-party-games/cover.webp",
+      "interiors": [
+        {
+          "src": "christmas-party-games/interior-01.webp",
+          "alt": "Christmas picture bingo calling cards to cut out",
+          "page": 14
+        },
+        {
+          "src": "christmas-party-games/interior-02.webp",
+          "alt": "A Christmas house hunt with pictures to tick",
+          "page": 15
+        },
+        {
+          "src": "christmas-party-games/interior-03.webp",
+          "alt": "An I spy Christmas game",
+          "page": 16
+        }
+      ],
+      "preview": "christmas-party-games/listing-hero.webp",
+      "photo": "christmas-party-games/photo.webp",
+      "sourceMasterProductId": "eb220ad9-0a84-4939-9bd5-2be57aa6f807"
+    },
+    {
+      "slug": "thanksgiving-kids-table",
+      "product": "Thanksgiving Kids Table Activity Pack",
+      "family": "Kids' table pack",
+      "pages": 16,
+      "answerKeyPages": 2,
+      "ages": "Ages 4-9",
+      "formats": [
+        "US Letter PDF",
+        "A4 PDF",
+        "ZIP with both"
+      ],
+      "cover": "thanksgiving-kids-table/cover.webp",
+      "interiors": [
+        {
+          "src": "thanksgiving-kids-table/interior-01.webp",
+          "alt": "A coloring page of a turkey",
+          "page": 9
+        },
+        {
+          "src": "thanksgiving-kids-table/interior-02.webp",
+          "alt": "A Thanksgiving word search",
+          "page": 8
+        },
+        {
+          "src": "thanksgiving-kids-table/interior-03.webp",
+          "alt": "A maze: help the turkey find the way to the pie",
+          "page": 11
+        },
+        {
+          "src": "thanksgiving-kids-table/interior-04.webp",
+          "alt": "An I am thankful for page with writing lines",
+          "page": 7
+        }
+      ],
+      "preview": "thanksgiving-kids-table/listing-hero.webp",
+      "photo": "thanksgiving-kids-table/photo.webp",
+      "sourceMasterProductId": "58e1aa58-9358-43f6-a9cf-795ae86ec371"
+    },
+    {
+      "slug": "coloring-christmas",
+      "product": "Christmas Coloring Book for Kids",
+      "family": "Coloring book",
+      "pages": 27,
+      "answerKeyPages": 0,
+      "ages": "Ages 3-8",
+      "formats": [
+        "US Letter PDF",
+        "A4 PDF",
+        "ZIP with both"
+      ],
+      "cover": "coloring-christmas/cover.webp",
+      "interiors": [
+        {
+          "src": "coloring-christmas/interior-01.webp",
+          "alt": "A coloring page of a decorated Christmas tree",
+          "page": 3
+        },
+        {
+          "src": "coloring-christmas/interior-02.webp",
+          "alt": "A coloring page of two smiling bells with holly",
+          "page": 13
+        },
+        {
+          "src": "coloring-christmas/interior-03.webp",
+          "alt": "A coloring page of a mug of cocoa with marshmallows",
+          "page": 17
+        },
+        {
+          "src": "coloring-christmas/interior-04.webp",
+          "alt": "A coloring page of a penguin in a scarf",
+          "page": 20
+        }
+      ],
+      "preview": "coloring-christmas/listing-hero.webp",
+      "photo": "coloring-christmas/photo.webp",
+      "sourceMasterProductId": "d559a554-cf27-4010-abe4-fdb4047050de"
+    }
+  ]
+}

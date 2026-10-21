@@ -1,0 +1,78 @@
+name: Render ads (motion/ads)
+# Renders the MakeAndList ad series on GitHub's runners instead of the 8 GB Mac: one job per ad, in parallel.
+# Each job uploads its folder (MP4s, covers, manifest.json with QC, CAPTIONS.md) as an artifact.
+# Runs on a push to a render/** branch that touches motion/ads, or by hand with the ads to render.
+on:
+  push:
+    branches: ['main']
+    paths: ['motion/ads/**', '.github/workflows/render-ads.yml']
+  workflow_dispatch:
+    inputs:
+      ads:
+        description: 'Space-separated ads, e.g. "b01 b02" (empty = all)'
+        required: false
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: render-ads-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      ads: ${{ steps.pick.outputs.ads }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          sparse-checkout: motion/ads
+      - id: pick
+        env:
+          ASKED: ${{ github.event.inputs.ads }}
+        run: |
+          if [ -f motion/ads/render-list.txt ] && [ -z "$ASKED" ]; then ASKED=$(tr '\n' ' ' < motion/ads/render-list.txt); fi
+          if [ -z "$ASKED" ]; then ASKED=$(ls motion/ads | grep -oE '^[ab][0-9]{2}' | sort -u | tr '\n' ' '); fi
+          echo "ads=$(printf '%s\n' $ASKED | jq -R . | jq -cs .)" >> "$GITHUB_OUTPUT"
+  render:
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        ad: ${{ fromJson(needs.plan.outputs.ads) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '20.19.5'
+          cache: npm
+          cache-dependency-path: motion/package-lock.json
+      - name: Tools (ffmpeg, numpy, Pillow)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          python3 -m pip install --quiet --break-system-packages numpy pillow
+      - run: npm ci --no-audit --no-fund
+        working-directory: motion
+      - name: Render ${{ matrix.ad }}
+        working-directory: motion/ads
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node render-ads.mjs ${{ matrix.ad }} --f=9x16,4x5 --out="$GITHUB_WORKSPACE/out"
+      - name: QC must pass
+        run: |
+          python3 - <<'PY'
+          import json, glob, sys
+          bad = [v['file'] for m in glob.glob('out/*/manifest.json') for v in json.load(open(m))['videos'] if not v['ok']]
+          print('QC failures:', bad or 'none'); sys.exit(1 if bad else 0)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: ad-${{ matrix.ad }}
+          path: out/
+          retention-days: 14
+          if-no-files-found: error

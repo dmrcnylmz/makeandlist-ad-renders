@@ -1,0 +1,101 @@
+[
+  {
+    "platform": "GUMROAD",
+    "file": "gumroad.svg",
+    "page": "https://gumroad.com",
+    "url": "https://assets.gumroad.com/images/logo-g.svg",
+    "sha256": "25e7950b4fe601e05de3788c99b8ecabb7dffdaee096ab113198815572fb5af6"
+  },
+  {
+    "platform": "ETSY",
+    "member": "Logos/Digital/SVG/Etsy_Wordmark_Orange.svg",
+    "file": "etsy.svg",
+    "page": "https://www.etsy.com/press",
+    "url": "https://extfiles.etsy.com/Press/brand-assets/etsy-logos.zip",
+    "sha256": "4e4d10b979bc717c4a98d54ca10552363d8c6117907831e59fe93792c4ab41cf",
+    "source_bytes_unchanged": true
+  },
+  {
+    "platform": "SHOPIFY",
+    "member": "02 - Glyph/svg/shopify_glyph.svg",
+    "file": "shopify.svg",
+    "page": "https://www.shopify.com/brand-assets",
+    "url": "https://cdn.shopify.com/static/brand-assets/shopify-shopping-bag.zip",
+    "sha256": "4db7a16ed5734680c24ed2cee13f132f4c9592727014c2e21b1bdc21bf14faee",
+    "source_bytes_unchanged": true
+  },
+  {
+    "platform": "WIX",
+    "member": "WixLogoNew/SVG/Wix logoB.svg",
+    "file": "wix.svg",
+    "page": "https://www.wix.com/about/design-assets",
+    "url": "https://9ab0d111-ec70-4f4c-900e-a9399b76d84c.usrfiles.com/archives/9ab0d1_a1c94e33202642618be2265c769c77b9.zip",
+    "sha256": "aaba8010180c83b94798a8fee848b01651bb62ce7827bb8df1bb951f3ca0423d",
+    "source_bytes_unchanged": true
+  },
+  {
+    "platform": "ECWID",
+    "member": "logo_set/EN_ Ecwid by Lightspeed/Ecwid_LSLockup_BlackRGB_Ecwid_EN.svg",
+    "file": "ecwid.svg",
+    "page": "https://www.ecwid.com/media",
+    "url": "https://don16obqbay2c.cloudfront.net/media/logos_set.zip",
+    "sha256": "fa7f813a48d375227b0e1fe039bc6011df120da4c0ad5d2c8387cc5b9ce58ced",
+    "source_bytes_unchanged": true
+  },
+  {
+    "platform": "WOOCOMMERCE",
+    "file": "woocommerce.svg",
+    "page": "https://woocommerce.com/brand-and-logo-guidelines/",
+    "url": "https://woocommerce.com/wp-content/themes/woo/images/woo-logo.svg",
+    "sha256": "e4218cf5b58aafc865b7816c58e3002c424b8a4108fd4439a18e2bd0c440a0cb",
+    "source_bytes_unchanged": true
+  },
+  {
+    "platform": "IKAS",
+    "file": "ikas.svg",
+    "page": "https://ikas.com/tr",
+    "url": "https://cms.ikas.com/wp-content/uploads/2024/12/ikas-header-logo.svg",
+    "sha256": "791cfbaa104fe90a9d11f57f8c7872be9b41fafd1a9a9aad0592e64fa2206ffc",
+    "source_bytes_unchanged": true
+  },
+  {
+    "platform": "SHOPIER",
+    "file": "shopier.png",
+    "page": "https://help.shopier.com/help/dukkanima-nasil-logo-ve-banner-ekleyebilirim",
+    "url": "https://dbgi97grppr1g.cloudfront.net/cmcfs1c4112oi130g26pi4ew5/company-logo_cmcfs1gtu12oj130g5rj5gwa5",
+    "sha256": "9dfea7361fc33fdb26cb7456a6efb17cd3b3dbd46cc16bd3ca37efe14a6c3b99",
+    "source_bytes_unchanged": true
+  },
+  {
+    "platform": "SHOPWARE",
+    "file": "shopware.svg",
+    "page": "https://www.shopware.com/en/press/",
+    "url": "https://www.shopware.com/media/download/shopware-logo-brand-blue.svg",
+    "sha256": "5966841ef6f2e39af8ddf899c4923e585eb7a2ad3d72b19bf4415df37dd02270",
+    "source_bytes_unchanged": true
+  },
+  {
+    "platform": "WHOP",
+    "file": "whop.svg",
+    "page": "https://brand.whop.com/",
+    "url": "https://brand.whop.com/images/logos/whop_logo_lockup_duo_black.svg",
+    "sha256": "c10c9d6e64f2a8021194992526a23d96036ebfe7d68374e696379ecf8bb60450",
+    "source_bytes_unchanged": true
+  },
+  {
+    "platform": "SHOPLINE",
+    "file": "shopline.svg",
+    "page": "https://au.shopline.com/",
+    "url": "https://cdn.prod.website-files.com/63dcf0542cdfca151dd2a2f2/67b542a9cabe76fefc1d9d27_sl-logo.svg",
+    "sha256": "2bd4671cc6666daa6548ea6c00eccb4a66b1332e8806923867c129d9c07ca8a3",
+    "source_bytes_unchanged": true
+  },
+  {
+    "platform": "SALLA",
+    "file": "salla.svg",
+    "page": "https://brand.salla.com/",
+    "url": "https://cdn.prod.website-files.com/63fe4a8108c3c17052878ef9/640478698a898d54481ea309_Group%2059.svg",
+    "sha256": "55c375c332d94f5c32b91b9180b0b7e2866c1f1291f60f25eb378cacadd7959b",
+    "source_bytes_unchanged": true
+  }
+]

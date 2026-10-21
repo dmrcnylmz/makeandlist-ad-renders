@@ -1,0 +1,1782 @@
+[
+  {
+    "name": "01-landing",
+    "group": "Public",
+    "note": "Landing — film hero, store band, studio",
+    "route": "/",
+    "scenario": "public",
+    "viewport": {
+      "width": 1440,
+      "height": 2700
+    },
+    "file": "01-landing.png",
+    "finalPath": "/",
+    "design": null,
+    "h1": "One idea. More ways to make it real.",
+    "overflowX": false,
+    "hiddenStoreNames": [
+      "Etsy"
+    ],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "02-signin",
+    "group": "Public",
+    "note": "Sign in",
+    "route": "/signin",
+    "scenario": "public",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "02-signin.png",
+    "finalPath": "/signin",
+    "design": null,
+    "h1": "Welcome back",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "03-overview",
+    "group": "Home",
+    "note": "Overview",
+    "route": "/overview",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1900
+    },
+    "file": "03-overview.png",
+    "finalPath": "/overview",
+    "design": null,
+    "h1": "Good morning.",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "04-create",
+    "group": "Make",
+    "note": "Create — what do you want to make?",
+    "route": "/create",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1500
+    },
+    "file": "04-create.png",
+    "finalPath": "/create",
+    "design": null,
+    "h1": "What are we making?",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "05-create-category",
+    "group": "Make",
+    "note": "Create — one category",
+    "route": "/create/kids-education",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1009
+    },
+    "file": "05-create-category.png",
+    "finalPath": "/create/kids-education",
+    "design": null,
+    "h1": "Choose what to make",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "06-create-product",
+    "group": "Make",
+    "note": "Create — configure a product, see its price",
+    "route": "/create/p/preschool-pack",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1319
+    },
+    "file": "06-create-product.png",
+    "finalPath": "/create/p/preschool-pack",
+    "design": null,
+    "h1": "Preschool learning pack",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "07-ideas",
+    "group": "Make",
+    "note": "Product ideas",
+    "route": "/ideas",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1800
+    },
+    "file": "07-ideas.png",
+    "finalPath": "/ideas",
+    "design": null,
+    "h1": "Ideas, not a blank page.",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "08-generating",
+    "group": "Make",
+    "note": "Making — live progress",
+    "route": "/generating/run-3333-3333-3333-333333333333",
+    "scenario": "generation-running",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "08-generating.png",
+    "finalPath": "/generating/run-3333-3333-3333-333333333333",
+    "design": null,
+    "h1": "Your new product",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "09-generation-stopped",
+    "group": "Make",
+    "note": "Making — stopped, credits returned",
+    "route": "/generating/run-3333-3333-3333-333333333333",
+    "scenario": "generation-failed",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "09-generation-stopped.png",
+    "finalPath": "/generating/run-3333-3333-3333-333333333333",
+    "design": null,
+    "h1": "Your new product",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "10-products",
+    "group": "Make",
+    "note": "Products library",
+    "route": "/products",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1281
+    },
+    "file": "10-products.png",
+    "finalPath": "/products",
+    "design": null,
+    "h1": "Products",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "11-product",
+    "group": "Make",
+    "note": "Product — review, files, listing images",
+    "route": "/products/prod-1",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 2100
+    },
+    "file": "11-product.png",
+    "finalPath": "/products/prod-1",
+    "design": null,
+    "h1": "Wedding Planner — Botanical",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "12-stores",
+    "group": "Sell",
+    "note": "Stores — connect and check every channel",
+    "route": "/channels",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 2431
+    },
+    "file": "12-stores.png",
+    "finalPath": "/channels",
+    "design": null,
+    "h1": "Stores",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "13-listings",
+    "group": "Sell",
+    "note": "Listings",
+    "route": "/listings",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "13-listings.png",
+    "finalPath": "/listings",
+    "design": null,
+    "h1": "Listings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "14-listing",
+    "group": "Sell",
+    "note": "Listing — copy, images, store and price",
+    "route": "/listings/list-1",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1917
+    },
+    "file": "14-listing.png",
+    "finalPath": "/listings/list-1",
+    "design": null,
+    "h1": "Wedding Planner Printable — Botanical, 36 pages",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "15-publishing",
+    "group": "Sell",
+    "note": "Waiting for you — what was sent, what needs a read-back",
+    "route": "/publishing",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1656
+    },
+    "file": "15-publishing.png",
+    "finalPath": "/publishing",
+    "design": null,
+    "h1": "Waiting for you",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "16-performance",
+    "group": "Sell",
+    "note": "Performance — only figures a store reports",
+    "route": "/performance",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1902
+    },
+    "file": "16-performance.png",
+    "finalPath": "/performance",
+    "design": null,
+    "h1": "Performance",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "17-billing",
+    "group": "Account",
+    "note": "Plan & Credits",
+    "route": "/billing",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 2238
+    },
+    "file": "17-billing.png",
+    "finalPath": "/billing",
+    "design": null,
+    "h1": "Plan & Credits",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "18-settings",
+    "group": "Account",
+    "note": "Settings — profile",
+    "route": "/settings",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1116
+    },
+    "file": "18-settings.png",
+    "finalPath": "/settings",
+    "design": null,
+    "h1": "Settings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "19-settings-ai",
+    "group": "Account",
+    "note": "Settings — AI models and own keys",
+    "route": "/settings/ai",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1800
+    },
+    "file": "19-settings-ai.png",
+    "finalPath": "/settings/ai",
+    "design": null,
+    "h1": "Settings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "20-settings-stores",
+    "group": "Account",
+    "note": "Settings — stores",
+    "route": "/settings/stores",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "20-settings-stores.png",
+    "finalPath": "/settings/stores",
+    "design": null,
+    "h1": "Settings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "21-phone-landing",
+    "group": "Phone",
+    "note": "Landing on a phone",
+    "route": "/",
+    "scenario": "public",
+    "viewport": {
+      "width": 390,
+      "height": 2600
+    },
+    "file": "21-phone-landing.png",
+    "finalPath": "/",
+    "design": null,
+    "h1": "One idea. More ways to make it real.",
+    "overflowX": false,
+    "hiddenStoreNames": [
+      "Etsy"
+    ],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "22-phone-create",
+    "group": "Phone",
+    "note": "Create on a phone",
+    "route": "/create",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1700
+    },
+    "file": "22-phone-create.png",
+    "finalPath": "/create",
+    "design": null,
+    "h1": "What are we making?",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "23-phone-products",
+    "group": "Phone",
+    "note": "Products on a phone",
+    "route": "/products",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1700
+    },
+    "file": "23-phone-products.png",
+    "finalPath": "/products",
+    "design": null,
+    "h1": "Products",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "24-phone-product",
+    "group": "Phone",
+    "note": "Product on a phone",
+    "route": "/products/prod-1",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "24-phone-product.png",
+    "finalPath": "/products/prod-1",
+    "design": null,
+    "h1": "Wedding Planner — Botanical",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "25-phone-stores",
+    "group": "Phone",
+    "note": "Stores on a phone",
+    "route": "/channels",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "25-phone-stores.png",
+    "finalPath": "/channels",
+    "design": null,
+    "h1": "Stores",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "26-production",
+    "group": "Sell",
+    "note": "Production — physical orders",
+    "route": "/production",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "26-production.png",
+    "finalPath": "/production",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "27-production-order",
+    "group": "Sell",
+    "note": "Production order — outcome unknown, looked up not resent",
+    "route": "/production/orders/pod-3412",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1500
+    },
+    "file": "27-production-order.png",
+    "finalPath": "/production/orders/pod-3412",
+    "design": null,
+    "h1": "Order #3412 · line 1",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "28-production-partners",
+    "group": "Sell",
+    "note": "Production partners — what each is proven to do",
+    "route": "/production/partners",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1953
+    },
+    "file": "28-production-partners.png",
+    "finalPath": "/production/partners",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "29-sell-physical",
+    "group": "Make",
+    "note": "Make it physical — sell the printed edition in every store, each by its own path",
+    "route": "/products/prod-1",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1500
+    },
+    "file": "29-sell-physical.png",
+    "finalPath": "/products/prod-1",
+    "design": null,
+    "h1": "Wedding Planner — Botanical",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "30-listing-several-stores",
+    "group": "Sell",
+    "note": "One listing, several stores — each reviewed and sent on its own",
+    "route": "/listings/list-1?channel=IKAS&also=WOOCOMMERCE",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 2266
+    },
+    "file": "30-listing-several-stores.png",
+    "finalPath": "/listings/list-1",
+    "design": null,
+    "h1": "Wedding Planner Printable — Botanical, 36 pages",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "31-partner-connected",
+    "group": "Sell",
+    "note": "Your own Printful account connected — orders only from MakeAndList",
+    "route": "/production/partners",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1400
+    },
+    "file": "31-partner-connected.png",
+    "finalPath": "/production/partners",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "32-create-composer",
+    "group": "Make",
+    "note": "Create — describe the idea, choose Digital / Physical / Both",
+    "route": "/create",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "32-create-composer.png",
+    "finalPath": "/create",
+    "design": null,
+    "h1": "What are we making?",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "33-phone-sell-physical",
+    "group": "Phone",
+    "note": "Sell the printed edition on a phone",
+    "route": "/products/prod-1",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "33-phone-sell-physical.png",
+    "finalPath": "/products/prod-1",
+    "design": null,
+    "h1": "Wedding Planner — Botanical",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "34-production-approve-several",
+    "group": "Sell",
+    "note": "Approve several orders — quotes, what each sale leaves, a loss kept out unless confirmed",
+    "route": "/production",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1500
+    },
+    "file": "34-production-approve-several.png",
+    "finalPath": "/production",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "35-production-order-shipping",
+    "group": "Sell",
+    "note": "One order — shipping method, quote and margin before approving",
+    "route": "/production/orders/pod-1088",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 967
+    },
+    "file": "35-production-order-shipping.png",
+    "finalPath": "/production/orders/pod-1088",
+    "design": null,
+    "h1": "Order #1088 · line 1",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "36-production-store-orders",
+    "group": "Sell",
+    "note": "Store orders — Salla, SHOPLINE, Shoplazza, Shopware relay and tracking switches, all off until turned on",
+    "route": "/production/stores",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1200
+    },
+    "file": "36-production-store-orders.png",
+    "finalPath": "/production/stores",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "37-production-salla-tracking",
+    "group": "Sell",
+    "note": "A Salla order — tracking to copy, because Salla takes it only from shipping apps",
+    "route": "/production/orders/pod-5120",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 753
+    },
+    "file": "37-production-salla-tracking.png",
+    "finalPath": "/production/orders/pod-5120",
+    "design": null,
+    "h1": "Order #5120 · line 1",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "38-listing-list",
+    "group": "Sell",
+    "note": "Listing — List: the final check beside the store preview, one \"Choose stores\" bar",
+    "route": "/listings/list-1?step=check&channel=IKAS",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1600
+    },
+    "file": "38-listing-list.png",
+    "finalPath": "/listings/list-1",
+    "design": null,
+    "h1": "Wedding Planner Printable — Botanical, 36 pages",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "39-listing-track",
+    "group": "Sell",
+    "note": "Listing — Track: only what each store reports",
+    "route": "/listings/list-1?step=result&channel=IKAS",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1400
+    },
+    "file": "39-listing-track.png",
+    "finalPath": "/listings/list-1",
+    "design": null,
+    "h1": "Wedding Planner Printable — Botanical, 36 pages",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "40-checkout",
+    "group": "Account",
+    "note": "Checkout — the order summary card: what is bought, how it is charged, how it ends",
+    "route": "/checkout?plan=PRO",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1201
+    },
+    "file": "40-checkout.png",
+    "finalPath": "/checkout",
+    "design": null,
+    "h1": "Checkout",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "41-ideas-category",
+    "group": "Make",
+    "note": "Ideas — one category: subcategory pills, the same cards as Ideas",
+    "route": "/ideas/wedding",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1383
+    },
+    "file": "41-ideas-category.png",
+    "finalPath": "/ideas/wedding",
+    "design": null,
+    "h1": "Wedding",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "42-copilot",
+    "group": "Make",
+    "note": "Copilot — describe it in a sentence",
+    "route": "/products/new/chat",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "42-copilot.png",
+    "finalPath": "/products/new/chat",
+    "design": null,
+    "h1": "What do you want to make?",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "43-owner-tools",
+    "group": "Account",
+    "note": "Owner tools — shop brain, bulk edits and sync under one head",
+    "route": "/bulk",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "43-owner-tools.png",
+    "finalPath": "/bulk",
+    "design": null,
+    "h1": "Bulk edits",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "44-start",
+    "group": "Account",
+    "note": "Getting started — the setup checklist as one warm card",
+    "route": "/start",
+    "scenario": "showcase-new",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "44-start.png",
+    "finalPath": "/start",
+    "design": null,
+    "h1": "Welcome — review your workspace",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "45-catalogue",
+    "group": "Sell",
+    "note": "Print catalogue — a connected partner's catalogue read live, drawn blanks, no invented prices",
+    "route": "/production/catalogue",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1067
+    },
+    "file": "45-catalogue.png",
+    "finalPath": "/production/catalogue",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "46-try-on",
+    "group": "Make",
+    "note": "Try-on — your image on a drawn blank, a sharpness estimate, the real print check beneath",
+    "route": "/try-on?kind=APPAREL&item=Heavyweight tee&partner=Simulated partner",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1500
+    },
+    "file": "46-try-on.png",
+    "finalPath": "/try-on",
+    "design": null,
+    "h1": "Wedding Planner — Botanical, on a tee.",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "47-settings-members",
+    "group": "Account",
+    "note": "Settings — workspace & members: your role and who did what",
+    "route": "/settings/members",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1094
+    },
+    "file": "47-settings-members.png",
+    "finalPath": "/settings/members",
+    "design": null,
+    "h1": "Settings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "48-settings-notifications",
+    "group": "Account",
+    "note": "Settings — notifications: the print emails, each its own switch",
+    "route": "/settings/notifications",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1153
+    },
+    "file": "48-settings-notifications.png",
+    "finalPath": "/settings/notifications",
+    "design": null,
+    "h1": "Settings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "49-settings-danger",
+    "group": "Account",
+    "note": "Settings — danger zone: deleting the account, counted first",
+    "route": "/settings/danger",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "49-settings-danger.png",
+    "finalPath": "/settings/danger",
+    "design": null,
+    "h1": "Settings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "50-phone-home",
+    "group": "Phone",
+    "note": "Home on a phone, with the tab bar",
+    "route": "/overview",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1700
+    },
+    "file": "50-phone-home.png",
+    "finalPath": "/overview",
+    "design": null,
+    "h1": "Good morning.",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "51-phone-listing",
+    "group": "Phone",
+    "note": "Listing — List on a phone",
+    "route": "/listings/list-1?step=check&channel=IKAS",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "51-phone-listing.png",
+    "finalPath": "/listings/list-1",
+    "design": null,
+    "h1": "Wedding Planner Printable — Botanical, 36 pages",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "52-phone-order",
+    "group": "Phone",
+    "note": "One order on a phone",
+    "route": "/production/orders/pod-1088",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "52-phone-order.png",
+    "finalPath": "/production/orders/pod-1088",
+    "design": null,
+    "h1": "Order #1088 · line 1",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "53-phone-settings",
+    "group": "Phone",
+    "note": "Settings on a phone",
+    "route": "/settings/notifications",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1306
+    },
+    "file": "53-phone-settings.png",
+    "finalPath": "/settings/notifications",
+    "design": null,
+    "h1": "Settings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "54-phone-try-on",
+    "group": "Phone",
+    "note": "Try-on on a phone",
+    "route": "/try-on?kind=APPAREL",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "54-phone-try-on.png",
+    "finalPath": "/try-on",
+    "design": null,
+    "h1": "Wedding Planner — Botanical, on a tee.",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "55-exhibition",
+    "group": "Public",
+    "note": "The exhibition — one artwork on six objects, a gallery room for the landing",
+    "route": "/",
+    "scenario": "public",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "file": "55-exhibition.png",
+    "finalPath": "/",
+    "design": null,
+    "h1": "One idea. More ways to make it real.",
+    "overflowX": false,
+    "hiddenStoreNames": [
+      "Etsy"
+    ],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "56-phone-exhibition",
+    "group": "Phone",
+    "note": "The exhibition on a phone — a swipe through the room",
+    "route": "/",
+    "scenario": "public",
+    "viewport": {
+      "width": 390,
+      "height": 1100
+    },
+    "file": "56-phone-exhibition.png",
+    "finalPath": "/",
+    "design": null,
+    "h1": "One idea. More ways to make it real.",
+    "overflowX": false,
+    "hiddenStoreNames": [
+      "Etsy"
+    ],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "57-production-partners-attention",
+    "group": "Sell",
+    "note": "Partners — check a connection again; confirm a live partner does not import orders itself",
+    "route": "/production/partners?pod=more",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1100
+    },
+    "file": "57-production-partners-attention.png",
+    "finalPath": "/production/partners",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "58-production-store-orders-woo",
+    "group": "Sell",
+    "note": "Store orders — WooCommerce relay beside the others, with the partner plugin found in the shop",
+    "route": "/production/stores?pod=more",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1200
+    },
+    "file": "58-production-store-orders-woo.png",
+    "finalPath": "/production/stores",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "59-sell-physical-shopware-wix",
+    "group": "Make",
+    "note": "Sell it in your stores — Shopware hidden product, checked print file for Wix and WooCommerce",
+    "route": "/products/prod-1?pod=more",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 2990
+    },
+    "file": "59-sell-physical-shopware-wix.png",
+    "finalPath": "/products/prod-1",
+    "design": null,
+    "h1": "Wedding Planner — Botanical",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "60-edition-managed",
+    "group": "Make",
+    "note": "This edition — name, ready, print-file revisions, the stores it prints for",
+    "route": "/products/prod-1?pod=more",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1036
+    },
+    "file": "60-edition-managed.png",
+    "finalPath": "/products/prod-1",
+    "design": null,
+    "h1": "Wedding Planner — Botanical",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "61-publishing-printed",
+    "group": "Sell",
+    "note": "Publishing — a printed edition is its own row; printing off needs the seller",
+    "route": "/publishing?pod=more",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 1814
+    },
+    "file": "61-publishing-printed.png",
+    "finalPath": "/publishing",
+    "design": null,
+    "h1": "Waiting for you",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "62-phone-production-partners",
+    "group": "Phone",
+    "note": "Partners on a phone",
+    "route": "/production/partners?pod=more",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "62-phone-production-partners.png",
+    "finalPath": "/production/partners",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "63-phone-signin",
+    "group": "Phone",
+    "note": "Sign in on a phone",
+    "route": "/signin",
+    "scenario": "public",
+    "viewport": {
+      "width": 390,
+      "height": 922
+    },
+    "file": "63-phone-signin.png",
+    "finalPath": "/signin",
+    "design": null,
+    "h1": "Welcome back",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "64-phone-create-category",
+    "group": "Phone",
+    "note": "Create — one category on a phone",
+    "route": "/create/kids-education",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1435
+    },
+    "file": "64-phone-create-category.png",
+    "finalPath": "/create/kids-education",
+    "design": null,
+    "h1": "Choose what to make",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "65-phone-configure",
+    "group": "Phone",
+    "note": "Configure and quote, with the page plan, on a phone",
+    "route": "/create/p/preschool-pack",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "65-phone-configure.png",
+    "finalPath": "/create/p/preschool-pack",
+    "design": null,
+    "h1": "Preschool learning pack",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "66-phone-ideas",
+    "group": "Phone",
+    "note": "Product ideas on a phone",
+    "route": "/ideas",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "66-phone-ideas.png",
+    "finalPath": "/ideas",
+    "design": null,
+    "h1": "Ideas, not a blank page.",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "67-phone-ideas-category",
+    "group": "Phone",
+    "note": "Ideas — one category on a phone",
+    "route": "/ideas/wedding",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "67-phone-ideas-category.png",
+    "finalPath": "/ideas/wedding",
+    "design": null,
+    "h1": "Wedding",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "68-phone-copilot",
+    "group": "Phone",
+    "note": "Copilot on a phone",
+    "route": "/products/new/chat",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "file": "68-phone-copilot.png",
+    "finalPath": "/products/new/chat",
+    "design": null,
+    "h1": "What do you want to make?",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "69-phone-making",
+    "group": "Phone",
+    "note": "Making — live progress on a phone",
+    "route": "/generating/run-3333-3333-3333-333333333333",
+    "scenario": "generation-running",
+    "viewport": {
+      "width": 390,
+      "height": 1346
+    },
+    "file": "69-phone-making.png",
+    "finalPath": "/generating/run-3333-3333-3333-333333333333",
+    "design": null,
+    "h1": "Your new product",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "70-phone-stopped",
+    "group": "Phone",
+    "note": "Making — stopped, credits returned, on a phone",
+    "route": "/generating/run-3333-3333-3333-333333333333",
+    "scenario": "generation-failed",
+    "viewport": {
+      "width": 390,
+      "height": 1573
+    },
+    "file": "70-phone-stopped.png",
+    "finalPath": "/generating/run-3333-3333-3333-333333333333",
+    "design": null,
+    "h1": "Your new product",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "71-phone-listings",
+    "group": "Phone",
+    "note": "Listings on a phone",
+    "route": "/listings",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1244
+    },
+    "file": "71-phone-listings.png",
+    "finalPath": "/listings",
+    "design": null,
+    "h1": "Listings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "72-phone-listing-send",
+    "group": "Phone",
+    "note": "Listing — Send on a phone",
+    "route": "/listings/list-1?step=stores&channel=IKAS",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "72-phone-listing-send.png",
+    "finalPath": "/listings/list-1",
+    "design": null,
+    "h1": "Wedding Planner Printable — Botanical, 36 pages",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "73-phone-listing-track",
+    "group": "Phone",
+    "note": "Listing — Track on a phone",
+    "route": "/listings/list-1?step=result&channel=IKAS",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "73-phone-listing-track.png",
+    "finalPath": "/listings/list-1",
+    "design": null,
+    "h1": "Wedding Planner Printable — Botanical, 36 pages",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "74-phone-waiting",
+    "group": "Phone",
+    "note": "Waiting for you on a phone",
+    "route": "/publishing",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "74-phone-waiting.png",
+    "finalPath": "/publishing",
+    "design": null,
+    "h1": "Waiting for you",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "75-phone-performance",
+    "group": "Phone",
+    "note": "Performance on a phone",
+    "route": "/performance",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "75-phone-performance.png",
+    "finalPath": "/performance",
+    "design": null,
+    "h1": "Performance",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "76-phone-billing",
+    "group": "Phone",
+    "note": "Plan & Credits on a phone",
+    "route": "/billing",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "76-phone-billing.png",
+    "finalPath": "/billing",
+    "design": null,
+    "h1": "Plan & Credits",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "77-phone-checkout",
+    "group": "Phone",
+    "note": "Checkout on a phone",
+    "route": "/checkout?plan=PRO",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "77-phone-checkout.png",
+    "finalPath": "/checkout",
+    "design": null,
+    "h1": "Checkout",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "78-phone-settings-ai",
+    "group": "Phone",
+    "note": "Settings — AI on a phone",
+    "route": "/settings/ai",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "78-phone-settings-ai.png",
+    "finalPath": "/settings/ai",
+    "design": null,
+    "h1": "Settings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "79-phone-settings-members",
+    "group": "Phone",
+    "note": "Settings — members on a phone",
+    "route": "/settings/members",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1666
+    },
+    "file": "79-phone-settings-members.png",
+    "finalPath": "/settings/members",
+    "design": null,
+    "h1": "Settings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "80-phone-settings-danger",
+    "group": "Phone",
+    "note": "Settings — danger zone on a phone",
+    "route": "/settings/danger",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "file": "80-phone-settings-danger.png",
+    "finalPath": "/settings/danger",
+    "design": null,
+    "h1": "Settings",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [
+      "heading color rgb(31, 31, 31)"
+    ],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "81-phone-orders",
+    "group": "Phone",
+    "note": "Orders on a phone — one card per order, one next step",
+    "route": "/production",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "81-phone-orders.png",
+    "finalPath": "/production",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "82-phone-store-orders",
+    "group": "Phone",
+    "note": "Store orders on a phone",
+    "route": "/production/stores",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "82-phone-store-orders.png",
+    "finalPath": "/production/stores",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "83-phone-catalogue",
+    "group": "Phone",
+    "note": "Print catalogue on a phone",
+    "route": "/production/catalogue",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 1900
+    },
+    "file": "83-phone-catalogue.png",
+    "finalPath": "/production/catalogue",
+    "design": null,
+    "h1": "Production",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "84-phone-start",
+    "group": "Phone",
+    "note": "Getting started on a phone",
+    "route": "/start",
+    "scenario": "showcase-new",
+    "viewport": {
+      "width": 390,
+      "height": 1272
+    },
+    "file": "84-phone-start.png",
+    "finalPath": "/start",
+    "design": null,
+    "h1": "Welcome — review your workspace",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "85-phone-owner-tools",
+    "group": "Phone",
+    "note": "Owner tools on a phone",
+    "route": "/bulk",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "file": "85-phone-owner-tools.png",
+    "finalPath": "/bulk",
+    "design": null,
+    "h1": "Bulk edits",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "86-invite",
+    "group": "Account",
+    "note": "An invitation to a workspace — join only as the invited address",
+    "route": "/invite/sample-invitation",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "file": "86-invite.png",
+    "finalPath": "/invite/sample-invitation",
+    "design": null,
+    "h1": "Join a workspace",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  },
+  {
+    "name": "87-phone-invite",
+    "group": "Phone",
+    "note": "An invitation on a phone",
+    "route": "/invite/sample-invitation",
+    "scenario": "showcase",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "file": "87-phone-invite.png",
+    "finalPath": "/invite/sample-invitation",
+    "design": null,
+    "h1": "Join a workspace",
+    "overflowX": false,
+    "hiddenStoreNames": [],
+    "dimmed": [],
+    "missingFixtures": [],
+    "pageErrors": []
+  }
+]

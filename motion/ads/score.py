@@ -1,0 +1,231 @@
+"""Original score and effects for one ad, synthesised (no samples, nothing to license).
+
+    python3 score.py meta.json out.wav
+
+meta: {"dur": 15, "bpm": 112, "mood": "warm|bright|calm|drive", "key": "A", "cues": [[t, "whoosh|click|pop|hit|riser|type"], ...]}
+The mix is left at a safe level; the renderer normalises loudness to -14 LUFS / -1.5 dBTP with ffmpeg.
+"""
+import json
+import sys
+import wave
+
+import numpy as np
+
+SR = 48000
+NOTES = {'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5, 'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11}
+
+
+def hz(semi_from_a4):
+    return 440.0 * 2 ** (semi_from_a4 / 12)
+
+
+def lp_fast(x, cutoff):
+    # Vectorised approximation: a short moving average tuned to the cutoff (good enough for pads and noise colour).
+    n = max(1, int(SR / (cutoff * 2.2)))
+    k = np.ones(n) / n
+    return np.convolve(x, k, mode='same')
+
+
+def env_adsr(n, a, d, s, r):
+    a, d, r = int(a * SR), int(d * SR), int(r * SR)
+    sus = max(0, n - a - d - r)
+    e = np.concatenate([np.linspace(0, 1, max(a, 1)), np.linspace(1, s, max(d, 1)), np.full(sus, s), np.linspace(s, 0, max(r, 1))])
+    return e[:n] if len(e) >= n else np.pad(e, (0, n - len(e)))
+
+
+def kick(n=int(0.42 * SR)):
+    t = np.arange(n) / SR
+    f = 46 + 110 * np.exp(-t * 28)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    return np.sin(ph) * np.exp(-t * 9) * 0.95
+
+
+def hat(rng, n=int(0.07 * SR)):
+    x = rng.standard_normal(n)
+    # Band-limited (6–11 kHz): bright enough to read as a hat, without the top octave AAC overshoots on.
+    x = lp_fast(x, 11000) - lp_fast(x, 6000)
+    return x * np.exp(-np.arange(n) / SR * 60) * 0.18
+
+
+def clap(rng, n=int(0.22 * SR)):
+    x = rng.standard_normal(n)
+    x = lp_fast(x, 3500) - lp_fast(x, 900)
+    t = np.arange(n) / SR
+    e = np.exp(-t * 22) + 0.6 * np.exp(-np.maximum(t - 0.012, 0) * 30) * (t > 0.012)
+    return x * e * 0.45
+
+
+def tone(freq, n, harmonics=(1, .5, .25, .12), detune=0.0):
+    t = np.arange(n) / SR
+    out = np.zeros(n)
+    for i, amp in enumerate(harmonics, start=1):
+        out += amp * np.sin(2 * np.pi * freq * i * (1 + detune) * t)
+    return out
+
+
+def pad_chord(freqs, n):
+    out = np.zeros(n)
+    for f in freqs:
+        out += tone(f, n, (1, .35, .15), 0.0) + tone(f, n, (1, .35, .15), 0.004)
+    return out / max(1, len(freqs)) * env_adsr(n, 0.35, 0.3, 0.8, 0.5)
+
+
+def pluck(freq, n):
+    t = np.arange(n) / SR
+    return tone(freq, n, (1, .6, .3, .15)) * np.exp(-t * 9)
+
+
+def whoosh(rng, n=int(0.6 * SR), up=True):
+    x = rng.standard_normal(n)
+    t = np.linspace(0, 1, n)
+    e = np.sin(np.pi * t) ** 2
+    # sweep a band by mixing two low-passes
+    lo = lp_fast(x, 600)
+    hi = lp_fast(x, 4000)
+    mix = (hi * (t if up else 1 - t) + lo * (1 - t if up else t))
+    return mix * e * 0.55
+
+
+def riser(rng, n=int(1.4 * SR)):
+    x = rng.standard_normal(n)
+    t = np.linspace(0, 1, n)
+    out = lp_fast(x, 900) * (1 - t) + lp_fast(x, 5200) * t
+    return out * t ** 2 * 0.5
+
+
+def impact(rng, n=int(0.9 * SR)):
+    t = np.arange(n) / SR
+    boom = np.sin(2 * np.pi * (38 + 60 * np.exp(-t * 12)) * t) * np.exp(-t * 4.5)
+    noise = lp_fast(rng.standard_normal(n), 2400) * np.exp(-t * 14) * 0.5
+    return (boom + noise) * 0.9
+
+
+def click(n=int(0.03 * SR)):
+    t = np.arange(n) / SR
+    return np.sin(2 * np.pi * 2200 * t) * np.exp(-t * 260) * 0.5
+
+
+def pop(n=int(0.18 * SR)):
+    t = np.arange(n) / SR
+    return np.sin(2 * np.pi * (660 + 520 * np.exp(-t * 40)) * t) * np.exp(-t * 18) * 0.42
+
+
+def typing(rng, n=int(0.05 * SR)):
+    x = rng.standard_normal(n)
+    # A soft key click in the 2.5–6 kHz band (no full-band noise burst for the encoder to overshoot on).
+    return (lp_fast(x, 6000) - lp_fast(x, 2500)) * np.exp(-np.arange(n) / SR * 120) * 0.35
+
+
+def place(buf, sig, at, gain=1.0):
+    i = int(at * SR)
+    if i >= len(buf):
+        return
+    j = min(len(buf), i + len(sig))
+    buf[i:j] += sig[: j - i] * gain
+
+
+def main():
+    meta = json.load(open(sys.argv[1]))
+    out = sys.argv[2]
+    dur = float(meta.get('dur', 15))
+    bpm = float(meta.get('bpm', 112))
+    mood = meta.get('mood', 'warm')
+    root = NOTES.get(meta.get('key', 'A'), 9) - 9  # semitones from A
+    rng = np.random.default_rng(abs(hash(meta.get('id', 'ad'))) % (2 ** 32))
+    n = int(dur * SR)
+    drums = np.zeros(n)
+    music = np.zeros(n)
+    sfx = np.zeros(n)
+    beat = 60.0 / bpm
+    bar = beat * 4
+
+    # Progressions in semitones from the root (minor-ish warm, major bright).
+    progs = {
+        'warm': [[0, 3, 7, 10], [-4, 0, 3, 7], [-7, -3, 0, 5], [-2, 2, 5, 9]],
+        'bright': [[0, 4, 7, 11], [-3, 0, 4, 7], [5, 9, 12, 16], [7, 11, 14, 17]],
+        'calm': [[0, 4, 7, 14], [5, 9, 12, 16], [-3, 0, 4, 7], [7, 11, 14, 19]],
+        'drive': [[0, 3, 7, 12], [0, 3, 7, 12], [-4, 0, 3, 8], [-2, 2, 5, 10]],
+    }
+    prog = progs.get(mood, progs['warm'])
+    intro = float(meta.get('intro', 0.0))  # seconds before the beat drops
+    outro = float(meta.get('outro', dur - 1.2))
+
+    # Pads and bass per bar
+    t = 0.0
+    bi = 0
+    while t < dur:
+        chord = prog[bi % len(prog)]
+        ln = int(min(bar, dur - t) * SR) + int(0.5 * SR)
+        freqs = [hz(root + c - 12) for c in chord]
+        place(music, pad_chord(freqs, ln), t, 0.32 if mood != 'calm' else 0.4)
+        if t >= intro and mood != 'calm':
+            bass = tone(hz(root + chord[0] - 36), ln, (1, .3)) * env_adsr(ln, 0.01, 0.2, 0.7, 0.2)
+            place(music, bass, t, 0.5)
+        t += bar
+        bi += 1
+
+    # Arpeggio for bright / drive
+    if mood in ('bright', 'drive', 'warm'):
+        step = beat / (4 if mood != 'warm' else 2)
+        t = intro
+        i = 0
+        while t < outro:
+            chord = prog[int(t / bar) % len(prog)]
+            note = chord[[0, 1, 2, 3, 2, 1][i % 6]] + (12 if i % 12 >= 6 else 0)
+            place(music, pluck(hz(root + note), int(0.4 * SR)), t, 0.16 if mood == 'warm' else 0.13)
+            t += step
+            i += 1
+
+    # Drums
+    if mood != 'calm':
+        t = intro
+        k = 0
+        while t < outro:
+            if mood == 'drive' or k % 4 in (0, 2) or mood == 'bright':
+                place(drums, kick(), t, 0.9)
+            place(drums, hat(rng), t + beat / 2, 1.0)
+            if k % 4 in (1, 3):
+                place(drums, clap(rng), t, 0.7)
+            t += beat
+            k += 1
+
+    # Effects at cues
+    for at, kind in meta.get('cues', []):
+        at = float(at)
+        if kind == 'whoosh':
+            place(sfx, whoosh(rng), max(0, at - 0.3), 0.8)
+        elif kind == 'riser':
+            place(sfx, riser(rng), max(0, at - 1.4), 0.8)
+        elif kind == 'hit':
+            place(sfx, impact(rng), at, 0.9)
+        elif kind == 'click':
+            place(sfx, click(), at, 1.0)
+        elif kind == 'pop':
+            place(sfx, pop(), at, 1.0)
+        elif kind == 'type':
+            for j in range(10):
+                place(sfx, typing(rng), at + j * 0.07 + rng.uniform(0, 0.02), 1.0)
+
+    mix = drums * 0.8 + music * 0.75 + sfx * 0.9
+    # Fade in/out
+    fi = int(0.05 * SR)
+    mix[:fi] *= np.linspace(0, 1, fi)
+    fo = int(1.0 * SR)
+    mix[-fo:] *= np.linspace(1, 0, fo) ** 1.5
+    mix = np.tanh(mix * 0.9)
+    # Simple stereo: music widened with a tiny delay, drums centred.
+    d = int(0.011 * SR)
+    left = mix + np.concatenate([np.zeros(d), music[:-d]]) * 0.08
+    right = mix + np.concatenate([music[d:], np.zeros(d)]) * 0.08
+    st = np.stack([left, right], axis=1)
+    st = st / max(1e-6, np.max(np.abs(st))) * 0.7
+    pcm = (st * 32767).astype(np.int16)
+    with wave.open(out, 'wb') as w:
+        w.setnchannels(2)
+        w.setsampwidth(2)
+        w.setframerate(SR)
+        w.writeframes(pcm.tobytes())
+
+
+if __name__ == '__main__':
+    main()

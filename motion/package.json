@@ -1,0 +1,16 @@
+{
+  "name": "makeandlist-motion",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Source compositions and the frame-accurate renderer for MakeAndList's landing motion (MV-H01, MV-R01).",
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs all",
+    "render:hero": "node render.mjs hero",
+    "render:reel": "node render.mjs reel",
+    "qa": "node qa.mjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "23.11.1"
+  }
+}
