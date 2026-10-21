@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B12 · One Design, Three Things</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EFE9DD; }
+.wash { position: absolute; inset: 0; }
+.spot { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,253,246,.95), rgba(255,253,246,0)); pointer-events: none; }
+.obj { position: absolute; z-index: 10; filter: drop-shadow(0 34px 34px rgba(31,31,31,.22)); }
+.obj .fill { position: absolute; inset: 0; }
+.obj .shade { position: absolute; inset: 0; pointer-events: none; }
+.artbox { position: absolute; overflow: hidden; transform-origin: 0 0; }
+.artbox img { position: absolute; left: 0; top: 0; display: block; }
+.objsvg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 11; }
+.floorS { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(31,31,31,.32), rgba(31,31,31,0)); z-index: 5; }
+.mug { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; z-index: 12; }
+.mugwrap { position: absolute; left: 0; top: 0; width: 0; height: 0; perspective: 1600px; z-index: 12; }
+.strip { position: absolute; overflow: hidden; backface-visibility: hidden; }
+.strip .tex { position: absolute; top: 0; background: #F3EBDD; }
+.strip .dk { position: absolute; inset: 0; background: #1F1F1F; }
+.rim { position: absolute; border-radius: 50%; backface-visibility: visible; }
+.handle { position: absolute; border-radius: 50%; border-style: solid; border-color: #E6DCCA; box-shadow: inset 0 0 0 3px rgba(0,0,0,.08), 0 0 0 2px rgba(0,0,0,.06); }
+.lbl { position: absolute; z-index: 30; left: 0; right: 0; text-align: center; }
+.lbl span { display: inline-flex; gap: 12px; align-items: center; font: 600 30px 'Archivo'; color: #1F1F1F; background: #FFFDF8; padding: 14px 24px; border-radius: 99px; box-shadow: 0 20px 40px -26px rgba(31,31,31,.6); white-space: nowrap; }
+.lbl span em { font-style: normal; font: 500 22px 'IBM Plex Mono', monospace; color: #45403A; }
+.cap { position: absolute; z-index: 40; text-align: center; font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; }
+.card { position: absolute; border-radius: 30px; overflow: hidden; background: #FAF7EE; box-shadow: 0 60px 120px -50px rgba(31,31,31,.7), 0 0 0 1px #E2DBCE; z-index: 20; }
+.card > img { position: absolute; left: 0; top: 0; display: block; }
+.opt { position: absolute; border: 6px solid #DFFF5A; border-radius: 22px; box-shadow: 0 0 0 2px #1F1F1F; }
+.mini { position: absolute; z-index: 22; }
+.chipP { position: absolute; z-index: 30; font: 700 24px 'Archivo'; color: #1F1F1F; background: #DFFF5A; padding: 12px 22px; border-radius: 99px; white-space: nowrap; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// B12 — one artwork, one silhouette that morphs: a poster becomes a tee, the tee flattens into a mug wrap, and the
+// wrap curls into a cylinder (CSS 3D strips); then the real "Make it physical" card lists all three, each a draft.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 122, B = (n) => n * BEAT;
+const S = tall ? 1 : 0.8;
+const CX = W / 2, CY = tall ? 850 : 690;
+const BW = 820 * S, BH = 760 * S;
+const L = tall ? { capY: 290, capFs: 84, lblY: 1188, tag: 500, card: [165, 520, 1.85] } : { capY: 50, capFs: 70, lblY: 1150, tag: 212, card: [150, 268, 1.92] };
+
+const wash = K.box(0, 0, W, H, { cls: 'wash' });
+const spot = K.box(CX - 700, CY - 720, 1400, 1300, { cls: 'spot' });
+const floorS = K.box(CX - 360 * S, CY + 330 * S, 720 * S, 110 * S, { cls: 'floorS' });
+
+// ── the morphing object: one clipped surface, the artwork inside it ──
+const obj = K.box(CX - BW / 2, CY - BH / 2, BW, BH, { cls: 'obj' });
+const fill = K.el('div', { cls: 'fill', parent: obj });
+const AW = 524, AH = 732; // artwork crop on the Print area board: x 1066–1590, y 762–1494
+const artBox = K.el('div', { cls: 'artbox', parent: obj, style: { width: AW + 'px', height: AH + 'px' } });
+K.el('img', { src: K.canvas('PrintArea'), parent: artBox, style: { width: '2880px', transform: 'translate(-1066px, -762px)' } });
+const shade = K.el('div', { cls: 'shade', parent: obj });
+const NS = 'http://www.w3.org/2000/svg';
+const osvg = document.createElementNS(NS, 'svg'); osvg.setAttribute('class', 'objsvg'); osvg.setAttribute('width', BW); osvg.setAttribute('height', BH); obj.appendChild(osvg);
+const outl = document.createElementNS(NS, 'polygon'); outl.setAttribute('fill', 'none'); outl.setAttribute('stroke-linejoin', 'round'); osvg.appendChild(outl);
+const collar = document.createElementNS(NS, 'path'); collar.setAttribute('fill', 'none'); collar.setAttribute('stroke', 'rgba(31,31,31,.18)'); collar.setAttribute('stroke-width', 4); osvg.appendChild(collar);
+
+// shapes as 15 matching points (tee order: neckline L→R, right sleeve, body, left sleeve)
+const TEE = [[104, 16], [125, 30], [150, 34], [175, 30], [196, 16], [258, 40], [292, 108], [246, 128], [236, 102], [236, 314], [64, 314], [64, 102], [54, 128], [8, 108], [42, 40]];
+const ox = BW / 2, oy = BH / 2;
+function teePts() { const s = 640 * S / 284; return TEE.map(([x, y]) => [ox + (x - 150) * s, oy + (y - 165) * s]); }
+function rectPts(w, h) {
+  const x0 = ox - w / 2, x1 = ox + w / 2, y0 = oy - h / 2, y1 = oy + h / 2;
+  const top = [104, 125, 150, 175, 196].map((x) => [x0 + (x - 8) / 284 * w, y0]);
+  return [...top, [x1, y0], [x1, y0 + 0.3 * h], [x1, y0 + 0.38 * h], [x1, y0 + 0.46 * h], [x1, y1], [x0, y1], [x0, y0 + 0.46 * h], [x0, y0 + 0.38 * h], [x0, y0 + 0.3 * h], [x0, y0]];
+}
+const POSTER = rectPts(480 * S, 600 * S), SHIRT = teePts(), WRAP = rectPts(720 * S, 300 * S);
+const mix = (a, b, p) => a.map((pt, i) => [K.lerp(pt[0], b[i][0], p), K.lerp(pt[1], b[i][1], p)]);
+// where the artwork sits in each shape: [x, y, scale] (top-left in obj px)
+const artIn = (w, h, k) => { const s = (h * k) / AH; return [ox - AW * s / 2, oy - AH * s / 2 + (h * (1 - k)) * 0, s]; };
+const A_POSTER = artIn(480 * S, 600 * S, 0.86);
+const A_TEE = (() => { const s = (200 * S) / AH; return [ox - AW * s / 2, oy - 130 * S, s]; })();
+const A_WRAP = artIn(720 * S, 300 * S, 0.84);
+
+// ── the mug: 40 strips around a cylinder ──
+const N = 40, WL = 720 * S, WH = 300 * S, SW = WL / N;
+const mugwrap = K.box(CX, CY, 0, 0, { cls: 'mugwrap' });
+const mug = K.el('div', { cls: 'mug', parent: mugwrap });
+const strips = Array.from({ length: N }, (_, i) => {
+  const st = K.el('div', { cls: 'strip', parent: mug, style: { left: -SW / 2 - 0.5 + 'px', top: -WH / 2 + 'px', width: SW + 1 + 'px', height: WH + 'px' } });
+  const tex = K.el('div', { cls: 'tex', parent: st, style: { left: -i * SW + 'px', width: WL + 'px', height: WH + 'px' } });
+  const s = A_WRAP[2];
+  const ab = K.el('div', { cls: 'artbox', parent: tex, style: { left: (WL - AW * s) / 2 + 'px', top: (WH - AH * s) / 2 + 'px', width: AW * s + 'px', height: AH * s + 'px' } });
+  K.el('img', { src: K.canvas('PrintArea'), parent: ab, style: { width: 2880 * s + 'px', transform: `translate(${-1066 * s}px, ${-762 * s}px)` } });
+  const dk = K.el('div', { cls: 'dk', parent: st });
+  return { st, dk };
+});
+const rim = K.el('div', { cls: 'rim', parent: mug });
+const handle = K.el('div', { cls: 'handle', parent: mug });
+
+// ── the real "Make it physical" card (11-product: x 975–1380, y 1015–1395) ──
+const [kx, ky, ks] = L.card;
+const CR = [975, 1015, 405, 380];
+const card = K.box(kx, ky, CR[2] * ks, CR[3] * ks, { cls: 'card' });
+K.el('img', { src: K.screen('11-product'), parent: card, style: { width: 1440 * ks + 'px', transform: `translate(${-CR[0] * ks}px, ${-CR[1] * ks}px)` } });
+const OPTS = [[1000, 1162], [1000, 1255], [1185, 1255]]; // art print, tee, mug (top-left, 175 × 63)
+const opts = OPTS.map(([x, y]) => K.el('div', { cls: 'opt', parent: card, style: { left: (x - CR[0] - 4) * ks + 'px', top: (y - CR[1] - 4) * ks + 'px', width: 183 * ks + 'px', height: 71 * ks + 'px' } }));
+// mini objects that drop into each option
+const mini = (kind) => {
+  const m = K.el('div', { cls: 'mini', parent: card });
+  const sz = 46 * ks;
+  if (kind === 0) { Object.assign(m.style, { width: sz * 0.8 + 'px', height: sz + 'px', background: '#F3EBDD', boxShadow: '0 8px 14px -8px rgba(0,0,0,.5)', overflow: 'hidden' }); }
+  if (kind === 1) { Object.assign(m.style, { width: sz + 'px', height: sz + 'px', background: '#F2EFE8', clipPath: `polygon(${TEE.map(([x, y]) => `${(x / 300) * 100}% ${((y - 16) / 298) * 100}%`).join(',')})`, overflow: 'hidden' }); }
+  if (kind === 2) { Object.assign(m.style, { width: sz * 0.78 + 'px', height: sz * 0.86 + 'px', background: '#F3EBDD', borderRadius: '6px 6px 10px 10px', boxShadow: `inset -6px 0 10px rgba(0,0,0,.12), ${sz * 0.22}px ${sz * 0.12}px 0 -${sz * 0.06}px #E9E1D2` }); }
+  const s = (kind === 1 ? sz * 0.4 : sz * 0.72) / AH;
+  const ab = K.el('div', { cls: 'artbox', parent: m, style: { left: '50%', top: kind === 1 ? '28%' : '50%', width: AW * s + 'px', height: AH * s + 'px', transform: `translate(-50%, ${kind === 1 ? '0' : '-50%'})`, transformOrigin: '50% 50%' } });
+  K.el('img', { src: K.canvas('PrintArea'), parent: ab, style: { width: 2880 * s + 'px', transform: `translate(${-1066 * s}px, ${-762 * s}px)` } });
+  return m;
+};
+const minis = [0, 1, 2].map(mini);
+minis.forEach((m, i) => { const [x, y] = OPTS[i]; m.style.left = (x - CR[0] + 128) * ks + 'px'; m.style.top = (y - CR[1] + 8) * ks + 'px'; });
+const chipP = K.box(kx + (1180 - CR[0]) * ks, ky + (1336 - CR[1]) * ks, null, null, { cls: 'chipP', html: 'Printed by your own partner', style: { width: 'auto', height: 'auto', fontSize: '22px' } });
+
+// ── type ──
+const head = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+const headW = K.words(head, 'One design.\nThree things to sell.');
+const cap2 = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+const cap2W = K.words(cap2, 'Each edition starts\nas a draft.');
+const LBLS = [['Art print', '40 × 50 cm'], ['Tee', '30 × 40 cm print area'], ['Mug', '21.5 × 9 cm wrap']];
+const lbls = LBLS.map(([a, b]) => K.box(0, L.lblY, W, null, { cls: 'lbl', html: `<span>${a}<em>${b}</em></span>` }));
+const tagC = K.demoTag('Product design · sample data', 0, L.tag); tagC.style.left = '50%'; tagC.style.transform = 'translateX(-50%)';
+const tagR = K.demoTag('Real app · demo workspace', 0, ky + CR[3] * ks + 20); tagR.style.left = '50%'; tagR.style.transform = 'translateX(-50%)';
+const end = K.endCard(13.0, { line: 'One design.<br>Three things to sell.' });
+if (tall) [...document.getElementById('stage').lastElementChild.children].forEach((n) => { n.style.top = (parseFloat(n.style.top) - 130) + 'px'; });
+
+const M1 = [B(7.5), B(9)], M2 = [B(14.5), B(16)], CURL = [B(16.4), B(18.5)], UI = B(21);
+const BG = [[239, 233, 221], [222, 229, 219], [236, 225, 210]];
+const lerpC = (a, b, p) => a.map((v, i) => Math.round(K.lerp(v, b[i], p)));
+
+K.run({
+  id: 'B12', title: 'One Design, Three Things', dur: DUR, bpm: 122, mood: 'drive', key: 'A', intro: B(9), cover: 9.6,
+  technique: 'One artwork inside one clip-path silhouette whose 15 points morph on the beat — framed poster to tee to a flat mug wrap — then the wrap curls into a cylinder of 40 CSS 3D strips with Lambert shading, a rim and a handle; the real “Make it physical” card lists all three with mini objects dropping into each option',
+  caption: 'One design, three things to sell: an art print, a tee and a mug — each its own edition, printed by your own partner account, and a draft until you say it’s ready. Start free at makeandlist.com',
+  short: 'One design. Three things to sell.',
+  beats: ['0–3.7 s: “One design. Three things to sell.” — the art print drops in', '3.7–4.4 s: the poster morphs into a tee', '4.4–7.1 s: the tee', '7.1–9.1 s: the tee flattens into a mug wrap that curls into a mug', '10.3–12.9 s: the real “Make it physical” card — each edition starts as a draft', '13–15 s: end card'],
+  cues: [[0.1, 'pop'], [0.62, 'hit'], [B(6), 'riser'], [M1[1], 'hit'], [B(13), 'riser'], [M2[1], 'whoosh'], [CURL[1], 'hit'], [UI, 'whoosh'], [UI + 0.5, 'pop'], [UI + 1.0, 'pop'], [UI + 1.5, 'pop'], [12.3, 'riser'], [13.0, 'hit']],
+}, (T) => {
+  K.reveal(headW.slice(0, 2), T, 0.1, { kind: 'up', stagger: 0.07, out: UI - 0.4 });
+  K.reveal(headW.slice(2), T, 0.9, { kind: 'up', stagger: 0.07, out: UI - 0.4 });
+  K.reveal(cap2W, T, UI + 0.1, { kind: 'up', stagger: 0.06, out: 12.6 });
+
+  // background wash follows the object
+  const m1 = K.p(T, M1[0], M1[1], E.inOutCubic), m2 = K.p(T, M2[0], M2[1], E.inOutCubic);
+  const bg = m2 > 0 ? lerpC(BG[1], BG[2], m2) : lerpC(BG[0], BG[1], m1);
+  wash.style.background = `rgb(${bg.join(',')})`;
+  spot.style.transform = `translate(${Math.sin(T * 0.6) * 40}px, ${Math.cos(T * 0.5) * 30}px)`;
+
+  // ── shape ──
+  let pts = POSTER, a = A_POSTER;
+  if (T >= M1[0]) { pts = mix(POSTER, SHIRT, m1); a = A_POSTER.map((v, i) => K.lerp(v, A_TEE[i], m1)); }
+  if (T >= M2[0]) { pts = mix(SHIRT, WRAP, m2); a = A_TEE.map((v, i) => K.lerp(v, A_WRAP[i], m2)); }
+  const poly = `polygon(${pts.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`;
+  fill.style.clipPath = poly; shade.style.clipPath = poly; artBox.style.clipPath = 'none';
+  const isTee = m1 > 0.5 && m2 < 0.5;
+  fill.style.background = m1 < 0.5 ? '#F3EBDD' : m2 > 0.5 ? '#F3EBDD' : '#F2EFE8';
+  shade.style.background = isTee ? `linear-gradient(${100 + Math.sin(T * 1.3) * 8}deg, rgba(0,0,0,.07), rgba(0,0,0,0) 30%, rgba(255,255,255,.18) 55%, rgba(0,0,0,.08))` : 'linear-gradient(135deg, rgba(255,255,255,.12), rgba(0,0,0,.06))';
+  artBox.style.transform = `translate(${a[0]}px, ${a[1]}px) scale(${a[2]})`;
+  outl.setAttribute('points', pts.map((p) => p.join(',')).join(' '));
+  const frameOn = 1 - K.p(T, M1[0], M1[0] + 0.25, E.linear);
+  outl.setAttribute('stroke', frameOn > 0.01 ? `rgba(31,31,31,${0.95 * frameOn + 0.2 * (1 - frameOn)})` : 'rgba(31,31,31,.2)');
+  outl.setAttribute('stroke-width', frameOn > 0.01 ? 4 + 14 * frameOn : 3);
+  collar.setAttribute('d', isTee ? `M${SHIRT[0][0]} ${SHIRT[0][1]} Q ${SHIRT[2][0]} ${SHIRT[2][1] + 26 * S} ${SHIRT[4][0]} ${SHIRT[4][1]}` : '');
+
+  // entrance (drop + hang swing), morph pops, ambient sway
+  const drop = K.p(T, 0.15, 0.62, E.inCubic);
+  const swing = T > 0.62 ? Math.exp(-(T - 0.62) * 2.6) * Math.sin((T - 0.62) * 7) * 5 : 0;
+  const pop1 = T > M1[1] ? Math.exp(-(T - M1[1]) * 7) * Math.sin((T - M1[1]) * 20) * 0.05 : 0;
+  const sway = isTee ? Math.sin(T * 2.2) * 1.4 : Math.sin(T * 1.1) * 0.6;
+  const flatOut = K.p(T, CURL[0] - 0.05, CURL[0] + 0.02, E.linear);
+  obj.style.transform = `translateY(${-(1 - drop) * 1200}px) rotate(${swing + sway}deg) scale(${1 + pop1}, ${1 - pop1 * 0.6 + (isTee ? Math.sin(T * 2.2 + 1) * 0.006 : 0)})`;
+  obj.style.transformOrigin = '50% 0%';
+  obj.style.opacity = T < CURL[0] ? 1 : 0;
+  floorS.style.opacity = drop * (T < UI ? 1 : 1 - K.p(T, UI, UI + 0.3, E.linear));
+  floorS.style.transform = `scale(${0.7 + 0.3 * drop + (T > CURL[0] ? -0.35 * K.p(T, CURL[0], CURL[1], E.inOutCubic) : 0)})`;
+
+  // ── curl into the mug ──
+  const c = K.p(T, CURL[0], CURL[1], E.inOutCubic);
+  const mugOn = T >= CURL[0] - 0.02 && T < UI + 0.6;
+  mugwrap.style.visibility = mugOn ? 'visible' : 'hidden';
+  if (mugOn) {
+    const A = Math.max(1e-4, c * 2 * Math.PI * 0.86), R = WL / A;
+    const yaw = K.lerp(0, -32, c) + (T > CURL[1] ? (T - CURL[1]) * 8 : 0);
+    const yawR = yaw * Math.PI / 180;
+    strips.forEach(({ st, dk }, i) => {
+      const phi = ((i + 0.5) / N - 0.5) * A;
+      const x = R * Math.sin(phi), z = R * Math.cos(phi) - R;
+      st.style.transform = `translate3d(${x}px, 0, ${z}px) rotateY(${phi}rad)`;
+      const lam = Math.max(0, Math.cos(phi + yawR - 0.35));
+      dk.style.opacity = (1 - lam) * 0.42 * c;
+    });
+    const Rm = WL / (2 * Math.PI * 0.86);
+    const rimOn = K.p(T, CURL[1] - 0.3, CURL[1], E.linear);
+    Object.assign(rim.style, { left: -Rm + 'px', top: -Rm + 'px', width: Rm * 2 + 'px', height: Rm * 2 + 'px', opacity: rimOn,
+      background: 'radial-gradient(closest-side, #5E554A 0%, #8C8273 78%, #F3EBDD 82%, #E9E0CF 100%)', transform: `translate3d(0, ${-WH / 2}px, ${-Rm}px) rotateX(90deg)` });
+    const hs = WH * 0.62;
+    Object.assign(handle.style, { left: -hs / 2 + 'px', top: -hs / 2 + 'px', width: hs + 'px', height: hs + 'px', borderWidth: hs * 0.2 + 'px', opacity: rimOn,
+      transform: `translate3d(${Rm * Math.sin(1.95)}px, 0, ${Rm * Math.cos(1.95) - Rm}px) rotateY(${1.95 + Math.PI / 2}rad) translateX(${-hs * 0.06}px)` });
+    const grow = K.lerp(1, 1.4, E.inOutCubic(c));
+    const leave = K.p(T, UI - 0.1, UI + 0.5, E.inCubic);
+    mug.style.transform = `rotateX(${-14 * c}deg) rotateY(${yaw}deg) scale(${grow * (1 - 0.7 * leave)})`;
+    mugwrap.style.transform = `translateY(${-leave * 300}px)`;
+    mugwrap.style.opacity = 1 - leave;
+  }
+  if (flatOut > 1) obj.style.opacity = 0;
+
+  // labels for each object
+  const LT = [[0.7, M1[0]], [M1[1] - 0.1, M2[0]], [CURL[1] - 0.2, UI - 0.1]];
+  lbls.forEach((l, i) => { const [a0, b0] = LT[i]; const p = K.p(T, a0, a0 + 0.35, E.outBack); const o = K.p(T, b0 - 0.2, b0, E.inCubic); l.style.opacity = K.p(T, a0, a0 + 0.1, E.linear) * (1 - o); l.style.transform = `translateY(${(1 - p) * 30 + o * 20}px) scale(${0.9 + 0.1 * p})`; });
+
+  // ── the real card ──
+  const ci = K.p(T, UI, UI + 0.6, E.outExpo);
+  card.style.opacity = K.p(T, UI, UI + 0.15, E.linear) * (1 - K.p(T, 12.75, 13.0, E.linear));
+  card.style.transform = `translateY(${(1 - ci) * 200}px) scale(${0.92 + 0.08 * ci})`;
+  opts.forEach((o, i) => { const t0 = UI + 0.5 + i * 0.5; const p = K.p(T, t0, t0 + 0.35, E.outBack); o.style.opacity = K.p(T, t0, t0 + 0.08, E.linear); o.style.transform = `scale(${0.92 + 0.08 * p})`; });
+  minis.forEach((m, i) => { const t0 = UI + 0.45 + i * 0.5; const p = K.p(T, t0, t0 + 0.45, E.outBack); m.style.opacity = K.p(T, t0, t0 + 0.08, E.linear); m.style.transform = `translateY(${(1 - p) * -60}px) rotate(${(1 - p) * 12 + Math.sin(T * 3 + i) * 2}deg) scale(${0.7 + 0.3 * p})`; });
+  const cp = K.p(T, UI + 1.9, UI + 2.3, E.outBack);
+  chipP.style.opacity = K.p(T, UI + 1.9, UI + 2.0, E.linear) * (1 - K.p(T, 12.75, 13.0, E.linear)); chipP.style.transform = `scale(${0.85 + 0.15 * cp})`;
+
+  tagC.style.opacity = K.win(T, 0.6, UI);
+  tagR.style.opacity = K.win(T, UI + 0.2, 12.85);
+  end(T);
+});
+</script></body></html>

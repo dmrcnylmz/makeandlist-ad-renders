@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>A20 · POV</title><link rel="stylesheet" href="kit.css">
+<style>
+.full { position: absolute; inset: 0; overflow: hidden; background: #FAF7EE; }
+.full img { position: absolute; left: 0; top: 0; width: 100%; }
+.cap { position: absolute; left: 50px; right: 50px; z-index: 20; text-align: center; font: 800 60px/1.5 'Archivo'; }
+.cap span { background: #1F1F1F; color: #fff; padding: 6px 18px; border-radius: 14px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.finger { position: absolute; width: 90px; height: 90px; margin: -45px 0 0 -45px; border-radius: 50%; background: rgba(31,31,31,.25); border: 4px solid rgba(255,255,255,.9); z-index: 15; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// A20 — native "POV" style: a full-screen phone recording feel, a finger dot, bold outlined captions, quick honest beats.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15;
+const SHOTS = [['22-phone-create', 0.0], ['65-phone-configure', 0.55], ['69-phone-making', 0.0], ['24-phone-product', 0.1], ['72-phone-listing-send', 0.2]];
+const fulls = SHOTS.map(([f]) => { const d = K.box(0, 0, W, H, { cls: 'full' }); K.el('img', { src: K.screen(f), parent: d }); return d; });
+const CAPS = [
+  [0.0, 2.2, 'POV: you sell printables\nand hate the busywork'],
+  [2.2, 4.6, 'you type one sentence'],
+  [4.6, 7.0, 'it shows the price\nbefore it makes anything'],
+  [7.0, 9.2, 'it makes the pages\nand the listing images'],
+  [9.2, 11.0, 'you check the real files'],
+  [11.0, 12.8, 'and send drafts\nto your own stores'],
+];
+const cap = K.box(0, 0, null, null, { cls: 'cap', style: { width: 'auto', height: 'auto', top: (tall ? 330 : 150) + 'px' } });
+const finger = K.box(0, 0, 90, 90, { cls: 'finger' });
+const dim = K.box(0, 0, W, H, { style: { background: 'rgba(31,31,31,.35)', zIndex: 10 } });
+const tag = K.demoTag('Real app · demo workspace', 0, 0); tag.style.left = '50%'; tag.style.transform = 'translateX(-50%)'; tag.style.top = (tall ? H - 290 : H - 60) + 'px'; tag.style.zIndex = 30;
+const end = K.endCard(12.8, { line: 'Less busywork.<br>More products.' });
+// which shot is on screen when
+const ON = [[0, 4.6, 0], [4.6, 7.0, 1], [7.0, 9.2, 2], [9.2, 11.0, 3], [11.0, 15, 4]];
+K.run({
+  id: 'A20', title: 'POV', dur: DUR, bpm: 124, mood: 'bright', key: 'B', intro: 0.0, cover: 5.4,
+  technique: 'Native UGC/POV format: full-screen phone recording feel, a finger dot scrolling and tapping, bold white captions with black outline, hard cuts on the beat',
+  caption: 'POV: you sell printables and hate the busywork. Type one sentence, see the price first, let MakeAndList make the pages and listing images, check the real files, send drafts to your own stores. Start free at makeandlist.com',
+  short: 'POV: less busywork, more products.',
+  beats: CAPS.map(([a, , t]) => `${a.toFixed(1)} s: “${t.replace('\n', ' ')}”`),
+  cues: [[0.1, 'pop'], [2.2, 'pop'], [3.2, 'type'], [4.6, 'whoosh'], [6.4, 'click'], [7.0, 'whoosh'], [9.2, 'whoosh'], [11.0, 'whoosh'], [12.0, 'click'], [12.8, 'hit']],
+}, (T) => {
+  let cur = 0; for (const [a, b, i] of ON) if (T >= a && T < b) cur = i;
+  fulls.forEach((f, i) => {
+    f.style.visibility = i === cur ? 'visible' : 'hidden';
+    if (i === cur) {
+      const [a, b] = ON.find((o) => o[2] === i);
+      const img = f.firstChild;
+      const max = Math.max(0, img.naturalHeight * (W / 780) - H);
+      const sp = K.p(T, a + 0.3, b - 0.2, K.ease.inOutCubic) * 0.35 + SHOTS[i][1] * 0.6;
+      img.style.transform = `translateY(${-max * Math.min(1, sp)}px) scale(${1 + 0.02 * Math.sin(T * 2)})`;
+    }
+  });
+  dim.style.opacity = T < 2.2 ? 1 : 0;
+  let c = ''; for (const [a, b, t] of CAPS) if (T >= a && T < b) c = t;
+  cap.innerHTML = c ? '<span>' + c.replace('\n', '<br>') + '</span>' : '';
+  cap.style.left = '50px'; cap.style.right = '50px';
+  const capStart = (CAPS.find((x) => x[2] === c) || [0])[0];
+  const cp = K.p(T, capStart, capStart + 0.2, K.ease.outBack);
+  cap.style.transform = `scale(${0.85 + 0.15 * cp})`;
+  // finger: scroll gesture, tap near the end of each beat
+  const lt = T % 2.3;
+  finger.style.left = W * (0.55 + 0.1 * Math.sin(T)) + 'px';
+  finger.style.top = (H * 0.72 - lt * 120) + 'px';
+  finger.style.opacity = T > 2.3 && T < 12.7 ? 0.9 : 0;
+  tag.style.opacity = K.win(T, 2.3, 12.6);
+  end(T);
+});
+</script></body></html>

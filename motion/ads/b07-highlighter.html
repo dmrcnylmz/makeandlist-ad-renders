@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B07 · Highlighter Brief</title><link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=block">
+<style>
+#stage { background: radial-gradient(120% 80% at 50% 30%, #FBF8F0 0%, #F1ECE1 70%, #E9E2D4 100%); }
+.hand { font-family: 'Caveat', cursive; font-weight: 700; }
+.pad { position: absolute; border-radius: 18px; background: #FFFDF6; box-shadow: 0 2px 0 #EAE3D6, 0 70px 110px -60px rgba(31,31,31,.55), 0 18px 30px -22px rgba(31,31,31,.35); overflow: hidden; z-index: 20; }
+.pad .rules { position: absolute; inset: 0; }
+.pad .margin { position: absolute; top: 0; bottom: 0; width: 3px; background: rgba(232,96,60,.45); }
+.pad .tape { position: absolute; top: -10px; width: 200px; height: 54px; left: 50%; margin-left: -100px; background: rgba(223,255,90,.55); transform: rotate(-2deg); box-shadow: 0 1px 0 rgba(0,0,0,.05); }
+.pad .ln { position: absolute; white-space: nowrap; color: #24303F; }
+.pad .ink { display: inline-block; isolation: isolate; }
+.ph { position: relative; display: inline-block; }
+.ph .hl { position: absolute; left: -8px; right: -8px; top: 30%; height: 62%; background: #DFFF5A; mix-blend-mode: multiply; z-index: -1; transform-origin: 0 50%; border-radius: 10px 18px 12px 16px; }
+.tool { position: absolute; z-index: 40; transform-origin: 0 0; pointer-events: none; }
+.chip2 { position: absolute; left: 0; top: 0; z-index: 45; white-space: nowrap; background: #DFFF5A; color: #1F1F1F; border-radius: 14px; padding: 0 16px; transform-origin: 50% 50%; box-shadow: 0 24px 40px -24px rgba(31,31,31,.6); }
+.shot { position: absolute; border-radius: 24px; background: #FAF7EE; overflow: hidden; box-shadow: 0 60px 120px -60px rgba(31,31,31,.7), 0 0 0 1px #E2DBCE; z-index: 10; }
+.shot .bar { position: absolute; left: 0; right: 0; top: 0; height: 46px; display: flex; align-items: center; gap: 9px; padding: 0 18px; background: #EFEADF; border-bottom: 1px solid #D9D3C9; z-index: 5; }
+.shot .bar i { width: 12px; height: 12px; border-radius: 50%; background: #D3CBBE; display: block; }
+.shot .bar span { margin-left: 14px; flex: 1; height: 26px; border-radius: 8px; background: #FFFDF8; font: 500 14px 'IBM Plex Mono', monospace; color: #45403A; display: flex; align-items: center; padding: 0 12px; }
+.shot .view { position: absolute; left: 0; right: 0; bottom: 0; overflow: hidden; }
+.world { position: absolute; left: 0; top: 0; width: 1440px; transform-origin: 0 0; }
+.world > img { position: absolute; left: 0; top: 0; width: 1440px; display: block; }
+.wl { position: absolute; }
+.ta { font: 500 15px/21px 'Archivo'; color: #1F1F1F; isolation: isolate; }
+.ta span { position: relative; }
+.ta span b { position: absolute; left: -3px; right: -3px; top: 1px; bottom: 0; background: #DFFF5A; z-index: -1; border-radius: 4px; }
+.mk { position: absolute; background: #DFFF5A; mix-blend-mode: multiply; transform-origin: 0 50%; border-radius: 4px 8px 5px 7px; }
+.cap { position: absolute; text-align: center; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; z-index: 30; }
+.note { position: absolute; z-index: 42; color: #C9452A; white-space: nowrap; text-shadow: 0 0 6px #FFFDF8, 0 0 14px #FFFDF8; }
+.ring { position: absolute; border-radius: 50%; border: 3px solid #DFFF5A; pointer-events: none; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// B07 — a scribbled brief on a notepad, highlighter swipes pick out what matters, the phrases fly into the real
+// Create form, the app makes it, and it ends as a draft that waits for the seller.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 108;
+const L = tall
+  ? { headY: 290, headFs: 92, capFs: 76, padX: 130, padY: 650, padW: 820, padH: 760, padTop: 110, lh: 116, fs: 80, shot: [60, 560, 960, 680], tagY: 512 }
+  : { headY: 56, headFs: 80, capFs: 66, padX: 170, padY: 360, padW: 740, padH: 690, padTop: 100, lh: 108, fs: 72, shot: [60, 296, 960, 994], tagY: 256 };
+
+// ── headline + captions ────────────────────────────────────────────────
+const head = K.box(65, L.headY, W - 130, null, { cls: 'serif cap', style: { fontSize: L.headFs + 'px' } });
+const headW = K.words(head, 'Scribble the idea.\nThat’s the brief.');
+const CAPS = [
+  [4.6, 7.55, 'It lands in the\nreal form.'],
+  [7.85, 9.8, 'Then it makes\nthe pages.'],
+  [10.1, 12.85, 'You review before\nit goes live.'],
+];
+const caps = CAPS.map(([a, b, t]) => { const c = K.box(65, L.headY, W - 130, null, { cls: 'serif cap', style: { fontSize: L.capFs + 'px' } }); return { a, b, w: K.words(c, t) }; });
+
+// ── the real app, in a browser frame with a camera inside ──────────────
+const [sx, sy, sw, sh] = L.shot;
+const shot = K.box(sx, sy, sw, sh, { cls: 'shot', html: '<div class="bar"><i></i><i></i><i></i><span>makeandlist.com/create</span></div>' });
+const urlEl = shot.querySelector('.bar span');
+const view = K.el('div', { cls: 'view', parent: shot, style: { top: '46px' } });
+const VW = sw, VH = sh - 46;
+function world(src) { const w = K.el('div', { cls: 'world', parent: view }); K.el('img', { src: K.screen(src), parent: w }); return w; }
+const w1 = world('04-create'), w2 = world('08-generating'), w3 = world('15-publishing');
+// Create: cover the placeholder, then type the brief in segments as the phrases land.
+K.el('div', { cls: 'wl', parent: w1, style: { left: '308px', top: '278px', width: '351px', height: '88px', background: '#FFFDF8' } });
+const ta = K.el('div', { cls: 'wl ta', parent: w1, style: { left: '318px', top: '285px', width: '334px' },
+  html: '<span>A 30-page<b></b></span><span> ocean colouring book<b></b></span><span> for 6–8 year olds<b></b></span><span>, with an answer key<b></b></span>' });
+const segs = [...ta.querySelectorAll('span')];
+const mk1 = K.el('div', { cls: 'mk', parent: w1, style: { left: '628px', top: '202px', width: '296px', height: '21px' } });
+// Generating: a live shimmer on the progress bar, a pulse on the current step.
+const shim = K.el('div', { cls: 'wl', parent: w2, style: { left: '881px', top: '417px', width: '283px', height: '10px', borderRadius: '5px', overflow: 'hidden' } });
+const shimB = K.el('div', { parent: shim, style: { position: 'absolute', top: 0, bottom: 0, width: '90px', background: 'linear-gradient(90deg, transparent, rgba(223,255,90,.9), transparent)' } });
+const ring2 = K.el('div', { cls: 'ring', parent: w2, style: { left: '871px', top: '607px', width: '40px', height: '40px' } });
+// Waiting for you: the Draft badge gets the highlighter.
+const mk3 = K.el('div', { cls: 'mk', parent: w3, style: { left: '846px', top: '1151px', width: '66px', height: '24px' } });
+const ring3 = K.el('div', { cls: 'ring', parent: w3, style: { left: '850px', top: '1147px', width: '60px', height: '60px', borderRadius: '30px', borderColor: '#C9452A', opacity: 0 } });
+
+// ── the notepad ────────────────────────────────────────────────────────
+const pad = K.box(L.padX, L.padY, L.padW, L.padH, { cls: 'pad' });
+K.el('div', { cls: 'rules', parent: pad, style: { backgroundImage: `repeating-linear-gradient(to bottom, transparent 0, transparent ${L.lh - 2}px, rgba(70,110,160,.22) ${L.lh - 2}px, rgba(70,110,160,.22) ${L.lh}px)`, backgroundPosition: `0 ${L.padTop + 20}px` } });
+K.el('div', { cls: 'margin', parent: pad, style: { left: '74px' } });
+K.el('div', { cls: 'tape', parent: pad });
+const LINES = ['a <span class="ph">30-page<i class="hl"></i></span> <span class="ph">ocean<i class="hl"></i></span>', '<span class="ph">colouring book<i class="hl"></i></span>',
+  'for <span class="ph">6–8 year olds<i class="hl"></i></span>', '+ an <span class="ph">answer key<i class="hl"></i></span>'];
+const lines = LINES.map((h, i) => {
+  const ln = K.el('div', { cls: 'ln hand', parent: pad, style: { left: '100px', top: (L.padTop + i * L.lh - L.fs * 0.62) + 'px', fontSize: L.fs + 'px', transform: `rotate(${[-1.2, 0.6, -0.4, 0.9][i]}deg)` } });
+  const ink = K.el('span', { cls: 'ink', parent: ln, html: h });
+  return { ln, ink };
+});
+const hls = [...pad.querySelectorAll('.hl')];
+const phs = [...pad.querySelectorAll('.ph')];
+// The pen writes, the highlighter swipes.
+const pen = K.el('div', { cls: 'tool', html: '<svg width="260" height="40" viewBox="0 0 260 40"><path d="M0 20 L26 12 L26 28 Z" fill="#24303F"/><rect x="26" y="8" width="40" height="24" rx="3" fill="#45403A"/><rect x="66" y="6" width="180" height="28" rx="8" fill="#1F1F1F"/><rect x="200" y="6" width="46" height="28" rx="8" fill="#DFFF5A"/></svg>' });
+const hiT = K.el('div', { cls: 'tool', html: '<svg width="300" height="64" viewBox="0 0 300 64"><path d="M0 18 L34 10 L34 54 L0 46 Z" fill="#C8EB3A"/><rect x="34" y="6" width="56" height="52" rx="6" fill="#DFFF5A"/><rect x="90" y="4" width="200" height="56" rx="14" fill="#FFFDF8" stroke="#D9D3C9" stroke-width="3"/><rect x="230" y="4" width="60" height="56" rx="14" fill="#DFFF5A"/></svg>' });
+
+// Phrase chips that fly from the notepad into the form.
+const CHIPS = ['30-page', 'ocean colouring book', '6–8 year olds', 'answer key'];
+const chipFrom = [0, 2, 3, 4]; // .ph index each chip leaves from
+const LAND = [5.0, 5.0 + BEAT * 0.5, 5.0 + BEAT, 5.0 + BEAT * 1.5];
+const chips = CHIPS.map((t) => K.el('div', { cls: 'chip2 hand', html: t, style: { fontSize: '64px', lineHeight: '76px' } }));
+
+// Handwritten note on the last screen, with an arrow to the Draft badge.
+const note = K.el('div', { cls: 'note hand', html: 'Draft — waiting for you', style: { fontSize: (tall ? 70 : 64) + 'px' } });
+const arrow = K.el('div', { cls: 'tool', html: '<svg width="140" height="120" viewBox="0 0 140 120"><path id="ar" d="M10 110 C 30 60, 70 30, 120 14" fill="none" stroke="#C9452A" stroke-width="6" stroke-linecap="round"/><path id="ah" d="M98 6 L122 13 L108 34" fill="none" stroke="#C9452A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>' });
+const arP = arrow.querySelector('#ar'), arH = arrow.querySelector('#ah');
+
+const cursor = K.cursor();
+const tag = K.demoTag('Real app · demo workspace', 0, L.tagY); tag.style.right = '60px'; tag.style.left = 'auto';
+const end = K.endCard(13.0, { line: 'Scribble it. Review it.<br>List it.' });
+// 9:16: lift the end card so its CTA sits above y 1248.
+if (tall) [...document.getElementById('stage').lastElementChild.children].forEach((n) => { n.style.top = (parseFloat(n.style.top) - 130) + 'px'; });
+
+// Writing and swipe timing.
+const WRITE = [[0.25, 0.78], [0.82, 1.28], [1.32, 1.82], [1.86, 2.2]];
+const SWIPE = [[2.22, 0], [2.78, 1], [2.78 + 0.16, 2], [3.33, 3], [3.89, 4]]; // [start, hl index]
+
+// Camera keyframes per screen: [t, cx, cy, zoom] in source px.
+const zFit = VW / 1440;
+const CAM1 = [[0, 720, 470, zFit], [4.44, 720, 470, zFit * 1.04], [5.0, 484, 322, 1.9], [5.95, 488, 324, 1.95], [6.35, 770, 236, 1.6], [6.75, 770, 238, 1.62], [7.05, 470, 600, 1.45], [7.6, 470, 610, 1.5]];
+const CAM2 = [[7.7, 720, 440, zFit * 1.02], [9.9, tall ? 1090 : 1000, tall ? 560 : 470, tall ? 1.15 : 0.9]];
+const CAM3 = [[9.9, 720, 400, zFit], [10.85, 700, 1190, 1.25], [12.9, 712, 1196, 1.3]];
+function cam(keys, T) {
+  const f = (j) => K.k(T, keys.map((k) => [k[0], k[j]]), E.inOutCubic);
+  return { cx: f(1), cy: f(2), z: f(3) };
+}
+function place(w, c, dy = 0) { w.style.transform = `translate(${VW / 2 - c.cx * c.z}px, ${VH / 2 - c.cy * c.z + dy}px) scale(${c.z})`; }
+// Source px on a world → stage px.
+function toStage(c, x, y, dy, fx, fy) { return [fx + VW / 2 + (x - c.cx) * c.z, fy + 46 + VH / 2 + (y - c.cy) * c.z + dy]; }
+
+K.run({
+  id: 'B07', title: 'Highlighter Brief', dur: DUR, bpm: 108, mood: 'bright', key: 'D', intro: 2.2, cover: 3.6,
+  technique: 'Masked handwriting writes a brief on a notepad, highlighter swipes pick the key phrases on the beat, the phrases fly on arcs into the real Create form while a camera moves inside the screen; it ends on a hand-drawn “Draft — waiting for you” note over the real Waiting-for-you list',
+  caption: 'Write the idea the way you would on a sticky note. MakeAndList turns it into the brief, shows you the quote before anything is made, and leaves the listing as a draft until you say yes. Start free at makeandlist.com',
+  short: 'Scribble the idea. That’s the brief.',
+  beats: ['0–2.2 s: the brief is handwritten on a notepad, the real Create screen behind it', '2.2–4.4 s: highlighter swipes on the beat — “That’s the brief.”', '4.4–7.6 s: the phrases fly into the real form; “nothing is made until you approve”; tap Plan it', '7.8–9.9 s: the real Making screen, live progress', '10–12.9 s: the real Waiting-for-you list — “Draft — waiting for you”', '13–15 s: end card'],
+  cues: [[0.1, 'pop'], [0.3, 'type'], [1.3, 'type'], [2.22, 'pop'], [2.78, 'pop'], [3.33, 'pop'], [3.89, 'pop'], [4.44, 'whoosh'], [LAND[0], 'pop'], [LAND[1], 'pop'], [LAND[2], 'pop'], [LAND[3], 'pop'], [6.39, 'pop'], [7.05, 'click'], [7.78, 'whoosh'], [10.0, 'whoosh'], [11.1, 'pop'], [11.4, 'type'], [12.3, 'riser'], [13.0, 'hit']],
+}, (T) => {
+  // headline + captions
+  K.reveal(headW.slice(0, 3), T, 0.05, { kind: 'up', stagger: 0.07, out: 4.25 });
+  K.reveal(headW.slice(3), T, 2.2, { kind: 'up', stagger: 0.08, out: 4.3 });
+  caps.forEach((c) => K.reveal(c.w, T, c.a, { kind: 'up', stagger: 0.07, out: c.b - 0.3 }));
+
+  // ── notepad: in, write, swipe, then step aside and leave ──
+  const pin = K.p(T, 0.0, 0.7, E.outExpo);
+  const aside = K.p(T, 4.44, 5.05, E.inOutCubic);
+  const leave = tall ? K.p(T, 12.4, 12.9, E.inCubic) : K.p(T, 7.3, 7.75, E.inCubic);
+  const ax = tall ? 0 : 300, ay = tall ? 640 : 470, as = tall ? 0.6 : 0.5, ar = tall ? -4 : 7;
+  const drift = Math.sin(T * 1.1) * 0.35;
+  pad.style.transform = `translate(${ax * aside}px, ${(1 - pin) * 140 + ay * aside + leave * 700}px) rotate(${-2.2 + drift + (ar + 2.2) * aside}deg) scale(${(0.96 + 0.04 * pin) * (1 - (1 - as) * aside)})`;
+  pad.style.opacity = pin * (1 - leave);
+  pad.style.zIndex = aside > 0.5 ? 35 : 20;
+
+  // handwriting wipes, one line at a time, with the pen at the edge
+  let penOn = 0, px = 0, py = 0;
+  lines.forEach((l, i) => {
+    const [a, b] = WRITE[i];
+    const p = K.p(T, a, b, E.linear);
+    l.ink.style.clipPath = `inset(-30% ${(1 - p) * 100}% -30% -4%)`;
+    if (T >= a && T <= b + 0.05) {
+      const r = l.ink.getBoundingClientRect();
+      penOn = 1; px = r.left + r.width * p; py = r.top + r.height * 0.62 + Math.sin(T * 46) * 5;
+    }
+  });
+  pen.style.opacity = penOn * K.win(T, 0.15, 2.3, 0.12);
+  pen.style.transform = `translate(${px}px, ${py}px) rotate(-38deg)`;
+
+  // highlighter swipes
+  let hiOn = 0, hx = 0, hy = 0;
+  SWIPE.forEach(([a, i]) => {
+    const p = K.p(T, a, a + 0.26, E.outCubic);
+    hls[i].style.transform = `scaleX(${p}) skewX(-8deg)`;
+    hls[i].style.opacity = p > 0 ? 0.92 : 0;
+    if (T >= a - 0.08 && T <= a + 0.3) { const r = phs[i].getBoundingClientRect(); hiOn = 1; hx = r.left + r.width * p; hy = r.top + r.height * 0.6; }
+  });
+  hiT.style.opacity = hiOn;
+  hiT.style.transform = `translate(${hx}px, ${hy}px) rotate(-30deg) scale(${tall ? 0.9 : 0.8})`;
+
+  // ── the browser: behind at first, then the hero ──
+  const front = K.p(T, 4.3, 5.0, E.inOutCubic);
+  const bIn = K.p(T, 0.7, 1.6, E.outExpo);
+  const float = Math.sin(T * 1.3) * 4;
+  shot.style.opacity = bIn * (0.8 + 0.2 * front);
+  shot.style.filter = front < 1 ? `blur(${(1 - front) * 5}px)` : 'none';
+  shot.style.transform = `translate(${(1 - front) * 40}px, ${(1 - bIn) * 80 + (1 - front) * -10 + float}px) rotate(${(1 - front) * 2.2}deg) scale(${0.9 + 0.1 * front})`;
+
+  // screen swaps inside the frame (slide up, motion blur only while moving)
+  const s2 = K.p(T, 7.5, 7.82, E.inOutCubic), s3 = K.p(T, 9.72, 10.02, E.inOutCubic);
+  const c1 = cam(CAM1, T), c2 = cam(CAM2, T), c3 = cam(CAM3, T);
+  const d1 = -s2 * VH, d2 = (1 - s2) * VH - s3 * VH, d3 = (1 - s3) * VH;
+  place(w1, c1, d1); place(w2, c2, d2); place(w3, c3, d3);
+  const mv = (s) => (s > 0.02 && s < 0.98 ? `blur(${Math.sin(s * Math.PI) * 10}px)` : 'none');
+  w1.style.visibility = s2 < 1 ? 'visible' : 'hidden'; w2.style.visibility = s2 > 0 && s3 < 1 ? 'visible' : 'hidden'; w3.style.visibility = s3 > 0 ? 'visible' : 'hidden';
+  w1.style.filter = mv(s2); w2.style.filter = s3 > 0 ? mv(s3) : mv(s2); w3.style.filter = mv(s3);
+  urlEl.textContent = T < 7.66 ? 'makeandlist.com/create' : T < 9.87 ? 'makeandlist.com/products/new' : 'makeandlist.com/listings/waiting';
+
+  // typed segments land as the chips arrive; their lime fades out
+  segs.forEach((s, i) => {
+    const on = T >= LAND[i];
+    s.style.opacity = on ? 1 : 0;
+    s.querySelector('b').style.opacity = on ? 1 - K.p(T, LAND[i] + 0.25, LAND[i] + 0.9, E.linear) : 0;
+  });
+  // approval sentence highlighted
+  mk1.style.transform = `scaleX(${K.p(T, 6.39, 6.65, E.outCubic)}) skewX(-6deg)`;
+  mk1.style.opacity = K.p(T, 6.39, 6.42, E.linear) * 0.85;
+
+  // chips fly on arcs (read both ends live, so they track the moving notepad and camera)
+  chips.forEach((ch, i) => {
+    const t1 = LAND[i], t0 = t1 - 0.6;
+    const p = K.p(T, t0, t1, E.inOutCubic);
+    const vis = T >= t0 && T < t1 + 0.08;
+    ch.style.visibility = vis ? 'visible' : 'hidden';
+    if (!vis) return;
+    const a = phs[chipFrom[i]].getBoundingClientRect(), b = segs[i].getBoundingClientRect();
+    const ax0 = a.left + a.width / 2, ay0 = a.top + a.height / 2, bx = b.left + b.width / 2, by = b.top + b.height / 2;
+    const cw = ch.offsetWidth, chh = ch.offsetHeight;
+    const s0 = (a.height / chh) * 1.05, s1 = Math.max(0.12, b.height / chh * 1.15);
+    const x = K.lerp(ax0, bx, p), y = K.lerp(ay0, by, p) - Math.sin(p * Math.PI) * (tall ? 260 : 200);
+    const lift = Math.sin(p * Math.PI);
+    ch.style.transform = `translate(${x - cw / 2}px, ${y - chh / 2}px) scale(${K.lerp(s0, s1, p) * (1 + 0.18 * lift)}) rotate(${(1 - p) * -6 + lift * 4}deg)`;
+    ch.style.opacity = 1 - K.p(T, t1 - 0.08, t1 + 0.08, E.linear);
+  });
+
+  // generating: shimmer + pulse
+  shimB.style.transform = `translateX(${-90 + ((T * 160) % 380)}px)`;
+  const rp = (T * 1.1) % 1;
+  ring2.style.transform = `scale(${0.8 + rp * 1.4})`; ring2.style.opacity = (1 - rp) * (T > 7.7 && T < 10 ? 1 : 0);
+
+  // waiting for you: Draft highlighted, note written, arrow drawn
+  mk3.style.transform = `scaleX(${K.p(T, 11.1, 11.34, E.outCubic)}) skewX(-6deg)`;
+  mk3.style.opacity = K.p(T, 11.1, 11.13, E.linear) * 0.85;
+  const [bx3, by3] = toStage(c3, 878, 1162, d3, sx, sy);
+  const nx = Math.max(80, Math.min(W - 80 - note.offsetWidth, bx3 - note.offsetWidth * 0.62)), ny = by3 + (tall ? 120 : 130);
+  const np = K.p(T, 11.4, 12.3, E.linear);
+  note.style.left = nx + 'px'; note.style.top = ny + 'px';
+  note.style.clipPath = `inset(-20% ${(1 - np) * 100}% -30% -4%)`;
+  note.style.transform = `rotate(-3deg) translateY(${Math.sin(T * 1.4) * 2}px)`;
+  note.style.opacity = T < 12.95 ? 1 : 0;
+  const ap = K.p(T, 11.18, 11.5, E.outCubic);
+  arP.style.strokeDasharray = '200'; arP.style.strokeDashoffset = 200 * (1 - ap);
+  arH.style.strokeDasharray = '60'; arH.style.strokeDashoffset = 60 * (1 - K.p(T, 11.42, 11.56, E.outCubic));
+  arrow.style.opacity = T > 11.1 && T < 12.95 ? 1 : 0;
+  arrow.style.transform = `translate(${bx3 - 150}px, ${by3 + 6}px)`;
+
+  // cursor: in, to Plan it, click
+  const [pxs, pys] = toStage(c1, 341, 719, d1, sx, sy);
+  const cp = K.p(T, 6.45, 7.0, E.outCubic);
+  const cx = K.lerp(W * 0.86, pxs, cp), cy = K.lerp(H * (tall ? 0.6 : 0.95), pys, cp);
+  cursor.at(cx, cy, T > 7.0 && T < 7.14); cursor.hide(K.win(T, 6.4, 7.6, 0.15));
+  cursor.ripple(pxs, pys, T, 7.05);
+
+  tag.style.opacity = K.win(T, 1.2, 12.85);
+  end(T);
+});
+// Caveat is the handwriting: wait for it like the kit waits for the brand fonts.
+window.__ready = window.__ready.then(async (r) => { await document.fonts.load('700 60px "Caveat"'); r.fonts.caveat = document.fonts.check('700 60px "Caveat"'); return r; });
+</script></body></html>

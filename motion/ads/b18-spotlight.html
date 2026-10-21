@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B18 · Spotlight Tour</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EFEADF; }
+.wall { position: absolute; inset: 0; background: radial-gradient(90% 70% at 50% 45%, #FAF7EE 0%, #EFEADF 60%, #E2DACB 100%); }
+.glow { position: absolute; width: 1400px; height: 1400px; border-radius: 50%; background: radial-gradient(circle, rgba(223,255,90,.45), rgba(223,255,90,0) 62%); }
+.dark { position: absolute; inset: 0; z-index: 40; pointer-events: none; }
+.beam { position: absolute; inset: 0; z-index: 41; pointer-events: none; mix-blend-mode: screen; }
+.ringL { position: absolute; border-radius: 50%; border: 4px solid #DFFF5A; z-index: 42; pointer-events: none; }
+.cap { position: absolute; z-index: 60; }
+.cap .k { font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; }
+.cap .t { margin-top: 10px; font: 800 72px/1 'Playfair Display'; letter-spacing: -0.02em; }
+.cursor { z-index: 55; }
+.ripple { z-index: 54; }
+.flash { position: absolute; inset: 0; background: #FFFDF8; z-index: 70; pointer-events: none; }
+.phone { box-shadow: 0 60px 120px -50px rgba(31,31,31,.65), inset 0 0 0 2px #2a2a2a; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// B18 — the lights are off; a spotlight rides the cursor through the real app on a phone. Every click pulses the
+// light; each step swipes on the beat. On the drop (beat 22) the cursor picks a store, the lights come up, and
+// the promise is in full light: drafts first, live only on the seller's yes.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 122, B = (n) => +(n * BEAT).toFixed(3);
+const DROP = B(22); // 10.820
+const CLICKS = [B(4), B(6), B(10), B(18), DROP];
+const SWIPES = [B(7), B(12), B(16), B(20)]; // a swipe lands on each of these
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const SCR = [['22-phone-create', 3400], ['65-phone-configure', 3800], ['69-phone-making', 2692], ['24-phone-product', 3800], ['72-phone-listing-send', 3800]];
+const P = tall ? { x: 200, y: 520, w: 680 } : { x: 530, y: 130, w: 500 };
+const PH = Math.round(P.w * 2.05);
+K.box(0, 0, W, H, { cls: 'wall' });
+const glow = K.box(0, 0, 1400, 1400, { cls: 'glow' });
+const world = K.box(0, 0, W, H, { style: { zIndex: 2 } });
+const deck = K.phoneDeck(P.x, P.y, P.w, SCR.map(([n]) => K.screen(n)), { parent: world });
+const sS = deck.sw / 780;
+// scroll (px of the 780-wide shot) per screen over time
+const scrollPx = (i, t) => {
+  if (i === 0) return 300;
+  if (i === 1) return 2167;
+  if (i === 2) return 1059;
+  if (i === 3) return 1150;
+  return K.lerp(960, 2000, K.p(t, DROP + 0.5, DROP + 1.5, E.inOutCubic));
+};
+const maxPx = (i) => SCR[i][1] - deck.sh / sS;
+const posAt = (t) => { let p = 0; SWIPES.forEach((s) => { p += K.p(t, s - 0.36, s, E.inOutExpo); }); return p; };
+const toStage = (i, xs, ys, t) => [P.x + 14 + xs * sS, P.y + 14 + (ys - scrollPx(i, t)) * sS];
+
+// cursor path: [t, screen, x, y] in the shot's own pixels
+const PATH = [
+  [0.0, 0, 640, 2100], [0.9, 0, 390, 690], [1.45, 0, 450, 700], [CLICKS[0], 0, 195, 985], [2.55, 0, 150, 1560], [CLICKS[1], 0, 140, 1625],
+  [3.5, 1, 420, 2560], [4.15, 1, 300, 2890], [CLICKS[2], 1, 250, 3292],
+  [5.5, 1, 330, 3200], [6.15, 2, 560, 1838], [6.6, 2, 560, 1945], [7.05, 2, 560, 2050], [7.5, 2, 600, 2155],
+  [8.2, 3, 470, 1580], [CLICKS[3], 3, 335, 1965], [9.3, 3, 360, 1980],
+  [10.15, 4, 420, 1100], [DROP, 4, 390, 2140], [11.6, 4, 400, 2700], [12.4, 4, 255, 3400], [15, 4, 255, 3400],
+];
+function cursorAt(t) {
+  if (t <= PATH[0][0]) return toStage(PATH[0][1], PATH[0][2], PATH[0][3], t);
+  for (let k = 1; k < PATH.length; k++) {
+    if (t <= PATH[k][0]) {
+      const a = PATH[k - 1], b = PATH[k];
+      const u = E.inOutCubic((t - a[0]) / (b[0] - a[0]));
+      const A = toStage(a[1], a[2], a[3], t), Bp = toStage(b[1], b[2], b[3], t);
+      return [K.lerp(A[0], Bp[0], u), K.lerp(A[1], Bp[1], u) - Math.sin(u * Math.PI) * 30];
+    }
+  }
+  const z = PATH[PATH.length - 1]; return toStage(z[1], z[2], z[3], t);
+}
+
+const dark = K.box(0, 0, W, H, { cls: 'dark' });
+const beam = K.box(0, 0, W, H, { cls: 'beam' });
+const ringL = K.box(0, 0, 10, 10, { cls: 'ringL' });
+const cursor = K.cursor();
+
+const C = tall ? { x: 70, y: 286, w: W - 140, align: 'center', fs: 64 } : { x: 60, y: 430, w: 430, align: 'left', fs: 64 };
+const CAPS = [
+  [0.05, 1.62, 'Real app · lights off', 'Lights off.\nWatch the cursor.'],
+  [1.72, 3.3, '01', 'Describe it.'],
+  [3.48, 5.75, '02', 'See the price first.'],
+  [5.95, 7.75, '03', 'It makes the pages.'],
+  [7.92, 9.7, '04', 'You check the files.'],
+  [9.88, DROP - 0.05, '05', 'Pick a store.'],
+  [DROP + 0.05, 12.85, 'Lights up', 'Drafts first.\nLive on your yes.'],
+];
+const caps = CAPS.map(([a, b, k, t]) => {
+  const c = K.box(C.x, C.y, C.w, null, { cls: 'cap', html: `<div class="k">${k}</div>`, style: { textAlign: C.align } });
+  const tt = K.el('div', { parent: c, cls: 't', style: { fontSize: C.fs + 'px' } });
+  return { c, a, b, w: K.words(tt, t), k: c.firstChild };
+});
+const tag = K.demoTag('Real app · demo workspace', 0, 0);
+tag.style.zIndex = 61;
+const flash = K.box(0, 0, W, H, { cls: 'flash' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+
+const end = K.endCard(13.0, { line: 'Lights up on<br>your own store.' });
+const endBg = document.getElementById('stage').lastElementChild;
+if (tall) [...endBg.children].forEach((c) => { c.style.top = parseFloat(c.style.top) - 150 + 'px'; });
+const endSpot = K.el('div', { parent: endBg, style: { position: 'absolute', width: '900px', height: '900px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(223,255,90,.4), rgba(223,255,90,0) 62%)' } });
+endBg.insertBefore(endSpot, endBg.firstChild);
+
+K.run({
+  id: 'B18', title: 'Spotlight Tour', dur: DUR, bpm: 122, mood: 'drive', key: 'C', intro: 0.0, cover: 11.4,
+  technique: 'Near-black overlay with a radial-gradient spotlight that trails the cursor through five real phone screens (phoneDeck swipes on the beat, motion-blurred by speed); every click pulses the light and throws a lime ring; on the beat drop the cursor picks a store and the lights come up with a flash and punch-in',
+  caption: 'Follow the cursor: describe the idea, see the price first, let MakeAndList make the pages, check the files, pick a store. Every listing goes as a draft and is public only when you say yes. Start free at makeandlist.com',
+  short: 'Lights off. Watch the cursor.',
+  beats: ['0–1.6 s: lights off, “Lights off. Watch the cursor.”', '1.7–5.8 s: describe it, see the price first', '5.9–9.7 s: it makes the pages, you check the files', '9.9–10.8 s: pick a store — click on the drop', '10.8–12.9 s: lights up, “Drafts first. Live on your yes.”', '13–15 s: end card'],
+  cues: [[0.05, 'hit'], [0.9, 'type'], ...CLICKS.slice(0, 4).map((t) => [t, 'click']), ...SWIPES.map((t) => [t, 'whoosh']), [9.9, 'riser'], [DROP, 'click'], [DROP + 0.02, 'hit'], [12.8, 'whoosh'], [13.0, 'hit']],
+}, (T) => {
+  const fr = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(fr) - 0.5) * 60}px, ${(seed(fr + 3) - 0.5) * 60}px)`;
+
+  // phone: rises in, breathes; punch-in on the drop
+  const pin = K.p(T, 0, 0.9, E.outExpo);
+  const punch = T > DROP ? 1 + 0.04 * Math.exp(-(T - DROP) * 3.5) : 1;
+  world.style.transformOrigin = `${W / 2}px ${H / 2}px`;
+  world.style.transform = `translateY(${(1 - pin) * 140 + Math.sin(T * 0.9) * 5}px) scale(${punch}) rotate(${Math.sin(T * 0.45) * 0.4}deg)`;
+  const pos = posAt(T), vel = pos - posAt(T - 1 / 30);
+  deck.draw(pos, SCR.map((s, i) => scrollPx(i, T) * sS / Math.max(1, s[1] * sS - deck.sh)), vel);
+
+  // cursor + its spotlight (the light trails the cursor a little)
+  const [cx, cy] = cursorAt(T);
+  const [lx0, ly0] = cursorAt(T - 0.07);
+  const lx = (cx + lx0) / 2 + 14, ly = (cy + ly0) / 2 + 14;
+  let press = false, pulse = 0, lastC = -9;
+  CLICKS.forEach((c) => { if (T > c - 0.05 && T < c + 0.12) press = true; if (T >= c) { lastC = c; pulse = Math.max(pulse, Math.exp(-(T - c) * 5)); } });
+  cursor.at(cx, cy, press);
+  cursor.hide(K.p(T, 0.3, 0.6, E.linear) * (1 - K.p(T, 12.6, 12.9, E.linear)));
+  cursor.ripple(cx + 8, cy + 8, T, lastC);
+
+  const R0 = tall ? 250 : 190;
+  const breathe = 1 + 0.04 * Math.sin(T * 2.6);
+  const open = K.p(T, 0.15, 0.9, E.outExpo); // the light finds the screen
+  const R = R0 * breathe * (0.35 + 0.65 * open) * (1 + 0.38 * pulse);
+  const up = K.p(T, DROP, DROP + 0.35, E.outExpo);
+  const a = (0.93 - 0.18 * pulse) * (1 - up);
+  dark.style.background = `radial-gradient(circle at ${lx}px ${ly}px, rgba(10,10,10,0) 0, rgba(10,10,10,0) ${R * 0.55}px, rgba(10,10,10,${a * 0.7}) ${R * 0.85}px, rgba(10,10,10,${a}) ${R * 1.25}px)`;
+  beam.style.background = `radial-gradient(circle at ${lx}px ${ly}px, rgba(255,236,190,${0.07 * (1 - up)}) 0, rgba(255,236,190,0) ${R * 0.8}px)`;
+  const rp = K.p(T, lastC, lastC + 0.6, E.outCubic);
+  const rr = R * (0.7 + 0.6 * rp);
+  ringL.style.left = lx - rr + 'px'; ringL.style.top = ly - rr + 'px'; ringL.style.width = rr * 2 + 'px'; ringL.style.height = rr * 2 + 'px';
+  ringL.style.opacity = T >= lastC && T < lastC + 0.6 ? (1 - rp) * 0.8 : 0;
+  flash.style.opacity = T >= DROP && T < DROP + 0.3 ? 0.55 * (1 - K.p(T, DROP, DROP + 0.3, E.outCubic)) : 0;
+  glow.style.transform = `translate(${W / 2 - 700 + Math.sin(T * 0.6) * 140}px, ${H * 0.55 - 700 + Math.cos(T * 0.5) * 100}px)`;
+  glow.style.opacity = up;
+
+  // captions: ivory in the dark, ink in the light
+  caps.forEach((c, i) => {
+    c.c.style.opacity = K.win(T, c.a, c.b, 0.2);
+    const lit = i === caps.length - 1;
+    c.c.style.color = lit ? '#1F1F1F' : '#FAF7EE';
+    c.k.style.color = lit ? '#7A5A12' : '#DFFF5A';
+    c.k.style.transform = `translateY(${(1 - K.p(T, c.a, c.a + 0.45, E.outExpo)) * 14}px)`;
+    K.reveal(c.w, T, c.a + 0.04, { kind: lit ? 'scale' : 'up', stagger: 0.07, out: c.b - 0.28 });
+  });
+  if (tall) { tag.style.left = '50%'; tag.style.transform = 'translateX(-50%)'; tag.style.top = P.y - 38 + 'px'; }
+  else { tag.style.left = C.x + 'px'; tag.style.top = 1252 + 'px'; }
+  tag.style.opacity = K.win(T, 0.6, 12.85, 0.25);
+
+  end(T);
+  endSpot.style.left = W / 2 - 450 + Math.sin(T * 1.3) * 160 + 'px';
+  endSpot.style.top = H * (tall ? 0.33 : 0.38) - 450 + Math.cos(T * 1.1) * 90 + 'px';
+});
+</script></body></html>

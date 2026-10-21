@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>A07 · Nothing goes public without you</title><link rel="stylesheet" href="kit.css">
+<style>
+.card { position: absolute; border-radius: 34px; background: #FFFDF8; border: 1px solid #E6E0D5; box-shadow: 0 50px 100px -50px rgba(31,31,31,.7); overflow: hidden; }
+.card .hd { display: flex; align-items: center; gap: 18px; padding: 30px 34px; border-bottom: 1px solid #EFEADF; }
+.card .hd img { height: 46px; }
+.card .hd .nm { font: 800 34px 'Archivo'; }
+.card .bd { display: flex; gap: 28px; padding: 30px 34px; }
+.card .bd img { width: 210px; border-radius: 10px; box-shadow: 0 16px 30px -18px rgba(31,31,31,.6); }
+.card .ttl { font: 700 38px/1.15 'Playfair Display'; }
+.card .pr { margin-top: 12px; font: 600 30px 'Archivo'; color: #45403A; }
+.state { display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; padding: 10px 20px; border-radius: 99px; font: 700 28px 'Archivo'; }
+.state i { width: 14px; height: 14px; border-radius: 50%; background: currentColor; }
+.btn { position: absolute; border-radius: 26px; font: 800 40px 'Archivo'; display: grid; place-items: center; }
+.dialog { position: absolute; border-radius: 30px; background: #1F1F1F; color: #FAF7EE; padding: 40px; box-shadow: 0 50px 120px -30px rgba(0,0,0,.7); z-index: 30; }
+.dialog h3 { margin: 0 0 14px; font: 800 44px 'Playfair Display'; }
+.dialog p { margin: 0 0 26px; font: 500 28px/1.35 'Archivo'; color: #D9D3C9; }
+.dialog .row { display: flex; gap: 18px; }
+.dialog .row span { flex: 1; padding: 22px; text-align: center; border-radius: 20px; font: 800 32px 'Archivo'; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// A07 — the moment that matters: a draft in the seller's store, a dialog that asks, a tap, and only then "Live".
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15;
+const head = K.box(60, tall ? 170 : 44, W - 120, null, { cls: 'serif', style: { fontSize: (tall ? 104 : 84) + 'px', fontWeight: 800, lineHeight: 0.98, textAlign: 'center', letterSpacing: '-0.02em' } });
+const headW = K.words(head, 'Nothing goes\npublic without you.');
+const cw = W - 120, cy = tall ? 600 : 330;
+if (tall) { const st2 = document.createElement('style'); st2.textContent = '.card .hd .nm{font-size:40px}.card .bd img{width:260px}.card .ttl{font-size:46px}.card .pr{font-size:34px}.state{font-size:32px}.btn{font-size:46px}'; document.head.appendChild(st2); }
+const card = K.box(60, cy, cw, null, { cls: 'card', html: `
+  <div class="hd"><img src="${K.pub('platforms/woocommerce.svg')}"><span class="nm">Your WooCommerce store</span></div>
+  <div class="bd"><img src="${K.pub('showcase/christmas-preschool-pack/cover.webp')}"><div>
+    <div class="ttl">Christmas Preschool Learning Pack</div><div class="pr">37 pages · $12.00</div>
+    <div class="state" id="st"><i></i><span id="stt">Draft in your store</span></div>
+  </div></div>`, style: { height: 'auto' } });
+const st = card.querySelector('#st'), stt = card.querySelector('#stt');
+const by = cy + (tall ? 600 : 470);
+const btn = K.box(60, by, cw, 130, { cls: 'btn', html: 'Publish in WooCommerce', style: { background: '#1F1F1F', color: '#DFFF5A' } });
+const dw = W - 160;
+const dlg = K.box(80, tall ? 860 : 470, dw, null, { cls: 'dialog', html: '<h3>Make it public?</h3><p>This listing becomes visible to buyers in your store. You can unpublish it there at any time.</p><div class="row"><span style="background:#2E2A26;color:#FAF7EE">Not yet</span><span style="background:#DFFF5A;color:#1F1F1F">Yes, publish</span></div>', style: { height: 'auto' } });
+const steps = K.box(60, tall ? 1300 : 1010, W - 120, null, { style: { fontSize: (tall ? 46 : 32) + 'px', fontWeight: 600, lineHeight: 1.5, textAlign: 'center' } });
+const LINES = ['1 · MakeAndList sends a draft.', '2 · You check it in your store.', '3 · It goes live only on your yes.'];
+const lineEls = LINES.map((t) => K.el('div', { parent: steps, html: t }));
+const cursor = K.cursor();
+const shade = K.box(0, 0, W, H, { style: { background: 'rgba(31,31,31,.45)', zIndex: 25 } });
+const tag = K.demoTag('Demo store · sample listing', 0, 0); tag.style.left = '50%'; tag.style.transform = 'translateX(-50%)'; tag.style.top = (tall ? 510 : 268) + 'px';
+const end = K.endCard(12.8, { line: 'Drafts first.<br>Public only when you say.' });
+const TAP1 = 5.0, TAP2 = 7.6;
+K.run({
+  id: 'A07', title: 'Your Yes', dur: DUR, bpm: 100, mood: 'warm', key: 'B', intro: 1.5, cover: 6.4,
+  technique: 'Recreated UI micro-story: draft card, publish button, confirmation dialog with shade, tap, state flip to Live with a lime pulse; numbered promise lines',
+  caption: 'MakeAndList sends your listing to your store as a draft. You look at it there, and it goes live only when you say yes — in every store, every time. Start free at makeandlist.com',
+  short: 'Nothing goes public without you.',
+  beats: ['0–1.8 s: “Nothing goes public without you.”', '1.8–5 s: a draft in the seller’s store', '5–8 s: publish → “Make it public?” → yes', '8–12.6 s: Live, and the three-step promise'],
+  cues: [[0.1, 'hit'], [1.8, 'whoosh'], [TAP1, 'click'], [5.3, 'pop'], [TAP2, 'click'], [8.0, 'hit'], [9.2, 'pop'], [10.0, 'pop'], [10.8, 'pop'], [12.8, 'hit']],
+}, (T) => {
+  K.reveal(headW, T, 0.05, { kind: 'up', stagger: 0.08 });
+  const cin = K.p(T, 1.6, 2.4, K.ease.outExpo);
+  card.style.opacity = cin; card.style.transform = `translateY(${(1 - cin) * 120}px)`;
+  const live = T > 8.0;
+  st.style.background = live ? '#1F1F1F' : '#F4EBD3'; st.style.color = live ? '#DFFF5A' : '#7A5A12';
+  stt.textContent = live ? 'Live — because you said yes' : 'Draft in your store';
+  const pulse = live ? 1 + 0.15 * Math.exp(-(T - 8.0) * 5) * Math.sin((T - 8) * 20) : 1;
+  st.style.transform = `scale(${pulse})`;
+  const bin = K.p(T, 2.6, 3.2, K.ease.outBack);
+  btn.style.opacity = K.p(T, 2.6, 2.8, K.ease.linear) * (1 - K.p(T, 8.0, 8.4, K.ease.linear));
+  btn.style.transform = `scale(${(0.9 + 0.1 * bin) * (T > TAP1 - 0.05 && T < TAP1 + 0.15 ? 0.96 : 1)})`;
+  const dOn = K.win(T, TAP1 + 0.2, 8.0, 0.25);
+  dlg.style.opacity = dOn; dlg.style.transform = `translateY(${(1 - K.p(T, TAP1 + 0.2, TAP1 + 0.7, K.ease.outExpo)) * 60}px) scale(${0.96 + 0.04 * dOn})`;
+  shade.style.opacity = dOn;
+  // cursor: to the button, then to "Yes, publish"
+  const yx = 80 + dw * 0.75, yy = (tall ? 860 : 470) + 300;
+  let x = W * 0.85, y = H * 0.95, show = K.win(T, 3.6, 8.3, 0.2);
+  if (T < TAP1 + 0.3) { const a = K.p(T, 3.8, TAP1, K.ease.outCubic); x = K.lerp(W * 0.85, W * 0.62, a); y = K.lerp(H * 0.95, by + 65, a); }
+  else { const a = K.p(T, TAP1 + 1.0, TAP2, K.ease.outCubic); x = K.lerp(W * 0.62, yx, a); y = K.lerp(by + 65, yy, a); }
+  cursor.at(x, y, (T > TAP1 - 0.05 && T < TAP1 + 0.12) || (T > TAP2 - 0.05 && T < TAP2 + 0.12)); cursor.hide(show);
+  cursor.ripple(T < 6.5 ? W * 0.62 : yx, T < 6.5 ? by + 65 : yy, T, T < 6.5 ? TAP1 : TAP2);
+  lineEls.forEach((l, i) => { const a = 9.0 + i * 0.8; const p = K.p(T, a, a + 0.5, K.ease.outExpo); l.style.opacity = p; l.style.transform = `translateY(${(1 - p) * 20}px)`; });
+  tag.style.opacity = K.win(T, 1.8, 12.6);
+  end(T);
+});
+</script></body></html>

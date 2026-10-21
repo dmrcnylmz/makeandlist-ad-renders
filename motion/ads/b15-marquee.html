@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B15 · Counter-Marquee</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1F1F1F; }
+.mq { position: absolute; transform-origin: 50% 50%; }
+.row { position: absolute; left: 0; height: 340px; will-change: transform; }
+.tile { position: absolute; top: 0; height: 340px; border-radius: 18px; object-fit: cover; box-shadow: 0 26px 50px -26px rgba(0,0,0,.7); background: #EFEADF; }
+.lift { position: absolute; border-radius: 18px; object-fit: cover; z-index: 30; transform-origin: 50% 50%; }
+.panel { position: absolute; z-index: 40; border-radius: 40px; background: #1F1F1F; color: #FAF7EE; text-align: center; box-shadow: 0 60px 120px -40px rgba(0,0,0,.8); overflow: hidden; }
+.panel .ln { font: 800 92px/1.04 'Playfair Display'; letter-spacing: -0.02em; }
+.panel .ln em { font-style: normal; color: #DFFF5A; }
+.cap { position: absolute; z-index: 40; color: #FAF7EE; }
+.cap .k { font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #DFFF5A; }
+.cap .t { margin-top: 12px; font: 800 64px/1.02 'Playfair Display'; letter-spacing: -0.015em; }
+.ph { position: absolute; z-index: 35; border-radius: 64px; background: #111; padding: 14px; box-shadow: 0 80px 160px -40px rgba(0,0,0,.95), inset 0 0 0 2px #2a2a2a; }
+.ph .scr { position: relative; width: 100%; height: 100%; border-radius: 52px; overflow: hidden; background: #FAF7EE; }
+.ph .lay { position: absolute; inset: 0; overflow: hidden; }
+.ph .lay img { position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none; }
+.ph .notch { position: absolute; left: 50%; top: 26px; width: 110px; height: 32px; margin-left: -55px; border-radius: 20px; background: #111; z-index: 3; }
+.ring { position: absolute; border: 5px solid #DFFF5A; border-radius: 22px; z-index: 4; }
+.flash { position: absolute; inset: 0; background: #FAF7EE; z-index: 45; pointer-events: none; }
+.shade { position: absolute; inset: 0; background: #141312; z-index: 20; pointer-events: none; }
+.demo { background: rgba(31,31,31,.8); color: #EFEADF; border-color: #8A8378; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// B15 — rows of the owner's real products scroll in alternating directions; on the beat everything freezes, one
+// pack lifts out of its row, flies into the thumbnail slot of a phone, and the phone swipes to that product's
+// listing step ("Where should it go?"). Then the rows unfreeze and race the other way.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 126, B = (n) => +(n * BEAT).toFixed(3);
+const T_FREEZE = B(8), T_PHONE = B(10), T_TAP = B(13), T_SWIPE = B(14), T_RING = B(17), T_GO = B(20);
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const S = (p) => K.pub('showcase/' + p);
+const PACKS = ['christmas-preschool-pack', 'halloween-party-games', 'fall-activity-pack', 'coloring-christmas', 'thanksgiving-kids-table', 'activity-halloween', 'christmas-party-games', 'halloween-preschool-pack'];
+const COV = PACKS.map((p) => [S(p + '/cover.webp'), 0]);
+const PHO = PACKS.map((p) => [S(p + '/photo.webp'), 1]);
+const LST = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => [S('christmas-preschool-pack/listing-' + String(n).padStart(2, '0') + '.webp'), 1]);
+const INT = PACKS.map((p, i) => [S(p + '/interior-0' + (1 + (i % 3)) + '.webp'), 0]);
+const EXA = ['dinosaur-coloring-cover', 'halloween-coloring-cover', 'winter-word-search-cover', 'dinosaur-coloring-interior', 'halloween-coloring-interior', 'winter-word-search-interior'].map((n) => [K.pub('examples/' + n + '.png'), 0]);
+const rot = (a, s) => a.slice(s).concat(a.slice(0, s));
+// [items, direction, speed]
+const ROWS = [
+  [rot(PHO, 3), 1, 0.9], [rot(COV, 4), -1, 1.1], [rot(LST, 2), 1, 1.0], [rot(COV, 6), -1, 1.25],
+  [EXA.concat(rot(INT, 2)), 1, 0.95], [rot(LST, 7), -1, 1.15], [rot(PHO, 6), 1, 1.05], [rot(COV, 1), -1, 0.9],
+];
+const TARGET_ROW = 3; // a covers row through the middle of the frame
+const TH = 340, GAP = 26, RH = TH + 30, ANG = -8, SC = tall ? 1.18 : 1.08;
+const MW = 2600, MH = ROWS.length * RH;
+const mq = K.box((W - MW) / 2, (H - MH) / 2, MW, MH, { cls: 'mq' });
+const rows = ROWS.map(([items, dir, sp], r) => {
+  const row = K.box(0, r * RH, 0, null, { parent: mq, cls: 'row' });
+  const tiles = []; let x = 0;
+  for (let rep = 0; rep < 4; rep++) items.forEach(([src, sq], i) => {
+    const w = sq ? TH : Math.round(TH * 0.7727);
+    const im = K.el('img', { parent: row, cls: 'tile', src, style: { left: x + 'px', width: w + 'px' } });
+    tiles.push({ im, x, w, src, i }); x += w + GAP;
+  });
+  const period = x / 4;
+  row.style.width = x + 'px';
+  return { row, tiles, period, dir, sp, off: seed(r) * period };
+});
+
+// distance travelled by the marquee (px), a pure function of time: fast in, cruise, hard stop on the beat,
+// a slow counter-drift while frozen, then a race the other way.
+function dist(t) {
+  const a = Math.min(t, T_FREEZE);
+  let d = 300 * a + 520 * (1 - Math.exp(-2.4 * a));
+  if (t > T_FREEZE) { const u = t - T_FREEZE; d += 26 * Math.sin(u * 26) * Math.exp(-u * 11); }
+  if (t > T_PHONE) d -= 22 * (Math.min(t, T_GO) - T_PHONE);
+  if (t > T_GO) { const u = t - T_GO; d -= 900 * u * u / (u + 0.55); }
+  return d;
+}
+const shiftOf = (R, t) => -(((R.off + R.dir * R.sp * dist(t)) % R.period) + R.period) % R.period - R.period;
+const toStage = (lx, ly) => { // marquee local (from its centre) → stage
+  const a = ANG * Math.PI / 180;
+  return [W / 2 + SC * (lx * Math.cos(a) - ly * Math.sin(a)), H / 2 + SC * (lx * Math.sin(a) + ly * Math.cos(a))];
+};
+// pick the Christmas preschool cover nearest the centre at the freeze
+const TR = rows[TARGET_ROW];
+let pick = null, best = 1e9;
+TR.tiles.forEach((tl) => {
+  if (!tl.src.includes('christmas-preschool-pack/cover')) return;
+  const [sx, sy] = toStage(tl.x + shiftOf(TR, T_FREEZE) + tl.w / 2 - MW / 2, TARGET_ROW * RH + TH / 2 - MH / 2);
+  const dd = Math.abs(sx - W * 0.5) + Math.abs(sy - H * 0.5) * 0.2;
+  if (dd < best) { best = dd; pick = { tl, sx, sy }; }
+});
+// re-solve the row's start offset so that copy sits exactly at the centre of the frame at the freeze
+(function center() {
+  const tl = pick.tl;
+  const want = MW / 2 - tl.w / 2 - tl.x; // shift that puts the tile's centre at local x = 0
+  const a = ANG * Math.PI / 180, ly = TARGET_ROW * RH + TH / 2 - MH / 2;
+  const lx = ly * Math.tan(a); // stage x = W/2 when lx·cos a = ly·sin a
+  const needShift = want + lx; // shiftOf(TR, T_FREEZE) must equal this (mod period)
+  const cur = shiftOf(TR, T_FREEZE);
+  const delta = needShift - cur; // change in shift; shift = -(off + …) so off changes by -delta
+  TR.off -= delta;
+  const [sx, sy] = toStage(tl.x + shiftOf(TR, T_FREEZE) + tl.w / 2 - MW / 2, ly);
+  if (Math.abs(sx - W / 2) > 2) { // the wrap moved it into another copy: pick the copy at the centre now
+    TR.tiles.forEach((t2) => { if (t2.src === tl.src) { const [x2] = toStage(t2.x + shiftOf(TR, T_FREEZE) + t2.w / 2 - MW / 2, ly); if (Math.abs(x2 - W / 2) < 3) pick.tl = t2; } });
+  }
+  const [fx, fy] = toStage(pick.tl.x + shiftOf(TR, T_FREEZE) + pick.tl.w / 2 - MW / 2, ly);
+  pick.sx = fx; pick.sy = fy;
+})();
+
+const shade = K.box(0, 0, W, H, { cls: 'shade' });
+const lift = K.el('img', { cls: 'lift', src: pick.tl.src });
+const LW = pick.tl.w, LH = TH;
+lift.style.width = LW + 'px'; lift.style.height = LH + 'px';
+
+// the phone: two screens cropped from the AppPhone design board (Home, then the product's Send step)
+const P = tall ? { x: 260, y: 545, w: 560 } : { x: 560, y: 210, w: 430 };
+const PH = Math.round(P.w * 2.05), sw = P.w - 28, sS = sw / 780;
+const ph = K.box(P.x, P.y, P.w, PH, { cls: 'ph' });
+const scr = K.el('div', { parent: ph, cls: 'scr' });
+K.el('div', { parent: ph, cls: 'notch' });
+const lays = [80, 940].map((bx) => {
+  const lay = K.el('div', { parent: scr, cls: 'lay' });
+  K.el('img', { parent: lay, src: K.canvas('AppPhone'), style: { width: 2660 * sS + 'px', transform: `translate(${-bx * sS}px, ${-150 * sS}px)` } });
+  return lay;
+});
+const ring = K.el('div', { parent: scr, cls: 'ring', style: { left: 6 + 'px', width: sw - 12 + 'px', top: (1592 - 150) * sS + 'px', height: (1830 - 1592) * sS - 6 + 'px' } });
+// thumbnail slot in the Home screen card (board px 153–297 × 450–633)
+const slot = { x: P.x + 14 + (153 - 80) * sS, y: P.y + 14 + (450 - 150) * sS, w: (297 - 153) * sS };
+const cursor = K.cursor();
+const tapX = P.x + 14 + (470 - 80) * sS, tapY = P.y + 14 + (755 - 150) * sS;
+
+const panel = K.box(tall ? 90 : 90, 0, W - 180, null, { cls: 'panel' });
+const HOOK = [['Activity', 'packs.'], ['Colouring', 'books.'], ['Party', 'games.']];
+const lines = HOOK.map(([a, b]) => K.el('div', { parent: panel, cls: 'ln', html: `<span class="m">${a} <em>${b}</em></span>` }));
+const outro = K.box(tall ? 90 : 90, 0, W - 180, null, { cls: 'panel' });
+const oLine = K.el('div', { parent: outro, cls: 'ln' });
+const oW = K.words(oLine, 'Every product.\nIts own listing.');
+
+const CAPS = [
+  [T_PHONE + 0.3, T_SWIPE - 0.1, 'Example made with MakeAndList', 'One pack\nlifts out.'],
+  [T_SWIPE + 0.1, T_RING - 0.05, 'The listing step', 'Pick where\nit goes.'],
+  [T_RING, T_GO - 0.1, 'Draft first', 'Hidden drafts.\nYou publish.'],
+];
+const capBox = tall ? [70, 326, W - 140] : [60, 380, 470];
+const caps = CAPS.map(([a, b, k, t]) => {
+  const c = K.box(capBox[0], capBox[1], capBox[2], null, { cls: 'cap', html: `<div class="k">${k}</div>`, style: { textAlign: tall ? 'center' : 'left' } });
+  const tt = K.el('div', { parent: c, cls: 't' });
+  if (!tall) tt.style.fontSize = '58px';
+  return { c, a, b, w: K.words(tt, t) };
+});
+const tagO = K.demoTag('Examples made with MakeAndList by their owner', 0, 0);
+const tagD = K.demoTag('Product design · sample data', 0, 0);
+const flash = K.box(0, 0, W, H, { cls: 'flash' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+
+const end = K.endCard(13.0, { line: 'Every product.<br>Its own listing.', dark: true });
+const endBg = document.getElementById('stage').lastElementChild;
+if (tall) [...endBg.children].forEach((c) => { c.style.top = parseFloat(c.style.top) - 150 + 'px'; });
+// a thin marquee of covers keeps moving under the end card
+const endStrip = K.el('div', { parent: endBg, style: { position: 'absolute', left: 0, top: (tall ? H * 0.78 : H * 0.9) + 'px', height: '150px', width: '4000px', opacity: 0.35 } });
+for (let i = 0; i < 24; i++) K.el('img', { parent: endStrip, src: COV[i % 8][0], style: { position: 'absolute', left: i * 128 + 'px', top: 0, width: '116px', height: '150px', objectFit: 'cover', borderRadius: '10px' } });
+
+K.run({
+  id: 'B15', title: 'Counter-Marquee', dur: DUR, bpm: 126, mood: 'drive', key: 'E', intro: 0.0, cover: 4.2,
+  technique: 'Tilted counter-scrolling marquee of the owner’s real products with a speed-ramped, pure-function travel curve; a hard freeze on the beat with a spring jolt and flash, one cover lifts out of its row and lands exactly in the thumbnail slot of a phone, a tap swipes to that product’s listing step, then the rows race the other way',
+  caption: 'Activity packs, colouring books, party games: every product made with MakeAndList gets its own listing, sent as a hidden draft to the stores you pick. You publish each one yourself. Start free at makeandlist.com',
+  short: 'Every product. Its own listing.',
+  beats: ['0–1.9 s: “Activity packs. Colouring books. Party games.” over racing rows', '1.9–3.8 s: the owner’s products stream both ways', '3.8–4.8 s: freeze on the beat, one pack lifts out', '4.8–9.5 s: it lands in a phone, tap, “Pick where it goes.” “Hidden drafts. You publish.”', '9.5–12.9 s: rows race back, “Every product. Its own listing.”', '13–15 s: end card'],
+  cues: [[0.1, 'pop'], [B(1) + 0.1, 'pop'], [B(2) + 0.1, 'pop'], [B(4), 'whoosh'], [B(7), 'riser'], [T_FREEZE, 'hit'], [T_PHONE, 'whoosh'], [T_PHONE + 0.75, 'pop'], [T_TAP, 'click'], [T_SWIPE + 0.45, 'whoosh'], [T_RING, 'pop'], [B(19), 'riser'], [T_GO, 'hit'], [12.8, 'whoosh'], [13.0, 'hit']],
+}, (T) => {
+  const fr = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(fr) - 0.5) * 60}px, ${(seed(fr + 3) - 0.5) * 60}px)`;
+  const v = Math.abs(dist(T) - dist(T - 1 / 30)) * 30; // px/s, for motion blur on the ramps
+
+  // marquee: entry punch, freeze jolt, push back while the phone is up, punch in on the race
+  const ent = K.p(T, 0, 0.8, E.outExpo);
+  const back = K.p(T, T_FREEZE, T_FREEZE + 0.6, E.outCubic) * (1 - K.p(T, T_GO - 0.1, T_GO + 0.5, E.inOutCubic));
+  const punch = 1 + 0.05 * Math.exp(-Math.max(0, T - T_GO) * 4) * (T > T_GO ? 1 : 0);
+  mq.style.transform = `rotate(${ANG + (1 - ent) * 6}deg) scale(${SC * (1.25 - 0.25 * ent) * (1 - 0.08 * back) * punch})`;
+  mq.style.filter = v > 500 ? `blur(${Math.min(5, (v - 500) / 260)}px)` : 'none';
+  rows.forEach((R) => { R.row.style.transform = `translateX(${shiftOf(R, T)}px)`; });
+  pick.tl.im.style.visibility = T >= T_FREEZE ? 'hidden' : 'visible';
+  shade.style.opacity = 0.62 * back;
+  const fl = K.p(T, T_FREEZE, T_FREEZE + 0.25, E.outCubic), fl2 = K.p(T, T_GO, T_GO + 0.25, E.outCubic);
+  flash.style.opacity = (T >= T_FREEZE && T < T_FREEZE + 0.25 ? 0.5 * (1 - fl) : 0) + (T >= T_GO && T < T_GO + 0.25 ? 0.35 * (1 - fl2) : 0);
+
+  // the lifted pack: rises out of its row, flies to the phone's thumbnail slot, rides it back at the end
+  const up = K.p(T, T_FREEZE + 0.05, T_PHONE, E.outExpo);
+  const into = K.p(T, T_PHONE, T_PHONE + 0.7, E.inOutCubic);
+  const big = tall ? 2.0 : 1.7;
+  let cx = K.lerp(pick.sx, W / 2, up), cy = K.lerp(pick.sy, H * 0.47, up) - Math.sin(up * Math.PI) * 40;
+  let s = K.lerp(1, big, up) * SC, rr = K.lerp(ANG, 0, up) + Math.sin(T * 2) * 1.5 * up * (1 - into);
+  const sx2 = slot.x + slot.w / 2, sy2 = slot.y + slot.w / 0.7727 / 2, s2 = slot.w / LW;
+  cx = K.lerp(cx, sx2, into); cy = K.lerp(cy, sy2, into); s = K.lerp(s, s2, into); rr = K.lerp(rr, 0, into);
+  lift.style.left = cx - LW / 2 + 'px'; lift.style.top = cy - LH / 2 + 'px';
+  lift.style.transform = `rotate(${rr}deg) scale(${s})`;
+  lift.style.boxShadow = `0 ${30 + 50 * up * (1 - into)}px ${60 + 80 * up * (1 - into)}px -30px rgba(0,0,0,${0.5 + 0.4 * up})`;
+  lift.style.borderRadius = K.lerp(18, 6 / s2 * 1, into) + 'px';
+  const phOn = K.p(T, T_PHONE + 0.15, T_PHONE + 0.75, E.outExpo);
+  const phOff = K.p(T, T_GO - 0.15, T_GO + 0.35, E.inCubic);
+  lift.style.opacity = T >= T_FREEZE && T < T_SWIPE + 0.2 ? 1 - K.p(T, T_SWIPE, T_SWIPE + 0.2, E.linear) : 0;
+  lift.style.zIndex = into > 0.98 ? 36 : 30;
+
+  // phone: scales in around the landing pack, tap, swipe to Send, ring on the draft promise, drops away
+  ph.style.opacity = phOn * (1 - phOff);
+  ph.style.transform = `translateY(${(1 - phOn) * 60 + phOff * 500}px) scale(${(1.12 - 0.12 * phOn) * (1 - 0.3 * phOff)}) rotate(${Math.sin(T * 0.8) * 0.8 + phOff * 8}deg)`;
+  const sp = K.p(T, T_SWIPE, T_SWIPE + 0.5, E.inOutExpo);
+  const sv = sp - K.p(T - 1 / 30, T_SWIPE, T_SWIPE + 0.5, E.inOutExpo);
+  lays[0].style.transform = `translateX(${-sp * sw}px)`; lays[1].style.transform = `translateX(${(1 - sp) * sw}px)`;
+  lays.forEach((l) => { l.style.filter = Math.abs(sv) > 0.01 ? `blur(${Math.min(10, Math.abs(sv) * 120)}px)` : 'none'; });
+  const rp = K.p(T, T_RING, T_RING + 0.5, E.outBack);
+  ring.style.opacity = K.p(T, T_RING, T_RING + 0.15, E.linear);
+  ring.style.transform = `scale(${0.9 + 0.1 * rp + 0.012 * Math.sin((T - T_RING) * 6) * (T > T_RING + 0.5 ? 1 : 0)})`;
+  // cursor taps "Continue to List"
+  const ca = K.p(T, T_TAP - 0.8, T_TAP, E.outCubic);
+  cursor.at(K.lerp(tapX + 260, tapX, ca), K.lerp(tapY + 420, tapY, ca), T > T_TAP - 0.05 && T < T_TAP + 0.12);
+  cursor.hide(K.win(T, T_TAP - 0.8, T_SWIPE + 0.3, 0.2));
+  cursor.ripple(tapX + 10, tapY + 10, T, T_TAP);
+
+  // hook panel: one line per beat, then it slips away
+  const pIn = K.p(T, 0, 0.45, E.outExpo), pOut = K.p(T, B(4) - 0.2, B(4) + 0.15, E.inCubic);
+  const lh = 96, padY = 46, panelH = padY * 2 + lh * 3;
+  panel.style.height = panelH + 'px';
+  panel.style.top = (tall ? 700 : H / 2 - panelH / 2) + 'px';
+  panel.style.opacity = pIn * (1 - pOut);
+  panel.style.transform = `translateY(${(1 - pIn) * 40 - pOut * 40}px) scale(${0.94 + 0.06 * pIn})`;
+  lines.forEach((l, i) => {
+    const a = 0.1 + i * BEAT; const p = K.p(T, a, a + 0.4, E.outExpo);
+    l.style.position = 'absolute'; l.style.left = 0; l.style.right = 0; l.style.top = padY + i * lh + 'px';
+    l.style.opacity = p; l.style.transform = `translateY(${(1 - p) * 50}px)`;
+  });
+  // outro panel
+  const oIn = K.p(T, T_GO + 0.25, T_GO + 0.75, E.outExpo), oOut = K.p(T, 12.6, 12.95, E.inCubic);
+  outro.style.top = (tall ? 720 : H / 2 - 150) + 'px'; outro.style.padding = '46px 30px';
+  outro.style.opacity = oIn * (1 - oOut);
+  outro.style.transform = `translateY(${(1 - oIn) * 40}px) scale(${0.94 + 0.06 * oIn + 0.01 * Math.sin(T * 2)})`;
+  K.reveal(oW, T, T_GO + 0.35, { kind: 'up', stagger: 0.08 });
+
+  caps.forEach((c) => {
+    c.c.style.opacity = K.win(T, c.a, c.b, 0.25);
+    c.c.firstChild.style.transform = `translateY(${(1 - K.p(T, c.a, c.a + 0.5, E.outExpo)) * 16}px)`;
+    K.reveal(c.w, T, c.a + 0.08, { kind: 'up', stagger: 0.07, out: c.b - 0.3 });
+  });
+  // honest labels
+  const tY = tall ? 1196 : 1252;
+  tagO.style.left = '50%'; tagO.style.top = tY + 'px'; tagO.style.transform = 'translateX(-50%)';
+  tagO.style.opacity = K.win(T, 0.4, T_FREEZE + 0.1, 0.25) + K.win(T, T_GO + 0.2, 12.8, 0.25);
+  tagD.style.left = tall ? '50%' : capBox[0] + 'px'; tagD.style.transform = tall ? 'translateX(-50%)' : 'none';
+  tagD.style.top = (tall ? 278 : 1252) + 'px';
+  tagD.style.opacity = K.win(T, T_PHONE + 0.5, T_GO, 0.25);
+
+  end(T);
+  endStrip.style.transform = `translateX(${-((T * 90) % 1024)}px) rotate(-3deg)`;
+});
+</script></body></html>

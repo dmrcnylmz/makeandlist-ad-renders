@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>A12 · Try it on</title><link rel="stylesheet" href="kit.css">
+<style>
+.stagebox { position: absolute; border-radius: 40px; background: linear-gradient(#F4EFE4, #E9E2D3); overflow: hidden; box-shadow: inset 0 -120px 120px -100px rgba(31,31,31,.15); }
+.ctl { position: absolute; border-radius: 30px; background: #FFFDF8; border: 1px solid #E6E0D5; padding: 30px 34px; box-shadow: 0 30px 60px -40px rgba(31,31,31,.6); }
+.ctl h4 { margin: 0 0 16px; font: 700 30px 'Archivo'; display: flex; justify-content: space-between; }
+.ctl h4 span { font: 500 24px 'IBM Plex Mono', monospace; color: #45403A; }
+.sw { display: inline-block; width: 64px; height: 64px; border-radius: 50%; margin-right: 18px; box-shadow: inset 0 0 0 2px rgba(0,0,0,.12); }
+.sw.on { box-shadow: 0 0 0 5px #FFFDF8, 0 0 0 9px #1F1F1F; }
+.track { position: relative; height: 12px; border-radius: 6px; background: #E6E0D5; margin-top: 10px; }
+.track b { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: #1F1F1F; }
+.track i { position: absolute; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; background: #1F1F1F; box-shadow: 0 0 0 6px #FFFDF8; }
+.badge { position: absolute; display: flex; gap: 14px; align-items: center; padding: 18px 26px; border-radius: 22px; background: #1F1F1F; color: #FAF7EE; font: 700 32px 'Archivo'; z-index: 10; }
+.badge em { font-style: normal; color: #DFFF5A; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// A12 — the try-on, recreated large: the tee changes colour, the artwork grows to its sharpest size, the badge counts the print density.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15;
+const ART_T = '../compositions/art/quiet-botanicals-01-transparent.svg';
+const head = K.box(60, tall ? 160 : 40, W - 120, null, { cls: 'serif', style: { fontSize: (tall ? 96 : 76) + 'px', fontWeight: 800, lineHeight: 0.98, textAlign: 'center', letterSpacing: '-0.02em' } });
+const headW = K.words(head, 'Try it on\nbefore it is printed.');
+const bw = W - 120, bh = tall ? 1000 : 560, by = tall ? 440 : 230;
+const box = K.box(60, by, bw, bh, { cls: 'stagebox' });
+const teeW = tall ? 760 : 440;
+const tee = K.el('div', { parent: box, style: { position: 'absolute', left: (bw - teeW) / 2 + 'px', top: (tall ? 90 : 50) + 'px', width: teeW + 'px', height: teeW * 1.07 + 'px' } });
+tee.innerHTML = `<svg viewBox="0 0 300 320" style="position:absolute;inset:0;width:100%;height:100%"><path id="teeP" d="M104 16 C 118 34 182 34 196 16 L 258 40 L 292 108 L 246 128 L 236 102 L 236 314 L 64 314 L 64 102 L 54 128 L 8 108 L 42 40 Z" fill="#F2EFE8" stroke="#CFC8BB" stroke-width="2" stroke-linejoin="round"/><path d="M104 16 C 114 42 186 42 196 16" fill="none" stroke="rgba(0,0,0,.15)" stroke-width="3"/></svg>`;
+const area = K.el('div', { parent: tee, style: { position: 'absolute', left: '28%', top: '20%', width: '44%', height: '50%', border: '3px dashed rgba(31,31,31,.6)' } });
+const art = K.el('img', { src: ART_T, parent: area, style: { position: 'absolute', left: '50%', top: '0', transformOrigin: '50% 0' } });
+const lblD = K.el('div', { parent: box, cls: 'mono', html: 'DRAWING OF THE PRINT AREA · NOT A PARTNER MOCKUP', style: { position: 'absolute', left: '30px', top: '26px', fontSize: '20px', color: '#45403A', letterSpacing: '.06em' } });
+const COLORS = [['#F2EFE8', 'Natural'], ['#1F1F1F', 'Black'], ['#7E9A7E', 'Sage'], ['#2A3A52', 'Navy'], ['#E9DFC8', 'Sand']];
+const cy = by + bh + 30;
+const c1 = K.box(60, cy, bw, null, { cls: 'ctl', html: `<h4>Colour on screen <span id="cn"></span></h4>${COLORS.map(([c]) => `<span class="sw" style="background:${c}"></span>`).join('')}`, style: { height: 'auto' } });
+const sws = [...c1.querySelectorAll('.sw')], cn = c1.querySelector('#cn');
+const c2 = K.box(60, cy + (tall ? 220 : 190), bw, null, { cls: 'ctl', html: `<h4>Artwork size <span id="sz"></span></h4><div class="track"><b></b><i></i></div>`, style: { height: 'auto' } });
+const sz = c2.querySelector('#sz'), trB = c2.querySelector('.track b'), trI = c2.querySelector('.track i');
+const badge = K.box(0, 0, null, null, { cls: 'badge', html: '<span>Prints sharp at this size</span><em id="ppi"></em>', style: { width: 'auto', height: 'auto' } });
+const ppi = badge.querySelector('#ppi');
+const tag = K.demoTag('Drawn tee · sample artwork', 0, 0); tag.style.left = '50%'; tag.style.transform = 'translateX(-50%)'; tag.style.top = (tall ? 380 : 196) + 'px';
+const end = K.endCard(12.8, { line: 'See it on the product<br>before anyone prints it.' });
+K.run({
+  id: 'A12', title: 'Try It On', dur: DUR, bpm: 116, mood: 'bright', key: 'A', intro: 1.6, cover: 7.2,
+  technique: 'Live UI recreation: colour swatches cycle on a beat, a slider drives the artwork size, a counting print-density badge; drawn product, honestly labelled',
+  caption: 'Put your artwork on a tee, a tote, a mug or a framed print and see it before anyone prints it: colour, size, position, and how sharp it will print. The real print check runs before an edition is made. Start free at makeandlist.com',
+  short: 'Try it on before it is printed.',
+  beats: ['0–1.8 s: “Try it on before it is printed.”', '2–6.5 s: the tee changes colour on the beat', '6.5–10 s: the artwork grows, the sharpness badge counts', '10–12.6 s: “Prints sharp at this size”'],
+  cues: [[0.1, 'pop'], [1.8, 'whoosh'], [2.6, 'click'], [3.5, 'click'], [4.4, 'click'], [5.3, 'click'], [6.2, 'click'], [6.8, 'riser'], [9.8, 'hit'], [12.8, 'hit']],
+}, (T) => {
+  K.reveal(headW, T, 0.05, { kind: 'up', stagger: 0.07 });
+  const bin = K.p(T, 1.5, 2.3, K.ease.outExpo);
+  box.style.opacity = bin; box.style.transform = `translateY(${(1 - bin) * 80}px)`;
+  [c1, c2].forEach((c, i) => { const p = K.p(T, 2.0 + i * 0.2, 2.7 + i * 0.2, K.ease.outExpo); c.style.opacity = p; c.style.transform = `translateY(${(1 - p) * 50}px)`; });
+  const ci = Math.min(4, Math.max(0, Math.floor((T - 2.6) / 0.9) + 1)) % 5;
+  const colorIdx = T < 2.6 ? 0 : T > 6.5 ? 0 : ci;
+  document.getElementById('teeP').setAttribute('fill', COLORS[colorIdx][0]);
+  sws.forEach((s, i) => s.classList.toggle('on', i === colorIdx));
+  cn.textContent = COLORS[colorIdx][1];
+  const size = K.k(T, [[0, 0.45], [6.8, 0.45], [9.6, 0.86], [15, 0.86]], K.ease.inOutCubic);
+  art.style.width = (size * 100) + '%'; art.style.transform = 'translateX(-50%)';
+  trB.style.width = (size * 100) + '%'; trI.style.left = (size * 100) + '%';
+  sz.textContent = Math.round(size * 100) + '% of the print area';
+  const dens = Math.round(1100 - size * 700);
+  const bo = K.p(T, 9.8, 10.3, K.ease.outBack);
+  badge.style.left = (W - (tall ? 700 : 640)) / 2 + 'px'; badge.style.top = by + bh - (tall ? 130 : 110) + 'px';
+  badge.style.opacity = K.p(T, 9.8, 10.0, K.ease.linear); badge.style.transform = `scale(${0.7 + 0.3 * bo})`;
+  ppi.textContent = `~${dens} ppi`;
+  tag.style.opacity = K.win(T, 1.8, 12.6);
+  end(T);
+});
+</script></body></html>

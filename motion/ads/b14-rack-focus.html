@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B14 · Rack Focus</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1A1816; }
+.bg { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 42%, #3A332C 0%, #221F1B 55%, #141210 100%); }
+.scene { position: absolute; inset: 0; perspective: 1900px; }
+.rig { position: absolute; inset: 0; transform-style: preserve-3d; }
+.plane { position: absolute; inset: 0; transform-style: flat; }
+.paper { position: absolute; display: block; border-radius: 10px; box-shadow: 0 50px 90px -30px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.05); }
+.sq { position: absolute; display: block; border-radius: 22px; box-shadow: 0 50px 90px -35px rgba(0,0,0,.8); }
+.scr { position: absolute; overflow: hidden; }
+.scr img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.mote { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(255,236,200,.9), rgba(255,236,200,0) 70%); }
+.leak { position: absolute; width: 1400px; height: 1400px; border-radius: 50%; mix-blend-mode: screen; background: radial-gradient(circle, rgba(232,140,80,.22), rgba(232,140,80,0) 60%); }
+.hook { position: absolute; text-align: center; color: #FAF7EE; font: 800 96px/0.98 'Playfair Display'; letter-spacing: -0.02em; z-index: 30; }
+.cap { position: absolute; color: #FAF7EE; z-index: 30; }
+.cap .k { font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #DFFF5A; }
+.cap .t { margin-top: 12px; font: 800 70px/1 'Playfair Display'; letter-spacing: -0.015em; }
+.lens { position: absolute; z-index: 30; padding: 12px 20px; border-radius: 14px; background: rgba(20,18,16,.72); display: flex; align-items: center; gap: 16px; font: 500 22px 'IBM Plex Mono', monospace; color: #D9D3C9; letter-spacing: .06em; }
+.lens .ring { position: relative; width: 300px; height: 6px; border-radius: 3px; background: rgba(250,247,238,.18); }
+.lens .ring i { position: absolute; top: -9px; width: 4px; height: 24px; margin-left: -2px; background: #DFFF5A; border-radius: 2px; }
+.lens .ring b { position: absolute; top: 12px; width: 2px; height: 8px; background: rgba(250,247,238,.4); }
+.demo { background: rgba(31,31,31,.72); color: #EFEADF; border-color: #8A8378; }
+.vig { position: absolute; inset: 0; pointer-events: none; z-index: 25; background: radial-gradient(120% 90% at 50% 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%); }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// B14 — a lens racks focus through three depth planes of one product: the owner's printed pack at the back, its
+// listing images in the middle, the phone with its store drafts up front. Blur by distance from the focal plane,
+// a breath of scale when focus lands, a touch of colour fringing, and a slow dolly orbit through real 3D depth.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 84;
+const B = (n) => +(n * BEAT).toFixed(3);
+const PULL = [B(2), B(6), B(10), B(14)]; // 1.429, 4.286, 7.143, 10.0
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const PACK = 'showcase/christmas-preschool-pack/';
+
+// Layout per format: [x, y, w, rot]
+const Lo = tall ? {
+  z: [-420, -60, 100],
+  cover: [150, 500, 560, -2], int1: [40, 560, 440, -11], int2: [470, 540, 440, 9],
+  sq: [[40, 1010, 380, -7, 'listing-01'], [690, 430, 340, 6, 'listing-03'], [90, 1420, 300, 5, 'listing-05']],
+  phone: [540, 950, 450, 820],
+  hookY: 300, capX: 70, capY: 292, lensY: 1196, tagY: 490,
+} : {
+  z: [-380, -60, 150],
+  cover: [250, 250, 420, -2], int1: [130, 300, 350, -11], int2: [440, 300, 350, 9],
+  sq: [[40, 640, 320, -7, 'listing-01'], [760, 180, 270, 6, 'listing-03'], [390, 880, 230, 4, 'listing-05']],
+  phone: [610, 450, 360, 700],
+  hookY: 120, capX: 60, capY: 60, lensY: 1258, tagY: 238,
+};
+
+K.box(0, 0, W, H, { cls: 'bg' });
+const leak = K.box(0, 0, 1400, 1400, { cls: 'leak' });
+const scene = K.box(0, 0, W, H, { cls: 'scene' });
+const rig = K.el('div', { parent: scene, cls: 'rig' });
+const planes = [0, 1, 2].map(() => K.el('div', { parent: rig, cls: 'plane' }));
+
+// plane 0: the printed pack
+const ims0 = [Lo.int1, Lo.int2].map(([x, y, w, r], i) => K.el('img', { parent: planes[0], cls: 'paper', src: K.pub(PACK + 'interior-0' + (i + 1) + '.webp'),
+  style: { left: x + 'px', top: y + 'px', width: w + 'px', transform: `rotate(${r}deg)` } }));
+const cover = K.el('img', { parent: planes[0], cls: 'paper', src: K.pub(PACK + 'cover.webp'),
+  style: { left: Lo.cover[0] + 'px', top: Lo.cover[1] + 'px', width: Lo.cover[2] + 'px', transform: `rotate(${Lo.cover[3]}deg)` } });
+// plane 1: listing images
+const sqs = Lo.sq.map(([x, y, w, r, n]) => K.el('img', { parent: planes[1], cls: 'sq', src: K.pub(PACK + n + '.webp'),
+  style: { left: x + 'px', top: y + 'px', width: w + 'px', height: w + 'px', transform: `rotate(${r}deg)` } }));
+// plane 2: the phone, its screen cropped from the AppPhone design board (the "Where should it go?" phone)
+const [px, py, pw, phH] = Lo.phone;
+const ph = K.phone(px, py, pw, K.canvas('AppPhone'), { parent: planes[2], h: phH });
+const sw = pw - 28, sS = sw / 765;
+ph.img.style.width = 2660 * sS + 'px'; ph.img.style.maxWidth = 'none';
+ph.root.style.boxShadow = '0 80px 140px -40px rgba(0,0,0,.9), inset 0 0 0 2px #2a2a2a';
+
+// bokeh motes at many depths
+const motes = Array.from({ length: 16 }, (_, i) => {
+  const s = 20 + seed(i) * 70;
+  const m = K.box(0, 0, s, s, { parent: scene, cls: 'mote' });
+  return { m, s, x: seed(i + 30) * W, y: seed(i + 60) * H, d: seed(i + 90) * 2.6 - 0.3, sp: 6 + seed(i + 5) * 14 };
+});
+K.box(0, 0, W, H, { cls: 'vig' });
+
+const hook = K.box(65, Lo.hookY, W - 130, null, { cls: 'hook' });
+const hookW = K.words(hook, 'Look closer\nat your listing.');
+const CAPS = [
+  [PULL[0], PULL[1], '01 · The product', 'The pack itself.'],
+  [PULL[1], PULL[2], '02 · Listing images', 'Its listing images.'],
+  [PULL[2], PULL[3], '03 · Your stores', 'A draft for each store.'],
+  [PULL[3], 12.9, 'All in focus', 'You review.\nThen you list.'],
+];
+const caps = CAPS.map(([a, b, k, t]) => {
+  const c = K.box(Lo.capX, Lo.capY, W - 2 * Lo.capX, null, { cls: 'cap', html: `<div class="k">${k}</div>` });
+  const tt = K.el('div', { parent: c, cls: 't' });
+  return { c, a, b, w: K.words(tt, t) };
+});
+const lens = K.box(tall ? 70 : 60, Lo.lensY, null, null, { cls: 'lens', html: '<span>FOCUS</span><div class="ring"><b style="left:0"></b><b style="left:50%"></b><b style="left:100%"></b><i></i></div><span id="fd">∞</span>', style: { width: 'auto', height: 'auto' } });
+const ringI = lens.querySelector('i'), fd = lens.querySelector('#fd');
+const tagP = K.demoTag('Example made with MakeAndList by its owner', Lo.capX, Lo.tagY);
+const tagD = K.demoTag('Product design · sample data', Lo.capX, Lo.tagY);
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+
+const end = K.endCard(13.0, { line: 'Look closer.<br>Then list it.', dark: true });
+const endBg = document.getElementById('stage').lastElementChild;
+if (tall) [...endBg.children].forEach((c) => { c.style.top = parseFloat(c.style.top) - 150 + 'px'; });
+const endLeak = K.el('div', { parent: endBg, cls: 'leak' }); endBg.insertBefore(endLeak, endBg.firstChild);
+
+// focal plane over time: 0 = pack, 1 = listing images, 2 = phone; -1 = nothing sharp (opening)
+function focusAt(t) {
+  const f = K.k(t, [[0, -0.9], [PULL[0] - 0.6, -0.9], [PULL[0], 0], [PULL[1] - 0.25, 0], [PULL[1] + 0.45, 1], [PULL[2] - 0.25, 1], [PULL[2] + 0.45, 2], [15, 2]], E.inOutCubic);
+  // a small focus hunt after each pull lands (overshoot, settle)
+  let hunt = 0;
+  [PULL[1] + 0.45, PULL[2] + 0.45].forEach((t0) => { if (t > t0) hunt += 0.07 * Math.exp(-(t - t0) * 6) * Math.sin((t - t0) * 16); });
+  return f + hunt;
+}
+// in the last act the aperture closes down: everything comes into focus
+const deep = (t) => K.p(t, PULL[3] - 0.2, PULL[3] + 0.9, E.inOutCubic);
+
+K.run({
+  id: 'B14', title: 'Rack Focus', dur: DUR, bpm: 84, mood: 'calm', key: 'D', intro: 1.43, cover: 5.6,
+  technique: 'Cinematic rack focus through three real 3D depth planes (the owner’s printed pack, its listing images, a phone with store drafts): blur by distance from the focal plane with colour fringing, a scale breath and focus hunt when focus lands, bokeh motes, a slow dolly orbit, then the aperture closes to deep focus',
+  caption: 'One product, three layers: the pages, the listing images made from them, and a draft for each store you choose. You look at every layer before anything is listed. Start free at makeandlist.com',
+  short: 'Look closer at your listing.',
+  beats: ['0–1.4 s: “Look closer at your listing.” over a soft, defocused scene', '1.4–4.3 s: focus lands on the owner’s printed pack', '4.3–7.1 s: rack to its listing images', '7.1–10 s: rack to the phone: a draft for each store', '10–12.9 s: deep focus, “You review. Then you list.”', '13–15 s: end card'],
+  cues: [[0.1, 'riser'], [PULL[0], 'hit'], [PULL[1] - 0.3, 'whoosh'], [PULL[1] + 0.45, 'pop'], [PULL[2] - 0.3, 'whoosh'], [PULL[2] + 0.45, 'pop'], [9.5, 'riser'], [PULL[3], 'hit'], [12.75, 'whoosh'], [13.0, 'hit']],
+}, (T) => {
+  const fr = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(fr) - 0.5) * 60}px, ${(seed(fr + 3) - 0.5) * 60}px)`;
+  const F = focusAt(T), dp = deep(T);
+
+  // camera: slow orbit + dolly in, pulls back in the last act
+  const orbit = K.lerp(-6, 6, T / DUR) + 1.6 * Math.sin(T * 0.42);
+  const dolly = K.k(T, [[0, -140], [PULL[0], 0], [PULL[3], 60], [12.9, -80]], E.inOutCubic);
+  rig.style.transform = `translateZ(${dolly}px) rotateY(${orbit}deg) rotateX(${2 + Math.sin(T * 0.3)}deg)`;
+  rig.style.transformOrigin = `${W / 2}px ${H * 0.45}px`;
+  scene.style.perspectiveOrigin = `${W / 2}px ${H * 0.45}px`;
+  const entry = K.p(T, 0, 1.6, E.outExpo);
+  scene.style.opacity = entry;
+
+  planes.forEach((p, d) => {
+    const dist = Math.abs(d - F) * (1 - dp);
+    const blur = Math.min(16, dist * 9);
+    const fringe = Math.min(5, dist * 3);
+    const landed = Math.exp(-Math.max(0, dist) * 4); // 1 when sharp
+    const breath = 1 + 0.018 * landed * (0.5 + 0.5 * Math.sin(T * 1.6 + d));
+    p.style.transform = `translateZ(${Lo.z[d]}px) scale(${breath})`;
+    p.style.transformOrigin = `${W / 2}px ${H / 2}px`;
+    p.style.filter = `blur(${blur.toFixed(2)}px) drop-shadow(${fringe}px 0 0 rgba(232,96,60,.28)) drop-shadow(${-fringe}px 0 0 rgba(90,170,255,.28)) brightness(${0.62 + 0.38 * Math.max(landed, dp)})`;
+  });
+  // each plane's own small life: papers settle, squares float, phone screen drifts
+  ims0.forEach((im, i) => { im.style.transform = `rotate(${(i ? 9 : -11) + Math.sin(T * 0.5 + i) * 1.2}deg) translateY(${Math.sin(T * 0.7 + i) * 6}px)`; });
+  cover.style.transform = `rotate(${-2 + Math.sin(T * 0.4) * 0.8}deg)`;
+  sqs.forEach((s, i) => {
+    const pin = K.p(T, 0.2 + i * 0.15, 1.6 + i * 0.15, E.outExpo);
+    s.style.transform = `translateY(${Math.sin(T * 0.9 + i * 2) * 10 + (1 - pin) * 80}px) rotate(${Lo.sq[i][3] + Math.sin(T * 0.6 + i) * 1.5}deg)`;
+  });
+  const scrollMax = Math.max(0, 1810 - (phH - 28) / sS - 180);
+  const scrollY = 180 + K.p(T, PULL[2] + 0.9, PULL[3] - 0.4, E.inOutCubic) * scrollMax;
+  ph.img.style.transform = `translate(${-948 * sS}px, ${-(scrollY + Math.sin(T * 0.8) * 3) * sS}px)`;
+  const phIn = K.p(T, 0.3, 1.8, E.outExpo);
+  ph.root.style.transform = `translateY(${(1 - phIn) * 160}px) rotate(${-4 + Math.sin(T * 0.5) * 0.8}deg)`;
+
+  motes.forEach((o, i) => {
+    const dist = Math.abs(o.d - F) * (1 - dp * 0.5);
+    const y = ((o.y - T * o.sp) % H + H) % H;
+    o.m.style.transform = `translate(${o.x + Math.sin(T * 0.4 + i) * 30 + orbit * (o.d - 1) * 10}px, ${y}px) scale(${0.6 + dist * 0.5})`;
+    o.m.style.filter = `blur(${Math.min(12, dist * 6)}px)`;
+    o.m.style.opacity = (0.12 + 0.25 * Math.min(1, dist)) * entry;
+  });
+  leak.style.transform = `translate(${-300 + Math.sin(T * 0.35) * 260}px, ${H * 0.2 - 700 + Math.cos(T * 0.27) * 200}px)`;
+
+  // words
+  K.reveal(hookW, T, 0.1, { kind: 'blur', stagger: 0.09, dur: 0.7, out: PULL[0] - 0.35 });
+  caps.forEach((c) => {
+    const o = K.win(T, c.a + 0.05, c.b, 0.3);
+    c.c.style.opacity = o;
+    c.c.firstChild.style.transform = `translateY(${(1 - K.p(T, c.a + 0.05, c.a + 0.6, E.outExpo)) * 20}px)`;
+    K.reveal(c.w, T, c.a + 0.15, { kind: 'up', stagger: 0.07, out: c.b - 0.35 });
+  });
+  // the lens readout: distance follows the focal plane
+  const fv = K.clamp((F + 0.9) / 2.9);
+  ringI.style.left = (100 * (1 - fv)) + '%';
+  const metres = dp > 0.5 ? '∞' : (F < -0.5 ? '—' : (3.2 - Math.max(0, F) * 1.35).toFixed(1) + ' m');
+  fd.textContent = metres;
+  lens.style.opacity = K.p(T, 0.8, 1.4, E.linear) * (1 - K.p(T, 12.6, 12.9, E.linear));
+  // honest labels: the product is the owner's example; the phone screen is a design board
+  tagP.style.opacity = K.win(T, PULL[0] + 0.2, PULL[2] - 0.1, 0.25);
+  tagD.style.opacity = K.win(T, PULL[2] + 0.2, 12.8, 0.25);
+  const act = caps.find((c) => T >= c.a && T < c.b) || caps[0];
+  [tagP, tagD].forEach((t) => { t.style.top = Lo.capY + act.c.offsetHeight + 22 + 'px'; });
+
+  end(T);
+  endLeak.style.left = -200 + Math.sin(T * 0.6) * 200 + 'px'; endLeak.style.top = H * 0.25 - 700 + Math.cos(T * 0.5) * 120 + 'px';
+});
+</script></body></html>

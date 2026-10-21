@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B11 · Blueprint to Render</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: radial-gradient(110% 80% at 40% 35%, #1F4B7D 0%, #173A63 55%, #102B4B 100%); color: #FAF7EE; }
+.grid { position: absolute; inset: -200px; background-image:
+  linear-gradient(rgba(170,205,240,.22) 1px, transparent 1px), linear-gradient(90deg, rgba(170,205,240,.22) 1px, transparent 1px),
+  linear-gradient(rgba(170,205,240,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(170,205,240,.09) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px; }
+.draw { position: absolute; left: 0; top: 0; transform-origin: 0 0; z-index: 10; }
+.draw svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.paper { position: absolute; background: #F3EBDD; overflow: hidden; }
+.artbox { position: absolute; overflow: hidden; }
+.artbox img { position: absolute; left: 0; top: 0; display: block; }
+.bp { position: absolute; background-color: #1C4472; background-image: linear-gradient(rgba(170,205,240,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(170,205,240,.12) 1px, transparent 1px); background-size: 24px 24px; }
+.ghost { mix-blend-mode: screen; filter: grayscale(1) invert(1) brightness(1.25) contrast(1.6); }
+.edge { position: absolute; width: 10px; background: linear-gradient(90deg, rgba(223,255,90,0), #DFFF5A, #FFFDF8, rgba(223,255,90,0)); filter: blur(2px); transform-origin: 50% 50%; z-index: 12; }
+.mono { font-family: 'IBM Plex Mono', monospace; }
+.tlabel { position: absolute; font: 500 24px 'IBM Plex Mono', monospace; color: #DCEBFA; white-space: nowrap; letter-spacing: .03em; }
+.tlabel b { color: #DFFF5A; font-weight: 600; }
+.cap { position: absolute; z-index: 40; text-align: center; font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; color: #FAF7EE; }
+.card { position: absolute; border-radius: 26px; overflow: hidden; background: #F7F7F4; box-shadow: 0 60px 120px -50px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.2); z-index: 20; }
+.card img { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: block; }
+.rowhl { position: absolute; border: 5px solid #DFFF5A; border-radius: 16px; box-shadow: 0 0 0 2px #1F1F1F; }
+.chipP { position: absolute; z-index: 30; font: 700 26px 'Archivo'; color: #1F1F1F; background: #DFFF5A; padding: 12px 20px; border-radius: 99px; white-space: nowrap; }
+.demo { background: rgba(16,43,75,.85); color: #DCEBFA; border-color: rgba(220,235,250,.55); }
+.shadowP { position: absolute; border-radius: 4px; background: rgba(0,0,0,.45); filter: blur(30px); z-index: 9; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// B11 — a technical drawing on a blue grid: three print sizes of one poster draw on with their dimensions, bleed and
+// safe area; a render wipe turns the outer frame into the artwork; then the real size list and the edition, still a draft.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 92, B = (n) => n * BEAT;
+const L = tall
+  ? { u: 36, bx: 160, by: 1240, capY: 290, capFs: 72, small: [70, 520, 0.5], panel: [402, 500, 0.95], ed: [410, 462, 1.4], chip: [70, 900], tag: 1200 }
+  : { u: 34, bx: 150, by: 1150, capY: 56, capFs: 66, small: [60, 270, 0.5], panel: [400, 250, 0.97], ed: [412, 250, 1.4], chip: [60, 630], tag: H - 100 };
+const u = L.u, BX = L.bx, BY = L.by;
+const SIZES = [[8, 10, '8 × 10 in'], [12, 15, '12 × 15 in'], [16, 20, '16 × 20 in']];
+const OW = 16 * u, OH = 20 * u, OX = BX, OY = BY - OH;
+
+const grid = K.box(0, 0, W, H, { cls: 'grid' });
+// ── the drawing (one container, so the whole sheet can lift and shrink later) ──
+const sheet = K.box(0, 0, W, H, { cls: 'draw' });
+const draw = K.el('div', { cls: 'draw', parent: sheet, style: { width: W + 'px', height: H + 'px', transformOrigin: `${OX + OW / 2}px ${OY + OH / 2}px` } });
+const shadowP = K.el('div', { cls: 'shadowP', parent: draw, style: { left: OX + 30 + 'px', top: OY + 50 + 'px', width: OW + 'px', height: OH + 'px' } });
+const bp = K.el('div', { cls: 'bp', parent: draw, style: { left: OX + 'px', top: OY + 'px', width: OW + 'px', height: OH + 'px' } });
+const paper = K.el('div', { cls: 'paper', parent: draw, style: { left: OX + 'px', top: OY + 'px', width: OW + 'px', height: OH + 'px' } });
+// artwork crop from the Print area board: x 1066–1590, y 762–1494 (board px)
+const AW = 524, AH = 732, ah = OH * 0.86, as = ah / AH, aw = AW * as;
+const artBox = (cls) => { const b = K.el('div', { cls: 'artbox ' + (cls || ''), parent: draw, style: { left: OX + (OW - aw) / 2 + 'px', top: OY + (OH - ah) / 2 + 'px', width: aw + 'px', height: ah + 'px' } });
+  K.el('img', { src: K.canvas('PrintArea'), parent: b, style: { width: 2880 * as + 'px', transform: `translate(${-1066 * as}px, ${-762 * as}px)` } }); return b; };
+const ghost = artBox('ghost');
+const art = artBox();
+const edgeClip = K.el('div', { parent: draw, style: { position: 'absolute', left: OX + 'px', top: OY + 'px', width: OW + 'px', height: OH + 'px', overflow: 'hidden', zIndex: 12 } });
+const edge = K.el('div', { cls: 'edge', parent: edgeClip, style: { height: OH * 1.6 + 'px' } });
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('width', W); svg.setAttribute('height', H); draw.appendChild(svg);
+const path = (d, o = {}) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', o.c || '#DCEBFA'); p.setAttribute('stroke-width', o.w || 3); p.setAttribute('pathLength', 1); if (o.dash) p.dataset.dash = o.dash; svg.appendChild(p); return p; };
+const rectD = (x, y, w, h) => `M${x} ${y + h} L${x} ${y} L${x + w} ${y} L${x + w} ${y + h} Z`;
+const rects = SIZES.map(([w, h]) => path(rectD(BX, BY - h * u, w * u, h * u), { w: 3.5 }));
+const bleed = path(rectD(OX - 12, OY - 12, OW + 24, OH + 24), { w: 2, c: '#E8A08C', dash: '0.012 0.01' });
+const safe = path(rectD(OX + 18, OY + 18, OW - 36, OH - 36), { w: 2, c: '#A9C9EA', dash: '0.004 0.006' });
+// dimension lines: top (width) and left (height), with arrowheads and end ticks
+const dimTop = path(`M${OX} ${OY - 34} L${OX + OW} ${OY - 34}`, { w: 2 });
+const dimTopA = path(`M${OX + 14} ${OY - 42} L${OX} ${OY - 34} L${OX + 14} ${OY - 26} M${OX + OW - 14} ${OY - 42} L${OX + OW} ${OY - 34} L${OX + OW - 14} ${OY - 26}`, { w: 2 });
+const dimL = path(`M${OX - 40} ${OY} L${OX - 40} ${BY}`, { w: 2 });
+const dimLA = path(`M${OX - 48} ${OY + 14} L${OX - 40} ${OY} L${OX - 32} ${OY + 14} M${OX - 48} ${BY - 14} L${OX - 40} ${BY} L${OX - 32} ${BY - 14}`, { w: 2 });
+// inch ticks along the top
+const ticks = path(Array.from({ length: 17 }, (_, i) => `M${OX + i * u} ${OY - 34} L${OX + i * u} ${OY - (i % 4 ? 42 : 52)}`).join(' '), { w: 1.5 });
+// leaders from each size's top-right corner to its label on the right
+const LX = OX + OW + 34;
+const leaders = SIZES.map(([w, h]) => path(`M${BX + w * u} ${BY - h * u} L${LX - 8} ${BY - h * u}`, { w: 1.5, c: '#A9C9EA' }));
+const lab = (x, y, html, o = {}) => K.el('div', { cls: 'tlabel', parent: draw, html, style: { left: x + 'px', top: y + 'px', ...(o.style || {}) } });
+const sLabels = SIZES.map(([w, h, t], i) => lab(LX, BY - h * u - 16, i === 2 ? `<b>${t}</b><br>40 × 50 cm` : t));
+const wLab = lab(OX + OW / 2 - 40, OY - 84, '16 in');
+const hLab = lab(OX - 70, OY + OH / 2, '20 in', { style: { transform: 'translate(-50%, -50%) rotate(-90deg)', transformOrigin: '50% 50%' } });
+const bLab = lab(LX, BY - 64, '<span style="color:#E8A08C">- - bleed</span><br><span style="color:#A9C9EA">··· safe area</span>', { style: { fontSize: '20px' } });
+const cross = path(`M${OX + OW / 2 - 22} ${OY + OH / 2} L${OX + OW / 2 + 22} ${OY + OH / 2} M${OX + OW / 2} ${OY + OH / 2 - 22} L${OX + OW / 2} ${OY + OH / 2 + 22}`, { w: 2, c: '#DFFF5A' });
+
+// ── UI: the size list (design canvas) and the edition (real app) ──
+const [px, py, ps] = L.panel;
+const PR = [2160, 190, 640, 760];
+const panel = K.box(px, py, PR[2] * ps, PR[3] * ps, { cls: 'card' });
+K.el('img', { src: K.canvas('MakePhysical'), parent: panel, style: { width: 2880 * ps + 'px', transform: `translate(${-PR[0] * ps}px, ${-PR[1] * ps}px)` } });
+const ROWS = [[398, 494], [510, 605], [619, 715]];
+const rowHl = ROWS.map(([a, b]) => K.el('div', { cls: 'rowhl', parent: panel, style: { left: (2190 - PR[0]) * ps + 'px', width: (2790 - 2190) * ps + 'px', top: (a - 6 - PR[1]) * ps + 'px', height: (b - a + 12) * ps + 'px' } }));
+const [ex, ey, es] = L.ed;
+const ER = [970, 0, 420, 560];
+const ed = K.box(ex, ey, ER[2] * es, ER[3] * es, { cls: 'card', style: { background: '#FAF7EE' } });
+K.el('img', { src: K.screen('60-edition-managed'), parent: ed, style: { width: 1440 * es + 'px', transform: `translate(${-ER[0] * es}px, ${-ER[1] * es}px)` } });
+const dHl = K.el('div', { cls: 'rowhl', parent: ed, style: { left: (1090 - ER[0]) * es + 'px', top: (18 - ER[1]) * es + 'px', width: 66 * es + 'px', height: 32 * es + 'px', borderRadius: '99px' } });
+const chipP = K.box(L.chip[0], L.chip[1], null, null, { cls: 'chipP', html: 'Printed by your own<br>partner account', style: { width: 'auto', height: 'auto', fontSize: '22px', lineHeight: 1.2, borderRadius: '20px', whiteSpace: 'normal' } });
+
+// ── type ──
+const head = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+const headW = K.words(head, 'Specs first.\nThen the poster.');
+const CAPS = [[8.5, 10.95, 'Every size,\nchecked first.'], [11.1, 12.85, 'A draft until you\nsay it’s ready.']];
+const caps = CAPS.map(([a, b, t]) => { const c = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }); return { a, b, w: K.words(c, t) }; });
+const tagC = K.demoTag('Product design · sample data', 0, L.tag); tagC.style.left = '50%'; tagC.style.transform = 'translateX(-50%)';
+const tagR = K.demoTag('Real app · demo workspace', 0, L.tag); tagR.style.left = '50%'; tagR.style.transform = 'translateX(-50%)';
+const end = K.endCard(13.0, { line: 'Specs first.<br>Then the poster.', dark: true });
+if (tall) [...document.getElementById('stage').lastElementChild.children].forEach((n) => { n.style.top = (parseFloat(n.style.top) - 130) + 'px'; });
+
+const WIPE = B(9); // 5.87 s
+const ROWT = [B(14), B(15), B(16)];
+const stroke = (p, v) => { if (p.dataset.dash) { p.setAttribute('stroke-dasharray', p.dataset.dash); p.style.opacity = v; } else { p.setAttribute('stroke-dasharray', '1 1'); p.setAttribute('stroke-dashoffset', 1 - v); } };
+const fadeIn = (el, T, a, d = 0.4) => { const p = K.p(T, a, a + d, E.outExpo); el.style.opacity = p; el.style.transform = (el._t || '') + ` translateY(${(1 - p) * 10}px)`; return p; };
+hLab._t = 'translate(-50%, -50%) rotate(-90deg)';
+
+K.run({
+  id: 'B11', title: 'Blueprint to Render', dur: DUR, bpm: 92, mood: 'calm', key: 'F', intro: B(3), cover: 6.6,
+  technique: 'A blueprint on a drifting blue grid: three print sizes of one poster draw on with stroke-dash, inch ticks, dimension arrows, bleed and safe area, over a line-art ghost of the artwork; a glowing diagonal render wipe turns the outer frame into the full-colour design, the sheet lifts in 3D, then shrinks beside the size list (each row lights with its frame) and the real edition card, still a draft',
+  caption: 'Every printed edition starts with the specs: the sizes, the bleed, the safe area — checked before anything is printed by your own partner account, and a draft until you say it’s ready. Start free at makeandlist.com',
+  short: 'Specs first. Then the poster.',
+  beats: ['0–2.6 s: “Specs first.” — three print sizes draw on the blue grid', '2.6–4.6 s: dimensions, inch ticks, bleed and safe area; the artwork as line art', '5.9 s: render wipe — “Then the poster.”', '6.4–8.4 s: the poster lifts off the sheet', '8.5–11 s: the size list, each row lit with its frame', '11.1–12.9 s: the real edition card — a draft until you say it’s ready'],
+  cues: [[0.1, 'pop'], [0.5, 'type'], [B(2), 'pop'], [B(3), 'pop'], [B(4), 'type'], [B(5), 'pop'], [B(6), 'type'], [B(7), 'riser'], [WIPE, 'hit'], [B(11), 'whoosh'], [B(13), 'whoosh'], ...ROWT.map((t) => [t, 'pop']), [B(17), 'whoosh'], [B(17) + 0.4, 'pop'], [12.2, 'riser'], [13.0, 'hit']],
+}, (T) => {
+  // ambient: the grid drifts, the sheet breathes
+  grid.style.transform = `translate(${(T * 6) % 120}px, ${(T * 4) % 120}px)`;
+  grid.style.opacity = K.p(T, 0, 0.8, E.linear) * (1 - 0.5 * K.p(T, 8.3, 9.0, E.linear));
+  K.reveal(headW.slice(0, 2), T, 0.1, { kind: 'up', stagger: 0.08, out: 8.15 });
+  K.reveal(headW.slice(2), T, WIPE, { kind: 'up', stagger: 0.08, out: 8.15 });
+  caps.forEach((c) => K.reveal(c.w, T, c.a, { kind: 'up', stagger: 0.06, out: c.b - 0.3 }));
+
+  // the hero (outer frame) draws first, then the smaller sizes
+  const DRAW = [[B(3), B(4)], [B(2), B(3)], [0.4, B(2)]];
+  rects.forEach((r, i) => stroke(r, K.p(T, DRAW[i][0], DRAW[i][1], E.inOutCubic)));
+  leaders.forEach((l, i) => stroke(l, K.p(T, DRAW[i][1] - 0.1, DRAW[i][1] + 0.25, E.outCubic)));
+  sLabels.forEach((s, i) => fadeIn(s, T, DRAW[i][1] + 0.1));
+  stroke(dimTop, K.p(T, B(4), B(5), E.inOutCubic)); stroke(dimTopA, K.p(T, B(4) + 0.4, B(5) + 0.2, E.outCubic));
+  stroke(ticks, K.p(T, B(4) + 0.2, B(5) + 0.3, E.linear));
+  stroke(dimL, K.p(T, B(4) + 0.25, B(5) + 0.25, E.inOutCubic)); stroke(dimLA, K.p(T, B(4) + 0.6, B(5) + 0.45, E.outCubic));
+  fadeIn(wLab, T, B(5)); fadeIn(hLab, T, B(5) + 0.15);
+  if (tall) wLab.style.opacity = Number(wLab.style.opacity) * (1 - K.p(T, WIPE - 0.25, WIPE + 0.05, E.linear)); // clear of the second headline line
+  bleed.style.opacity = K.p(T, B(6), B(6) + 0.5, E.linear); bleed.setAttribute('stroke-dasharray', '0.012 0.01'); bleed.setAttribute('stroke-dashoffset', -T * 0.02);
+  safe.style.opacity = K.p(T, B(6) + 0.2, B(6) + 0.7, E.linear); safe.setAttribute('stroke-dasharray', '0.004 0.006');
+  fadeIn(bLab, T, B(6) + 0.3);
+  cross.style.opacity = K.win(T, B(6), WIPE, 0.3);
+  const gop = K.p(T, B(6), B(7) + 0.4, E.linear) * (1 - K.p(T, WIPE + 0.2, WIPE + 0.6, E.linear));
+  ghost.style.opacity = gop * 0.75; bp.style.opacity = K.p(T, B(6) - 0.3, B(6) + 0.3, E.linear) * (1 - K.p(T, WIPE + 0.2, WIPE + 0.6, E.linear));
+
+  // render wipe: a diagonal edge sweeps the frame
+  const wp = K.p(T, WIPE - 0.45, WIPE + 0.35, E.inOutCubic);
+  const diag = OW + OH * 0.5, cut = wp * diag;
+  const poly = `polygon(0 0, ${cut}px 0, ${cut - OH * 0.5}px 100%, 0 100%)`;
+  paper.style.clipPath = poly; paper.style.webkitClipPath = poly;
+  const artPoly = `polygon(0 0, ${cut - (OW - aw) / 2}px 0, ${cut - (OW - aw) / 2 - OH * 0.5}px ${ah}px, 0 ${ah}px)`;
+  art.style.clipPath = artPoly;
+  edge.style.left = cut - OH * 0.25 - 5 + 'px'; edge.style.top = -OH * 0.3 + 'px';
+  edge.style.transform = `rotate(${Math.atan2(OH * 0.5, OH) * 180 / Math.PI}deg)`;
+  edge.style.opacity = wp > 0 && wp < 1 ? 1 : 0;
+  // after the render the drawing recedes
+  const rec = K.p(T, WIPE + 0.4, WIPE + 1.4, E.linear);
+  [...rects, ...leaders, dimTop, dimTopA, dimL, dimLA, ticks].forEach((p) => { p.style.opacity = 1 - 0.72 * rec; });
+  if (tall) [dimTop, dimTopA, ticks].forEach((p) => { p.style.opacity = 1 - K.p(T, WIPE - 0.25, WIPE + 0.05, E.linear); });
+  bleed.style.opacity = Math.min(Number(bleed.style.opacity), 1 - 0.6 * rec); safe.style.opacity = Math.min(Number(safe.style.opacity), 1 - 0.7 * rec);
+
+  // the sheet lifts in 3D, then shrinks to the corner beside the UI
+  const lift = K.p(T, WIPE + 0.5, WIPE + 1.6, E.outCubic) * (1 - K.p(T, B(13) - 0.1, B(13) + 0.5, E.inOutCubic));
+  const shrink = K.p(T, B(13) - 0.2, B(13) + 0.6, E.inOutCubic);
+  const [tx, ty, ts] = L.small;
+  const s = K.lerp(1, ts, shrink);
+  const dx = K.lerp(0, tx - OX * ts, shrink), dy = K.lerp(0, ty - OY * ts, shrink);
+  const sway = Math.sin(T * 0.9) * 1.2 * lift;
+  sheet.style.transform = `translate(${dx}px, ${dy}px) scale(${s})`;
+  draw.style.transform = `perspective(1800px) translateY(${-lift * 30}px) rotateY(${-9 * lift + sway}deg) rotateX(${5 * lift}deg)`;
+  shadowP.style.opacity = K.p(T, WIPE, WIPE + 0.8, E.linear) * (0.6 + 0.4 * lift);
+  [...sLabels, wLab, hLab, bLab].forEach((l) => { l.style.opacity = Number(l.style.opacity) * (1 - K.p(T, B(13) - 0.3, B(13), E.linear)); });
+
+  // the size list: rows light with their frame on the small sheet
+  const pin = K.p(T, B(13), B(13) + 0.6, E.outExpo) * (1 - K.p(T, 12.7, 13.0, E.linear));
+  panel.style.opacity = K.p(T, B(13), B(13) + 0.2, E.linear); panel.style.transform = `translateX(${(1 - pin) * 260}px) rotate(${(1 - pin) * 3}deg)`;
+  rowHl.forEach((r, i) => { const on = K.p(T, ROWT[i], ROWT[i] + 0.35, E.outBack) * (1 - K.p(T, (ROWT[i + 1] || B(17)) - 0.05, (ROWT[i + 1] || B(17)) + 0.2, E.linear)); r.style.opacity = on > 0 ? Math.min(1, on * 1.5) : 0; r.style.transform = `scale(${0.96 + 0.04 * on})`; });
+  rects.forEach((r, i) => { const on = T >= ROWT[i] && T < (ROWT[i + 1] || B(17)); r.setAttribute('stroke', on ? '#DFFF5A' : '#DCEBFA'); r.setAttribute('stroke-width', on ? 7 : 3.5); if (shrink > 0.5) r.style.opacity = on ? 1 : 0.55; });
+  // the edition card, still a draft
+  const ein = K.p(T, B(17), B(17) + 0.6, E.outExpo);
+  ed.style.opacity = K.p(T, B(17), B(17) + 0.15, E.linear) * (1 - K.p(T, 12.75, 13.0, E.linear)); ed.style.transform = `translateY(${(1 - ein) * 120}px) scale(${0.94 + 0.06 * ein})`;
+  const dh = K.p(T, B(17) + 0.45, B(17) + 0.8, E.outBack);
+  dHl.style.opacity = K.p(T, B(17) + 0.45, B(17) + 0.55, E.linear); dHl.style.transform = `scale(${0.9 + 0.1 * dh + 0.02 * Math.sin(T * 6)})`;
+  const cp = K.p(T, B(14) + 0.3, B(14) + 0.8, E.outBack);
+  chipP.style.opacity = K.p(T, B(14) + 0.3, B(14) + 0.45, E.linear) * (1 - K.p(T, 12.75, 13.0, E.linear)); chipP.style.transform = `scale(${0.85 + 0.15 * cp})`;
+
+  tagC.style.opacity = T > 3.5 && T < B(17) ? K.win(T, 3.5, B(17), 0.2) : 0;
+  tagR.style.opacity = K.win(T, B(17), 12.85, 0.2);
+  end(T);
+});
+</script></body></html>

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B03 · Riso Registration</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F1EBDD; }
+.paperbg { position: absolute; inset: 0; background: radial-gradient(110% 70% at 50% 35%, #F7F2E6, #E7DFCD); }
+.riso { position: absolute; isolation: isolate; overflow: visible; }
+.ink { position: absolute; inset: 0; overflow: hidden; mix-blend-mode: multiply; will-change: transform; }
+.ink img { position: absolute; display: block; }
+.dots { position: absolute; inset: 0; pointer-events: none; z-index: 5; opacity: .5; mix-blend-mode: screen;
+  background-image: radial-gradient(circle, rgba(255,255,255,0) 0 42%, rgba(247,242,230,.55) 64%); background-size: 9px 9px; }
+.sheet { position: absolute; background: #FBF8F0; box-shadow: 0 60px 100px -50px rgba(31,31,31,.55), 0 12px 24px -16px rgba(31,31,31,.35); }
+.mark { position: absolute; width: 44px; height: 44px; }
+.bars { position: absolute; display: flex; gap: 6px; }
+.bars i { width: 30px; height: 18px; display: block; }
+.mono { font-family: 'IBM Plex Mono', monospace; }
+.slug { position: absolute; font: 500 19px 'IBM Plex Mono', monospace; letter-spacing: .08em; color: #45403A; text-transform: uppercase; white-space: nowrap; }
+.rh { position: absolute; text-align: center; font-family: 'Playfair Display', serif; font-weight: 800; letter-spacing: -0.02em; line-height: 0.98; isolation: isolate; }
+.rh div { position: absolute; left: 0; right: 0; top: 0; mix-blend-mode: multiply; }
+.stamp { position: absolute; z-index: 40; padding: 16px 28px; border: 5px solid #E8418C; color: #E8418C; border-radius: 14px; font: 800 38px 'Archivo'; letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; mix-blend-mode: multiply; }
+.objlab { position: absolute; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #45403A; text-transform: uppercase; text-align: center; white-space: nowrap; }
+.pillx { position: absolute; z-index: 30; padding: 14px 24px; border-radius: 99px; background: #1F1F1F; color: #DFFF5A; font: 700 28px 'Archivo'; white-space: nowrap; box-shadow: 0 20px 40px -20px rgba(0,0,0,.6); }
+</style></head>
+<body><div id="stage" class="grain"><div class="paperbg"></div></div>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="sepC" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/></filter>
+  <filter id="sepM" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 1  0 1 0 0 0  0 0 0 0 1  0 0 0 1 0"/></filter>
+  <filter id="sepY" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 1 0 0  0 0 0 1 0"/></filter>
+</svg>
+<script src="kit.js"></script>
+<script>
+// B03 — risograph registration. The artwork is split into three ink layers with SVG colour matrices (cyan keeps red,
+// magenta keeps green, yellow keeps blue) and multiplied back together: misaligned, they read as a riso print;
+// in register, they are the exact artwork. Every snap lands on the beat with a two-frame shake and a halftone screen.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const B = 60 / 112;
+const ART = { src: K.canvas('PrintArea'), x: 1064, y: 760, w: 528, h: 730, full: 2880 }; // the artwork inside the print-area board
+const L = K.v({
+  '9x16': { headY: 300, headFs: 108, sheetW: 600, sheetY: 590, obj: 620, objY: 600, capY: 1150, brW: 940, brY: 560 },
+  '4x5': { headY: 60, headFs: 88, sheetW: 520, sheetY: 290, obj: 560, objY: 300, capY: 1150, brW: 960, brY: 330 },
+});
+const SEP = ['sepC', 'sepM', 'sepY'];
+// a three-ink copy of a crop of an image
+function riso(parent, w, h, src, crop, opts = {}) {
+  const root = K.el('div', { cls: 'riso', parent, style: { left: (opts.x || 0) + 'px', top: (opts.y || 0) + 'px', width: w + 'px', height: h + 'px' } });
+  const s = w / crop.w;
+  const inks = SEP.map((f) => {
+    const d = K.el('div', { cls: 'ink', parent: root, style: { filter: `url(#${f})` } });
+    K.el('img', { src, parent: d, style: { left: -crop.x * s + 'px', top: -crop.y * s + 'px', width: crop.full * s + 'px' } });
+    return d;
+  });
+  const dots = K.el('div', { cls: 'dots', parent: root });
+  return { root, inks, dots,
+    set(off, rot = [0, 0, 0]) { inks.forEach((d, i) => { d.style.transform = `translate(${off[i][0]}px, ${off[i][1]}px) rotate(${rot[i]}deg)`; }); } };
+}
+// misregistration that closes into register at `snap`, with a 2-frame shake on impact
+const DIRS = [[-1, -0.55], [0.9, -0.7], [0.15, 1]];
+function reg(T, open0, snap, amp, reopen, ampOut) {
+  const close = K.p(T, open0, snap, E.inOutCubic);
+  let a = amp * (1 - close);
+  if (reopen !== undefined) a += ampOut * K.p(T, reopen, reopen + 0.45, E.inCubic);
+  const resid = 3 * Math.sin(T * 2.1); // never dead still: a slight breathing misregistration
+  const shake = T >= snap && T < snap + 2 / 30 ? (Math.floor((T - snap) * 30) ? -7 : 9) : 0;
+  return DIRS.map(([dx, dy], i) => [dx * a + (i === 0 ? shake : -shake * 0.6) + (i - 1) * resid * 0.3, dy * a + (i === 2 ? shake : 0) + resid * 0.15 * (i - 1)]);
+}
+
+// ---------- headline in three inks ----------
+function risoHead(text, y, fs) {
+  const root = K.box(50, y, W - 100, fs * 2.1, { cls: 'rh', style: { fontSize: fs + 'px', zIndex: 30 } });
+  const cols = ['#FF48B0', '#0078BF', '#FFE800'];
+  const layers = cols.map((c) => K.el('div', { parent: root, html: text, style: { color: c } }));
+  return { root, layers };
+}
+const h1 = risoHead('Your design,<br>now on paper.', L.headY, L.headFs);
+const h2 = risoHead(tall ? 'Printed via your own<br>partner account.' : 'Printed via your own<br>partner account.', L.headY, L.headFs * 0.82);
+const h3 = risoHead('Printed only after<br>you approve the order.', L.headY, L.headFs * 0.78);
+
+// ---------- 1 · the poster sheet ----------
+const sw = L.sheetW, ah = Math.round(sw * 0.78 * ART.h / ART.w), sh = Math.round(ah + sw * 0.22 + 70);
+const sheet = K.box((W - sw) / 2, L.sheetY, sw, sh, { cls: 'sheet', style: { zIndex: 10 } });
+const aw = Math.round(sw * 0.78), ax = (sw - aw) / 2, ay = Math.round(sw * 0.11);
+const poster = riso(sheet, aw, ah, ART.src, ART, { x: ax, y: ay });
+const MARK = '<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="11" fill="none" stroke="#1F1F1F" stroke-width="2"/><path d="M22 0V44M0 22H44" stroke="#1F1F1F" stroke-width="2"/></svg>';
+const marks = [[14, 14], [sw - 58, 14], [14, sh - 58], [sw - 58, sh - 58]].map(([x, y]) => K.el('div', { cls: 'mark', parent: sheet, html: MARK, style: { left: x + 'px', top: y + 'px' } }));
+const bars = K.el('div', { cls: 'bars', parent: sheet, html: ['#00AEEF', '#EC008C', '#FFF200', '#1F1F1F', '#7FD6F7', '#F57FC5', '#FFF87F'].map((c) => `<i style="background:${c}"></i>`).join(''), style: { left: ax + 'px', top: (ay + ah + 26) + 'px' } });
+const slug = K.el('div', { cls: 'slug', parent: sheet, html: 'Art print · 16 × 20 in · matte', style: { left: ax + 'px', top: (ay + ah + 58) + 'px' } });
+const tagP = K.demoTag('Product design · sample artwork', 0, 0);
+
+// ---------- 2 · the tee and 3 · the mug (drawn, honestly labelled) ----------
+const ow = L.obj;
+const tee = K.box((W - ow) / 2, L.objY, ow, ow * 1.07, { style: { zIndex: 10 } });
+tee.innerHTML = `<svg viewBox="0 0 300 320" style="position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 40px 40px rgba(31,31,31,.25))"><path d="M104 16 C 118 34 182 34 196 16 L 258 40 L 292 108 L 246 128 L 236 102 L 236 314 L 64 314 L 64 102 L 54 128 L 8 108 L 42 40 Z" fill="#FBF8F0" stroke="#CFC8BB" stroke-width="2" stroke-linejoin="round"/><path d="M104 16 C 114 42 186 42 196 16" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="3"/></svg>`;
+const tw = Math.round(ow * 0.36), th = Math.round(tw * ART.h / ART.w);
+const teeArt = riso(tee, tw, th, ART.src, ART, { x: (ow - tw) / 2, y: ow * 0.25 });
+const mug = K.box((W - ow) / 2, L.objY + ow * 0.08, ow, ow * 0.92, { style: { zIndex: 10 } });
+const mw = Math.round(ow * 0.6), mh = Math.round(ow * 0.7), mx = Math.round(ow * 0.12), my = Math.round(ow * 0.1);
+mug.innerHTML = `<svg viewBox="0 0 ${ow} ${ow * 0.92}" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 40px 36px rgba(31,31,31,.28))">
+  <path d="M${mx + mw - 6} ${my + mh * 0.2} C ${mx + mw + ow * 0.26} ${my + mh * 0.16}, ${mx + mw + ow * 0.26} ${my + mh * 0.78}, ${mx + mw - 6} ${my + mh * 0.74}" fill="none" stroke="#E7E0D2" stroke-width="${ow * 0.065}" stroke-linecap="round"/>
+  <path d="M${mx + mw - 6} ${my + mh * 0.2} C ${mx + mw + ow * 0.26} ${my + mh * 0.16}, ${mx + mw + ow * 0.26} ${my + mh * 0.78}, ${mx + mw - 6} ${my + mh * 0.74}" fill="none" stroke="#CFC8BB" stroke-width="2"/>
+  <rect x="${mx}" y="${my}" width="${mw}" height="${mh}" rx="${ow * 0.05}" fill="#FBF8F0" stroke="#CFC8BB" stroke-width="2"/>
+  <ellipse cx="${mx + mw / 2}" cy="${my + 2}" rx="${mw / 2}" ry="${ow * 0.035}" fill="#EAE3D5" stroke="#CFC8BB" stroke-width="2"/></svg>`;
+const mAw = Math.round(mw * 0.62), mAh = Math.round(mAw * ART.h / ART.w);
+const mugArt = riso(mug, mAw, mAh, ART.src, ART, { x: mx + (mw - mAw) / 2, y: my + (mh - mAh) / 2 + 8 });
+const shade = K.el('div', { parent: mug, style: { position: 'absolute', left: mx + 'px', top: my + 'px', width: mw + 'px', height: mh + 'px', borderRadius: ow * 0.05 + 'px', zIndex: 6, pointerEvents: 'none',
+  background: 'linear-gradient(90deg, rgba(31,31,31,.20), rgba(31,31,31,0) 22%, rgba(255,255,255,.35) 38%, rgba(31,31,31,0) 55%, rgba(31,31,31,.24))' } });
+const objLab = K.box(60, 0, W - 120, null, { cls: 'objlab', style: { height: 'auto', zIndex: 20 } });
+const tagO = K.demoTag('Drawn objects · not partner mockups', 0, 0);
+
+// ---------- 4 · the real partner screen, printed in three inks ----------
+const SCR = { x: 310, y: 290, w: 900, h: 600, full: 1440 }; // 31-partner-connected: "Your partner accounts"
+const bw = L.brW, bh = Math.round(bw * SCR.h / SCR.w);
+const brw = K.box((W - bw) / 2, L.brY, bw, bh + 46, { cls: 'browser', style: { zIndex: 12, overflow: 'visible', background: 'transparent', boxShadow: 'none' } });
+const brBar = K.el('div', { cls: 'bar', parent: brw, html: '<i></i><i></i><i></i><span>makeandlist.com/production</span>', style: { borderRadius: '22px 22px 0 0', background: '#EFEADF' } });
+const scrBox = K.el('div', { parent: brw, style: { position: 'absolute', left: 0, top: '46px', width: bw + 'px', height: bh + 'px', background: '#FAF7EE', borderRadius: '0 0 22px 22px', overflow: 'hidden', boxShadow: '0 50px 100px -50px rgba(31,31,31,.6)' } });
+const scr = riso(scrBox, bw, bh, K.screen('31-partner-connected'), SCR);
+scr.dots.style.opacity = 0.28;
+const pill = K.box(0, 0, null, null, { cls: 'pillx', html: 'Your partner bills your own account', style: { width: 'auto', height: 'auto' } });
+const tagS = K.demoTag('Real app · demo workspace', 0, 0);
+
+// ---------- 5 · the three, in a row ----------
+const rowW = (W - 120) / 3;
+const row = [0, 1, 2].map((i) => {
+  const box = K.box(60 + i * rowW, 0, rowW, rowW * 1.3, { style: { zIndex: 10 } });
+  return box;
+});
+const rPoster = K.el('div', { cls: 'sheet', parent: row[0], style: { left: rowW * 0.14 + 'px', top: '0px', width: rowW * 0.72 + 'px', height: rowW * 0.95 + 'px' } });
+const rpa = riso(rPoster, rowW * 0.56, rowW * 0.56 * ART.h / ART.w, ART.src, ART, { x: rowW * 0.08, y: rowW * 0.07 });
+const rTee = K.el('div', { parent: row[1], style: { position: 'absolute', left: '0', top: '0', width: rowW + 'px', height: rowW * 1.07 + 'px' } });
+rTee.innerHTML = tee.querySelector('svg').outerHTML;
+const rta = riso(rTee, rowW * 0.36, rowW * 0.36 * ART.h / ART.w, ART.src, ART, { x: rowW * 0.32, y: rowW * 0.25 });
+const rMug = K.el('div', { parent: row[2], style: { position: 'absolute', left: '0', top: rowW * 0.08 + 'px', width: rowW + 'px', height: rowW * 0.92 + 'px' } });
+const msvg = mug.querySelector('svg').outerHTML; rMug.innerHTML = msvg; rMug.firstChild.setAttribute('viewBox', `0 0 ${ow} ${ow * 0.92}`);
+const rma = riso(rMug, rowW * 0.6 * 0.62, rowW * 0.6 * 0.62 * ART.h / ART.w, ART.src, ART, { x: rowW * (0.12 + 0.6 * 0.19), y: rowW * 0.1 + (rowW * 0.7 - rowW * 0.372 * ART.h / ART.w) / 2 + 4 });
+const stamp = K.box(0, 0, null, null, { cls: 'stamp', html: 'You approve first', style: { width: 'auto', height: 'auto' } });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Your design.<br>Your partner. Your yes.' });
+
+// beat grid: snaps on beats 4, 10, 14, 17; scene changes on 8, 12, 16, 20
+const S1 = 4 * B, X1 = 8 * B, S2 = 10 * B, X2 = 12 * B, S3 = 14 * B, X3 = 16 * B, S4 = 17 * B, X4 = 20 * B, S5 = 21 * B;
+function headInk(h, T, t0, snap, tout) {
+  const off = reg(T, t0, snap, tall ? 46 : 38, tout, 70);
+  const vis = K.p(T, t0, t0 + 0.3, E.linear) * (tout !== undefined ? 1 - K.p(T, tout + 0.2, tout + 0.45, E.linear) : 1);
+  h.layers.forEach((l, i) => { l.style.transform = `translate(${off[i][0]}px, ${off[i][1]}px)`; });
+  h.root.style.opacity = vis; h.root.style.visibility = vis > 0 ? 'visible' : 'hidden';
+}
+function enter(el, T, tin, tout, dy = 140, scale = 0.94) {
+  const pin = K.p(T, tin, tin + 0.55, E.outExpo), pout = tout !== undefined ? K.p(T, tout, tout + 0.38, E.inCubic) : 0;
+  el.style.opacity = Math.min(pin * 1.5, 1) * (1 - pout);
+  el.style.visibility = pin > 0 && pout < 1 ? 'visible' : 'hidden';
+  return { pin, pout, tr: `translateY(${(1 - pin) * dy - pout * dy * 0.7}px) scale(${scale + (1 - scale) * pin + pout * 0.04})` };
+}
+
+K.run({
+  id: 'B03', title: 'Riso Registration', dur: DUR, bpm: 112, mood: 'drive', key: 'E', intro: 0.0, cover: 2.6,
+  technique: 'Three ink layers split by SVG colour matrices and multiplied back (cyan keeps red, magenta green, yellow blue): misregistered they read as a riso print, in register they are the exact artwork; every snap lands on the beat with a two-frame shake under a halftone screen',
+  caption: 'Turn your design into posters, tees and mugs printed through your own print partner account — your partner bills you directly, and nothing is printed until you approve the order. Start free at makeandlist.com',
+  short: 'Your design, now on paper.',
+  beats: ['0–2.1 s: “Your design, now on paper.” — three inks slide in', '2.1–4.3 s: the poster snaps into register', '4.3–8.6 s: the inks fly apart and land on a tee, then a mug', '8.6–10.7 s: the real partner screen — printed via your own account', '10.7–13 s: poster, tee, mug — printed only after you approve', '13–15 s: end card'],
+  cues: [[0.05, 'riser'], [2 * B, 'hit'], [S1 - 0.3, 'whoosh'], [S1, 'hit'], [X1, 'whoosh'], [S2, 'hit'], [X2, 'whoosh'], [S3, 'hit'], [X3, 'whoosh'], [S4, 'hit'], [X4, 'whoosh'], [S5, 'hit'], [S5 + 0.6, 'pop'], [13.0, 'hit']],
+}, (T) => {
+  // headlines
+  headInk(h1, T, 0.05, 2 * B, X1 - 0.4);
+  headInk(h2, T, X3 + 0.1, S4 + 0.1, X4 - 0.35);
+  headInk(h3, T, X4 + 0.05, S5, 12.6);
+  // 1 · poster
+  const e1 = enter(sheet, T, 0.35, X1 - 0.05, 220, 0.9);
+  const drift = Math.sin(T * 0.9) * 6;
+  sheet.style.transform = e1.tr + ` translateY(${drift}px) rotate(${-1.2 + 0.4 * Math.sin(T * 0.7) + e1.pout * -6}deg) scale(${1 + K.p(T, S1, X1, E.linear) * 0.04})`;
+  poster.set(reg(T, 0.4, S1, tall ? 120 : 100, X1 - 0.3, 260));
+  poster.dots.style.backgroundPosition = `${T * 4}px ${T * 2}px`;
+  marks.forEach((m, i) => { m.style.transform = `rotate(${K.p(T, 0.4, S1, E.outCubic) * 90}deg) scale(${T >= S1 && T < S1 + 0.1 ? 1.25 : 1})`; });
+  slug.style.opacity = K.p(T, S1, S1 + 0.3, E.linear);
+  const r1 = sheet.getBoundingClientRect();
+  tagP.style.left = (r1.left) + 'px'; tagP.style.top = (r1.bottom + 18) + 'px';
+  tagP.style.opacity = K.win(T, S1, X1, 0.15);
+  if (!tall) { tagP.style.top = (Math.min(r1.bottom + 14, H - 52)) + 'px'; }
+  // 2 · tee
+  const e2 = enter(tee, T, X1 + 0.05, X2 - 0.05, 260, 0.88);
+  tee.style.transform = e2.tr + ` rotate(${Math.sin(T * 1.1) * 1.2}deg)`;
+  teeArt.set(reg(T, X1 - 0.1, S2, 140, X2 - 0.3, 220));
+  // 3 · mug
+  const e3 = enter(mug, T, X2 + 0.05, X3 - 0.05, 260, 0.88);
+  mug.style.transform = e3.tr + ` rotate(${Math.sin(T * 1.1 + 1) * 1.2}deg)`;
+  mugArt.set(reg(T, X2 - 0.1, S3, 120, X3 - 0.3, 220));
+  // object labels
+  const lab = T < X2 ? 'On a tee · drawn' : 'On a mug · drawn';
+  objLab.innerHTML = lab;
+  const lt0 = T < X2 ? S2 : S3, lt1 = T < X2 ? X2 : X3;
+  const lp = K.p(T, lt0 - 0.1, lt0 + 0.35, E.outExpo) * (1 - K.p(T, lt1 - 0.3, lt1, E.inCubic));
+  objLab.style.top = (L.objY + ow * 1.1) + 'px'; objLab.style.fontSize = (tall ? 30 : 26) + 'px';
+  objLab.style.opacity = lp; objLab.style.transform = `translateY(${(1 - lp) * 20}px)`;
+  if (!tall) objLab.style.top = Math.min(L.objY + ow * 1.06, H - 120) + 'px';
+  tagO.style.left = '50%'; tagO.style.transform = 'translateX(-50%)';
+  tagO.style.top = (tall ? L.objY - 60 : L.objY - 50) + 'px';
+  tagO.style.opacity = K.win(T, X1 + 0.3, X3, 0.15);
+  // 4 · the partner screen
+  const e4 = enter(brw, T, X3 + 0.05, X4 - 0.05, 200, 0.9);
+  brw.style.transform = e4.tr + ` perspective(1600px) rotateX(${(1 - e4.pin) * 14}deg) rotateY(${Math.sin(T * 0.8) * 2}deg)`;
+  scr.set(reg(T, X3, S4, 60, X4 - 0.3, 120));
+  const pp = K.p(T, S4 + 0.15, S4 + 0.6, E.outBack) * (1 - K.p(T, X4 - 0.3, X4, E.inCubic));
+  const rb = scrBox.getBoundingClientRect();
+  pill.style.left = (W / 2) + 'px'; pill.style.top = (rb.bottom + (tall ? 40 : 26)) + 'px';
+  pill.style.opacity = Math.min(1, pp * 2); pill.style.transform = `translateX(-50%) scale(${0.7 + 0.3 * pp})`;
+  if (!tall) pill.style.top = Math.min(rb.bottom + 26, H - 150) + 'px';
+  tagS.style.left = (rb.left + 20) + 'px'; tagS.style.top = (rb.bottom - 50) + 'px';
+  tagS.style.opacity = K.win(T, S4, X4, 0.15);
+  // 5 · all three
+  const rowY = tall ? 640 : 380;
+  row.forEach((b, i) => {
+    const e = enter(b, T, X4 + 0.1 + i * 0.12, 12.75, 180, 0.85);
+    b.style.top = rowY + 'px';
+    b.style.transform = e.tr + ` translateY(${Math.sin(T * 1.3 + i) * 6}px) rotate(${[-3, 0, 3][i] * (1 - e.pin) + Math.sin(T + i) * 0.8}deg)`;
+  });
+  [rpa, rta, rma].forEach((r, i) => r.set(reg(T, X4 + 0.1, S5, 40, undefined, 0)));
+  const sp = K.p(T, S5 + 0.55, S5 + 0.85, E.outBack);
+  stamp.style.left = W / 2 + 'px'; stamp.style.top = (rowY + rowW * 1.32 + (tall ? 30 : 10)) + 'px';
+  stamp.style.opacity = K.p(T, S5 + 0.55, S5 + 0.65, E.linear) * (1 - K.p(T, 12.6, 12.9, E.linear));
+  stamp.style.transform = `translateX(-50%) rotate(-4deg) scale(${1.6 - 0.6 * sp})`;
+  end(T);
+});
+</script></body></html>

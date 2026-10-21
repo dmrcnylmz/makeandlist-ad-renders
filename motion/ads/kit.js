@@ -167,15 +167,17 @@
     /** The end card: the stacked logo and the one line to act on. */
     endCard(start, opts = {}) {
       const W = K.W, H = K.H;
+      // lift (px) moves the whole card up, so the CTA clears the bottom 35 % that Reels / TikTok cover in 9:16.
+      const top = H * 0.3 - (opts.lift || 0);
       const bg = K.box(0, 0, W, H, { style: { background: opts.dark ? '#1F1F1F' : 'var(--ivory)', zIndex: 90, opacity: 0 } });
       const logoW = Math.min(W * 0.52, 560);
       const logo = K.el('img', { src: K.brand(opts.dark ? 'makeandlist-logo-stacked-ivory.svg' : 'makeandlist-logo-stacked.svg'), parent: bg,
-        style: { position: 'absolute', left: (W - logoW) / 2 + 'px', top: H * 0.3 + 'px', width: logoW + 'px' } });
+        style: { position: 'absolute', left: (W - logoW) / 2 + 'px', top: top + 'px', width: logoW + 'px' } });
       const line = K.el('div', { parent: bg, cls: 'serif', html: opts.line || 'One idea. More ways to make it real.',
         // The stacked logo is 859 / 1055 as tall as it is wide: the line starts clear of it.
-        style: { position: 'absolute', left: '60px', right: '60px', top: H * 0.3 + logoW * 0.814 + 48 + 'px', textAlign: 'center', fontSize: Math.round(W * 0.052) + 'px', lineHeight: 1.15, color: opts.dark ? '#FAF7EE' : '#1F1F1F' } });
+        style: { position: 'absolute', left: '60px', right: '60px', top: top + logoW * 0.814 + 48 + 'px', textAlign: 'center', fontSize: Math.round(W * 0.052) + 'px', lineHeight: 1.15, color: opts.dark ? '#FAF7EE' : '#1F1F1F' } });
       const cta = K.el('div', { parent: bg, cls: 'chip lime', html: opts.cta || 'Start free · makeandlist.com',
-        style: { position: 'absolute', left: '50%', top: H * 0.3 + logoW * 0.814 + 48 + Math.round(W * 0.052) * 2.3 + 56 + 'px', fontSize: Math.round(W * 0.036) + 'px', padding: '22px 40px', transform: 'translateX(-50%)' } });
+        style: { position: 'absolute', left: '50%', top: top + logoW * 0.814 + 48 + Math.round(W * 0.052) * 2.3 + 56 + 'px', fontSize: Math.round(W * 0.036) + 'px', padding: '22px 40px', transform: 'translateX(-50%)' } });
       return (T) => {
         bg.style.opacity = K.p(T, start, start + 0.35, ease.linear);
         const pl = K.p(T, start + 0.1, start + 0.9, ease.outExpo);

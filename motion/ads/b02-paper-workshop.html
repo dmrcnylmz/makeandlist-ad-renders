@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B02 · Paper Workshop</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #CDB48E; }
+.mat { position: absolute; inset: -40px; background:
+  radial-gradient(120% 80% at 50% 40%, rgba(255,240,210,.35), rgba(80,50,20,.28) 100%),
+  repeating-linear-gradient(90deg, rgba(90,60,30,.05) 0 2px, transparent 2px 7px),
+  repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 1px, transparent 1px 5px), #CDB48E; }
+.sh { position: absolute; filter: drop-shadow(12px 14px 0 rgba(70,45,20,.32)); will-change: transform; }
+.sheet { position: absolute; inset: 0; background: #FFFDF8; overflow: hidden; }
+.sheet img { position: absolute; display: block; }
+.strip { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-weight: 800; letter-spacing: -0.02em; color: #1F1F1F; white-space: nowrap; }
+.tape { position: absolute; width: 150px; height: 46px; background: rgba(240,228,196,.82); box-shadow: 0 1px 0 rgba(0,0,0,.05); z-index: 3;
+  clip-path: polygon(0 8%, 4% 0, 9% 10%, 14% 0, 100% 0, 100% 90%, 96% 100%, 91% 90%, 86% 100%, 0 100%); }
+.cap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 800 40px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.tagp { position: absolute; inset: 0; background: #E9D3A3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  font: 800 44px/1 'Archivo'; color: #1F1F1F; }
+.tagp small { font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #5C4A2E; }
+.hole { position: absolute; left: 50%; top: 22px; width: 26px; height: 26px; margin-left: -13px; border-radius: 50%; background: #CDB48E; box-shadow: inset 0 0 0 5px #C9A96A; }
+.own { position: absolute; z-index: 30; font: 500 19px 'IBM Plex Mono', monospace; color: #3B2E1C; background: rgba(250,247,238,.9); padding: 6px 12px; border-radius: 6px; white-space: nowrap; }
+.logo { position: absolute; inset: 0; background: #FFFDF8; display: grid; place-items: center; }
+.logo img { max-width: 70%; max-height: 52%; }
+</style></head>
+<body><div id="stage" class="grain"><div class="mat"></div></div>
+<script src="kit.js"></script>
+<script>
+// B02 — stop-motion paper. Everything moves on twos (time snapped to 1/15 s) with a seeded per-step jitter, so the
+// cut-outs "boil" like animated paper. The owner's real activity pages drop onto the kraft table and stack; the other
+// packs fan in; the review board is taped down and a paper "Approve?" tag gets its crayon tick; a draft goes out.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const B = 0.6; // 100 bpm
+const step = (T) => Math.floor(T * 15) / 15; // on twos
+const rnd = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const jit = (T, id, a) => (rnd(Math.floor(T * 15) * 7.31 + id * 19.7) - 0.5) * 2 * a;
+// a deckle-edged outline, seeded per element; three variants that boil from step to step
+function deckle(w, h, seed, amp, n = 26) {
+  const P = [];
+  const side = (x0, y0, x1, y1, nx, ny, k) => { for (let i = 0; i < n; i++) { const f = i / n; const d = (rnd(seed + k * 101 + i) - 0.5) * amp * 2; P.push(`${(x0 + (x1 - x0) * f + nx * d).toFixed(1)}px ${(y0 + (y1 - y0) * f + ny * d).toFixed(1)}px`); } };
+  side(0, 0, w, 0, 0, 1, 1); side(w, 0, w, h, -1, 0, 2); side(w, h, 0, h, 0, -1, 3); side(0, h, 0, 0, 1, 0, 4);
+  return `polygon(${P.join(',')})`;
+}
+// a paper cut-out: shadow wrapper + clipped sheet
+function cut(x, y, w, h, opts = {}) {
+  const sh = K.box(x, y, w, h, { cls: 'sh', style: { zIndex: opts.z || 10 } });
+  const sheet = K.el('div', { cls: 'sheet', parent: sh, style: { background: opts.bg || '#FFFDF8' } });
+  const seed = opts.seed || Math.round(x + y * 3 + w);
+  const shapes = [0, 1, 2].map((k) => deckle(w, h, seed + k * 977, opts.amp ?? 2.4));
+  return { sh, sheet, w, h, x, y, seed, shapes, boil(T) { sheet.style.clipPath = shapes[Math.floor(T * 15) % 3]; } };
+}
+const L = K.v({
+  '9x16': { hookY: 300, hookFs: 112, hookH: 150, pw: 500, stackY: 470, capY: 1150, boardW: 900, boardY: 420, sendW: 640, sendY: 400 },
+  '4x5': { hookY: 64, hookFs: 88, hookH: 120, pw: 480, stackY: 330, capY: 1110, boardW: 960, boardY: 300, sendW: 600, sendY: 250 },
+});
+const SC = 'showcase/christmas-preschool-pack/';
+// hook: two paper strips with the words
+const strips = [["Kids' packs,", -2.2, '#FFFDF8'], ['cut from paper.', 1.6, '#DFFF5A']].map(([t, rot, bg], i) => {
+  const w = tall ? (i ? 900 : 740) : (i ? 720 : 590), h = L.hookH;
+  const c = cut((W - w) / 2, L.hookY + i * (h + 26), w, h, { z: 40, bg, seed: 50 + i * 13, amp: 3 });
+  K.el('div', { cls: 'strip', parent: c.sheet, html: t, style: { fontSize: L.hookFs + 'px' } });
+  return { c, rot };
+});
+// the owner's pages, stacking
+const PAGES = ['interior-04', 'interior-03', 'interior-02', 'interior-01', 'cover'];
+const ph = Math.round(L.pw * 1164 / 900);
+const stack = PAGES.map((p, i) => {
+  const c = cut((W - L.pw) / 2, L.stackY, L.pw, ph, { z: 12 + i, seed: 200 + i * 37, amp: 2 });
+  K.el('img', { src: K.pub(SC + p + '.webp'), parent: c.sheet, style: { left: 0, top: 0, width: '100%', height: '100%' } });
+  return c;
+});
+const tapes = [0, 1].map((i) => K.el('div', { cls: 'tape', parent: stack[4].sh, style: { left: i ? 'auto' : '-40px', right: i ? '-40px' : 'auto', top: '-14px', transform: `rotate(${i ? 32 : -34}deg)` } }));
+const own = K.box(0, 0, null, null, { cls: 'own', html: 'Example made with MakeAndList by its owner', style: { width: 'auto', height: 'auto' } });
+// the other packs, fanned like a hand of cards
+const PACKS = ['halloween-preschool-pack', 'fall-activity-pack', 'christmas-preschool-pack', 'thanksgiving-kids-table', 'coloring-christmas'];
+const fw = Math.round(L.pw * (tall ? 0.7 : 0.66)), fh = Math.round(fw * 1164 / 900);
+const fan = PACKS.map((p, i) => {
+  const c = cut(0, 0, fw, fh, { z: 20 + i, seed: 400 + i * 51, amp: 2 });
+  K.el('img', { src: K.pub('showcase/' + p + '/cover.webp'), parent: c.sheet, style: { left: 0, top: 0, width: '100%', height: '100%' } });
+  return c;
+});
+// captions on paper strips
+function capStrip(text, w, bg, seed) {
+  const c = cut((W - w) / 2, L.capY, w, 88, { z: 45, bg: bg || '#FFFDF8', seed, amp: 2.6 });
+  K.el('div', { cls: 'cap', parent: c.sheet, html: text, style: { fontSize: (tall ? 42 : 38) + 'px' } });
+  return c;
+}
+const cap1 = capStrip('37 pages. Mazes, tracing, counting.', tall ? 860 : 800, '#FFFDF8', 601);
+const cap2 = capStrip('Each pack began as one sentence.', tall ? 860 : 800, '#FFFDF8', 602);
+const cap3 = capStrip('You look through every page first.', tall ? 900 : 840, '#DFFF5A', 603);
+const cap4 = capStrip('Then a draft in your store.', tall ? 760 : 700, '#FFFDF8', 604);
+// the review board, printed and taped down (board crop x 560–2820, y 280–1500 of the 2x canvas)
+const bw = L.boardW, bsc = bw / 2260, bh = Math.round(1220 * bsc);
+const board = cut((W - bw) / 2, L.boardY, bw, bh, { z: 30, seed: 700, amp: 2.2 });
+K.el('img', { src: K.canvas('AppRoomReview'), parent: board.sheet, style: { left: -560 * bsc + 'px', top: -280 * bsc + 'px', width: 2880 * bsc + 'px' } });
+[0, 1, 2].forEach((i) => K.el('div', { cls: 'tape', parent: board.sh, style: { left: ['-30px', '42%', 'auto'][i], right: i === 2 ? '-30px' : 'auto', top: '-16px', transform: `rotate(${[-30, 3, 28][i]}deg)` } }));
+const boardTag = K.demoTag('Product design · sample data', 0, 0);
+// the paper tag on its string
+const tw = tall ? 380 : 330, th = tall ? 220 : 190;
+const tagRoot = K.box(0, 0, tw, th + 160, { style: { zIndex: 50, transformOrigin: '50% 0' } });
+tagRoot.innerHTML = `<svg width="${tw}" height="170" style="position:absolute;left:0;top:0;overflow:visible"><path d="M${tw / 2} 0 C ${tw / 2 + 10} 60, ${tw / 2 - 8} 110, ${tw / 2} 172" stroke="#5C4A2E" stroke-width="4" fill="none"/></svg>`;
+const tagC = cut(0, 160, tw, th, { seed: 800, amp: 2, z: 1, bg: '#E9D3A3' });
+tagRoot.appendChild(tagC.sh); tagC.sh.style.left = '0px'; tagC.sh.style.top = '160px';
+tagC.sheet.style.clipPath = 'none';
+tagC.sheet.innerHTML = `<div class="tagp" style="clip-path:polygon(18% 0,82% 0,100% 22%,100% 100%,0 100%,0 22%)"><div class="hole"></div><small id="tgs">Your review</small><span id="tgt">Approve?</span></div>
+  <svg viewBox="0 0 100 60" style="position:absolute;right:${tall ? 22 : 18}px;bottom:${tall ? 28 : 22}px;width:${tall ? 92 : 80}px;overflow:visible"><path id="tick" d="M8 34 L 36 54 L 94 6" fill="none" stroke="#2E7D32" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg>`;
+const tgs = tagC.sheet.querySelector('#tgs'), tgt = tagC.sheet.querySelector('#tgt'), tick = tagC.sheet.querySelector('#tick');
+// the draft, sent: the real Send screen as a print + cut-out store badges (72-phone-listing-send y 1290–2100)
+const sw2 = L.sendW, ssc = sw2 / 780, sh2 = Math.round(810 * ssc);
+const send = cut((W - sw2) / 2, L.sendY, sw2, sh2, { z: 32, seed: 900, amp: 2.2 });
+K.el('img', { src: K.screen('72-phone-listing-send'), parent: send.sheet, style: { left: 0, top: -1290 * ssc + 'px', width: sw2 + 'px' } });
+const sendTag = K.demoTag('Real app · demo workspace', 0, 0);
+const draftChip = cut(0, 0, tall ? 480 : 430, 92, { z: 46, bg: '#1F1F1F', seed: 950, amp: 2.4 });
+K.el('div', { cls: 'cap', parent: draftChip.sheet, html: 'Draft · you publish it', style: { color: '#DFFF5A', fontSize: (tall ? 36 : 32) + 'px' } });
+const badges = ['woocommerce.svg', 'ikas.svg', 'wix.svg', 'gumroad.svg'].map((f, i) => {
+  const c = cut(0, 0, tall ? 220 : 190, tall ? 110 : 96, { z: 47, seed: 1000 + i * 17, amp: 2.4, bg: f === 'wix.svg' ? '#1F1F1F' : '#FFFDF8' });
+  const lg = K.el('div', { cls: 'logo', parent: c.sheet, style: { background: f === 'wix.svg' ? '#1F1F1F' : '#FFFDF8' } });
+  K.el('img', { src: K.pub('platforms/' + f), parent: lg });
+  return c;
+});
+// paper scraps on the table: ambient
+const SCR = ['#E8603C', '#DFFF5A', '#7E9A7E', '#FFFDF8', '#E9D3A3', '#E8603C', '#7E9A7E'];
+const scraps = SCR.map((col, i) => {
+  const s = 40 + rnd(i * 3) * 60;
+  const c = K.box(rnd(i * 5 + 1) * (W - 80), rnd(i * 7 + 2) * (H - 80), s, s * (0.5 + rnd(i) * 0.6), { style: { background: col, zIndex: 2, clipPath: `polygon(0 ${rnd(i) * 30}%, 100% 0, ${70 + rnd(i + 4) * 30}% 100%, 10% 90%)`, filter: 'drop-shadow(6px 7px 0 rgba(70,45,20,.25))' } });
+  return c;
+});
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Describe it. Review it.<br>List it.' });
+
+// on-twos placement of a cut-out: slide in from off-screen, settle with a jitter, optional exit
+function place(c, T, { x, y, rot = 0, tin, tout, from = [0, -1.4], to = [0, 1.4], id = 0, jitA = 1.6 }) {
+  const t = step(T);
+  const pin = K.p(t, tin, tin + 0.5, E.outQuint), pout = tout !== undefined ? K.p(t, tout, tout + 0.33, E.inCubic) : 0;
+  const ox = (1 - pin) * from[0] * W + pout * to[0] * W, oy = (1 - pin) * from[1] * H + pout * to[1] * H;
+  const r = rot + (1 - pin) * 18 * Math.sign(from[0] || 1) + jit(T, id, 0.5) * (pin > 0 && pout < 1 ? 1 : 0);
+  c.sh.style.left = x + 'px'; c.sh.style.top = y + 'px';
+  c.sh.style.transform = `translate(${ox + jit(T, id + 1, jitA)}px, ${oy + jit(T, id + 2, jitA)}px) rotate(${r}deg)`;
+  c.sh.style.visibility = t >= tin && pout < 1 ? 'visible' : 'hidden';
+  c.boil(T);
+  return pin * (1 - pout);
+}
+
+K.run({
+  id: 'B02', title: 'Paper Workshop', dur: DUR, bpm: 100, mood: 'warm', key: 'F', intro: 1.2, cover: 4.4,
+  technique: 'Stop-motion on twos (time snapped to 1/15 s) with seeded per-step jitter and boiling deckle edges; paper cut-outs with hard drop shadows on kraft; the owner\'s real activity pages stack, packs fan in, a paper "Approve?" tag swings in and gets its crayon tick',
+  caption: 'Preschool packs, colouring books, party games: each one began as a sentence. MakeAndList makes the pages, you look through every one, and it goes to your store as a draft. Start free at makeandlist.com',
+  short: "Kids' packs, cut from paper.",
+  beats: ["0–1.8 s: “Kids' packs, cut from paper.” — two paper strips slap down", '1.8–4.8 s: the owner\'s real pages drop and stack, one per beat', '4.8–7.2 s: four more packs fan in — each began as one sentence', '7.2–10.6 s: the review board taped down, the paper tag gets its tick', '10.6–13 s: the real Send screen — a draft, you publish it', '13–15 s: end card'],
+  cues: [[0.1, 'pop'], [0.6, 'pop'], [1.8, 'hit'], [2.4, 'pop'], [3.0, 'pop'], [3.6, 'pop'], [4.2, 'hit'], [4.8, 'whoosh'], [5.1, 'pop'], [5.4, 'pop'], [5.7, 'pop'], [6.0, 'pop'], [7.2, 'whoosh'], [7.5, 'hit'], [8.4, 'pop'], [9.6, 'click'], [9.7, 'hit'], [10.6, 'whoosh'], [10.8, 'hit'], [11.6, 'pop'], [12.0, 'pop'], [12.2, 'pop'], [12.4, 'pop'], [12.6, 'pop'], [13.0, 'hit']],
+}, (T) => {
+  const t = step(T);
+  // hook strips
+  strips.forEach((s, i) => place(s.c, T, { x: s.c.x, y: s.c.y, rot: s.rot, tin: 0.1 + i * 0.5, tout: 1.75 + i * 0.07, from: [i ? 1.2 : -1.2, 0], to: [i ? -1.3 : 1.3, 0], id: 10 + i, jitA: 1.2 }));
+  // pages stack (cover last, on top), one per beat; the stack leaves at 4.8
+  const sx = (W - L.pw) / 2;
+  stack.forEach((c, i) => {
+    const tin = 1.6 + i * B * 0.5 + (i === 4 ? 0.2 : 0);
+    const rot = [-7, 5, -3, 6, -1.5][i];
+    const fromA = [[-1.2, -0.3], [1.2, -0.2], [-0.2, -1.3], [1.2, 0.4], [0, -1.4]][i];
+    // after 4.8 the stack slides left and shrinks as the other packs arrive (still on twos)
+    place(c, T, { x: sx + i * 4, y: L.stackY + i * 3, rot, tin, tout: 4.75 + (4 - i) * 0.04, from: fromA, to: [-1.4, 0.15], id: 30 + i * 3 });
+  });
+  const coverR = (t < 4.9 ? stack[4] : fan[2]).sh.getBoundingClientRect();
+  own.style.left = Math.max(60, coverR.left + coverR.width / 2 - 250) + 'px'; own.style.top = Math.max(tall ? 380 : 270, coverR.top - 58) + 'px';
+  own.style.opacity = K.win(t, 2.6, 7.0, 0.15) * (t < 4.7 || t > 5.75 ? 1 : 0);
+  own.style.transform = `rotate(${-1 + jit(T, 77, 0.3)}deg)`;
+  // fan of the other packs
+  fan.forEach((c, i) => {
+    const cx = W / 2, cy = tall ? 790 : 640;
+    const ang = (i - 2) * 8;
+    // fan order: the middle card (Christmas, the pack we just saw) lands last, on top
+    const ord = [0, 1, 4, 2, 3][i];
+    c.sh.style.zIndex = 20 + ord;
+    place(c, T, { x: cx - fw / 2 + (i - 2) * (tall ? 118 : 150), y: cy - fh / 2 + Math.abs(i - 2) * 30, rot: ang, tin: 4.9 + ord * 0.15, tout: 7.0 + i * 0.04, from: [i < 2 ? -1.3 : 1.3, 0.2], to: [0, 1.4], id: 60 + i * 3 });
+  });
+  // captions
+  place(cap1, T, { x: cap1.x, y: cap1.y, rot: -1.2, tin: 3.0, tout: 4.75, from: [-1.3, 0], to: [1.3, 0], id: 90 });
+  place(cap2, T, { x: cap2.x, y: cap2.y, rot: 1, tin: 5.5, tout: 7.0, from: [1.3, 0], to: [-1.3, 0], id: 92 });
+  place(cap3, T, { x: cap3.x, y: cap3.y, rot: -0.8, tin: 7.9, tout: 10.45, from: [-1.3, 0], to: [1.3, 0], id: 94 });
+  place(cap4, T, { x: cap4.x, y: cap4.y, rot: 1.1, tin: 11.0, tout: 12.85, from: [1.3, 0], to: [-1.3, 0], id: 96 });
+  // the review board
+  place(board, T, { x: board.x, y: board.y + (t > 7.5 ? (t - 7.5) * -6 : 0), rot: 1.2, tin: 7.25, tout: 10.5, from: [0, 1.4], to: [0, -1.5], id: 110 });
+  const br = board.sh.getBoundingClientRect();
+  boardTag.style.left = (br.left + 18) + 'px'; boardTag.style.top = (br.bottom - 50) + 'px';
+  boardTag.style.opacity = K.win(t, 7.7, 10.45, 0.1);
+  // the paper tag swings in and is ticked at 9.6
+  const tIn = K.p(t, 8.3, 8.8, E.outQuint), tOut = K.p(t, 10.45, 10.75, E.inCubic);
+  const swing = 14 * Math.exp(-Math.max(0, t - 8.5) * 1.6) * Math.cos((t - 8.5) * 5.2) + (t > 9.6 ? 6 * Math.exp(-(t - 9.6) * 2.5) * Math.sin((t - 9.6) * 9) : 0);
+  const tx = tall ? W - tw - 70 : W - tw - 60, ty = tall ? 640 : 520;
+  tagRoot.style.left = tx + 'px'; tagRoot.style.top = (ty - (1 - tIn) * 900 - tOut * 1200) + 'px';
+  tagRoot.style.transform = `rotate(${swing + jit(T, 120, 0.4)}deg)`;
+  tagRoot.style.visibility = t >= 8.3 && tOut < 1 ? 'visible' : 'hidden';
+  const tk = K.p(t, 9.35, 9.75, E.outCubic);
+  tick.setAttribute('stroke-dashoffset', 100 - tk * 100);
+  tgt.textContent = t >= 9.7 ? 'Approved' : 'Approve?';
+  tgs.textContent = t >= 9.7 ? 'by you' : 'Your review';
+  // the draft
+  place(send, T, { x: 60, y: send.y, rot: -1.6, tin: 10.6, tout: 12.85, from: [0, 1.4], to: [0, 1.5], id: 130 });
+  const sr = send.sh.getBoundingClientRect();
+  sendTag.style.left = (sr.left + 16) + 'px'; sendTag.style.top = (sr.top - 44) + 'px';
+  sendTag.style.opacity = K.win(t, 10.9, 12.85, 0.1);
+  place(draftChip, T, { x: tall ? 150 : 130, y: L.sendY + sh2 - 46, rot: -3, tin: 11.4, tout: 12.85, from: [1.3, -0.2], to: [1.3, 0], id: 140 });
+  badges.forEach((c, i) => {
+    const bx = W - c.w - 50 - (i % 2) * 24, by = L.sendY + 60 + i * (c.h + (tall ? 44 : 30));
+    place(c, T, { x: bx, y: by, rot: [-5, 4, -3, 6][i], tin: 11.75 + i * 0.2, tout: 12.85, from: [1.2, 0], to: [1.3, 0], id: 150 + i * 3 });
+  });
+  // scraps boil and drift a little: ambient
+  scraps.forEach((s, i) => { s.style.transform = `translate(${jit(T, 200 + i, 2)}px, ${jit(T, 300 + i, 2) + Math.sin(step(T) * 0.8 + i) * 8}px) rotate(${i * 37 + jit(T, 400 + i, 3)}deg)`; });
+  end(T);
+});
+</script></body></html>

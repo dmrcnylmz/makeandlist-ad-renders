@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B01 · Metro Line</title><link rel="stylesheet" href="kit.css">
+<style>
+svg.map { position: absolute; left: 0; top: 0; overflow: visible; }
+.card { position: absolute; border-radius: 38px; background: #FFFDF8; overflow: hidden; z-index: 20;
+  box-shadow: 0 70px 120px -60px rgba(31,31,31,.75), 0 18px 40px -24px rgba(31,31,31,.45), 0 0 0 2px #1F1F1F; transform-origin: 50% 100%; }
+.card .strip { position: absolute; left: 0; right: 0; top: 0; height: 64px; background: #1F1F1F; color: #DFFF5A; display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
+  font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; z-index: 2; }
+.card .strip b { color: #FAF7EE; font-weight: 500; }
+.card .crop { position: absolute; left: 0; right: 0; bottom: 0; overflow: hidden; background: #FAF7EE; }
+.card .crop img { position: absolute; left: 0; top: 0; }
+.stem { position: absolute; width: 4px; margin-left: -2px; background: #1F1F1F; z-index: 19; transform-origin: 50% 100%; }
+.slabel { position: absolute; z-index: 21; white-space: nowrap; text-align: center; transform: translateX(-50%); }
+.slabel .n { font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #45403A; }
+.slabel .t { font: 800 44px/1.05 'Archivo'; letter-spacing: -0.01em; }
+.pill { position: absolute; left: 50%; bottom: 34px; transform: translateX(-50%); z-index: 3; display: flex; align-items: center; gap: 14px; padding: 20px 34px; border-radius: 99px;
+  font: 800 34px 'Archivo'; white-space: nowrap; box-shadow: 0 24px 40px -22px rgba(31,31,31,.7); }
+.pill i { width: 18px; height: 18px; border-radius: 50%; background: currentColor; display: block; }
+.term { position: absolute; z-index: 22; background: #FFFDF8; border-radius: 30px; display: grid; place-items: center; box-shadow: 0 30px 50px -30px rgba(31,31,31,.7), 0 0 0 3px #1F1F1F; }
+.term img { max-width: 72%; max-height: 46%; }
+.term em { position: absolute; bottom: -42px; font: 600 20px 'IBM Plex Mono', monospace; font-style: normal; letter-spacing: .08em; color: #45403A; white-space: nowrap; }
+.head { position: absolute; z-index: 40; text-align: center; font-weight: 800; letter-spacing: -0.02em; line-height: 0.98; }
+.typed { position: absolute; font: 500 27px/1.4 'Archivo'; color: #1F1F1F; background: #FFFDF8; z-index: 2; padding: 0; }
+.typed u { text-decoration: none; display: inline-block; width: 3px; height: 1.1em; vertical-align: -0.15em; background: #1F1F1F; margin-left: 2px; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// B01 — a transit map of the product journey. The line draws on, the camera dives in, a product token rides from stop
+// to stop and each station opens into the real phone screen for that step. Stop 4 is red: the token waits for the
+// seller's tap. After stop 6 the line forks into four store terminals — drafts, live only on the seller's yes.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const B = 60 / 118; // beat
+const NS = 'http://www.w3.org/2000/svg';
+const L = K.v({
+  '9x16': { ax: 540, ay: 1120, cw: 720, ch: 770, gap: 92, head: 300, headFs: 112, forkY: 905, forkS: 0.56, ovY: 860, lab: 46 },
+  '4x5': { ax: 540, ay: 1030, cw: 760, ch: 690, gap: 84, head: 70, headFs: 92, forkY: 800, forkS: 0.5, ovY: 820, lab: 40 },
+});
+
+// ---------- the line (world units) ----------
+const ST = [[0, 0], [1000, 0], [2000, 300], [3000, 300], [4000, 0], [5000, 0]];
+const PTS = [[-600, 0], [0, 0], [1000, 0], [1300, 0], [1600, 300], [2000, 300], [3000, 300], [3300, 300], [3600, 0], [4000, 0], [5000, 0], [5500, 0]];
+const J = [5500, 0];
+const TERM = [[-480, 'ikas.svg', 'IKAS'], [-160, 'woocommerce.svg', 'WOOCOMMERCE'], [160, 'wix.svg', 'WIX'], [480, 'shopware.svg', 'SHOPWARE']];
+const BR = TERM.map(([dy]) => [J, [J[0] + Math.abs(dy), dy], [J[0] + Math.abs(dy) + 420, dy]]);
+const TCOL = ['#7E9A7E', '#E8603C', '#1F1F1F', '#B9A27A'];
+function seglen(P) { let s = 0; const acc = [0]; for (let i = 1; i < P.length; i++) { s += Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); acc.push(s); } return acc; }
+const ACC = seglen(PTS), TOTAL = ACC[ACC.length - 1];
+function at(s) { s = K.clamp(s, 0, TOTAL); for (let i = 1; i < PTS.length; i++) if (s <= ACC[i]) { const f = (s - ACC[i - 1]) / (ACC[i] - ACC[i - 1] || 1); return [K.lerp(PTS[i - 1][0], PTS[i][0], f), K.lerp(PTS[i - 1][1], PTS[i][1], f)]; } return PTS[PTS.length - 1]; }
+const sOf = (p) => { for (let i = 0; i < PTS.length; i++) if (PTS[i][0] === p[0] && PTS[i][1] === p[1]) return ACC[i]; return 0; };
+const SS = ST.map(sOf), SJ = TOTAL;
+
+// ---------- timing on the beat grid ----------
+// arrivals on beats 4, 7, 10, 13, 18, 21; stop 4 waits for the tap on beat 15.5
+const ARR = [4, 7, 10, 13, 18, 20.5].map((b) => b * B);
+const DEP = [6 * B, 9 * B, 12 * B, 16.5 * B, 19.5 * B, 21.5 * B];
+const TAP = 15.5 * B;
+const FORK = 21.5 * B + 0.55; // token reaches the junction
+function tokenS(T) {
+  if (T < ARR[0]) return SS[0];
+  for (let i = 0; i < 6; i++) {
+    if (T < DEP[i]) return SS[i];
+    const nextT = i < 5 ? ARR[i + 1] : FORK, nextS = i < 5 ? SS[i + 1] : SJ;
+    if (T < nextT) return K.lerp(SS[i], nextS, E.inOutCubic((T - DEP[i]) / (nextT - DEP[i])));
+  }
+  return SJ;
+}
+
+// ---------- scene ----------
+const bgMap = document.createElementNS(NS, 'svg'); bgMap.setAttribute('class', 'map'); bgMap.setAttribute('width', W); bgMap.setAttribute('height', H);
+document.getElementById('stage').appendChild(bgMap);
+const bgG = document.createElementNS(NS, 'g'); bgMap.appendChild(bgG);
+// ghost lines of a bigger map, behind, for parallax
+[[[-1400, -900], [600, -900], [1100, -400], [4200, -400], [4700, -900], [7600, -900]],
+ [[-1400, 900], [1800, 900], [2300, 1400], [5200, 1400], [5700, 900], [7600, 900]],
+ [[700, -1800], [700, -600], [1500, 200], [1500, 2200]], [[3500, -2000], [3500, -300], [2800, 400], [2800, 2400]],
+ [[5200, -2000], [5200, 2400]]].forEach((P, i) => {
+  const pl = document.createElementNS(NS, 'polyline'); pl.setAttribute('points', P.map((p) => p.join(',')).join(' '));
+  pl.setAttribute('fill', 'none'); pl.setAttribute('stroke', i % 2 ? '#E6DFD0' : '#ECE5D7'); pl.setAttribute('stroke-width', 60); pl.setAttribute('stroke-linejoin', 'round'); pl.setAttribute('stroke-linecap', 'round');
+  bgG.appendChild(pl);
+});
+const map = document.createElementNS(NS, 'svg'); map.setAttribute('class', 'map'); map.setAttribute('width', W); map.setAttribute('height', H);
+map.style.zIndex = 10; document.getElementById('stage').appendChild(map);
+const G = document.createElementNS(NS, 'g'); map.appendChild(G);
+function poly(P, stroke) { const pl = document.createElementNS(NS, 'polyline'); pl.setAttribute('points', P.map((p) => p.join(',')).join(' ')); pl.setAttribute('fill', 'none'); pl.setAttribute('stroke', stroke); pl.setAttribute('stroke-linejoin', 'round'); pl.setAttribute('stroke-linecap', 'round'); G.appendChild(pl); return pl; }
+const branches = BR.map((P, i) => { const pl = poly(P, TCOL[i]); const len = seglen(P); pl.setAttribute('stroke-dasharray', `${len[len.length - 1]} 99999`); return { pl, len: len[len.length - 1] }; });
+const casing = poly(PTS, '#FAF7EE');
+const line = poly(PTS, '#1F1F1F');
+const done = poly(PTS, '#DFFF5A');
+line.setAttribute('stroke-dasharray', `${TOTAL} 99999`); casing.setAttribute('stroke-dasharray', `${TOTAL} 99999`);
+done.setAttribute('stroke-dasharray', `0 99999`);
+const dots = ST.map((p, i) => {
+  const g = document.createElementNS(NS, 'g');
+  const ring = document.createElementNS(NS, 'circle'); ring.setAttribute('fill', 'none'); ring.setAttribute('stroke', i === 3 ? '#E8603C' : '#1F1F1F');
+  const c = document.createElementNS(NS, 'circle'); c.setAttribute('fill', '#FFFDF8'); c.setAttribute('stroke', i === 3 ? '#E8603C' : '#1F1F1F');
+  g.appendChild(ring); g.appendChild(c); G.appendChild(g); return { g, c, ring, p };
+});
+const junc = document.createElementNS(NS, 'circle'); junc.setAttribute('fill', '#1F1F1F'); G.appendChild(junc);
+const tok = document.createElementNS(NS, 'g'); G.appendChild(tok);
+const tokHalo = document.createElementNS(NS, 'circle'); tokHalo.setAttribute('fill', 'rgba(223,255,90,.55)'); tok.appendChild(tokHalo);
+const tokC = document.createElementNS(NS, 'circle'); tokC.setAttribute('fill', '#1F1F1F'); tok.appendChild(tokC);
+const clip = document.createElementNS(NS, 'clipPath'); clip.id = 'tc'; const clipC = document.createElementNS(NS, 'circle'); clip.appendChild(clipC); map.appendChild(clip);
+const tokImg = document.createElementNS(NS, 'image'); tokImg.setAttribute('href', K.pub('showcase/christmas-preschool-pack/cover.webp')); tokImg.setAttribute('clip-path', 'url(#tc)'); tokImg.setAttribute('preserveAspectRatio', 'xMidYMin slice'); tok.appendChild(tokImg);
+// the svg <image> is not in document.images: preload a twin so K.run waits for it
+K.el('img', { src: K.pub('showcase/christmas-preschool-pack/cover.webp'), style: { position: 'absolute', width: '1px', height: '1px', opacity: 0 } });
+
+// station cards: real phone screens, cropped to the step
+const STOPS = [
+  ['01', 'Describe it', '22-phone-create', 380, 70],
+  ['02', 'See the price', '65-phone-configure', 1990, 90],
+  ['03', 'It makes the files', '69-phone-making', 1370, 60],
+  ['04', 'Your review', '24-phone-product', 330, 80],
+  ['05', 'The listing', '51-phone-listing', 930, 80],
+  ['06', 'Send a draft', '72-phone-listing-send', 1330, 90],
+];
+const SC = L.cw / 780;
+const cards = STOPS.map(([n, t, src, y0, drift], i) => {
+  const c = K.box(L.ax - L.cw / 2, L.ay - L.gap - L.ch, L.cw, L.ch, { cls: 'card', html: `<div class="strip"><span>Stop ${n} / 06</span><b>${i === 3 ? 'Waiting for you' : t}</b></div>` });
+  const crop = K.el('div', { cls: 'crop', parent: c, style: { top: '64px' } });
+  const img = K.el('img', { src: K.screen(src), parent: crop, style: { width: 780 * SC + 'px' } });
+  return { c, img, y0, drift };
+});
+const stems = STOPS.map(() => K.box(L.ax, L.ay - L.gap, 4, L.gap - 34, { cls: 'stem' }));
+const labels = STOPS.map(([n, t]) => K.box(0, 0, null, null, { cls: 'slabel', html: `<div class="n">${n}</div><div class="t" style="font-size:${L.lab}px">${t}</div>`, style: { width: 'auto', height: 'auto' } }));
+// stop 1: the sentence being typed into the real field (field at x 66–714, y 588–778 of the 780-wide shot)
+const typed = K.el('div', { cls: 'typed', parent: cards[0].c.querySelector('.crop'), style: { left: 84 * SC + 'px', width: 612 * SC + 'px', height: 150 * SC + 'px', fontSize: 28 * SC + 'px' } });
+const SENT = 'A Christmas preschool pack for ages 3–5, with tracing and counting';
+// stop 4: the seller's tap
+const pill = K.el('div', { cls: 'pill', parent: cards[3].c, html: '<i></i><span>Looks right? Tap to go on</span>' });
+const pillT = pill.querySelector('span');
+const cursor = K.cursor();
+// terminals
+const terms = TERM.map(([dy, logo, name]) => K.box(0, 0, 250, 120, { cls: 'term', html: `<img src="${K.pub('platforms/' + logo)}"><em>${name} · DRAFT</em>`, style: logo === 'wix.svg' ? { background: '#1F1F1F' } : {} }));
+const headTop = K.box(60, L.head, W - 120, null, { cls: 'head serif', style: { fontSize: L.headFs + 'px' } });
+const hookW = K.words(headTop, 'Your idea\nhas six stops.');
+const forkHead = K.box(60, L.head, W - 120, null, { cls: 'head serif', style: { fontSize: L.headFs * 0.86 + 'px' } });
+const forkW = K.words(forkHead, 'Sent as drafts.\nLive on your yes.');
+const tag = K.demoTag('Real app · demo workspace', 0, 0);
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Six stops.<br>You decide at every one.' });
+
+function cam(T) {
+  // follow the token with a little lag (average of three past positions: still a pure function of T)
+  const pos = [0, 0.06, 0.12].map((d) => at(tokenS(T - d)));
+  let cx = (pos[0][0] + pos[1][0] + pos[2][0]) / 3, cy = (pos[0][1] + pos[1][1] + pos[2][1]) / 3, s = 1;
+  let ax = L.ax, ay = L.ay;
+  // overview first, then the dive
+  const ov = 1 - K.p(T, 1.45, 2.05, E.inOutExpo);
+  const ovS = (W - 160) / 6400;
+  cx = K.lerp(cx, 2600 + T * 60, ov); cy = K.lerp(cy, 150, ov); s = K.lerp(1, ovS, ov); ay = K.lerp(ay, L.ovY, ov);
+  // pull back to see the fork
+  const fk = K.p(T, FORK - 0.35, FORK + 0.6, E.inOutCubic);
+  cx = K.lerp(cx, J[0] + 470 + (T - FORK) * 30, fk); cy = K.lerp(cy, 0, fk); s = K.lerp(s, L.forkS, fk); ay = K.lerp(ay, L.forkY, fk);
+  // breathe
+  s *= 1 + 0.012 * Math.sin(T * 1.3);
+  return { cx, cy, s, ax, ay };
+}
+
+K.run({
+  id: 'B01', title: 'Metro Line', dur: DUR, bpm: 118, mood: 'bright', key: 'D', intro: 0.5, cover: 7.2,
+  technique: 'SVG transit line draws on and the camera dives in; a product token rides it on the beat, each station opens into the real phone screen for that step, a red review stop waits for the tap, and the line forks to four store terminals',
+  caption: 'Every product takes the same six stops: describe it, see the price, let it make the files, review them, write the listing, send it to your store as a draft. Nothing goes on without your tap. Start free at makeandlist.com',
+  short: 'Your idea has six stops.',
+  beats: ['0–2 s: “Your idea has six stops.” — the line draws on', '2–6.6 s: describe it, see the price, it makes the files', '6.6–8.4 s: red stop — your review waits for your tap', '8.4–11 s: the listing, then a draft to send', '11–13 s: the line forks to four stores — live on your yes', '13–15 s: end card'],
+  cues: [[0.05, 'riser'], [1.25, 'pop'], [1.9, 'whoosh'], [ARR[0], 'hit'], [2.4, 'type'], [ARR[1] - 0.05, 'whoosh'], [ARR[1], 'pop'], [ARR[2] - 0.05, 'whoosh'], [ARR[2], 'pop'], [ARR[3] - 0.05, 'whoosh'], [ARR[3], 'pop'], [TAP, 'click'], [TAP + 0.15, 'hit'], [ARR[4] - 0.05, 'whoosh'], [ARR[4], 'pop'], [ARR[5] - 0.05, 'whoosh'], [ARR[5], 'pop'], [FORK, 'whoosh'], [FORK + 0.35, 'pop'], [FORK + 0.55, 'pop'], [FORK + 0.75, 'pop'], [FORK + 0.95, 'pop'], [13.0, 'hit']],
+}, (T) => {
+  const C = cam(T);
+  const toS = (p) => [C.ax + (p[0] - C.cx) * C.s, C.ay + (p[1] - C.cy) * C.s];
+  G.setAttribute('transform', `translate(${C.ax - C.cx * C.s} ${C.ay - C.cy * C.s}) scale(${C.s})`);
+  const ps = 0.45 * C.s + 0.2;
+  bgG.setAttribute('transform', `translate(${C.ax - C.cx * ps} ${C.ay - C.cy * ps}) scale(${ps})`);
+  bgMap.style.opacity = 0.9;
+  // stroke widths in screen px, whatever the zoom
+  const zp = K.p(T, 1.45, 2.05, E.inOutExpo);
+  const lw = K.lerp(12, 34, zp) / C.s;
+  line.setAttribute('stroke-width', lw); casing.setAttribute('stroke-width', lw * 1.6); done.setAttribute('stroke-width', lw * 0.42);
+  const draw = K.p(T, 0.1, 1.35, E.inOutCubic) * TOTAL;
+  line.setAttribute('stroke-dasharray', `${draw} 99999`); casing.setAttribute('stroke-dasharray', `${draw} 99999`);
+  const s = tokenS(T);
+  done.setAttribute('stroke-dasharray', `${Math.max(0, s - SS[0] + 600)} 99999`);
+  done.setAttribute('stroke-dashoffset', 0);
+  // station dots pop as the line reaches them
+  dots.forEach((d, i) => {
+    const reach = K.p(T, 0.1 + (SS[i] + 600) / TOTAL * 1.25, 0.1 + (SS[i] + 600) / TOTAL * 1.25 + 0.35, E.outBack);
+    const here = Math.abs(s - SS[i]) < 1 ? 1 : 0;
+    const r = K.lerp(10, 28, zp) / C.s * reach * (1 + 0.08 * here);
+    d.c.setAttribute('r', Math.max(0.01, r)); d.c.setAttribute('stroke-width', r * 0.34);
+    const passed = s >= SS[i] - 1;
+    d.c.setAttribute('fill', passed && zp > 0.5 ? (i === 3 && T < TAP ? '#E8603C' : '#DFFF5A') : '#FFFDF8');
+    // pulsing ring while the token waits here
+    const ph = ((T * 1.6) % 1);
+    d.ring.setAttribute('r', r * (1.2 + ph * 1.4)); d.ring.setAttribute('stroke-width', r * 0.18);
+    d.ring.setAttribute('opacity', here && zp > 0.9 ? (1 - ph) * (i === 3 && T < TAP ? 1 : 0.6) : 0);
+    d.p && d.g.setAttribute('transform', `translate(${d.p[0]} ${d.p[1]})`);
+  });
+  // branches to the stores
+  branches.forEach((b, i) => {
+    const p = K.p(T, FORK - 0.1 + i * 0.12, FORK + 0.55 + i * 0.12, E.outCubic);
+    b.pl.setAttribute('stroke-width', lw); b.pl.setAttribute('stroke-dasharray', `${p * b.len} 99999`);
+  });
+  junc.setAttribute('cx', J[0]); junc.setAttribute('cy', J[1]); junc.setAttribute('r', (T > FORK - 0.1 ? 1 : 0) * lw * 0.9);
+  // the token
+  const tp = at(s), tr = K.lerp(16, 46, zp) / C.s, tIn = K.p(T, 0.9, 1.4, E.outBack);
+  const fade = 1 - K.p(T, FORK + 0.2, FORK + 0.6, E.inCubic);
+  tok.setAttribute('transform', `translate(${tp[0]} ${tp[1]}) scale(${Math.max(0.001, tIn * (0.4 + 0.6 * fade))})`);
+  tok.setAttribute('opacity', fade);
+  tokC.setAttribute('r', tr); tokHalo.setAttribute('r', tr * (1.35 + 0.08 * Math.sin(T * 6)));
+  clipC.setAttribute('r', tr * 0.84); clipC.setAttribute('cx', tp[0]); clipC.setAttribute('cy', tp[1]);
+  clipC.setAttribute('transform', `translate(${-tp[0]} ${-tp[1]})`);
+  tokImg.setAttribute('x', -tr * 0.84); tokImg.setAttribute('y', -tr * 0.84); tokImg.setAttribute('width', tr * 1.68); tokImg.setAttribute('height', tr * 1.68);
+  // station cards
+  cards.forEach((cd, i) => {
+    const inA = ARR[i] - 0.12, outA = DEP[i] - 0.04;
+    const pin = K.p(T, inA, inA + 0.55, E.outExpo), pout = K.p(T, outA, outA + 0.3, E.inCubic);
+    const v = pin * (1 - pout);
+    const dp = toS(ST[i]);
+    cd.c.style.visibility = v > 0.001 ? 'visible' : 'hidden';
+    cd.c.style.opacity = Math.min(1, v * 1.6);
+    const fl = Math.sin(T * 1.7 + i) * 6;
+    cd.c.style.left = (dp[0] - L.cw / 2) + 'px'; cd.c.style.top = (dp[1] - L.gap - L.ch) + 'px';
+    cd.c.style.transform = `translateY(${(1 - pin) * 60 + pout * 40 + fl}px) scale(${0.35 + 0.65 * pin - 0.12 * pout}) rotate(${(1 - pin) * -3}deg)`;
+    cd.c.style.filter = pout > 0.05 && pout < 0.95 ? `blur(${pout * 6}px)` : 'none';
+    const dr = K.p(T, ARR[i], DEP[i] + 0.3, E.inOutCubic) * cd.drift;
+    cd.img.style.transform = `translateY(${-(cd.y0 + dr) * SC}px)`;
+    const st = stems[i];
+    st.style.left = dp[0] + 'px'; st.style.top = (dp[1] - L.gap) + 'px';
+    st.style.transform = `scaleY(${pin * (1 - pout)})`; st.style.opacity = v > 0.01 ? 1 : 0;
+    const lb = labels[i]; const lp = K.p(T, ARR[i] - 0.05, ARR[i] + 0.45, E.outExpo) * (1 - K.p(T, DEP[i], DEP[i] + 0.25, E.inCubic));
+    lb.style.left = dp[0] + 'px'; lb.style.top = (dp[1] + 52) + 'px';
+    lb.style.opacity = lp; lb.style.transform = `translateX(-50%) translateY(${(1 - lp) * 26}px)`;
+  });
+  // typing at stop 1
+  const n = Math.round(K.p(T, 2.3, 3.0, E.linear) * SENT.length);
+  typed.innerHTML = SENT.slice(0, n) + (T < 3.15 && Math.floor(T * 4) % 2 === 0 ? '<u></u>' : '');
+  typed.style.top = ((606 - cards[0].y0 - K.p(T, ARR[0], DEP[0] + 0.3, E.inOutCubic) * cards[0].drift) * SC) + 'px';
+  typed.style.opacity = T > 2.25 ? 1 : 0;
+  // the review stop: waits, the tap, approved
+  const ok = T >= TAP;
+  pill.style.background = ok ? '#DFFF5A' : '#E8603C'; pill.style.color = ok ? '#1F1F1F' : '#FFFDF8';
+  pillT.textContent = ok ? 'Approved by you' : 'Looks right? Tap to go on';
+  const pp = ok ? 1 + 0.14 * Math.exp(-(T - TAP) * 6) * Math.sin((T - TAP) * 22) : 1 + 0.03 * Math.sin(T * 9);
+  pill.style.transform = `translateX(-50%) scale(${pp * (T > TAP - 0.06 && T < TAP + 0.08 ? 0.95 : 1)})`;
+  const pr = pill.getBoundingClientRect();
+  const px = pr.left + pr.width * 0.62, py = pr.top + pr.height * 0.55;
+  const ca = K.p(T, ARR[3] + 0.35, TAP - 0.05, E.outCubic);
+  cursor.at(K.lerp(W * 0.86, px, ca), K.lerp(H * 0.62, py, ca), T > TAP - 0.06 && T < TAP + 0.1);
+  cursor.hide(K.win(T, ARR[3] + 0.3, DEP[3], 0.18));
+  cursor.ripple(px, py, T, TAP);
+  // terminals
+  terms.forEach((tm, i) => {
+    const end = BR[i][2], sp = toS(end);
+    const p = K.p(T, FORK + 0.3 + i * 0.2, FORK + 0.85 + i * 0.2, E.outBack);
+    const tw = 250 * C.s / L.forkS * 0.9, th = 116 * C.s / L.forkS * 0.9;
+    tm.style.width = tw + 'px'; tm.style.height = th + 'px';
+    tm.style.left = (sp[0] - tw * 0.08) + 'px'; tm.style.top = (sp[1] - th / 2) + 'px';
+    tm.style.opacity = K.p(T, FORK + 0.3 + i * 0.2, FORK + 0.5 + i * 0.2, E.linear);
+    tm.style.transform = `scale(${0.6 + 0.4 * p}) translateY(${Math.sin(T * 1.5 + i) * 4}px)`;
+  });
+  // headlines
+  K.reveal(hookW, T, 0.1, { kind: 'up', stagger: 0.09, out: 1.45 });
+  K.reveal(forkW, T, FORK + 0.1, { kind: 'up', stagger: 0.08 });
+  // the demo tag rides on the open card
+  const open = cards.findIndex((cd) => cd.c.style.visibility === 'visible' && Number(cd.c.style.opacity) > 0.6);
+  if (open >= 0) { const r = cards[open].c.getBoundingClientRect(); tag.style.left = (r.left + r.width / 2 + 22) + 'px'; tag.style.top = (r.bottom + 26) + 'px'; }
+  tag.style.opacity = open >= 0 ? 1 : 0;
+  end(T);
+});
+</script></body></html>

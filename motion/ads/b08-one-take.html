@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B08 · One-Take Scroll</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F3EEE3; }
+.lens { position: absolute; inset: 0; overflow: hidden; perspective: 1800px; }
+.col { position: absolute; left: 0; top: 0; transform-origin: 50% 0; will-change: transform; }
+.sec { position: absolute; left: 0; overflow: hidden; border-radius: 34px; background: #FAF7EE; box-shadow: 0 50px 90px -50px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; }
+.sec img { position: absolute; left: 0; top: 0; display: block; }
+.band { position: absolute; left: 0; display: flex; align-items: center; justify-content: space-between; font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .08em; color: #45403A; text-transform: uppercase; }
+.band b { font: 800 30px 'Archivo'; color: #1F1F1F; letter-spacing: 0; }
+.band i { flex: 1; height: 2px; margin: 0 22px; background: repeating-linear-gradient(90deg, #BDB5A8 0 10px, transparent 10px 18px); }
+.ghost { position: absolute; font: 800 520px/1 'Playfair Display'; color: transparent; -webkit-text-stroke: 2px rgba(31,31,31,.07); white-space: nowrap; }
+.capbox { position: absolute; z-index: 30; }
+.step { font: 500 24px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #45403A; text-transform: uppercase; display: flex; gap: 14px; align-items: center; }
+.step em { font-style: normal; background: #1F1F1F; color: #DFFF5A; padding: 4px 12px; border-radius: 8px; }
+.ctext { font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; margin-top: 14px; }
+.rail { position: absolute; z-index: 30; width: 6px; border-radius: 3px; background: rgba(31,31,31,.12); }
+.rail b { position: absolute; left: 0; right: 0; top: 0; border-radius: 3px; background: #1F1F1F; }
+.dot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -8px; border-radius: 50%; background: #F3EEE3; border: 3px solid #1F1F1F; }
+.hiframe { position: absolute; border: 5px solid #DFFF5A; border-radius: 26px; box-shadow: 0 0 0 3px #1F1F1F; pointer-events: none; }
+.fade { position: absolute; left: 0; right: 0; pointer-events: none; z-index: 20; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<svg width="0" height="0" style="position:absolute"><filter id="vb" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur id="vbg" stdDeviation="0 0"/></filter></svg>
+<script src="kit.js"></script>
+<script>
+// B08 — one continuous take down a single column of real phone screens: speed ramps between steps, holds on each,
+// vertical motion blur on the ramps, pinned captions, and a hard brake at the review step.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 128;
+const L = tall
+  ? { colX: 120, colW: 840, anchor: 980, capX: 65, capY: 285, capW: 950, capFs: 84, align: 'center', gap: 170, rail: [1012, 560, 640] }
+  : { colX: 520, colW: 500, anchor: 690, capX: 60, capY: 300, capW: 420, capFs: 70, align: 'left', gap: 150, rail: [490, 300, 760] };
+const k = L.colW / 780;
+
+// Sections of the column: [screen, y0, y1 (source px), band label]
+const SECS = [
+  ['22-phone-create', 0, 1720, 'Describe'],
+  ['65-phone-configure', 2240, 3560, 'The quote'],
+  ['69-phone-making', 1540, 2470, 'Making'],
+  ['24-phone-product', 130, 2110, 'Review'],
+  ['72-phone-listing-send', 1080, 2420, 'Send a draft'],
+];
+const lens = K.box(0, 0, W, H, { cls: 'lens' });
+const col = K.el('div', { cls: 'col', parent: lens, style: { left: L.colX + 'px', width: L.colW + 'px' } });
+let y = 0;
+const off = SECS.map(([src, y0, y1, label], i) => {
+  if (i > 0) {
+    K.el('div', { cls: 'band', parent: col, style: { top: y + 'px', width: L.colW + 'px', height: L.gap + 'px' }, html: `<span>Step 0${i + 1}</span><i></i><b>${label}</b>` });
+    y += L.gap;
+  }
+  const h = (y1 - y0) * k;
+  const s = K.el('div', { cls: 'sec', parent: col, style: { top: y + 'px', width: L.colW + 'px', height: h + 'px' } });
+  K.el('img', { src: K.screen(src), parent: s, style: { width: L.colW + 'px', transform: `translateY(${-y0 * k}px)` } });
+  const o = { top: y, y0 }; y += h; return o;
+});
+const COLH = y;
+// Source y of a section → column y.
+const cy = (i, sy) => off[i].top + (sy - off[i].y0) * k;
+
+// Ghost numerals drift behind the column at a slower rate (depth).
+const ghosts = [1, 2, 3, 4, 5].map((n, i) => K.el('div', { cls: 'ghost', parent: lens, html: '0' + n, style: { left: (tall ? (i % 2 ? 560 : -60) : -40) + 'px', zIndex: 0 } }));
+col.style.zIndex = 2;
+// A lime frame around the review preview at the brake.
+const hf = K.el('div', { cls: 'hiframe', parent: col, style: { left: '18px', width: (L.colW - 36) + 'px', top: cy(3, 1150) + 'px', height: (cy(3, 1790) - cy(3, 1150)) + 'px' } });
+const hf2 = K.el('div', { cls: 'hiframe', parent: col, style: { left: (14 * k) + 'px', width: (L.colW - 28 * k) + 'px', top: cy(4, 1985) + 'px', height: (cy(4, 2420) - cy(4, 1985) - 8) + 'px' } });
+
+// Fades so the captions sit on clean paper.
+const fTop = K.box(0, 0, W, tall ? 760 : 0, { cls: 'fade', style: { background: 'linear-gradient(#F3EEE3 0%, #F3EEE3 80%, rgba(243,238,227,0) 100%)' } });
+const fBot = K.box(0, H - (tall ? 520 : 180), W, tall ? 520 : 180, { cls: 'fade', style: { background: tall ? 'linear-gradient(rgba(243,238,227,0), rgba(243,238,227,.72) 60%, rgba(243,238,227,.9))' : 'linear-gradient(rgba(243,238,227,0), rgba(243,238,227,.95))' } });
+if (!tall) { K.box(0, 0, W, 200, { cls: 'fade', style: { background: 'linear-gradient(#F3EEE3, rgba(243,238,227,0))' } }); K.box(0, 0, 500, H, { cls: 'fade', style: { background: 'linear-gradient(90deg, #F3EEE3 85%, rgba(243,238,227,0))' } }); }
+
+// Pinned captions, one per hold.
+const CAPS = [
+  ['One idea.', 'One idea.\nKeep scrolling.'],
+  ['Step 02', 'See the price\nbefore it’s made.'],
+  ['Step 03', 'It makes the\npages and images.'],
+  ['Step 04', 'You review\nevery file.'],
+  ['Step 05', 'Send it\nas a draft.'],
+];
+const capEls = CAPS.map(([s, t], i) => {
+  const b = K.box(L.capX, L.capY, L.capW, null, { cls: 'capbox', style: { textAlign: L.align } });
+  const st = K.el('div', { cls: 'step', parent: b, html: i === 0 ? '<em>Make&amp;List</em><span>one take</span>' : `<em>0${i + 1}</em><span>of 05</span>`, style: { justifyContent: tall ? 'center' : 'flex-start' } });
+  const tx = K.el('div', { cls: 'ctext', parent: b, style: { fontSize: L.capFs + 'px' } });
+  return { b, st, w: K.words(tx, t) };
+});
+const sub = K.box(L.capX, 0, L.capW, null, { cls: 'capbox', style: { textAlign: L.align, font: `600 ${tall ? 34 : 30}px/1.25 Archivo`, color: '#45403A', top: (tall ? L.capY + 236 : L.capY + 330) + 'px' } });
+const subW = K.words(sub, 'Public only when you say.');
+const sub2 = K.box(L.capX, 0, L.capW, null, { cls: 'capbox', style: { textAlign: L.align, font: `600 ${tall ? 34 : 30}px/1.25 Archivo`, color: '#45403A', top: (tall ? L.capY + 236 : L.capY + 330) + 'px' } });
+const sub2W = K.words(sub2, 'Nothing goes live yet.');
+
+// Rail with five stops.
+const [rx, ry, rh] = L.rail;
+const rail = K.box(rx, ry, 6, rh, { cls: 'rail', html: '<b></b>' });
+const railB = rail.firstChild;
+const dots = [0, 1, 2, 3, 4].map((i) => K.box(rx, ry + rh * i / 4, 22, 22, { cls: 'dot', style: { zIndex: 31 } }));
+const tag = K.demoTag('Real app · demo workspace', 0, 0); tag.style.zIndex = 40;
+const end = K.endCard(13.0, { line: 'One idea. One take.<br>Your yes.' });
+if (tall) [...document.getElementById('stage').lastElementChild.children].forEach((n) => { n.style.top = (parseFloat(n.style.top) - 130) + 'px'; });
+
+// Camera: holds drift slowly; ramps are inOutExpo (speed ramps). [t0, t1, fromY, toY, kind]
+const B = (n) => n * BEAT;
+const FOCUS = [[cy(0, 560), cy(0, 960)], [cy(1, 2560), cy(1, 2960)], [cy(2, 1700), cy(2, 2000)], [cy(3, 700), cy(3, 820)], [cy(4, 1420), cy(4, 1760)]];
+const HOLD = [[0, B(3)], [B(4), B(8)], [B(9), B(13)], [B(14), B(20)], [B(21), 13.2]];
+function camAt(T) {
+  for (let i = 0; i < HOLD.length; i++) {
+    const [a, b] = HOLD[i];
+    if (T <= b) {
+      if (T >= a || i === 0) {
+        const p = K.clamp((T - a) / (b - a));
+        let yv = K.lerp(FOCUS[i][0], FOCUS[i][1], i === 3 ? E.outCubic(p) : p);
+        if (i === 3) { const t = T - a; yv += 70 * Math.exp(-t * 5.5) * Math.sin(t * 13); } // the brake overshoots, then settles
+        return yv;
+      }
+      // ramp from hold i-1 to hold i; the ramp into review is the hard brake
+      const pa = HOLD[i - 1][1], p = K.clamp((T - pa) / (a - pa));
+      // cubic in, quintic out: it arrives fast and stops hard
+      const brake = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 5) / 2;
+      return K.lerp(FOCUS[i - 1][1], FOCUS[i][0], i === 3 ? brake : E.inOutExpo(p));
+    }
+  }
+  return FOCUS[4][1];
+}
+const stepAt = (T) => { let s = 0; HOLD.forEach(([a], i) => { if (T >= a - 0.2) s = i; }); return s; };
+
+K.run({
+  id: 'B08', title: 'One-Take Scroll', dur: DUR, bpm: 128, mood: 'drive', key: 'E', intro: 1.875, cover: 7.4,
+  technique: 'One tall column of real phone screens filmed as a single take: the camera dollies down with speed ramps and plateau holds, vertical-only motion blur and a slight tilt on the ramps, pinned step captions, a progress rail, and a hard brake with overshoot at the review step',
+  caption: 'One idea, all the way down: describe it, see the price before anything is made, let it make the pages, review every file, and send it to your store as a draft. Start free at makeandlist.com',
+  short: 'One idea. Keep scrolling.',
+  beats: ['0–1.9 s: “One idea. Keep scrolling.” on the real Create screen', '1.9–4.2 s: ramp → the quote, before anything is made', '4.2–6.6 s: ramp → making the pages', '6.6–9.4 s: hard brake at the review step', '9.8–12.9 s: send it as a draft — public only when you say', '13–15 s: end card'],
+  cues: [[0.1, 'pop'], [B(4), 'whoosh'], [B(4) + 0.15, 'pop'], [B(9), 'whoosh'], [B(9) + 0.15, 'pop'], [B(14), 'whoosh'], [B(14) + 0.02, 'hit'], [B(15), 'pop'], [B(21), 'whoosh'], [B(21) + 0.15, 'pop'], [B(24), 'pop'], [12.2, 'riser'], [13.0, 'hit']],
+}, (T) => {
+  const yv = camAt(T), v = yv - camAt(T - 1 / 30);
+  const speed = Math.abs(v);
+  const ramp = K.clamp(speed / 160);
+  // camera: translate, pull back a touch and tilt with speed
+  const intro = K.p(T, 0, 0.9, E.outExpo);
+  const sc = (1 - 0.06 * ramp) * (0.94 + 0.06 * intro);
+  col.style.transform = `translateY(${L.anchor - yv + (1 - intro) * 220}px) rotateX(${K.clamp(v / 40, -14, 14)}deg) scale(${sc})`;
+  col.style.transformOrigin = `50% ${yv}px`;
+  col.style.opacity = K.p(T, 0, 0.35, E.linear);
+  const sigma = speed > 4 ? Math.min(46, speed * 0.32) : 0;
+  document.getElementById('vbg').setAttribute('stdDeviation', `0 ${sigma.toFixed(2)}`);
+  col.style.filter = sigma > 0 ? 'url(#vb)' : 'none';
+  // ghost numerals: slower parallax, so the column feels in front
+  ghosts.forEach((g, i) => { g.style.top = (L.anchor - 260 + (i * 1500 - yv) * 0.35) + 'px'; g.style.opacity = tall ? 1 : 0; });
+
+  // captions: swap on the cut, masked up
+  const st = stepAt(T);
+  capEls.forEach((c, i) => {
+    const a = i === 0 ? 0.05 : HOLD[i][0] - 0.05, b = i < 4 ? HOLD[i + 1][0] - 0.35 : 12.75;
+    K.reveal(c.w, T, a, { kind: 'up', stagger: 0.05, dur: 0.45, out: b });
+    const sp = K.p(T, a, a + 0.4, E.outExpo) * (1 - K.p(T, b, b + 0.25, E.inCubic));
+    c.st.style.opacity = sp; c.st.style.transform = `translateY(${(1 - sp) * 20}px)`;
+  });
+  K.reveal(sub2W, T, B(15) + 0.2, { kind: 'up', stagger: 0.05, out: HOLD[4][0] - 0.35 });
+  K.reveal(subW, T, B(21) + 0.4, { kind: 'up', stagger: 0.05, out: 12.75 });
+
+  // review frame draws in after the brake; the selected store gets one too
+  const f1 = K.p(T, B(15), B(15) + 0.45, E.outBack) * (1 - K.p(T, B(20) + 0.1, B(21), E.inCubic));
+  hf.style.opacity = K.p(T, B(15), B(15) + 0.15, E.linear) * (1 - K.p(T, B(20) + 0.1, B(21), E.inCubic));
+  hf.style.transform = `scale(${0.92 + 0.08 * f1 + 0.008 * Math.sin(T * 5)})`;
+  const f2 = K.p(T, B(24), B(24) + 0.45, E.outBack);
+  hf2.style.opacity = K.p(T, B(24), B(24) + 0.15, E.linear);
+  hf2.style.transform = `scale(${0.92 + 0.08 * f2 + 0.008 * Math.sin(T * 5)})`;
+
+  // rail: progress tracks the camera, the current stop fills
+  const prog = K.clamp((yv - FOCUS[0][0]) / (FOCUS[4][1] - FOCUS[0][0]));
+  railB.style.height = (prog * 100) + '%';
+  dots.forEach((d, i) => { const on = i <= st; d.style.background = on ? (i === st ? '#DFFF5A' : '#1F1F1F') : '#F3EEE3'; d.style.transform = `scale(${i === st ? 1.25 + 0.05 * Math.sin(T * 6) : 1})`; });
+  const rIn = K.p(T, 0.4, 1.0, E.outExpo);
+  [rail, ...dots].forEach((n) => { n.style.opacity = rIn * (1 - K.p(T, 12.7, 13.0, E.linear)); });
+
+  tag.style.left = (tall ? L.colX + 20 : L.colX + 10) + 'px'; tag.style.top = (tall ? 1196 : 216) + 'px';
+  tag.style.opacity = K.win(T, 0.4, 12.85);
+  end(T);
+});
+</script></body></html>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B09 · Shape Match Cuts</title><link rel="stylesheet" href="kit.css">
+<style>
+.shot { position: absolute; inset: 0; overflow: hidden; }
+.shot img.src { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: block; }
+.shot .shadow { position: absolute; border-radius: 22px; box-shadow: 0 60px 110px -40px rgba(31,31,31,.55), 0 20px 30px -20px rgba(31,31,31,.3); }
+.outline { position: absolute; z-index: 30; border: 6px solid #DFFF5A; box-shadow: 0 0 0 2px rgba(31,31,31,.85), inset 0 0 0 2px rgba(31,31,31,.85); pointer-events: none; }
+.flash { position: absolute; inset: 0; background: #FFFDF8; z-index: 50; pointer-events: none; }
+.tile { position: absolute; border-radius: 64px; background: #FFFDF8; display: grid; place-items: center; box-shadow: 0 60px 100px -50px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.tile img { max-width: 68%; max-height: 42%; }
+.tname { position: absolute; left: 0; right: 0; text-align: center; font: 500 26px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #45403A; }
+.cap { position: absolute; z-index: 40; text-align: center; font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; }
+.cap .plate { display: inline-block; background: rgba(250,247,238,.95); padding: 16px 34px 20px; border-radius: 30px; box-shadow: 0 30px 60px -36px rgba(31,31,31,.55), 0 0 0 1px rgba(31,31,31,.06); transform-origin: 50% 50%; }
+.lbl { position: absolute; z-index: 40; left: 0; right: 0; text-align: center; }
+.lbl span { display: inline-block; font: 500 19px 'IBM Plex Mono', monospace; color: #45403A; background: rgba(250,247,238,.88); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; }
+.beatdots { position: absolute; z-index: 40; display: flex; gap: 10px; }
+.beatdots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(31,31,31,.18); display: block; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// B09 — graphic match cuts on the beat: the same rectangle across the owner's products, the same circle across
+// the app's steps, the same pill across its buttons, the same tile across the stores; 2-frame flash + punch on each cut.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 120;
+const AX = W / 2, AY = tall ? 900 : 720;
+const RH = tall ? 700 : 580, D = tall ? 170 : 150, PH = tall ? 112 : 98, TS = tall ? 320 : 280;
+const SC = K.screen, SP = (p) => K.pub('showcase/' + p);
+// [t0, kind, src, natW, natH, shape {cx, cy, w, h} in source px, background, tag]
+const COVER = (pack, bg) => ['rect', SP(pack + '/cover.webp'), 900, 1164, { cx: 450, cy: 582, w: 900, h: 1164, r: 24 }, bg, 'own'];
+const STEP = (src, cx) => ['circle', SC(src), 780, src.startsWith('69') ? 2692 : 3800, { cx, cy: 225.5, w: 48, h: 48 }, '#FAF7EE', 'real'];
+const SHOTS = [
+  [0.0, ...COVER('christmas-preschool-pack', '#F3DFE1')],
+  [1.0, ...COVER('halloween-preschool-pack', '#F7E2D6')],
+  [1.5, ...COVER('fall-activity-pack', '#F5E4D3')],
+  [2.0, ...COVER('thanksgiving-kids-table', '#F4E5D6')],
+  [2.5, ...COVER('coloring-christmas', '#F1DFE2')],
+  [3.0, ...COVER('activity-halloween', '#F6E3D8')],
+  [3.5, 'rect', SP('christmas-preschool-pack/interior-01.webp'), 900, 1164, { cx: 450, cy: 582, w: 900, h: 1164, r: 24 }, '#EEEAE1', 'own'],
+  [4.0, 'bridge', K.canvas('PrintArea'), 2880, 2360, { cx: 1328, cy: 1128, w: 524, h: 732, r: 6 }, '#E3DED6', 'canvas'],
+  [4.5, 'circle', SC('22-phone-create'), 780, 3400, { cx: 474.5, cy: 1955, w: 96, h: 96 }, '#F4EFE5', 'real'],
+  [5.0, ...STEP('69-phone-making', 221.5)],
+  [5.5, ...STEP('24-phone-product', 335.5)],
+  [6.0, ...STEP('51-phone-listing', 447.5)],
+  [6.5, ...STEP('72-phone-listing-send', 559.5)],
+  [7.0, 'pill', SC('22-phone-create'), 780, 3400, { cx: 139.5, cy: 1627.5, w: 147, h: 79 }, '#FAF7EE', 'real'],
+  [7.5, 'pill', SC('24-phone-product'), 780, 3800, { cx: 389.5, cy: 3589.5, w: 667, h: 91 }, '#FAF7EE', 'real'],
+  [8.0, 'pill', SC('51-phone-listing'), 780, 3800, { cx: 389.5, cy: 3589.5, w: 599, h: 91 }, '#FAF7EE', 'real'],
+  [8.5, 'pill', SC('72-phone-listing-send'), 780, 3800, { cx: 254.5, cy: 3399.5, w: 377, h: 79 }, '#FAF7EE', 'real'],
+];
+const STORES = [['woocommerce', 'WooCommerce'], ['ikas', 'ikas'], ['wix', 'Wix'], ['gumroad', 'Gumroad'], ['shopware', 'Shopware'], ['whop', 'Whop'], ['salla', 'Salla'], ['shopline', 'SHOPLINE']];
+const T_BADGE = 9.0, T_FINAL = 11.0;
+const BG_T = ['#FAF7EE', '#EFEADF'];
+// Every cut on the beat grid.
+const CUTS = [...SHOTS.slice(1).map((s) => s[0]), ...STORES.map((_, i) => T_BADGE + i * BEAT / 2), T_FINAL];
+
+// size the shape lands at
+const target = (kind, sh) => kind === 'rect' || kind === 'bridge' ? RH / sh.h : kind === 'circle' ? D / sh.w : PH / sh.h;
+const layers = SHOTS.map((s) => {
+  const [, kind, src, nw, nh, sh, bg] = s;
+  const lay = K.box(0, 0, W, H, { cls: 'shot', style: { background: bg, visibility: 'hidden' } });
+  const shadow = kind === 'rect' ? K.el('div', { cls: 'shadow', parent: lay }) : null;
+  const img = K.el('img', { cls: 'src', src, parent: lay, style: { width: nw + 'px', height: nh + 'px', borderRadius: kind === 'rect' ? '24px' : '0' } });
+  return { lay, img, shadow };
+});
+// Store tiles
+const badges = STORES.map(([f, n], i) => {
+  const lay = K.box(0, 0, W, H, { cls: 'shot', style: { background: BG_T[i % 2], visibility: 'hidden' } });
+  const t = K.el('div', { cls: 'tile', parent: lay, style: { background: f === 'wix' ? '#1F1F1F' : '#FFFDF8', left: AX - TS / 2 + 'px', top: AY - TS / 2 + 'px', width: TS + 'px', height: TS + 'px' } });
+  K.el('img', { src: K.pub('platforms/' + f + '.svg'), parent: t });
+  K.el('div', { cls: 'tname', parent: lay, html: n, style: { top: AY + TS / 2 + 34 + 'px' } });
+  return { lay, t };
+});
+// Final: the phone with the real Send step.
+const finalLay = K.box(0, 0, W, H, { cls: 'shot', style: { background: '#F1ECE1', visibility: 'hidden' } });
+const PW = tall ? 470 : 380;
+const ph = K.phone(AX - PW / 2, (tall ? 990 : 710) - PW * 1.025, PW, SC('72-phone-listing-send'), { parent: finalLay });
+const outline = K.box(0, 0, 10, 10, { cls: 'outline' });
+const flash = K.box(0, 0, W, H, { cls: 'flash', style: { opacity: 0 } });
+
+// Captions
+const capY = tall ? 290 : 56, capFs = tall ? 84 : 72;
+const CAPS = [[0.0, 1.0, 'Same idea,\nevery shape.'], [1.0, 3.45, 'Every cover.'], [3.5, 3.97, 'Every page.'], [4.0, 4.47, 'Every design.'], [4.5, 6.95, 'Every step.'], [7.0, 8.95, 'Every button\nis yours to press.'], [9.0, 10.95, 'Your stores.'], [11.0, 12.85, 'Sent as a draft.\nLive on your yes.']];
+const caps = CAPS.map(([a, b, t]) => { const c = K.box(65, capY, W - 130, null, { cls: 'cap', style: { fontSize: capFs + 'px' } }); const plate = K.el('div', { cls: 'plate', parent: c }); return { a, b, plate, w: K.words(plate, t) }; });
+// Honesty labels
+const lblY = tall ? 500 : (AY - RH / 2 - 56);
+const LBL = { own: 'Examples made with MakeAndList by its owner', real: 'Real app · demo workspace', canvas: 'Product design · sample data' };
+const lbls = Object.fromEntries(Object.entries(LBL).map(([k, v]) => [k, K.box(0, lblY, W, null, { cls: 'lbl', html: `<span>${v}</span>` })]));
+lbls.real.style.top = (tall ? 1200 : H - 104) + 'px';
+const dotsEl = K.box(0, 0, null, null, { cls: 'beatdots', html: '<i></i>'.repeat(8), style: { left: AX - 75 + 'px', top: (tall ? 1180 : H - 40) + 'px', width: 'auto', height: 'auto' } });
+const dots = [...dotsEl.children];
+const end = K.endCard(13.0, { line: 'One idea.<br>Every shape it takes.' });
+if (tall) [...document.getElementById('stage').lastElementChild.children].forEach((n) => { n.style.top = (parseFloat(n.style.top) - 130) + 'px'; });
+
+const lastCut = (T) => { let c = 0; CUTS.forEach((t) => { if (T >= t) c = t; }); return c; };
+function setOutline(w, h, r, sc, op) {
+  outline.style.left = AX - w / 2 + 'px'; outline.style.top = AY - h / 2 + 'px';
+  outline.style.width = w + 'px'; outline.style.height = h + 'px'; outline.style.borderRadius = r + 'px';
+  outline.style.transform = `scale(${sc})`; outline.style.opacity = op;
+}
+const shapeBox = (kind, sh) => { const s = target(kind, sh); return kind === 'circle' ? [D, D, D / 2] : kind === 'pill' ? [sh.w * s + 18, PH + 18, (PH + 18) / 2] : [sh.w * s + 22, sh.h * s + 22, 30]; };
+
+K.run({
+  id: 'B09', title: 'Shape Match Cuts', dur: DUR, bpm: 120, mood: 'bright', key: 'G', intro: 1.0, cover: 5.6,
+  technique: 'Graphic match cuts on every beat: the same rectangle across the owner’s product covers, a rectangle that becomes the artwork’s sun, the same circle across the app’s step markers, the same pill across its buttons, the same tile across eight store badges; a lime outline holds the shape while the picture changes, with a 2-frame flash and a punch on each cut',
+  caption: 'Covers, pages, steps, buttons, stores — one idea moves through every shape, and nothing goes live until you say yes. Start free at makeandlist.com',
+  short: 'Same idea, every shape.',
+  beats: ['0–3.5 s: “Same idea, every shape.” — the same rectangle across the owner’s covers', '3.5–4.5 s: a page, then the artwork; the rectangle closes into its sun', '4.5–7 s: the same circle — Make, Review, List, Send', '7–9 s: the same pill — every button is yours to press', '9–11 s: the same tile — the seller’s own stores', '11–12.9 s: the real Send step — sent as a draft, live on your yes'],
+  cues: [[0.05, 'hit'], ...CUTS.filter((t) => t < T_BADGE).map((t) => [t, t === 4.5 || t === 7.0 ? 'hit' : 'pop']), [4.1, 'whoosh'], ...STORES.map((_, i) => [T_BADGE + i * BEAT / 2, i === 0 ? 'hit' : 'click']), [T_FINAL, 'whoosh'], [11.6, 'pop'], [12.3, 'riser'], [13.0, 'hit']],
+}, (T) => {
+  const cut = lastCut(T), local = T - cut;
+  // 2-frame flash on each cut, punch that settles in ~0.22 s
+  const fr = Math.round(local * 30);
+  flash.style.opacity = T > 0.2 && T < 13 ? (fr === 0 ? 0.75 : fr === 1 ? 0.35 : 0) : 0;
+  const punch = 1 + 0.1 * (1 - E.outExpo(K.clamp(local / 0.22)));
+
+  // which shot
+  let si = -1; SHOTS.forEach((s, i) => { if (T >= s[0] && T < T_BADGE) si = i; });
+  layers.forEach((l, i) => { l.lay.style.visibility = i === si ? 'visible' : 'hidden'; });
+  let bi = -1; if (T >= T_BADGE && T < T_FINAL) bi = Math.min(7, Math.floor((T - T_BADGE) / (BEAT / 2)));
+  badges.forEach((b, i) => { b.lay.style.visibility = i === bi ? 'visible' : 'hidden'; });
+  finalLay.style.visibility = T >= T_FINAL ? 'visible' : 'hidden';
+
+  let ow = 0, oh = 0, orad = 0, oop = 0;
+  if (si >= 0) {
+    const [t0, kind, , nw, nh, sh0] = SHOTS[si];
+    const dur = (SHOTS[si + 1] ? SHOTS[si + 1][0] : T_BADGE) - t0;
+    const drift = 1 + 0.04 * K.clamp(local / dur);
+    let sh = sh0, s = target(kind, sh0);
+    [ow, oh, orad] = shapeBox(kind, sh0);
+    if (kind === 'bridge') {
+      // the rectangle closes onto the sun while the camera pushes in
+      const p = K.p(T, 4.12, 4.5, E.inOutCubic);
+      const sun = { cx: 1432, cy: 933, w: 314, h: 314 };
+      sh = { cx: K.lerp(sh0.cx, sun.cx, p), cy: K.lerp(sh0.cy, sun.cy, p) };
+      s = Math.exp(K.lerp(Math.log(RH / sh0.h), Math.log(D / sun.w), p));
+      ow = K.lerp(ow, D, p); oh = K.lerp(oh, D, p); orad = K.lerp(30, D / 2, p);
+    }
+    // the outline grows into the next group's shape just before the cut
+    if (kind === 'circle' && si === 12) { const p = K.p(T, 6.82, 7.0, E.inOutCubic); const nb = shapeBox('pill', SHOTS[13][5]); ow = K.lerp(ow, nb[0], p); oh = K.lerp(oh, nb[1], p); orad = K.lerp(orad, nb[2], p); }
+    if (kind === 'pill' && si > 13) { const pb = shapeBox('pill', SHOTS[si - 1][5]); const p = K.p(T, t0, t0 + 0.14, E.outCubic); ow = K.lerp(pb[0], ow, p); }
+    const st = s * punch * drift;
+    const L = layers[si];
+    L.img.style.transform = `translate(${AX - sh.cx * st}px, ${AY - sh.cy * st}px) scale(${st})`;
+    if (L.shadow) { const w = 900 * st, h = 1164 * st; Object.assign(L.shadow.style, { left: AX - w / 2 + 'px', top: AY - h / 2 + 'px', width: w + 'px', height: h + 'px' }); }
+    ow *= punch * drift; oh *= punch * drift;
+    oop = 1;
+  } else if (bi >= 0) {
+    const b = badges[bi];
+    const bob = Math.sin(T * 7) * 4;
+    b.t.style.transform = `scale(${punch}) translateY(${bob}px) rotate(${(bi % 2 ? 1 : -1) * (1 - E.outExpo(K.clamp(local / 0.22))) * 4}deg)`;
+    ow = (TS + 22) * punch; oh = ow; orad = 74; oop = 1;
+  } else if (T >= T_FINAL) {
+    // the tile opens into the phone: same rectangle family, the camera settles
+    const p = K.p(T, T_FINAL, T_FINAL + 0.6, E.outExpo);
+    const s0 = TS / PW;
+    const sc = K.lerp(s0, 1, p) * (1 + 0.015 * Math.sin((T - T_FINAL) * 1.6));
+    ph.root.style.transform = `scale(${sc})`; ph.root.style.transformOrigin = `50% ${AY - parseFloat(ph.root.style.top)}px`;
+    ph.scroll((1060 + (T - T_FINAL) * 120) * (ph.w - 28) / 780);
+    ow = K.lerp(TS + 22, PW + 22, p); oh = K.lerp(TS + 22, ph.h + 22, p); orad = K.lerp(74, 70, p);
+    oop = 1 - K.p(T, T_FINAL + 0.4, T_FINAL + 0.9, E.linear);
+  }
+  // the final outline is centred on the phone, not the anchor
+  if (T >= T_FINAL) {
+    const top = parseFloat(ph.root.style.top) - 11;
+    outline.style.left = AX - ow / 2 + 'px'; outline.style.top = top + 'px'; outline.style.width = ow + 'px'; outline.style.height = oh + 'px'; outline.style.borderRadius = orad + 'px'; outline.style.opacity = oop; outline.style.transform = 'none';
+  } else setOutline(ow, oh, orad, 1, T < 13 ? oop : 0);
+
+  // captions and labels
+  caps.forEach((c) => {
+    K.reveal(c.w, T, c.a + 0.05, { kind: 'up', stagger: 0.05, dur: 0.4, out: c.b - 0.22 });
+    const pin = K.p(T, c.a, c.a + 0.3, E.outExpo), pout = K.p(T, c.b - 0.18, c.b, E.inCubic);
+    c.plate.style.opacity = pin * (1 - pout); c.plate.style.transform = `scale(${(0.9 + 0.1 * pin) * (1 - 0.06 * pout)})`;
+  });
+  const tagKind = si >= 0 ? SHOTS[si][7] : T >= T_FINAL ? 'real' : null;
+  Object.entries(lbls).forEach(([k, el]) => { el.style.opacity = tagKind === k && T < 12.9 ? 1 : 0; });
+  // beat dots: the bar of eight beats being counted
+  const beatI = Math.floor(T / BEAT) % 8;
+  dots.forEach((d, i) => { d.style.background = i === beatI ? '#1F1F1F' : 'rgba(31,31,31,.18)'; d.style.transform = `scale(${i === beatI ? 1.3 : 1})`; });
+  dotsEl.style.opacity = T < 12.9 && T >= T_BADGE && T < T_FINAL ? 1 : 0;
+  end(T);
+});
+</script></body></html>

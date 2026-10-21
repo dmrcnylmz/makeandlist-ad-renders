@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B10 · Unboxing the Download</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: linear-gradient(#FAF7EE 0%, #F3EEE3 55%, #E6DECF 100%); }
+.scene { position: absolute; left: 0; top: 0; width: 0; height: 0; perspective: 1700px; perspective-origin: 50% -20%; z-index: 10; }
+.box3d { position: absolute; left: 0; top: 0; transform-style: preserve-3d; }
+.face, .flap { position: absolute; backface-visibility: visible; }
+.face { background: linear-gradient(160deg, #EADFC7, #D9CAAA); box-shadow: inset 0 0 0 2px rgba(120,95,55,.25); }
+.flap { background: linear-gradient(180deg, #E4D6B8, #D2C19D); box-shadow: inset 0 0 0 2px rgba(120,95,55,.25); transform-origin: 50% 0; }
+.floor { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(31,31,31,.35), rgba(31,31,31,0)); z-index: 5; }
+.label { position: absolute; left: 8%; right: 8%; top: 14%; bottom: 14%; background: #FFFDF8; border-radius: 10px; display: flex; gap: 14px; align-items: center; padding: 12px 16px; box-shadow: 0 2px 0 rgba(0,0,0,.08); }
+.label img { height: 100%; border-radius: 6px; }
+.label .t { font: 800 22px/1.1 'Archivo'; color: #1F1F1F; }
+.label .m { margin-top: 8px; font: 500 15px 'IBM Plex Mono', monospace; color: #45403A; }
+.label .dr { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 99px; background: #F4EBD3; color: #7A5A12; font: 700 15px 'Archivo'; }
+.tape { position: absolute; left: 50%; width: 70px; margin-left: -35px; background: rgba(223,255,90,.92); }
+.glow { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,253,240,.95), rgba(223,255,90,.35) 55%, rgba(223,255,90,0)); z-index: 8; pointer-events: none; }
+.rays { position: absolute; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(223,255,90,.0) 0deg 9deg, rgba(223,255,90,.32) 9deg 13deg); -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent 100%); mask-image: radial-gradient(closest-side, #000 20%, transparent 100%); z-index: 7; pointer-events: none; }
+.item { position: absolute; left: 0; top: 0; z-index: 30; border-radius: 18px; background: #FFFDF8; box-shadow: 0 30px 50px -28px rgba(31,31,31,.6), 0 0 0 1px #E6E0D5; overflow: hidden; transform-origin: 50% 50%; }
+.item .im { position: absolute; left: 8px; right: 8px; top: 8px; border-radius: 12px; overflow: hidden; background: #F4F1EA; display: grid; place-items: center; }
+.item .im img { width: 100%; height: 100%; object-fit: cover; }
+.item .cp { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font: 500 18px 'IBM Plex Mono', monospace; letter-spacing: .04em; color: #45403A; white-space: nowrap; }
+.pdf { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #F4F1EA; }
+.pdf b { font: 800 26px 'Archivo'; color: #FFFDF8; background: #E8603C; padding: 6px 14px; border-radius: 8px; }
+.pdf span { font: 500 15px 'IBM Plex Mono', monospace; color: #45403A; text-align: center; padding: 0 10px; line-height: 1.3; }
+.bits { position: absolute; width: 14px; height: 9px; border-radius: 2px; z-index: 25; }
+.frame { position: absolute; border-radius: 28px; overflow: hidden; background: #FAF7EE; box-shadow: 0 60px 120px -60px rgba(31,31,31,.7), 0 0 0 1px #E2DBCE; z-index: 20; }
+.world { position: absolute; left: 0; top: 0; width: 2880px; transform-origin: 0 0; }
+.world > img { position: absolute; left: 0; top: 0; width: 2880px; display: block; }
+.hl { position: absolute; border: 6px solid #DFFF5A; border-radius: 18px; box-shadow: 0 0 0 3px #1F1F1F; }
+.cap { position: absolute; z-index: 40; text-align: center; font-family: 'Playfair Display'; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; }
+.count { position: absolute; z-index: 40; left: 0; right: 0; text-align: center; }
+.count span { display: inline-block; font: 600 28px 'IBM Plex Mono', monospace; color: #1F1F1F; background: #DFFF5A; padding: 10px 20px; border-radius: 14px; }
+.lbl { position: absolute; z-index: 60; left: 0; right: 0; text-align: center; }
+.lbl span { display: inline-block; font: 500 19px 'IBM Plex Mono', monospace; color: #45403A; background: rgba(250,247,238,.9); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; }
+.draft { position: absolute; z-index: 45; font: 700 30px 'Archivo'; background: #1F1F1F; color: #FAF7EE; border-radius: 99px; padding: 14px 26px; display: inline-flex; gap: 12px; align-items: center; white-space: nowrap; }
+.draft i { width: 14px; height: 14px; border-radius: 50%; background: #F4C542; display: block; }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// B10 — a 3D box for one listing; the flaps burst open and the owner's real files pop out on arcs with squash,
+// land in a grid, and that grid flies into the product's review board, where the camera checks what the buyer gets.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 60 / 115;
+const L = tall
+  ? { bx: 540, by: 1310, bw: 440, bh: 270, capY: 290, capFs: 84, grid: [ (W - 900) / 2, 545, 210, 272, 20 ], frame: [40, 520, 1000, 720], countY: 1128, lblY: 480 }
+  : { bx: 540, by: 1020, bw: 380, bh: 230, capY: 52, capFs: 70, grid: [ (W - 820) / 2, 250, 190, 246, 20 ], frame: [60, 230, 960, 1060], countY: 1210, lblY: 206 };
+const { bx, by, bw, bh } = L, bd = bw;
+const PK = (f) => K.pub('showcase/christmas-preschool-pack/' + f);
+
+// ── the box ────────────────────────────────────────────────────────────
+const scene = K.box(bx, by, 0, 0, { cls: 'scene' });
+const floor = K.box(bx - bw * 0.95, by + bh * 0.38, bw * 1.9, bh * 0.55, { cls: 'floor' });
+const box3d = K.el('div', { cls: 'box3d', parent: scene });
+const face = (w, h, tr, shade) => K.el('div', { cls: 'face', parent: box3d, style: { left: -w / 2 + 'px', top: -h / 2 + 'px', width: w + 'px', height: h + 'px', transform: tr, filter: `brightness(${shade})` } });
+face(bw, bd, `translateY(${bh / 2}px) rotateX(90deg)`, 0.55);           // bottom
+face(bw, bh, `rotateY(180deg) translateZ(${bd / 2}px)`, 0.62);          // back (seen from inside)
+face(bd, bh, `rotateY(90deg) translateZ(${bw / 2}px)`, 0.84);           // right
+face(bd, bh, `rotateY(-90deg) translateZ(${bw / 2}px)`, 0.7);           // left
+const front = face(bw, bh, `translateZ(${bd / 2}px)`, 1.0);
+front.innerHTML = `<div class="label"><img src="${PK('cover.webp')}"><div><div class="t">Christmas Preschool<br>Learning Pack</div><div class="m">one listing</div><div class="dr">Draft</div></div></div>`;
+// flaps: hinge on each top edge; closed = flat over the opening, open = up and out
+const flapEl = (w, h, base) => { const f = K.el('div', { cls: 'flap', parent: box3d, style: { left: -w / 2 + 'px', top: '0px', width: w + 'px', height: h + 'px' } }); f._base = base; return f; };
+const flaps = [
+  flapEl(bw, bd / 2, `translate3d(0, ${-bh / 2}px, ${bd / 2}px)`),
+  flapEl(bw, bd / 2, `translate3d(0, ${-bh / 2}px, ${-bd / 2}px) rotateY(180deg)`),
+  flapEl(bd, bw / 2, `translate3d(${-bw / 2}px, ${-bh / 2}px, 0) rotateY(-90deg)`),
+  flapEl(bd, bw / 2, `translate3d(${bw / 2}px, ${-bh / 2}px, 0) rotateY(90deg)`),
+];
+// lime tape halves on the front and back flaps, meeting in the middle
+flaps.slice(0, 2).forEach((f) => K.el('div', { cls: 'tape', parent: f, style: { top: (bd / 2 - 120) + 'px', height: '120px' } }));
+const glow = K.box(bx - bw, by - bh * 0.5 - bw * 0.7, bw * 2, bw * 1.4, { cls: 'glow' });
+const rays = K.box(bx - bw * 1.2, by - bh * 0.5 - bw * 1.2, bw * 2.4, bw * 2.4, { cls: 'rays' });
+
+// ── the files ──────────────────────────────────────────────────────────
+const ITEMS = [
+  ['img', PK('cover.webp'), 'Cover'], ['img', PK('interior-01.webp'), 'Page'], ['img', PK('interior-02.webp'), 'Page'], ['img', PK('interior-03.webp'), 'Page'],
+  ['pdf', 'Christmas-Preschool-<br>Pack-A4.pdf', 'A4 · PDF'], ['pdf', 'Christmas-Preschool-<br>Pack-Letter.pdf', 'Letter · PDF'],
+  ['img', PK('listing-hero.webp'), 'Listing image'], ['img', PK('listing-05.webp'), 'Listing image'],
+];
+const [gx, gy, cw, ch, gg] = L.grid;
+const items = ITEMS.map(([k, v, c], i) => {
+  const el = K.el('div', { cls: 'item', style: { width: cw + 'px', height: ch + 'px' } });
+  const im = K.el('div', { cls: 'im', parent: el, style: { height: (ch - 52) + 'px' } });
+  if (k === 'img') K.el('img', { src: v, parent: im }); else im.innerHTML = `<div class="pdf"><b>PDF</b><span>${v}</span></div>`;
+  K.el('div', { cls: 'cp', parent: el, html: c, style: { height: '44px', lineHeight: '40px' } });
+  const col = i % 4, row = Math.floor(i / 4);
+  return { el, gx: gx + col * (cw + gg), gy: gy + row * (ch + gg) };
+});
+const LAUNCH = ITEMS.map((_, i) => 3 * BEAT + 0.5 + i * BEAT / 2);
+const FLY = 0.72;
+// paper bits that burst with the flaps (seeded, so every frame is the same every time)
+let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+const bits = Array.from({ length: 22 }, () => ({ el: K.box(0, 0, 14, 9, { cls: 'bits', style: { background: ['#DFFF5A', '#E8603C', '#FFFDF8', '#7E9A7E'][Math.floor(rnd() * 4)] } }), a: -Math.PI / 2 + (rnd() - 0.5) * 2.2, v: 500 + rnd() * 700, r: rnd() * 720 }));
+
+// ── the review board (design canvas) ───────────────────────────────────
+const [fx, fy, fw, fh] = L.frame;
+const frame = K.box(fx, fy, fw, fh, { cls: 'frame' });
+const world = K.el('div', { cls: 'world', parent: frame });
+K.el('img', { src: K.canvas('AppRoomReview'), parent: world });
+const hlZip = K.el('div', { cls: 'hl', parent: world, style: { left: '1984px', top: '1990px', width: '730px', height: '182px' } });
+const hlTab = K.el('div', { cls: 'hl', parent: world, style: { left: '580px', top: '722px', width: '790px', height: '100px', borderRadius: '30px' } });
+// where each file lands on the board (board px)
+const DEST = [[817, 905, 864, 1121], [761, 2125, 146, 183], [934, 2125, 146, 183], [1107, 2125, 146, 183], [2002, 2002, 690, 152], [2002, 2002, 690, 152], [798, 740, 220, 58], [798, 740, 220, 58]];
+const FLIP0 = 12 * BEAT; // 6.26 s
+const CAM = tall
+  ? [[0, 1670, 1520, 0.45], [FLIP0 + 1.4, 1670, 1520, 0.46], [9.0, 1395, 760, 0.6], [10.2, 1395, 790, 0.62], [11.0, 2360, 2140, 1.08], [12.9, 2365, 2150, 1.12]]
+  : [[0, 1670, 1180, 0.432], [FLIP0 + 1.4, 1670, 1180, 0.44], [9.0, 1395, 1000, 0.6], [10.2, 1395, 1020, 0.62], [11.0, 2360, 2230, 1.22], [12.9, 2365, 2236, 1.26]];
+const cam = (T) => { const f = (j) => K.k(T, CAM.map((c) => [c[0], c[j]]), E.inOutCubic); return { cx: f(1), cy: f(2), z: f(3) }; };
+const toStage = (c, x, y) => [fx + fw / 2 + (x - c.cx) * c.z, fy + fh / 2 + (y - c.cy) * c.z];
+
+// ── type ───────────────────────────────────────────────────────────────
+const CAPS = [[0.05, 4.9, 'What’s inside\none listing?'], [5.0, 8.4, 'The real files.\nAll of them.'], [8.6, 12.85, 'You review it all\nbefore it’s listed.']];
+const caps = CAPS.map(([a, b, t]) => { const c = K.box(65, L.capY, W - 130, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } }); return { a, b, w: K.words(c, t) }; });
+const count = K.box(0, L.countY, W, null, { cls: 'count', html: '<span id="cnt"></span>' });
+const cnt = count.querySelector('#cnt');
+const lblOwn = K.box(0, L.lblY, W, null, { cls: 'lbl', html: '<span>Example made with MakeAndList by its owner</span>' });
+const lblCan = K.box(0, tall ? fy - 40 : fy + fh - 52, W, null, { cls: 'lbl', html: '<span>Product design · sample data</span>' });
+const draft = K.box(0, 0, null, null, { cls: 'draft', html: '<i></i>Draft · not listed yet', style: { width: 'auto', height: 'auto' } });
+const end = K.endCard(13.0, { line: 'Open it. Check it.<br>Then list it.' });
+if (tall) [...document.getElementById('stage').lastElementChild.children].forEach((n) => { n.style.top = (parseFloat(n.style.top) - 130) + 'px'; });
+
+const OPEN = 3 * BEAT; // 1.57 s
+K.run({
+  id: 'B10', title: 'Unboxing the Download', dur: DUR, bpm: 115, mood: 'bright', key: 'C', intro: OPEN, cover: 3.4,
+  technique: 'A CSS 3D box with hinged flaps drops, shakes and bursts open on the beat; the owner’s real cover, pages, PDFs and listing images pop out on parabolic arcs with squash-and-stretch and land in a grid, which FLIPs into the product’s review board while a camera inside it pushes to the buyer’s files',
+  caption: 'One listing, unboxed: the cover, the pages, print-ready PDFs and the listing images — the real files, and you look through all of them before anything is listed. Start free at makeandlist.com',
+  short: 'What’s inside one listing?',
+  beats: ['0–1.6 s: “What’s inside one listing?” — a box drops, the owner’s product on its label', '1.6 s: the flaps burst open', '2.1–4.6 s: cover, pages, PDFs and listing images pop out and land in a grid', '5–8.4 s: “The real files. All of them.” — the grid flies into the review board', '8.6–12.9 s: the camera checks the buyer’s files — draft, not listed yet', '13–15 s: end card'],
+  cues: [[0.05, 'pop'], [0.42, 'hit'], [0.9, 'riser'], [OPEN, 'hit'], ...LAUNCH.map((t) => [t, 'pop']), [5.0, 'whoosh'], [FLIP0, 'whoosh'], [FLIP0 + 0.9, 'pop'], [9.0, 'whoosh'], [10.25, 'pop'], [11.0, 'whoosh'], [11.6, 'pop'], [12.3, 'riser'], [13.0, 'hit']],
+}, (T) => {
+  caps.forEach((c) => K.reveal(c.w, T, c.a, { kind: 'up', stagger: 0.06, out: c.b - 0.3 }));
+
+  // ── box: drop with squash, idle wobble, shake, burst, then sink away ──
+  const drop = K.p(T, 0, 0.42, E.inCubic);
+  const land = T > 0.42 ? Math.exp(-(T - 0.42) * 7) * Math.sin((T - 0.42) * 22) : 0;
+  const shake = T > 1.05 && T < OPEN ? Math.sin(T * 90) * 3 * K.p(T, 1.05, OPEN, E.inCubic) : 0;
+  const sink = K.p(T, 4.7, 5.5, E.inCubic);
+  const sy = 1 - 0.12 * land, sx = 1 + 0.1 * land;
+  const yaw = -34 + Math.sin(T * 0.7) * 4 + K.p(T, OPEN, OPEN + 2.5, E.outCubic) * 10;
+  box3d.style.transform = `translate(${shake}px, ${-(1 - drop) * 1100 + sink * 900}px) rotateX(-24deg) rotateY(${yaw}deg) scale3d(${sx}, ${sy}, ${sx})`;
+  scene.style.opacity = 1 - K.p(T, 5.2, 5.5, E.linear);
+  floor.style.opacity = drop * (1 - sink) * 0.9; floor.style.transform = `scale(${0.6 + 0.4 * drop + 0.1 * land})`;
+  flaps.forEach((f, i) => {
+    const p = K.p(T, OPEN + (i < 2 ? 0 : 0.08), OPEN + 0.5 + (i < 2 ? 0 : 0.08), E.outBack);
+    const flutter = T > OPEN + 0.5 ? Math.sin(T * 3 + i) * 3 : 0;
+    f.style.transform = `${f._base} rotateX(${-90 - 118 * p + flutter}deg)`;
+  });
+  const gl = K.p(T, OPEN, OPEN + 0.3, E.outCubic) * (1 - K.p(T, 4.4, 5.2, E.linear));
+  glow.style.opacity = gl * (0.85 + 0.15 * Math.sin(T * 5)); glow.style.transform = `translateY(${sink * 900}px) scale(${0.7 + 0.3 * gl})`;
+  rays.style.opacity = gl * 0.9; rays.style.transform = `translateY(${sink * 900}px) rotate(${T * 14}deg) scale(${0.8 + 0.2 * gl})`;
+  // paper bits
+  bits.forEach((b) => {
+    const t = T - OPEN, on = t > 0 && t < 1.4;
+    b.el.style.opacity = on ? 1 - K.clamp(t / 1.4) : 0;
+    if (!on) return;
+    const x = bx + Math.cos(b.a) * b.v * t, y = by - bh * 0.46 + Math.sin(b.a) * b.v * t + 900 * t * t;
+    b.el.style.transform = `translate(${x}px, ${y}px) rotate(${b.r + t * 900}deg)`;
+  });
+
+  // ── files: arc out with squash, land in the grid, then fly into the board ──
+  const c = cam(T);
+  const ox = bx, oy = by - bh * 0.46;
+  const flipOn = T >= FLIP0;
+  items.forEach((it, i) => {
+    const t0 = LAUNCH[i], t1 = t0 + FLY;
+    if (T < t0) { it.el.style.opacity = 0; return; }
+    let x, y, w = cw, h = ch, s = 1, rot = 0, op = 1;
+    if (T < t1) {
+      const p = (T - t0) / FLY;
+      const px = E.outCubic(p);
+      x = K.lerp(ox - cw / 2, it.gx, px); y = K.lerp(oy - ch / 2, it.gy, p) - (tall ? 300 : 230) * 4 * p * (1 - p);
+      s = K.lerp(0.25, 1, E.outCubic(Math.min(1, p * 1.6)));
+      rot = (1 - p) * (i % 2 ? 40 : -40);
+      const st = 0.16 * Math.sin(p * Math.PI);
+      it.el.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg) scale(${s * (1 - st * 0.6)}, ${s * (1 + st)})`;
+      op = K.p(T, t0, t0 + 0.08, E.linear);
+    } else if (!flipOn) {
+      const L2 = Math.exp(-(T - t1) * 8) * Math.sin((T - t1) * 26);
+      const hover = Math.sin(T * 1.6 + i) * 3;
+      it.el.style.transform = `translate(${it.gx}px, ${it.gy + hover}px) scale(${1 + 0.14 * L2}, ${1 - 0.18 * L2})`;
+    } else {
+      const f0 = FLIP0 + i * 0.09, p = K.p(T, f0, f0 + 0.8, E.inOutCubic);
+      const [dx, dy, dw, dh] = DEST[i];
+      const [sx2, sy2] = toStage(c, dx, dy);
+      x = K.lerp(it.gx, sx2, p); y = K.lerp(it.gy, sy2, p) - Math.sin(p * Math.PI) * 60;
+      w = K.lerp(cw, dw * c.z, p); h = K.lerp(ch, dh * c.z, p);
+      it.el.style.transform = `translate(${x}px, ${y}px) scale(${w / cw}, ${h / ch})`;
+      op = 1 - K.p(T, f0 + 0.62, f0 + 0.85, E.linear);
+    }
+    it.el.style.opacity = op;
+  });
+
+  // ── board ──
+  const bIn = K.p(T, FLIP0 - 0.4, FLIP0 + 0.4, E.outExpo);
+  frame.style.opacity = bIn; frame.style.transform = `translateY(${(1 - bIn) * 60}px) scale(${0.96 + 0.04 * bIn})`;
+  world.style.transform = `translate(${fw / 2 - c.cx * c.z}px, ${fh / 2 - c.cy * c.z}px) scale(${c.z})`;
+  const ht = K.p(T, 10.25, 10.6, E.outBack) * (1 - K.p(T, 10.9, 11.1, E.linear));
+  hlTab.style.opacity = K.p(T, 10.25, 10.35, E.linear) * (1 - K.p(T, 10.9, 11.1, E.linear)); hlTab.style.transform = `scale(${0.94 + 0.06 * ht})`;
+  const hz = K.p(T, 11.6, 11.95, E.outBack);
+  hlZip.style.opacity = K.p(T, 11.6, 11.7, E.linear); hlZip.style.transform = `scale(${0.94 + 0.06 * hz + 0.006 * Math.sin(T * 6)})`;
+  const dp = K.p(T, 11.75, 12.2, E.outBack);
+  draft.style.left = (W - draft.offsetWidth) / 2 + 'px'; draft.style.top = (fy + 28) + 'px';
+  draft.style.opacity = K.p(T, 11.75, 11.9, E.linear) * (T < 12.95 ? 1 : 0); draft.style.transform = `translateY(${(1 - dp) * 30}px) scale(${0.85 + 0.15 * dp})`;
+
+  // counter, as the files land
+  const landed = LAUNCH.filter((t) => T >= t + FLY).length;
+  const pages = landed >= 4 ? 37 : Number(K.count(T, LAUNCH[1] + FLY, LAUNCH[3] + FLY, 1, 37));
+  cnt.innerHTML = `${pages} pages · ${landed >= 6 ? 2 : landed >= 5 ? 1 : 0} PDFs · ${landed >= 8 ? 10 : landed >= 7 ? 1 : 0} listing images`;
+  const cIn = K.p(T, LAUNCH[1] + FLY, LAUNCH[1] + FLY + 0.4, E.outExpo) * (1 - K.p(T, FLIP0 - 0.2, FLIP0 + 0.1, E.inCubic));
+  count.style.opacity = cIn; count.style.transform = `translateY(${(1 - cIn) * 24}px)`;
+
+  lblOwn.style.opacity = K.win(T, 0.5, FLIP0);
+  lblCan.style.opacity = K.win(T, FLIP0 + 0.2, 12.85);
+  end(T);
+});
+</script></body></html>

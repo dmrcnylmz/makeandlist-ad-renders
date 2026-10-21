@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B16 · Scanner Pass</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #161514; }
+.room { position: absolute; inset: 0; background:
+  radial-gradient(90% 60% at 50% 45%, #2B2825 0%, #191817 60%, #121110 100%); }
+.grid { position: absolute; inset: -80px; opacity: .22;
+  background-image: linear-gradient(rgba(250,247,238,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(250,247,238,.08) 1px, transparent 1px);
+  background-size: 60px 60px; }
+.bed { position: absolute; border-radius: 36px; background: #24221F; box-shadow: 0 80px 160px -60px rgba(0,0,0,.9), inset 0 0 0 2px #34312D; }
+.glass { position: absolute; border-radius: 26px; overflow: hidden; background: #EFEADF; }
+.layer { position: absolute; inset: 0; }
+.brief { position: absolute; inset: 0; background: #FAF7EE; padding: 46px 56px; }
+.brief .lab { font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #45403A; }
+.brief h3 { margin: 18px 0 8px; font: 800 44px 'Archivo'; letter-spacing: -0.01em; color: #1F1F1F; }
+.brief .note { font: 500 24px 'Archivo'; color: #6B655C; }
+.brief .ta { margin-top: 30px; min-height: 180px; border-radius: 22px; border: 2px solid #D9D3C9; background: #FFFDF8; padding: 28px 30px; font: 500 40px/1.32 'Archivo'; color: #1F1F1F; }
+.brief .ta i { display: inline-block; width: 3px; height: 44px; margin-left: 3px; vertical-align: -8px; background: #1F1F1F; }
+.brief .row { display: flex; gap: 16px; margin-top: 34px; flex-wrap: wrap; }
+.brief .pill { padding: 14px 24px; border-radius: 999px; font: 700 28px 'Archivo'; border: 2px solid #1F1F1F; }
+.brief .pill.on { background: #1F1F1F; color: #FAF7EE; }
+.brief .go { display: inline-block; margin-top: 30px; padding: 20px 36px; border-radius: 18px; background: #DFFF5A; font: 800 32px 'Archivo'; }
+.brief .idea { margin-top: 26px; border-radius: 26px; background: #EFEADF; padding: 30px 34px; }
+.brief .idea .tg { display: inline-block; padding: 8px 16px; border-radius: 999px; background: #FAF7EE; font: 500 20px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #45403A; }
+.brief .idea .tt { margin-top: 16px; font: 800 50px/1.04 'Playfair Display'; letter-spacing: -0.015em; }
+.brief .idea .ds { margin-top: 16px; font: 500 28px/1.35 'Archivo'; color: #45403A; }
+.pages { position: absolute; inset: 0; background: radial-gradient(90% 70% at 50% 40%, #F4EFE4, #E3DCCD); }
+.pg { position: absolute; border-radius: 8px; box-shadow: 0 30px 60px -28px rgba(31,31,31,.6), 0 0 0 1px rgba(31,31,31,.06); transform-origin: 50% 60%; }
+.shot { position: absolute; inset: 0; background: #FAF7EE; }
+.shot .bar { position: absolute; left: 0; right: 0; top: 0; height: 54px; background: #EFEADF; border-bottom: 1px solid #D9D3C9; display: flex; align-items: center; gap: 10px; padding: 0 22px; }
+.shot .bar i { width: 13px; height: 13px; border-radius: 50%; background: #D3CBBE; }
+.shot .bar span { margin-left: 12px; flex: 1; height: 30px; border-radius: 8px; background: #FFFDF8; font: 500 17px 'IBM Plex Mono', monospace; color: #45403A; display: flex; align-items: center; padding: 0 12px; }
+.shot .vw { position: absolute; left: 0; right: 0; top: 54px; bottom: 0; overflow: hidden; }
+.shot .vw img { position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none; }
+.beam { position: absolute; left: -20px; right: -20px; height: 8px; margin-top: -4px; border-radius: 4px; background: #F4FFB8; z-index: 20;
+  box-shadow: 0 0 18px 6px rgba(223,255,90,.95), 0 0 70px 24px rgba(223,255,90,.45); }
+.trail { position: absolute; left: 0; right: 0; height: 260px; z-index: 19; mix-blend-mode: screen;
+  background: linear-gradient(to top, rgba(223,255,90,.42), rgba(223,255,90,0)), repeating-linear-gradient(rgba(255,255,255,.10) 0 2px, transparent 2px 6px); }
+.edge { position: absolute; left: 0; right: 0; height: 120px; z-index: 18; background: linear-gradient(to bottom, rgba(223,255,90,.18), rgba(223,255,90,0)); }
+.cap { position: absolute; color: #FAF7EE; z-index: 30; }
+.cap .k { font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #DFFF5A; }
+.cap .t { margin-top: 10px; font: 800 64px/1.02 'Playfair Display'; letter-spacing: -0.015em; }
+.hook { position: absolute; color: #FAF7EE; font: 800 84px/0.98 'Playfair Display'; letter-spacing: -0.02em; z-index: 30; }
+.hud { position: absolute; z-index: 30; font: 500 22px 'IBM Plex Mono', monospace; letter-spacing: .08em; color: #D9D3C9; display: flex; gap: 18px; align-items: center; }
+.hud b { color: #DFFF5A; font-weight: 600; }
+.hud .meter { width: 160px; height: 6px; border-radius: 3px; background: rgba(250,247,238,.16); overflow: hidden; }
+.hud .meter u { display: block; height: 100%; background: #DFFF5A; text-decoration: none; }
+.tray { position: absolute; z-index: 10; display: flex; gap: 26px; }
+.slot { position: relative; border-radius: 16px; border: 2px dashed rgba(250,247,238,.22); }
+.slot img { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); object-fit: cover; object-position: top; border-radius: 10px; }
+.chip.draft { background: #FAF7EE; color: #1F1F1F; font: 700 28px 'Archivo'; padding: 14px 24px; z-index: 31; position: absolute; }
+.chip.draft i { width: 12px; height: 12px; border-radius: 50%; background: #E8603C; display: block; }
+.demo { background: rgba(31,31,31,.8); color: #EFEADF; border-color: #8A8378; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// B16 — a glowing scan bar sweeps down a brief and reveals what it became underneath: the owner's finished pages,
+// twice, and on the third pass the real product screen with its listing images. Each result drops into a tray.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const BEAT = 0.5;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+// [card in, scan start, scan end, card out]
+const PASS = [[0.3, 1.5, 3.0, 3.75], [4.0, 4.5, 6.0, 6.75], [7.0, 7.5, 9.5, 99]];
+
+const G = tall
+  ? { bed: [70, 476, 940, 716], hookY: 286, capY: 286, hudY: 1206, trayY: 1310, slot: [200, 260], tagY: 1196 }
+  : { bed: [150, 196, 780, 900], hookY: 54, capY: 54, hudY: 1120, trayY: 1160, slot: [110, 140], tagY: 1262 };
+const [bx, by, bw, bh] = G.bed;
+K.box(0, 0, W, H, { cls: 'room' });
+const grid = K.box(0, 0, W + 160, H + 160, { cls: 'grid' });
+const bed = K.box(bx, by, bw, bh, { cls: 'bed' });
+const GI = 22, gw = bw - GI * 2, gh = bh - GI * 2;
+const glass = K.box(GI, GI, gw, gh, { parent: bed, cls: 'glass' });
+
+const S = (p) => K.pub('showcase/' + p);
+function pagesLayer(pack, n) {
+  const L = K.el('div', { parent: glass, cls: 'pages' });
+  const cw = gw * 0.5, ch = cw * 1.293;
+  const defs = [
+    [gw * 0.53, gh * 0.18, cw * 0.86, 8, 'interior-0' + (n + 1)],
+    [gw * 0.40, gh * 0.12, cw * 0.86, -3, 'interior-0' + (n + 2)],
+    [gw * 0.08, gh * 0.16, cw, -5, 'cover'],
+  ];
+  const els = defs.map(([x, y, w, r, f]) => K.el('img', { parent: L, cls: 'pg', src: S(pack + '/' + f + '.webp'), style: { left: x + 'px', top: y + 'px', width: w + 'px' } }));
+  return { L, els, defs };
+}
+const R1 = pagesLayer('christmas-preschool-pack', 0);
+const R2 = pagesLayer('halloween-party-games', 1);
+// pass 3: the real product screen, listing images in view
+const R3 = { L: K.el('div', { parent: glass, cls: 'shot', html: '<div class="bar"><i></i><i></i><i></i><span>makeandlist.com/products/wedding-planner</span></div><div class="vw"></div>' }) };
+const vw = R3.L.querySelector('.vw');
+const shotS = tall ? 1.32 : 1.12; // px of the 1440-wide shot → glass px
+const shotImg = K.el('img', { parent: vw, src: K.screen('11-product'), style: { width: 1440 * shotS + 'px' } });
+
+function briefLayer(html) { return K.el('div', { parent: glass, cls: 'brief', html }); }
+const T1 = 'A Christmas preschool pack: counting, tracing and patterns, ages 3–5.';
+const B1 = briefLayer(`<div class="lab">Studio · New product</div><h3>Describe your idea</h3><div class="note">Nothing is made or charged until you approve a quote.</div><div class="ta"><span id="ty"></span><i></i></div><div class="row"><span class="pill on">Digital</span><span class="pill">Physical</span><span class="pill">Both</span></div><br><span class="go">Plan it</span>`);
+const B2 = briefLayer(`<div class="lab">Ideas · Party &amp; seasonal</div><h3>Pick an idea</h3><div class="note">Ideas, not a blank page.</div><div class="idea"><span class="tg">Party games</span><div class="tt">Halloween bingo &amp; party games</div><div class="ds">Bingo cards, a scavenger hunt and a few quick games for a classroom party.</div></div><br><span class="go">Use this idea</span>`);
+const B3 = briefLayer(`<div class="lab">Studio · New product</div><h3>Describe your idea</h3><div class="note">Nothing is made or charged until you approve a quote.</div><div class="ta">A botanical wedding planner, 36 pages: timeline, budget, guests.</div><div class="row"><span class="pill on">Digital</span><span class="pill">Physical</span><span class="pill">Both</span></div><br><span class="go">Plan it</span>`);
+const ty = B1.querySelector('#ty'), caret = B1.querySelector('.ta i');
+const briefs = [B1, B2, B3], results = [R1, R2, R3];
+
+const edge = K.el('div', { parent: glass, cls: 'edge' });
+const trail = K.el('div', { parent: glass, cls: 'trail' });
+const beam = K.el('div', { parent: bed, cls: 'beam' });
+
+const hook = K.box(65, G.hookY, W - 130, null, { cls: 'hook', style: { textAlign: tall ? 'center' : 'left', fontSize: tall ? '78px' : '72px' } });
+const hookW = K.words(hook, tall ? 'From a brief\nto a printable.' : 'From a brief to a printable.');
+const CAPS = [
+  [1.45, 3.75, '01 · A brief', 'A preschool pack.'],
+  [4.0, 6.75, '02 · An idea', 'Party games.'],
+  [7.0, 9.45, '03 · A brief', 'A wedding planner.'],
+  [9.6, 12.85, 'Pages in, listing out', tall ? 'Its listing images.' : 'Its listing images.'],
+];
+const caps = CAPS.map(([a, b, k, t]) => {
+  const c = K.box(65, G.capY, W - 130, null, { cls: 'cap', html: `<div class="k">${k}</div>`, style: { textAlign: tall ? 'center' : 'left' } });
+  const tt = K.el('div', { parent: c, cls: 't' });
+  if (!tall) tt.style.fontSize = '58px';
+  return { c, a, b, w: K.words(tt, t) };
+});
+const hud = K.box(tall ? 70 : 150, G.hudY, null, null, { cls: 'hud', html: '<span>SCAN <b id="hn">01</b>/03</span><div class="meter"><u></u></div><span id="hp">0%</span>', style: { width: 'auto', height: 'auto' } });
+const hn = hud.querySelector('#hn'), hpEl = hud.querySelector('#hp'), meter = hud.querySelector('u');
+const draft = K.box(0, 0, null, null, { cls: 'chip draft', html: '<i></i>Draft · you review before it goes live', style: { width: 'auto', height: 'auto' } });
+// tray of results (images only; it may sit low in 9:16)
+const trayW = 3 * G.slot[0] + 2 * 26;
+const tray = K.box((W - trayW) / 2, G.trayY, trayW, G.slot[1], { cls: 'tray' });
+if (!tall) { tray.style.left = 'auto'; }
+const TRAY = [S('christmas-preschool-pack/cover.webp'), S('halloween-party-games/cover.webp'), K.screen('11-product')];
+const slots = TRAY.map((src) => { const s = K.el('div', { parent: tray, cls: 'slot', style: { width: G.slot[0] + 'px', height: G.slot[1] + 'px' } }); const im = K.el('img', { parent: s, src }); return { s, im }; });
+slots[2].im.style.objectPosition = '30% 22%';
+const tagO = K.demoTag('Example made with MakeAndList by its owner', 0, 0);
+const tagR = K.demoTag('Real app · demo workspace', 0, 0);
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+
+const end = K.endCard(13.0, { line: 'Brief in.<br>Printables out.', dark: true });
+const endBg = document.getElementById('stage').lastElementChild;
+if (tall) [...endBg.children].forEach((c) => { c.style.top = parseFloat(c.style.top) - 150 + 'px'; });
+const endBeam = K.el('div', { parent: endBg, cls: 'beam', style: { left: 0, right: 0, opacity: 0.6 } });
+
+const scanY = (t, i) => { const [, a, b] = PASS[i]; return K.lerp(-30, gh + 30, K.p(t, a, b, (x) => 0.5 - Math.cos(Math.PI * x) / 2)); };
+
+K.run({
+  id: 'B16', title: 'Scanner Pass', dur: DUR, bpm: 120, mood: 'drive', key: 'G', intro: 1.5, cover: 5.4,
+  technique: 'Scanner reveal: a glowing lime beam with bloom and a scan-line trail sweeps a brief card and wipes it into what it became underneath (clip-path reveal), three passes on the beat with a HUD meter; finished pages spread on impact and drop into a tray; the last pass reveals the real product screen and dollies in on its listing images',
+  caption: 'Write a brief or pick an idea, and MakeAndList makes the printable pages, then the listing images from those pages. You review everything before it goes to your store as a draft. Start free at makeandlist.com',
+  short: 'From a brief to a printable.',
+  beats: ['0–1.5 s: “From a brief to a printable.” as a brief is typed', '1.5–3.8 s: pass 1 reveals the owner’s Christmas preschool pack', '4–6.8 s: pass 2: an idea becomes a party games pack', '7–9.5 s: pass 3 reveals the real product screen', '9.5–12.9 s: its listing images, “Draft · you review before it goes live”', '13–15 s: end card'],
+  cues: [[0.05, 'hit'], [0.7, 'type'], [1.5, 'riser'], [3.0, 'pop'], [3.5, 'pop'], [4.0, 'whoosh'], [4.5, 'riser'], [6.0, 'pop'], [6.5, 'pop'], [7.0, 'whoosh'], [7.5, 'riser'], [9.5, 'hit'], [11.0, 'pop'], [12.8, 'whoosh'], [13.0, 'hit']],
+}, (T) => {
+  const fr = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(fr) - 0.5) * 60}px, ${(seed(fr + 3) - 0.5) * 60}px)`;
+  grid.style.transform = `translate(${-80 + (T * 12) % 60}px, ${-80 + (T * 7) % 60}px)`;
+
+  // bed: enters, breathes, a small kick on every scan landing
+  const bin = K.p(T, 0.0, 0.8, E.outExpo);
+  let kick = 0; PASS.forEach(([, , b]) => { if (T > b) kick += 0.018 * Math.exp(-(T - b) * 8) * Math.sin((T - b) * 30); });
+  const zoom3 = K.p(T, 9.6, 12.9, E.inOutCubic);
+  bed.style.transform = `translateY(${(1 - bin) * 140 + Math.sin(T * 0.9) * 4}px) scale(${(0.94 + 0.06 * bin) * (1 + kick)}) rotate(${Math.sin(T * 0.5) * 0.3}deg)`;
+  bed.style.opacity = bin;
+
+  // which pass is on the bed
+  let cur = 0; PASS.forEach((p, i) => { if (T >= p[0] - 0.01) cur = i; });
+  briefs.forEach((b, i) => { b.style.visibility = i === cur ? 'visible' : 'hidden'; });
+  results.forEach((r, i) => { r.L.style.visibility = i === cur ? 'visible' : 'hidden'; });
+  const [tin, ts, te, tout] = PASS[cur];
+  const cin = cur === 0 ? 1 : K.p(T, tin, tin + 0.5, E.outExpo);
+  const cout = K.p(T, tout, tout + 0.25, E.inCubic);
+  glass.style.transform = `translateY(${(1 - cin) * gh * 0.6 - cout * gh * 0.4}px)`;
+  glass.style.opacity = Math.min(1, cin * 1.4) * (1 - cout);
+  const y = scanY(T, cur);
+  const scanning = T > ts - 0.15 && T < te + 0.15;
+  briefs[cur].style.clipPath = `inset(${Math.max(0, y)}px 0 0 0)`;
+  results[cur].L.style.clipPath = `inset(0 0 ${Math.max(0, gh - y)}px 0)`;
+  beam.style.top = GI + y + 'px';
+  beam.style.opacity = scanning ? 1 : 0;
+  beam.style.transform = `scaleX(${0.96 + 0.04 * Math.sin(T * 40)})`;
+  trail.style.top = y - 260 + 'px'; trail.style.opacity = scanning ? 1 : 0;
+  edge.style.top = y + 'px'; edge.style.opacity = scanning ? 0.9 : 0;
+  // landing flash: the whole result glows once
+  const land = T > te ? Math.exp(-(T - te) * 5) : 0;
+  results[cur].L.style.filter = `brightness(${1 + 0.25 * land})`;
+
+  // pass 1 typing
+  const n = Math.round(T1.length * K.p(T, 0.7, 1.45, E.linear));
+  ty.textContent = T1.slice(0, n);
+  caret.style.opacity = Math.floor(T * 4) % 2 === 0 || (T > 0.7 && T < 1.45) ? 1 : 0;
+
+  // pages: under the beam they sit stacked, after the landing they spread and float
+  [R1, R2].forEach((R, ri) => {
+    const sp = K.p(T, PASS[ri][2] - 0.1, PASS[ri][2] + 0.7, E.outBack);
+    R.els.forEach((el, k) => {
+      const [, , , r] = R.defs[k];
+      const dx = [80, 10, -40][k] * sp, dy = [20, -10, 10][k] * sp;
+      const fl = Math.sin(T * 1.3 + k * 2 + ri) * 5;
+      el.style.transform = `translate(${dx}px, ${dy + fl}px) rotate(${r * (0.4 + 0.6 * sp) + Math.sin(T * 0.7 + k) * 0.6}deg)`;
+    });
+  });
+  // pass 3: the screen, then a slow dolly into the listing images (main image + thumbnails)
+  const sx0 = 300, sy0 = 430, sx1 = 300, sy1 = tall ? 990 : 840;
+  const zs = shotS * (1 + 0.28 * zoom3);
+  shotImg.style.width = 1440 * zs + 'px';
+  const dX = K.lerp(sx0, sx1, zoom3) * zs, dY = K.lerp(sy0, sy1, zoom3) * zs + Math.sin(T * 0.8) * 3;
+  shotImg.style.transform = `translate(${-dX}px, ${-dY}px)`;
+
+  // words
+  K.reveal(hookW, T, 0.08, { kind: 'up', stagger: 0.08, out: 1.25 });
+  caps.forEach((c) => {
+    c.c.style.opacity = K.win(T, c.a, c.b, 0.22);
+    c.c.firstChild.style.transform = `translateY(${(1 - K.p(T, c.a, c.a + 0.5, E.outExpo)) * 16}px)`;
+    K.reveal(c.w, T, c.a + 0.06, { kind: 'up', stagger: 0.07, out: c.b - 0.3 });
+  });
+  // HUD
+  const prog = K.p(T, ts, te, (x) => 0.5 - Math.cos(Math.PI * x) / 2);
+  hn.textContent = '0' + (cur + 1); hpEl.textContent = Math.round(prog * 100) + '%';
+  meter.style.width = prog * 100 + '%';
+  hud.style.opacity = K.p(T, 1.2, 1.5, E.linear) * (1 - K.p(T, 9.8, 10.2, E.linear));
+  // draft chip on the final screen
+  const dp = K.p(T, 11.0, 11.5, E.outBack);
+  draft.style.left = W / 2 + 'px';
+  draft.style.top = by + GI + 76 + 'px';
+  draft.style.opacity = K.p(T, 11.0, 11.15, E.linear) * (1 - K.p(T, 12.7, 12.95, E.linear));
+  draft.style.transform = `translateX(-50%) scale(${0.8 + 0.2 * dp})`;
+
+  // tray: each result drops in on its landing
+  slots.forEach((s, i) => {
+    const t0 = PASS[i][2] + 0.4;
+    const p = K.p(T, t0, t0 + 0.55, E.outBack);
+    s.im.style.opacity = K.p(T, t0, t0 + 0.12, E.linear);
+    s.im.style.transform = `translateY(${(1 - p) * -90}px) scale(${0.7 + 0.3 * p})`;
+  });
+  const trIn = K.p(T, 0.6, 1.3, E.outExpo);
+  tray.style.opacity = trIn * (1 - K.p(T, 12.7, 12.95, E.linear));
+  if (!tall) { tray.style.left = (W - trayW) / 2 + 'px'; tray.style.top = G.trayY + 'px'; }
+  tray.style.transform = `translateY(${(1 - trIn) * 60}px)`;
+
+  // honest labels
+  tagO.style.left = bx + 24 + 'px'; tagO.style.top = (tall ? G.tagY - 40 : by + bh - 60) + 'px';
+  tagO.style.opacity = K.win(T, 3.0, 3.75, 0.2) + K.win(T, 6.0, 6.75, 0.2);
+  tagR.style.left = bx + bw - 24 - tagR.offsetWidth + 'px'; tagR.style.top = by + GI + 12 + 'px';
+  tagR.style.opacity = K.win(T, 9.5, 12.85, 0.2);
+
+  end(T);
+  endBeam.style.top = (K.p(T, 13.0, 14.2, (x) => 0.5 - Math.cos(Math.PI * x) / 2) * H) + 'px';
+  endBeam.style.opacity = K.win(T, 13.05, 14.2, 0.15) * 0.55;
+});
+</script></body></html>

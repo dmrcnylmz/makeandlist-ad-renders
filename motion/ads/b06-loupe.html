@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B06 · The Loupe</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #EFEADF; }
+.bgv { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 45%, #F7F3EA, #E6DFD1); }
+.layer { position: absolute; inset: 0; }
+.plate { position: absolute; will-change: transform; }
+.sheet { position: absolute; background: #fff; box-shadow: 0 40px 80px -40px rgba(31,31,31,.5), 0 2px 4px rgba(31,31,31,.12); overflow: hidden; }
+.sheet img, .crop img { position: absolute; display: block; }
+.crop { position: absolute; overflow: hidden; border-radius: 26px; background: #FAF7EE; box-shadow: 0 40px 90px -40px rgba(31,31,31,.55), 0 0 0 1px #DDD6C9; }
+.bar { position: absolute; left: 0; right: 0; top: 0; height: 46px; display: flex; align-items: center; gap: 9px; padding: 0 18px; background: #EFEADF; border-bottom: 1px solid #DDD6C9; z-index: 2; }
+.bar i { width: 12px; height: 12px; border-radius: 50%; background: #D3CBBE; display: block; }
+.bar span { margin-left: 14px; flex: 1; height: 26px; border-radius: 8px; background: #FFFDF8; font: 500 14px 'IBM Plex Mono', monospace; color: #45403A; display: flex; align-items: center; padding: 0 12px; }
+.mag { position: absolute; inset: 0; z-index: 20; transform-origin: 0 0; }
+.ring { position: absolute; z-index: 22; border-radius: 50%; pointer-events: none;
+  box-shadow: 0 0 0 16px #1F1F1F, 0 0 0 19px #3A3835, 0 0 0 22px rgba(223,255,90,.0), inset 0 0 0 3px rgba(255,255,255,.55), inset 0 0 40px rgba(31,31,31,.28), inset 6px -10px 30px rgba(0,120,191,.10), inset -6px 10px 30px rgba(255,72,176,.08); }
+.ring::after { content: ''; position: absolute; left: 14%; top: 9%; width: 42%; height: 26%; border-radius: 50%; background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,.55), rgba(255,255,255,0) 70%); transform: rotate(-24deg); }
+.handle { position: absolute; z-index: 21; height: 46px; border-radius: 23px; background: linear-gradient(#2E2C29, #151413); transform-origin: 0 50%; box-shadow: 0 20px 30px -12px rgba(0,0,0,.5); }
+.lshadow { position: absolute; z-index: 19; border-radius: 50%; background: radial-gradient(circle, rgba(31,31,31,.30), rgba(31,31,31,0) 68%); }
+.call { position: absolute; z-index: 30; padding: 16px 24px 14px; border-radius: 18px; background: #1F1F1F; color: #FAF7EE; white-space: nowrap; box-shadow: 0 24px 40px -22px rgba(0,0,0,.7); }
+.call b { display: block; font: 800 34px 'Archivo'; letter-spacing: -0.01em; }
+.call b em { font-style: normal; color: #DFFF5A; }
+.call small { display: block; margin-top: 4px; font: 500 18px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #BDB5A8; }
+svg.lead { position: absolute; left: 0; top: 0; z-index: 29; overflow: visible; pointer-events: none; }
+.head { position: absolute; z-index: 40; text-align: center; font-family: 'Playfair Display', serif; font-weight: 800; letter-spacing: -0.02em; line-height: 0.98; color: #1F1F1F; }
+</style></head>
+<body><div id="stage" class="grain"><div class="bgv"></div></div>
+<script src="kit.js"></script>
+<script>
+// B06 — a loupe over the real thing. The magnified circle is a second copy of the whole scene, scaled about the lens
+// centre and clipped to a circle, so whatever is under the glass is the same pixels, closer. The lens glides between
+// beat-held stops (inOut moves, outBack landings), each stop draws a leader line to a callout.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const B = 60 / 90;
+const L = K.v({
+  '9x16': { x: 60, y: 500, w: 960, h: 740, headY: 290, headFs: 92, R: 190 },
+  '4x5': { x: 60, y: 250, w: 960, h: 860, headY: 56, headFs: 76, R: 175 },
+});
+const stage = document.getElementById('stage');
+const base = K.el('div', { cls: 'layer', parent: stage, style: { zIndex: 5 } });
+const mag = K.el('div', { cls: 'mag', parent: stage });
+
+// ---------- the three plates (built twice: the scene and its magnified copy) ----------
+const PAGE = K.pub('showcase/christmas-preschool-pack/interior-02.webp'); // 900 × 1164
+const s1h = L.h, s1w = Math.round(s1h * 900 / 1164), s1x = L.x + (L.w - s1w) / 2, s1 = s1w / 900;
+const BRD = { x: 560, y: 300, w: 2260, h: 1200 }; // AppRoomReview, above the editions block
+const s2 = L.w / BRD.w, s2h = Math.round(BRD.h * s2), s2y = L.y + (L.h - s2h) / 2;
+const PRD = { x: 280, w: 1160 }; // 11-product
+const s3 = L.w / PRD.w;
+function build(parent) {
+  const p1 = K.el('div', { cls: 'plate', parent, style: { left: 0, top: 0, width: W + 'px', height: H + 'px' } });
+  const sh = K.el('div', { cls: 'sheet', parent: p1, style: { left: s1x + 'px', top: L.y + 'px', width: s1w + 'px', height: s1h + 'px' } });
+  K.el('img', { src: PAGE, parent: sh, style: { left: 0, top: 0, width: '100%', height: '100%' } });
+  const p2 = K.el('div', { cls: 'plate', parent, style: { left: 0, top: 0, width: W + 'px', height: H + 'px' } });
+  const c2 = K.el('div', { cls: 'crop', parent: p2, style: { left: L.x + 'px', top: s2y + 'px', width: L.w + 'px', height: s2h + 'px' } });
+  K.el('img', { src: K.canvas('AppRoomReview'), parent: c2, style: { left: -BRD.x * s2 + 'px', top: -BRD.y * s2 + 'px', width: 2880 * s2 + 'px' } });
+  const p3 = K.el('div', { cls: 'plate', parent, style: { left: 0, top: 0, width: W + 'px', height: H + 'px' } });
+  const c3 = K.el('div', { cls: 'crop', parent: p3, style: { left: L.x + 'px', top: L.y + 'px', width: L.w + 'px', height: L.h + 'px', borderRadius: '22px' } });
+  K.el('div', { cls: 'bar', parent: c3, html: '<i></i><i></i><i></i><span>makeandlist.com/products/wedding-planner</span>' });
+  const i3 = K.el('img', { src: K.screen('11-product'), parent: c3, style: { left: -PRD.x * s3 + 'px', top: '46px', width: 1440 * s3 + 'px' } });
+  return { p: [p1, p2, p3], i3 };
+}
+const A = build(base), M = build(mag);
+// scroll of the product screen: source y at the top of the view
+const S3MAX = Math.min(1300, 2100 - (L.h - 46) / s3);
+const scroll3 = (T) => K.k(T, [[0, 110], [10.1, 110], [11.2, S3MAX], [15, S3MAX + 10]], E.inOutCubic);
+// source → screen for each plate (at rest)
+const at1 = (x, y) => [s1x + x * s1, L.y + y * s1];
+const at2 = (x, y) => [L.x + (x - BRD.x) * s2, s2y + (y - BRD.y) * s2];
+const at3 = (x, y, T) => [L.x + (x - PRD.x) * s3, L.y + 46 + (y - scroll3(T)) * s3];
+
+// ---------- the lens ----------
+const lshadow = K.box(0, 0, 10, 10, { cls: 'lshadow' });
+const handle = K.box(0, 0, 300, 46, { cls: 'handle' });
+const ring = K.box(0, 0, 10, 10, { cls: 'ring' });
+// stops: [arrive, leave, zoom, point(T)]
+const STOPS = [
+  { a: 3 * B, l: 2.85, z: 1.7, pt: () => at1(450, 352), call: ['<em>Clean</em> line art', 'Page 4 of 37 · owner example'] },
+  { a: 5 * B, l: 4.2, z: 1.7, pt: () => at1(190, 615), call: ['Dotted lines to <em>trace</em>', 'US Letter + A4'] },
+  { a: 8 * B, l: 6.1, z: 2.4, pt: () => at2(980, 768), call: ['<em>37</em> pages · <em>10</em> listing images', 'Review · before it is listed'] },
+  { a: 10 * B, l: 8.3, z: 2.4, pt: () => at2(2260, 880), call: ['Sizes, fonts, margins <em>checked</em>', 'Before you see it'] },
+  { a: 14 * B, l: 10.1, z: 1.8, pt: (T) => at3(1290, 452, T), call: ['<em>Nothing</em> blocking', 'Real checks on the real files'] },
+  { a: 17 * B, l: 12.85, z: 1.8, pt: (T) => at3(480, 2046, T), call: ['Nothing is sent <em>until you go on</em>', 'You decide what is next'] },
+];
+const calls = STOPS.map((s) => K.box(0, 0, null, null, { cls: 'call', html: `<b>${s.call[0]}</b><small>${s.call[1]}</small>`, style: { width: 'auto', height: 'auto' } }));
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'lead'); svg.setAttribute('width', W); svg.setAttribute('height', H); stage.appendChild(svg);
+const leads = STOPS.map(() => { const g = document.createElementNS(NS, 'g'); const pth = document.createElementNS(NS, 'path'); pth.setAttribute('fill', 'none'); pth.setAttribute('stroke', '#1F1F1F'); pth.setAttribute('stroke-width', 4); pth.setAttribute('stroke-linecap', 'round');
+  const dot = document.createElementNS(NS, 'circle'); dot.setAttribute('r', 9); dot.setAttribute('fill', '#DFFF5A'); dot.setAttribute('stroke', '#1F1F1F'); dot.setAttribute('stroke-width', 4); g.appendChild(pth); g.appendChild(dot); svg.appendChild(g); return { g, pth, dot }; });
+// type
+const HEADS = [['Zoom in.\nIt\'s print-ready.', 0.05, 4.5], ['Every page,\nchecked.', 4.7, 8.5], ['Nothing goes out\nuntil you say.', 8.7, 12.8]];
+const heads = HEADS.map(([t]) => { const h = K.box(60, L.headY, W - 120, null, { cls: 'head', style: { fontSize: L.headFs + 'px', height: 'auto' } }); return K.words(h, t); });
+const tags = [K.demoTag('Example made with MakeAndList by its owner', 0, 0), K.demoTag('Product design · sample data', 0, 0), K.demoTag('Real app · demo workspace', 0, 0)];
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'Look closer.<br>Then list it.' });
+// plates in and out
+const P_IN = [0.25, 4.4, 8.4], P_OUT = [4.4, 8.4, 13.0];
+
+function lensAt(T) {
+  // hold at a stop, glide between stops (inOut), land with a small overshoot
+  const first = STOPS[0];
+  if (T < first.a) {
+    const p = K.p(T, 0.9, first.a, E.outBack);
+    const [x, y] = first.pt(T);
+    return { x: x + (1 - p) * 360, y: y + (1 - p) * 520, z: first.z, s: 0.4 + 0.6 * K.p(T, 0.9, first.a, E.outCubic), on: K.p(T, 0.9, 1.1, E.linear) };
+  }
+  for (let i = 0; i < STOPS.length; i++) {
+    const s = STOPS[i], n = STOPS[i + 1];
+    if (!n || T < s.l) { const [x, y] = s.pt(T); return { x: x + Math.sin(T * 1.6) * 4, y: y + Math.cos(T * 1.3) * 4, z: s.z, s: 1, on: 1 - K.p(T, 12.6, 12.95, E.inCubic) }; }
+    if (T < n.a) {
+      const p = K.p(T, s.l, n.a, E.inOutCubic);
+      const [x0, y0] = s.pt(T), [x1, y1] = n.pt(T);
+      return { x: K.lerp(x0, x1, p), y: K.lerp(y0, y1, p) - Math.sin(p * Math.PI) * 60, z: K.lerp(s.z, n.z, p), s: 1 + Math.sin(p * Math.PI) * 0.08, on: 1 };
+    }
+  }
+}
+
+K.run({
+  id: 'B06', title: 'The Loupe', dur: DUR, bpm: 90, mood: 'calm', key: 'A', intro: 2.0, cover: 2.4,
+  technique: 'A jeweller\'s loupe made from a second copy of the scene scaled about the lens centre and clipped to a circle (the same pixels, closer), gliding between beat-held stops over the owner\'s page, a review board and the real product screen, each stop drawing a leader line to a callout',
+  caption: 'Look as close as you like: the owner\'s pages, the checks on paper sizes, fonts and margins, the files themselves. Nothing is sent to a store until you go on. Start free at makeandlist.com',
+  short: "Zoom in. It's print-ready.",
+  beats: ["0–2 s: “Zoom in. It's print-ready.” — the lens lands on the owner's page", '2–4.4 s: clean line art, dotted lines to trace', '4.4–8.4 s: “Every page, checked.” — pages, images, sizes, fonts, margins', '8.4–10.1 s: the real product screen — nothing blocking', '10.1–13 s: “Nothing goes out until you say.”', '13–15 s: end card'],
+  cues: [[0.05, 'riser'], [0.9, 'whoosh'], [STOPS[0].a, 'pop'], [STOPS[1].a, 'pop'], [P_IN[1] + 0.65, 'whoosh'], [STOPS[2].a, 'pop'], [STOPS[3].a, 'pop'], [P_IN[2] + 0.65, 'whoosh'], [STOPS[4].a, 'pop'], [11.15, 'whoosh'], [STOPS[5].a, 'hit'], [13.0, 'hit']],
+}, (T) => {
+  // plates: slide in from the right, out to the left, with a slow push while on screen
+  const pt = [0, 1, 2].map((i) => {
+    const pin = K.p(T, P_IN[i], P_IN[i] + 0.7, E.inOutCubic), pout = i < 2 ? K.p(T, P_OUT[i], P_OUT[i] + 0.7, E.inOutCubic) : 0;
+    const x = (1 - pin) * W * 1.05 - pout * W * 1.05;
+    const vis = T >= P_IN[i] && pout < 1;
+    return { x, vis, tr: `translateX(${x}px) translateY(${Math.sin(T * 0.7 + i) * 5}px)` };
+  });
+  [A, M].forEach((S) => {
+    S.p.forEach((p, i) => { p.style.transform = pt[i].tr; p.style.visibility = pt[i].vis ? 'visible' : 'hidden'; });
+    S.i3.style.transform = `translateY(${-scroll3(T) * s3}px)`;
+  });
+  // the lens
+  const lz = lensAt(T);
+  const R = L.R * lz.s;
+  const moving = T > STOPS[0].a && STOPS.some((s, i) => STOPS[i + 1] && T > s.l && T < STOPS[i + 1].a);
+  // the copy under the glass: scale about the lens centre, clip a circle (local radius R / z)
+  mag.style.transform = `translate(${lz.x}px, ${lz.y}px) scale(${lz.z}) translate(${-lz.x}px, ${-lz.y}px)`;
+  mag.style.clipPath = `circle(${R / lz.z}px at ${lz.x}px ${lz.y}px)`;
+  mag.style.opacity = lz.on; mag.style.filter = moving ? 'blur(0.6px)' : 'none';
+  ring.style.left = (lz.x - R) + 'px'; ring.style.top = (lz.y - R) + 'px'; ring.style.width = ring.style.height = 2 * R + 'px'; ring.style.opacity = lz.on;
+  const ha = 38 + Math.sin(T * 0.8) * 3;
+  handle.style.left = (lz.x + Math.cos(ha * Math.PI / 180) * (R + 10)) + 'px'; handle.style.top = (lz.y + Math.sin(ha * Math.PI / 180) * (R + 10) - 23) + 'px';
+  handle.style.transform = `rotate(${ha}deg)`; handle.style.opacity = lz.on; handle.style.width = 300 * lz.s + 'px';
+  const lift = moving ? 1 : 0.2;
+  lshadow.style.left = (lz.x - R * 1.25 + 30 + lift * 30) + 'px'; lshadow.style.top = (lz.y - R * 1.25 + 50 + lift * 40) + 'px';
+  lshadow.style.width = lshadow.style.height = R * 2.5 + 'px'; lshadow.style.opacity = lz.on * (0.8 - lift * 0.25);
+  // callouts with leader lines
+  STOPS.forEach((s, i) => {
+    const c = calls[i], ld = leads[i];
+    const pin = K.p(T, s.a + 0.05, s.a + 0.55, E.outExpo), pout = K.p(T, s.l - 0.3, s.l, E.inCubic);
+    const v = pin * (1 - pout);
+    const right = lz.x < W / 2;
+    const cw = c.offsetWidth, ch = c.offsetHeight;
+    let cx = right ? Math.min(W - 60 - cw, lz.x + R * 0.55) : Math.max(60, lz.x - R * 0.55 - cw);
+    let cy = lz.y - R - ch - 70;
+    const minY = tall ? L.y - 10 : L.y - 20;
+    if (cy < minY) cy = lz.y + R + 60; // no room above: below the lens
+    cy = Math.min(cy, (tall ? 1248 : H - 60) - ch);
+    c.style.left = cx + 'px'; c.style.top = cy + 'px';
+    c.style.opacity = v; c.style.transform = `translateY(${(1 - pin) * 24}px) scale(${0.94 + 0.06 * pin})`;
+    // leader: from the lens rim towards the callout's nearest corner
+    const tx = right ? cx + 24 : cx + cw - 24, ty = cy < lz.y ? cy + ch : cy;
+    const ang = Math.atan2(ty - lz.y, tx - lz.x);
+    const sx = lz.x + Math.cos(ang) * (R + 18), sy = lz.y + Math.sin(ang) * (R + 18);
+    const len = Math.hypot(tx - sx, ty - sy);
+    ld.pth.setAttribute('d', `M${sx} ${sy} L${tx} ${ty}`);
+    ld.pth.setAttribute('stroke-dasharray', `${len * K.p(T, s.a, s.a + 0.4, E.outCubic)} 9999`);
+    ld.dot.setAttribute('cx', sx); ld.dot.setAttribute('cy', sy);
+    ld.g.setAttribute('opacity', v > 0.001 || (T >= s.a && T < s.l) ? 1 - pout : 0);
+  });
+  // headlines
+  HEADS.forEach(([, a, b], i) => K.reveal(heads[i], T, a, { kind: 'up', stagger: 0.07, out: b - 0.3 }));
+  // tags under each plate
+  const tagY = [L.y + L.h + 16, s2y + s2h + 16, L.y + L.h + 16];
+  tags.forEach((t, i) => {
+    t.style.left = (L.x + pt[i].x) + 'px'; t.style.top = Math.min(tagY[i], tall ? 1252 : H - 46) + 'px';
+    t.style.opacity = pt[i].vis ? 1 : 0;
+  });
+  end(T);
+});
+</script></body></html>

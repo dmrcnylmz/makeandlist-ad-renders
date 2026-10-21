@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B04 · Thermal Receipt</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1A1917; color: #FAF7EE; }
+.spot { position: absolute; inset: 0; background: radial-gradient(70% 55% at 50% 48%, rgba(250,247,238,.13), rgba(0,0,0,0) 70%), radial-gradient(120% 90% at 50% 100%, rgba(223,255,90,.05), transparent 60%); }
+.win { position: absolute; left: 0; top: 0; width: 100%; perspective: 2200px; }
+.pc { position: absolute; transform-style: preserve-3d; transform-origin: 50% 50%; }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.front { background: linear-gradient(90deg, #EDEBE3, #FBFAF5 8%, #FFFEFA 50%, #FBFAF5 92%, #EAE7DE); color: #262523; padding: 54px 44px 30px; font: 500 25px/1.25 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: .02em; }
+.front .row { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; white-space: nowrap; }
+.front .row .k { flex: none; }
+.front .row .d { flex: 1; border-bottom: 3px dotted #8E8A80; transform: translateY(-6px); }
+.front .row .v { flex: none; font-weight: 600; }
+.front .blk { padding: 9px 0; white-space: normal; }
+.front .sent { font: 600 30px/1.3 'IBM Plex Mono', monospace; text-transform: none; }
+.front .rule { border-top: 3px dashed #8E8A80; margin: 12px 0; height: 0; padding: 0; }
+.front .dbl { border-top: 4px double #262523; margin: 14px 0; height: 0; padding: 0; }
+.front .ctr { text-align: center; }
+.front .small { font-size: 20px; color: #55524B; letter-spacing: .1em; }
+.front .tags { text-transform: none; font-size: 24px; line-height: 1.45; }
+.front .thumbs { display: flex; gap: 14px; justify-content: center; padding: 12px 0; }
+.front .thumbs .t { position: relative; overflow: hidden; background: #fff; }
+.front .thumbs .t img { position: absolute; filter: url(#dither); }
+.front .bar { height: 78px; margin: 10px 20px 0; background: repeating-linear-gradient(90deg, #262523 0 3px, transparent 3px 5px, #262523 5px 9px, transparent 9px 11px, #262523 11px 12px, transparent 12px 16px); }
+.back { transform: rotateY(180deg); background: #FAF7EE; overflow: hidden; }
+.back img { position: absolute; left: 0; top: 0; }
+.printer { position: absolute; z-index: 30; }
+.printer .body { position: absolute; inset: 0; border-radius: 34px 34px 46px 46px; background: linear-gradient(#3A3834, #262421 30%, #1E1C1A); box-shadow: 0 50px 80px -30px rgba(0,0,0,.8), inset 0 2px 0 rgba(255,255,255,.08); }
+.printer .lip { position: absolute; left: 30px; right: 30px; top: -10px; height: 26px; border-radius: 13px; background: linear-gradient(#4A4743, #2A2825); box-shadow: inset 0 -6px 8px rgba(0,0,0,.5); }
+.printer .slot { position: absolute; left: 44px; right: 44px; top: 0; height: 8px; border-radius: 4px; background: #0A0A09; }
+.printer .led { position: absolute; width: 16px; height: 16px; border-radius: 50%; }
+.printer .lcd { position: absolute; border-radius: 12px; background: #2E3A1E; color: #DFFF5A; font: 600 24px 'IBM Plex Mono', monospace; letter-spacing: .1em; display: flex; align-items: center; padding: 0 22px; box-shadow: inset 0 0 0 2px rgba(0,0,0,.4); white-space: nowrap; overflow: hidden; }
+.printer .brand { position: absolute; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .2em; color: #8E8A80; }
+.head { position: absolute; z-index: 40; text-align: center; font-family: 'Playfair Display', serif; font-weight: 800; letter-spacing: -0.02em; line-height: 1; color: #FAF7EE; }
+.stamp { position: absolute; z-index: 45; border: 7px solid #E8603C; color: #E8603C; border-radius: 16px; padding: 14px 30px 12px; font: 800 54px/1 'Archivo'; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; text-align: center; background: rgba(250,247,238,.25); }
+.stamp small { display: block; font: 600 20px 'IBM Plex Mono', monospace; letter-spacing: .16em; margin-top: 8px; }
+.chip2 { position: absolute; z-index: 45; padding: 18px 30px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 34px 'Archivo'; white-space: nowrap; }
+.glow { position: absolute; height: 6px; border-radius: 3px; background: #DFFF5A; filter: blur(4px); z-index: 31; }
+</style></head>
+<body><div id="stage" class="grain"><div class="spot"></div></div>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="dither" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
+    <feColorMatrix type="saturate" values="0" result="g"/>
+    <feComponentTransfer in="g" result="c"><feFuncR type="linear" slope="1.6" intercept="-0.6"/><feFuncG type="linear" slope="1.6" intercept="-0.6"/><feFuncB type="linear" slope="1.6" intercept="-0.6"/></feComponentTransfer>
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 1" result="nn"/>
+    <feComposite in="c" in2="nn" operator="arithmetic" k1="0" k2="1" k3="1.7" k4="-0.85" result="mix"/>
+    <feComponentTransfer in="mix"><feFuncR type="discrete" tableValues="0.15 1"/><feFuncG type="discrete" tableValues="0.15 1"/><feFuncB type="discrete" tableValues="0.14 0.98"/></feComponentTransfer>
+  </filter>
+</svg>
+<script src="kit.js"></script>
+<script>
+// B04 — a thermal receipt of one sentence. The printer feeds the paper up line by line (a stepper jerk per line, a
+// burn-in per line, dithered thumbnails of the real pages); the paper is torn off, pulled back into frame and flipped
+// in 3D to the real listing screen on its back, where the stamp lands: approved by you, sent as a draft.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const B = 60 / 124;
+const L = K.v({
+  '9x16': { pw: 640, slot: 1120, headY: 300, headFs: 100, fitH: 900, fitY: 290 },
+  '4x5': { pw: 640, slot: 1050, headY: 64, headFs: 84, fitH: 860, fitY: 70 },
+});
+const SH = '../../docs/design-v2/screens/11-product.png';
+// ---------- the receipt ----------
+const win = K.box(0, 0, W, L.slot, { cls: 'win', style: { overflow: 'hidden', zIndex: 20 } });
+const pc = K.el('div', { cls: 'pc', parent: win, style: { left: (W - L.pw) / 2 + 'px', width: L.pw + 'px' } });
+const front = K.el('div', { cls: 'face front', parent: pc, style: { position: 'relative', inset: 'auto' } });
+const ROWS = [
+  ['<div class="ctr"><img src="' + K.brand('makeandlist-logo.svg') + '" style="height:58px"></div>', 'blk'],
+  ['<div class="ctr small">One sentence in · demo workspace</div>', 'blk'],
+  ['“A botanical wedding planner,', 'blk sent'],
+  ['36 pages, A4 and US Letter.”', 'blk sent'],
+  ['', 'rule'],
+  ['row', 'Product', 'Wedding planner'],
+  ['row', 'Style', 'Botanical'],
+  ['row', 'Pages', '36'],
+  ['row', 'Sizes', 'A4 + US Letter'],
+  ['row', 'Files', '2 PDFs'],
+  ['thumbs'],
+  ['row', 'Listing images', '10'],
+  ['', 'rule'],
+  ['<div class="small">Title</div>', 'blk'],
+  ['<span style="text-transform:none">Wedding Planner Printable — Botanical, 36 pages</span>', 'blk'],
+  ['<div class="small">Tags</div>', 'blk'],
+  ['<div class="tags">#wedding planner #printable planner #wedding binder #botanical wedding #guest list #wedding budget</div>', 'blk'],
+  ['', 'rule'],
+  ['row', 'Price', 'You set it'],
+  ['row', 'Status', 'Draft'],
+  ['', 'dbl'],
+  ['<div class="ctr" style="font-weight:700">Nothing goes live without you</div>', 'blk'],
+  ['<div class="bar"></div>', 'blk'],
+  ['<div class="ctr small" style="padding-top:8px">makeandlist.com</div>', 'blk'],
+];
+const rows = ROWS.map((r) => {
+  if (r[0] === 'row') return K.el('div', { cls: 'row', parent: front, html: `<span class="k">${r[1]}</span><span class="d"></span><span class="v">${r[2]}</span>` });
+  if (r[0] === 'thumbs') {
+    const d = K.el('div', { cls: 'thumbs', parent: front });
+    // cover (x 448–756, y 596–1030) and two real page previews (166 × 244 each) of the product screen
+    [[448, 596, 308, 434], [322, 1728, 166, 244], [767, 1728, 166, 244]].forEach(([x, y, w, h]) => {
+      const tw = 150, s = tw / w, th = Math.round(h * s * (w === 308 ? 1 : 1));
+      const t = K.el('div', { cls: 't', parent: d, style: { width: tw + 'px', height: Math.round(tw * 1.41) + 'px' } });
+      K.el('img', { src: SH, parent: t, style: { left: -x * s + 'px', top: -y * s + 'px', width: 1440 * s + 'px' } });
+    });
+    return d;
+  }
+  return K.el('div', { cls: r[1], parent: front, html: r[0] });
+});
+const back = K.el('div', { cls: 'face back', parent: pc });
+const backImg = K.el('img', { src: K.screen('51-phone-listing'), parent: back, style: { width: L.pw + 'px' } });
+const backTag = K.el('div', { cls: 'demo', parent: back, html: 'Real app · demo workspace', style: { left: '22px', bottom: '22px', fontSize: '26px' } });
+// ---------- the printer ----------
+const prW = L.pw + 120, prH = tall ? 230 : 220;
+const printer = K.box((W - prW) / 2, L.slot - 6, prW, prH, { cls: 'printer', html: '<div class="lip"></div><div class="body"></div><div class="slot"></div>' });
+const lcd = K.el('div', { cls: 'lcd', parent: printer, style: { left: '50px', top: '60px', width: (prW - 240) + 'px', height: '66px' } });
+const led = K.el('div', { cls: 'led', parent: printer, style: { right: '70px', top: '84px' } });
+K.el('div', { cls: 'brand', parent: printer, html: 'MAKEANDLIST · THERMAL', style: { right: '56px', top: '154px' } });
+const glow = K.box((W - L.pw) / 2 + 20, L.slot - 4, L.pw - 40, 6, { cls: 'glow' });
+const tagF = K.demoTag('Demo workspace · sample data', 0, 0);
+// ---------- type ----------
+const head = K.box(60, L.headY, W - 120, null, { cls: 'head', style: { fontSize: L.headFs + 'px', height: 'auto' } });
+const headW = K.words(head, "Here's what\none sentence prints.");
+const stamp = K.box(0, 0, null, null, { cls: 'stamp', html: 'Approved by you<small>sent to your store as a draft</small>', style: { width: 'auto', height: 'auto' } });
+const chip = K.box(0, 0, null, null, { cls: 'chip2', html: 'You read it. You say yes.', style: { width: 'auto', height: 'auto' } });
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'One sentence in.<br>A listing out, on your yes.', dark: true });
+
+// ---------- timing ----------
+const P0 = 3 * B;            // first line prints
+const STEP = B / 2;          // one line per half beat
+const TEAR = 17 * B;         // tear on beat 17
+const FLIP = 18 * B;         // flip starts
+const FLIP_END = FLIP + 2 * B;
+const STAMP = 21 * B;
+let geo = null; // row offsets, measured once (layout is deterministic)
+function measure() {
+  if (geo) return geo;
+  const offs = rows.map((r) => [r.offsetTop, r.offsetHeight + parseFloat(getComputedStyle(r).marginTop) + parseFloat(getComputedStyle(r).marginBottom)]);
+  const total = front.offsetHeight;
+  pc.style.height = total + 'px';
+  back.style.height = total + 'px';
+  geo = { offs, total };
+  return geo;
+}
+function fed(T, g) {
+  // the paper that has come out of the slot: 54 px header margin, then each row jerks out on its step
+  let F = K.p(T, P0 - 0.35, P0 - 0.05, E.outCubic) * 54;
+  g.offs.forEach(([o, h], k) => { const tk = P0 + k * STEP; F += (h + (k === g.offs.length - 1 ? 30 : 0)) * K.p(T, tk, tk + 0.11, E.outCubic); });
+  return F;
+}
+
+K.run({
+  id: 'B04', title: 'Thermal Receipt', dur: DUR, bpm: 124, mood: 'drive', key: 'G', intro: 1.45, cover: 5.6,
+  technique: 'A thermal printer feeds a receipt up in stepped lines (a stepper jerk and burn-in per line, noise-dithered thumbnails of the real pages); the receipt is torn off, pulled back into frame and flipped in 3D to the real listing screen, where a rubber stamp lands',
+  caption: 'One sentence in, and here is what comes out: the pages, the files, the listing images, a title and tags written for your store. The price is yours to set, and it reaches your store as a draft only when you approve it. Start free at makeandlist.com',
+  short: "Here's what one sentence prints.",
+  beats: ["0–1.5 s: “Here's what one sentence prints.” — the printer wakes", '1.5–7.8 s: the receipt feeds line by line: pages, sizes, files, thumbnails, title, tags', '7.8–8.2 s: “Price — you set it. Status — draft.”', '8.2–9.8 s: torn off and flipped to the real listing screen', '9.8–13 s: stamp — approved by you, sent as a draft', '13–15 s: end card'],
+  cues: [[0.05, 'riser'], [1.2, 'pop'], [P0, 'type'], [P0 + 2 * STEP, 'pop'], [P0 + 10 * STEP, 'pop'], [P0 + 16 * STEP, 'type'], [P0 + 18 * STEP, 'pop'], [P0 + 19 * STEP, 'pop'], [TEAR, 'hit'], [FLIP_END - 0.05, 'whoosh'], [STAMP, 'hit'], [STAMP + 1.0, 'pop'], [13.0, 'hit']],
+}, (T) => {
+  const g = measure();
+  const F = fed(T, g);
+  // which row is printing now
+  const printing = T >= P0 - 0.3 && T < P0 + (g.offs.length) * STEP;
+  // burn-in: each row darkens as it comes out
+  rows.forEach((r, k) => { const tk = P0 + k * STEP; r.style.opacity = 0.25 + 0.75 * K.p(T, tk + 0.02, tk + 0.2, E.outCubic); });
+  // the torn paper: after the tear it rises, shrinks to fit, then flips
+  const tp = K.p(T, TEAR + 0.08, FLIP + 0.3, E.inOutCubic);
+  const sFit = L.fitH / g.total;
+  const push = K.p(T, FLIP_END - 0.1, STAMP - 0.1, E.inOutCubic);
+  const s = K.lerp(1, sFit, tp) * (1 + 0.42 * push + 0.03 * K.p(T, STAMP, 13, E.linear));
+  // paper top in window space before the tear: L.slot - F; after: centred at fitY
+  const top0 = L.slot - F;
+  const cx = W / 2, cy0 = top0 + g.total / 2, cy1 = L.fitY + L.fitH / 2;
+  const cy = K.lerp(cy0, cy1, tp) + push * (tall ? 150 : 120) + (T > FLIP_END ? Math.sin(T * 1.4) * 6 : 0);
+  // tear jerk: the paper snaps 14 px up and back in two frames
+  const jerk = T >= TEAR && T < TEAR + 0.07 ? -14 : 0;
+  const ang = K.p(T, FLIP, FLIP_END, E.inOutExpo) * 180;
+  const tilt = (T < TEAR ? 0 : Math.sin(K.p(T, TEAR, FLIP_END, E.linear) * Math.PI) * -8) + (T > FLIP_END ? Math.sin(T * 0.9) * 2.5 : 0);
+  pc.style.top = (cy - g.total / 2) + 'px';
+  pc.style.transform = `translateY(${jerk}px) scale(${s}) rotateY(${ang}deg) rotateZ(${tilt * 0.25}deg) rotateX(${tilt * 0.4}deg)`;
+  // before the tear the slot clips the paper; after it, the paper is free (and 3D needs no clipping)
+  win.style.overflow = T < TEAR ? 'hidden' : 'visible';
+  win.style.height = (T < TEAR ? L.slot : H) + 'px';
+  // the torn edge
+  if (T >= TEAR) {
+    const n = 34, P = ['0 0', '100% 0'];
+    for (let i = n; i >= 0; i--) P.push(`${(i / n * 100).toFixed(2)}% calc(100% - ${(i % 2 ? 14 : 2) + (i * 7 % 5)}px)`);
+    front.style.clipPath = `polygon(${P.join(',')})`;
+  } else front.style.clipPath = 'none';
+  // the back: crop of the real listing, scaled to the receipt width (y 200 down)
+  backImg.style.transform = `translateY(${-200 * L.pw / 780 - K.p(T, FLIP_END, 12.8, E.inOutCubic) * 90}px)`;
+  backTag.style.opacity = T > FLIP_END - 0.3 ? 1 : 0;
+  // printer: rises in, vibrates while printing, drops out after the tear
+  const pin = K.p(T, 0.2, 0.9, E.outExpo), pout = K.p(T, TEAR + 0.15, TEAR + 0.6, E.inCubic);
+  const vib = printing && Math.abs(((T - P0) % STEP) - 0.05) < 0.05 ? (Math.floor(T * 30) % 2 ? 1.5 : -1.5) : 0;
+  printer.style.transform = `translateY(${(1 - pin) * 320 + pout * 900 + vib}px)`; printer.style.opacity = 1 - pout;
+  glow.style.opacity = printing && T < TEAR ? 0.55 + 0.45 * Math.abs(Math.sin(T * 26)) : 0;
+  led.style.background = printing ? (Math.floor(T * 6) % 2 ? '#DFFF5A' : '#7D8F2E') : '#E8603C';
+  led.style.boxShadow = printing ? '0 0 16px #DFFF5A' : '0 0 12px rgba(232,96,60,.8)';
+  const pct = K.clamp((T - P0) / (g.offs.length * STEP));
+  lcd.textContent = T < P0 ? '1 SENTENCE · READY' : T < P0 + g.offs.length * STEP ? `PRINTING ${String(Math.round(pct * 100)).padStart(3, ' ')}%` : 'DONE · TEAR HERE ▲';
+  // demo tag on the printer, then gone with it
+  const pr = printer.getBoundingClientRect();
+  tagF.style.left = (pr.left + 50) + 'px'; tagF.style.top = (pr.top + 186) + 'px';
+  tagF.style.opacity = K.win(T, 1.0, TEAR + 0.2, 0.2);
+  // headline
+  K.reveal(headW, T, 0.1, { kind: 'up', stagger: 0.07, out: 3.6 });
+  // stamp + closing chip
+  const sp = K.p(T, STAMP, STAMP + 0.32, E.outBack);
+  stamp.style.left = W / 2 + 'px'; stamp.style.top = (L.fitY + L.fitH * 0.46) + 'px';
+  stamp.style.opacity = K.p(T, STAMP, STAMP + 0.06, E.linear) * (1 - K.p(T, 12.75, 13.0, E.linear));
+  stamp.style.transform = `translate(-50%, -50%) rotate(-8deg) scale(${2.2 - 1.2 * sp})`;
+  const cp = K.p(T, STAMP + 1.0, STAMP + 1.5, E.outExpo) * (1 - K.p(T, 12.6, 12.9, E.inCubic));
+  chip.style.left = W / 2 + 'px'; chip.style.top = (L.fitY + L.fitH * 0.46 + (tall ? 120 : 110)) + 'px';
+  chip.style.opacity = cp; chip.style.transform = `translateX(-50%) translateY(${(1 - cp) * 30}px) rotate(3deg)`;
+  // a little camera shake on the stamp
+  document.getElementById('stage').style.transform = T >= STAMP && T < STAMP + 0.1 ? `translate(${Math.floor((T - STAMP) * 30) % 2 ? 4 : -5}px, 3px)` : 'none';
+  end(T);
+});
+</script></body></html>

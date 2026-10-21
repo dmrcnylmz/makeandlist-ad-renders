@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>B05 · Overhead Desk</title><link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=block">
+<style>
+#stage { background: #D9CDB8; }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.desk { position: absolute; background:
+  radial-gradient(60% 45% at 40% 35%, rgba(255,248,232,.55), rgba(255,248,232,0) 70%),
+  repeating-linear-gradient(92deg, rgba(120,90,55,.05) 0 3px, rgba(255,255,255,.03) 3px 9px, rgba(120,90,55,.035) 9px 10px, transparent 10px 23px),
+  linear-gradient(180deg, #E3D6BF, #D8C9AE); }
+.obj { position: absolute; will-change: transform; }
+.note { background: linear-gradient(160deg, #FFF07A, #FBE25A); }
+.note .glue { position: absolute; left: 0; right: 0; top: 0; height: 18%; background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,0)); }
+.note .hw { position: absolute; left: 9%; right: 8%; font: 700 66px/1.08 'Caveat', cursive; color: #22201C; white-space: nowrap; }
+.tablet { border-radius: 52px; background: #151515; box-shadow: inset 0 0 0 3px #2A2A2A; }
+.tablet .scr { position: absolute; left: 30px; top: 30px; right: 30px; bottom: 30px; border-radius: 26px; overflow: hidden; background: #FAF7EE; }
+.tablet .scr img { position: absolute; left: 0; top: 0; }
+.tablet .cam { position: absolute; left: 50%; top: 11px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: #333; }
+.page { background: #fff; overflow: hidden; }
+.page img { width: 100%; height: 100%; display: block; }
+.ph { border-radius: 60px; background: #121212; box-shadow: inset 0 0 0 3px #2B2B2B; }
+.ph .scr { position: absolute; left: 14px; top: 14px; right: 14px; bottom: 14px; border-radius: 48px; overflow: hidden; background: #FAF7EE; }
+.ph .scr img { position: absolute; }
+.ph .isl { position: absolute; left: 50%; top: 30px; width: 120px; height: 34px; margin-left: -60px; border-radius: 18px; background: #121212; z-index: 3; }
+.pencil { background: linear-gradient(90deg, #E8603C 0 82%, #F2D7A6 82% 94%, #33302B 94%); border-radius: 6px; }
+.mug2 { border-radius: 50%; background: radial-gradient(circle at 50% 50%, #3A2618 0 46%, #F4F1EA 47% 60%, #E3DCCF 61% 100%); }
+.head { position: absolute; z-index: 40; text-align: center; font-family: 'Playfair Display', serif; font-weight: 800; letter-spacing: -0.02em; line-height: 0.98; color: #1F1F1F; }
+.cap { position: absolute; z-index: 40; left: 50%; padding: 18px 32px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 800 36px 'Archivo'; white-space: nowrap; box-shadow: 0 24px 40px -24px rgba(0,0,0,.7); }
+.cap em { font-style: normal; color: #DFFF5A; }
+.toast { position: absolute; left: 6%; right: 6%; bottom: 18%; z-index: 4; padding: 18px 20px; border-radius: 22px; background: #1F1F1F; color: #DFFF5A; font: 800 26px 'Archivo'; text-align: center; box-shadow: 0 20px 30px -16px rgba(0,0,0,.6); }
+.toast small { display: block; color: #D9D3C9; font: 500 19px 'Archivo'; margin-top: 4px; }
+.finger { position: absolute; width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%; z-index: 35; background: radial-gradient(circle at 40% 35%, rgba(255,226,200,.9), rgba(214,160,130,.85)); box-shadow: 0 18px 30px -10px rgba(60,30,10,.5), inset 0 -6px 10px rgba(120,70,40,.25); }
+</style></head>
+<body><div id="stage" class="grain"></div>
+<script src="kit.js"></script>
+<script>
+// B05 — an orthographic flat-lay. The camera looks straight down at a desk and rotates 3° over the ad; each object
+// (sticky note, tablet, printed pages, phone) is placed by an unseen hand: lifted (bigger, higher shadow), set down
+// (shadow tightens). Two shadow layers per object — a contact line and a soft ambient — lit from a fixed screen light.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 15, E = K.ease;
+const B = 0.625; // 96 bpm
+document.fonts && document.fonts.load('700 66px "Caveat"');
+const stage = document.getElementById('stage');
+const world = K.el('div', { cls: 'world', parent: stage });
+const DW = 2600, DH = 2900;
+K.el('div', { cls: 'desk', parent: world, style: { left: '-1800px', top: '-1800px', width: DW + 3600 + 'px', height: DH + 3600 + 'px' } });
+const objs = [];
+function obj(cls, cx, cy, w, h, rot, html, z) {
+  const n = K.el('div', { cls: 'obj ' + cls, parent: world, html: html || '', style: { left: cx - w / 2 + 'px', top: cy - h / 2 + 'px', width: w + 'px', height: h + 'px', zIndex: z || 1 } });
+  const o = { n, cx, cy, w, h, rot }; objs.push(o); return o;
+}
+// props (ambient, always there)
+const pencil = obj('pencil', 300, 1250, 560, 26, 62, '', 1);
+const mug = obj('mug2', 2150, 380, 330, 330, 0, '', 1);
+// 1 · sticky note
+const note = obj('note', 640, 640, 600, 600, -5, '<div class="glue"></div>', 5);
+const HW = ['Christmas', 'preschool pack', 'ages 3–5 · 37 pages', '→ my stores'];
+const hw = HW.map((t, i) => K.el('div', { cls: 'hw', parent: note.n, html: t, style: { top: (12 + i * 19) + '%', fontSize: (i === 3 ? 60 : 66) + 'px', color: i === 3 ? '#C2462A' : '#22201C' } }));
+// 2 · tablet with the real configure + quote screen
+const TW = 1240, TH = 900;
+const tablet = obj('tablet', 1640, 860, TW, TH, 3, '<div class="cam"></div><div class="scr"></div>', 6);
+const tsc = (TW - 60) / 1440;
+const timg = K.el('img', { src: K.screen('06-create-product'), parent: tablet.n.querySelector('.scr'), style: { width: 1440 * tsc + 'px' } });
+// 3 · the owner's printed pages, fanned
+const PG = ['cover', 'interior-01', 'interior-02', 'interior-03', 'interior-04'];
+const pw = 470, ph = Math.round(pw * 1164 / 900);
+const pages = PG.map((p, i) => {
+  const o = obj('page', 760, 1900, pw, ph, 0, `<img src="${K.pub('showcase/christmas-preschool-pack/' + p + '.webp')}">`, 10 - i);
+  return o;
+});
+// 4 · phone with the Send step (design board: AppPhone, screen x 940–1720, y 138–1826 of the 2x board)
+const PW = 470, PH = Math.round((PW - 28) * 1688 / 780) + 28;
+const phone = obj('ph', 1760, 2080, PW, PH, -6, '<div class="isl"></div><div class="scr"></div>', 12);
+const psc = (PW - 28) / 780;
+const pscr = phone.n.querySelector('.scr');
+K.el('img', { src: K.canvas('AppPhone'), parent: pscr, style: { left: -940 * psc + 'px', top: -138 * psc + 'px', width: 2660 * psc + 'px' } });
+const toast = K.el('div', { cls: 'toast', parent: pscr, html: '2 drafts sent<small>Hidden in Gumroad and WooCommerce until you publish</small>' });
+const finger = K.box(0, 0, 92, 92, { cls: 'finger' });
+const ripple = K.el('div', { cls: 'ripple', parent: stage });
+// screen-space type
+const head = K.box(60, tall ? 290 : 60, W - 120, null, { cls: 'head', style: { fontSize: (tall ? 112 : 92) + 'px', height: 'auto' } });
+const headW = K.words(head, 'From sticky note\nto store.');
+const capY = tall ? 1166 : 1210;
+const caps = [
+  ['See the plan and the <em>price first</em>', 4 * B + 0.4, 8 * B - 0.1],
+  ['<em>37 pages</em>, ready to print', 8 * B + 0.5, 12 * B - 0.1],
+  ['Drafts first. <em>You publish.</em>', 12 * B + 0.6, 17 * B - 0.1],
+].map(([t, a, b]) => ({ n: K.box(0, capY, null, null, { cls: 'cap', html: t, style: { width: 'auto', height: 'auto' } }), a, b }));
+const endHead = K.box(60, tall ? 290 : 60, W - 120, null, { cls: 'head', style: { fontSize: (tall ? 96 : 80) + 'px', height: 'auto' } });
+const endW = K.words(endHead, 'Sticky note.\nYour store.');
+const tagT = K.demoTag('Real app · demo workspace', 0, 0);
+const tagP = K.demoTag('Example made with MakeAndList by its owner', 0, 0);
+const tagPh = K.demoTag('Product design · sample data', 0, 0);
+const end = K.endCard(13.0, { lift: K.F === '9x16' ? 160 : 0, line: 'From sticky note<br>to your store.' });
+
+// ---------- placement: an object is carried in, lifted, then set down ----------
+const T_NOTE = 0.15, T_TAB = 4 * B, T_PG = 8 * B, T_PH = 12 * B, TAP = 15 * B, PULL = 17 * B;
+function carry(o, T, t0, from, dur = 0.75) {
+  const p = K.p(T, t0, t0 + dur, E.outQuint);
+  const lift = 1 - K.p(T, t0 + dur * 0.55, t0 + dur + 0.15, E.outCubic); // lifted while moving, set down at the end
+  const dx = (1 - p) * from[0], dy = (1 - p) * from[1], dr = (1 - p) * (from[2] || 0);
+  return { dx, dy, dr, lift: T < t0 ? 1 : lift, on: T >= t0 };
+}
+function cam(T) {
+  // views: [t, cx, cy, scale]
+  const V = K.v({
+    '9x16': [[0, 640, 470, 1.0], [T_TAB - 0.2, 640, 470, 1.0], [T_TAB + 0.5, 1640, 900, 0.78], [T_PG - 0.2, 1640, 900, 0.8], [T_PG + 0.5, 900, 1880, 0.9], [T_PH - 0.2, 900, 1880, 0.92], [T_PH + 0.5, 1720, 2060, 0.8], [PULL, 1720, 2060, 0.84], [PULL + 0.9, 1250, 1380, 0.4], [13, 1250, 1380, 0.43]],
+    '4x5': [[0, 640, 640, 1.05], [T_TAB - 0.2, 640, 640, 1.05], [T_TAB + 0.5, 1640, 900, 0.72], [T_PG - 0.2, 1640, 900, 0.74], [T_PG + 0.5, 900, 1880, 0.78], [T_PH - 0.2, 900, 1880, 0.8], [T_PH + 0.5, 1640, 2020, 0.8], [PULL, 1640, 2020, 0.84], [PULL + 0.9, 1300, 1380, 0.37], [13, 1300, 1380, 0.39]],
+  });
+  const cx = K.k(T, V.map((v) => [v[0], v[1]]), E.inOutCubic), cy = K.k(T, V.map((v) => [v[0], v[2]]), E.inOutCubic), s = K.k(T, V.map((v) => [v[0], v[3]]), E.inOutCubic);
+  const ay = tall ? K.lerp(760, 1018, K.p(T, PULL, PULL + 0.9, E.inOutCubic)) : H * 0.52;
+  return { cx, cy, s, rot: K.p(T, 0, 13, E.inOutCubic) * 3 - 1.5, ay };
+}
+// two-layer shadow lit from screen-top: offsets counter-rotated into the object's frame
+function shade(o, lift, totalRot) {
+  const a = -totalRot * Math.PI / 180;
+  const d1 = 2 + lift * 6, d2 = 18 + lift * 60, b2 = 40 + lift * 70;
+  const rx = (d) => (-Math.sin(a) * d).toFixed(1), ry = (d) => (Math.cos(a) * d).toFixed(1);
+  o.n.style.boxShadow = `${rx(d1)}px ${ry(d1)}px ${3 + lift * 6}px rgba(50,35,20,${0.32 - lift * 0.12}), ${rx(d2)}px ${ry(d2)}px ${b2}px -12px rgba(50,35,20,${0.34 - lift * 0.08})` + (o.n.classList.contains('tablet') || o.n.classList.contains('ph') ? ', inset 0 0 0 3px #2A2A2A' : '');
+}
+function put(o, T, c, extraRot = 0) {
+  const r = o.rot + c.dr + extraRot;
+  o.n.style.visibility = c.on ? 'visible' : 'hidden';
+  o.n.style.transform = `translate(${c.dx}px, ${c.dy}px) rotate(${r}deg) scale(${1 + c.lift * 0.06})`;
+  return r;
+}
+
+K.run({
+  id: 'B05', title: 'Overhead Desk', dur: DUR, bpm: 96, mood: 'warm', key: 'C', intro: 1.25, cover: 5.6,
+  technique: 'Orthographic flat-lay with a slow 3° camera rotate: each object is carried in, lifted and set down with a two-layer contact + ambient shadow lit from a fixed screen light; handwriting writes on, the camera glides object to object, a fingertip taps the phone, then the desk pulls back',
+  caption: 'Start with a line on a sticky note. See the plan and the price before anything is made, get the pages ready to print, and send drafts to your own stores — you publish them yourself. Start free at makeandlist.com',
+  short: 'From sticky note to store.',
+  beats: ['0–2.5 s: “From sticky note to store.” — the note writes itself', '2.5–5 s: the tablet — the real plan and price, first', '5–7.5 s: the owner\'s printed pages fan out', '7.5–10.6 s: the phone — drafts to two stores, a tap', '10.6–13 s: the camera pulls back over the whole desk', '13–15 s: end card'],
+  cues: [[0.15, 'whoosh'], [0.5, 'pop'], [0.7, 'type'], [T_TAB - 0.1, 'whoosh'], [T_TAB + 0.6, 'pop'], [T_PG - 0.1, 'whoosh'], [T_PG + 0.3, 'pop'], [T_PG + 0.6, 'pop'], [T_PG + 0.9, 'pop'], [T_PG + 1.2, 'pop'], [T_PH - 0.1, 'whoosh'], [T_PH + 0.6, 'pop'], [TAP, 'click'], [TAP + 0.25, 'pop'], [PULL, 'riser'], [PULL + 0.9, 'hit'], [13.0, 'hit']],
+}, (T) => {
+  const C = cam(T);
+  world.style.transform = `translate(${W / 2}px, ${C.ay}px) rotate(${C.rot}deg) scale(${C.s}) translate(${-C.cx}px, ${-C.cy}px)`;
+  // props: always resting
+  [pencil, mug].forEach((o) => { put(o, T, { dx: 0, dy: 0, dr: 0, lift: 0, on: true }); shade(o, 0, o.rot + C.rot); });
+  // note
+  const cn = carry(note, T, T_NOTE, [-900, -300, -18], 0.7); shade(note, cn.lift, put(note, T, cn) + C.rot);
+  hw.forEach((h, i) => { const a = 0.75 + i * 0.32; const p = K.p(T, a, a + 0.42, E.inOutCubic); h.style.clipPath = `inset(-20% ${100 - p * 100}% -20% 0)`; });
+  // tablet
+  const ct = carry(tablet, T, T_TAB, [1400, -500, 14], 0.8); shade(tablet, ct.lift, put(tablet, T, ct) + C.rot);
+  timg.style.transform = `translateY(${-K.p(T, T_TAB + 0.9, T_PG + 0.3, E.inOutCubic) * 220 * tsc}px)`;
+  // pages fan out one per half beat
+  pages.forEach((o, i) => {
+    const t0 = T_PG + i * B * 0.5;
+    const c = carry(o, T, t0, [-1100, 500, -30], 0.7);
+    const fanA = K.p(T, t0 + 0.25, t0 + 0.9, E.outCubic);
+    const ang = (2 - i) * -9 * fanA;
+    c.dx += (2 - i) * -95 * fanA; c.dy += Math.abs(2 - i) * 22 * fanA;
+    shade(o, c.lift, put(o, T, c, ang) + C.rot);
+  });
+  // phone
+  const cp = carry(phone, T, T_PH, [900, 900, -20], 0.8); shade(phone, cp.lift, put(phone, T, cp) + C.rot);
+  const tp = K.p(T, TAP + 0.2, TAP + 0.6, E.outBack);
+  toast.style.opacity = K.p(T, TAP + 0.2, TAP + 0.35, E.linear); toast.style.transform = `translateY(${(1 - tp) * 40}px) scale(${0.9 + 0.1 * tp})`;
+  // the tap: fingertip in screen space, aimed at the Send button (board x 1330, y 1730)
+  const btn = phone.n.querySelector('.scr').getBoundingClientRect();
+  const bx = btn.left + (1330 - 940) * psc * (btn.width / (PW - 28)), by = btn.top + (1730 - 138) * psc * (btn.height / (PH - 28));
+  const fa = K.p(T, TAP - 0.9, TAP, E.outCubic), fo = K.p(T, TAP + 0.25, TAP + 0.8, E.inCubic);
+  const press = T > TAP - 0.06 && T < TAP + 0.12;
+  finger.style.left = K.lerp(W + 120, bx, fa) + fo * 420 + 'px'; finger.style.top = K.lerp(by + 420, by, fa) - fo * 80 + 'px';
+  finger.style.opacity = T > TAP - 1 && T < TAP + 0.8 ? 1 : 0;
+  finger.style.transform = `scale(${press ? 0.88 : 1 + (1 - fa) * 0.15})`;
+  const rp = K.p(T, TAP, TAP + 0.55, E.outCubic);
+  ripple.style.left = bx + 'px'; ripple.style.top = by + 'px'; ripple.style.opacity = T >= TAP && T < TAP + 0.55 ? 1 - rp : 0; ripple.style.transform = `scale(${0.3 + rp})`;
+  // type
+  K.reveal(headW, T, 0.1, { kind: 'up', stagger: 0.08, out: T_TAB - 0.35 });
+  K.reveal(endW, T, PULL + 0.6, { kind: 'up', stagger: 0.08 });
+  caps.forEach(({ n, a, b }) => { const p = K.p(T, a, a + 0.5, E.outExpo) * (1 - K.p(T, b - 0.3, b, E.inCubic)); n.style.left = W / 2 + 'px'; n.style.opacity = p; n.style.transform = `translateX(-50%) translateY(${(1 - p) * 40}px) scale(${0.94 + 0.06 * p})`; });
+  // honesty tags ride on their objects
+  const rt = tablet.n.getBoundingClientRect(), rp0 = pages[0].n.getBoundingClientRect(), rph = phone.n.getBoundingClientRect();
+  tagT.style.left = Math.max(60, rt.left + 40) + 'px'; tagT.style.top = Math.max(tall ? 280 : 60, rt.top - 44) + 'px'; tagT.style.opacity = K.win(T, T_TAB + 0.6, T_PG + 0.1, 0.15);
+  tagP.style.left = Math.max(60, Math.min(W - 520, rp0.left)) + 'px'; tagP.style.top = Math.max(tall ? 280 : 60, rp0.top - 44) + 'px'; tagP.style.opacity = K.win(T, T_PG + 0.6, T_PH + 0.1, 0.15);
+  tagPh.style.left = Math.max(60, Math.min(W - 380, rph.left - 60)) + 'px'; tagPh.style.top = Math.max(tall ? 280 : 60, rph.top - 40) + 'px'; tagPh.style.opacity = K.win(T, T_PH + 0.6, PULL + 0.2, 0.15);
+  end(T);
+});
+</script></body></html>

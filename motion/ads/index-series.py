@@ -20,12 +20,12 @@ for d in sorted(os.listdir(root)):
     rows.append((man['series'], man['title'], short, man.get('technique', ''), files, ok))
 
 lines = [
-    '# MakeAndList · Ekranlardan reklam serisi (R01, 2026-10-20)',
+    '# MakeAndList · Yeni ekranlardan reklam serisi (R02, 2026-10-21)',
     '',
-    f'{len(rows)} reklam, her biri 15 saniye; 9:16 (Reels · TikTok · Shorts) ve 4:5 (Instagram / Facebook akışı).',
-    'Gerçek uygulama ekranları (demo çalışma alanı) ve sahibin MakeAndList ile yaptığı gerçek ürünlerle hazırlandı;',
-    'her klasörde MP4, kapak görseli, manifest.json (kalite kontrolü) ve CAPTIONS.md (paylaşım metni) var.',
-    'Ses: her reklama özel sentezlenmiş müzik ve efekt, -14 LUFS / -1 dBTP. Seslendirme yok; mesaj ekrandaki yazıda.',
+    f'{len(rows)} reklam, her biri 15 saniye; 9:16 (Reels · TikTok · Shorts) ve 4:5 (Instagram / Facebook akışı), ayrı yerleşimle.',
+    'Kaynak: v2 canvas ekranları, uygulamanın kendisinden 21 Ekim\'de çekilen gerçek ekranlar (demo çalışma alanı) ve sahibin ürünleri.',
+    'Her klasörde MP4, kapak, manifest.json (kalite kontrolü) ve CAPTIONS.md (paylaşım metni) var. Ses: her reklama özel sentez müzik ve efekt,',
+    '-14 LUFS / -1 dBTP. Seslendirme yok; mesaj ekrandaki yazıda. Teknikler ve promptlar: ARASTIRMA-VE-PROMPTLAR.md.',
     '',
     '| # | Reklam | Tek cümle | Teknik | Formatlar | QC |',
     '|---|---|---|---|---|---|',
@@ -36,13 +36,13 @@ lines += [
     '',
     '## Önerilen test sırası',
     '',
-    '- Kanca testi (ilk 3 saniye): A19 Manifesto, A02 The Price First, A20 POV, A10 Speed Run.',
-    '- Ürün anlatımı: A01 Idea to Listing, A09 Blank To Finished, A13 One Sentence, A03 Every Page Planned.',
-    '- Güven: A07 Your Yes, A08 Approved By You, A14 Real Numbers.',
-    '- Baskı (print on demand): A04 One Artwork Six Objects, A12 Try It On.',
-    '- Marka / yeniden hedefleme: A17 Brand Orbit, A16 The Wall, A11 Look Inside, A15 Ideas For The Season.',
+    '- Kanca testi (ilk 2 saniye): B18 Spotlight, B09 Shape Match Cuts, B04 Thermal Receipt, B15 Counter-Marquee.',
+    '- Ürün anlatımı: B01 Metro Line, B08 One-Take Scroll, B07 Highlighter Brief, B13 You / The App.',
+    '- Güven ("senin onayın"): B13, B04, B01.',
+    '- Baskı (print on demand): B03 Riso, B11 Blueprint, B12 One Design Three Things.',
+    '- Zanaat / marka: B02 Paper Workshop, B05 Overhead Desk, B06 Loupe, B14 Rack Focus, B16 Scanner, B17 Polaroid, B10 Unboxing.',
     '',
-    'Yeniden üretmek: repo içinde `motion/ads` (README.md).',
+    'Yeniden üretmek: github.com/dmrcnylmz/makeandlist-ad-renders (motion/ads, BRIEF-R02.md).',
 ]
 open(os.path.join(root, 'INDEX.md'), 'w').write('\n'.join(lines) + '\n')
 print(len(rows), 'ads indexed')
