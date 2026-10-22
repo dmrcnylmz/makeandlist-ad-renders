@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0,
+  "text": "Start free.",
+  "file": "01-356d92936e.wav",
+  "dur": 1.63
+ },
+ {
+  "t": 1.4,
+  "text": "You pay in Credits for what you make, and the quote comes first.",
+  "file": "02-a40ed6b005.wav",
+  "dur": 3.67
+ },
+ {
+  "t": 5.6,
+  "text": "If making stops, unused Credits come back.",
+  "file": "03-49b98ac6f8.wav",
+  "dur": 3.72
+ },
+ {
+  "t": 9.5,
+  "text": "Plans and packs come in Credits, or use your own AI key.",
+  "file": "04-a9a7e83863.wav",
+  "dur": 4.69
+ }
+]

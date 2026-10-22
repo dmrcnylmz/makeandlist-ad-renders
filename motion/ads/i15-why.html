@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I15 · Why It Helps</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #1F1F1F; }
+/* R09 series chip — the R08 .fchip, identical in I01–I16 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.photo { position: absolute; overflow: hidden; inset: 0; }
+.photo img { position: absolute; left: 50%; top: 50%; display: block; transform-origin: 50% 50%; }
+.scrim { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #FAF7EE; text-shadow: 0 4px 30px rgba(0,0,0,.35); }
+.cap em { font-style: italic; font-weight: 700; color: #1F1F1F; text-shadow: none; background: #DFFF5A; border-radius: 10px; padding: 0 .12em; }
+.w { display: inline-block; white-space: pre; }
+.tile { position: absolute; z-index: 30; border-radius: 28px; background: #FFFDF8; padding: 30px 34px; overflow: hidden;
+  box-shadow: 0 60px 100px -46px rgba(0,0,0,.8), 0 0 0 1px rgba(226,219,206,.8); transform-origin: 50% 80%; }
+.tile .ic { width: 84px; height: 84px; border-radius: 50%; background: #DFFF5A; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px #1F1F1F; }
+.tile .tt { margin-top: 22px; font: 800 60px/1.02 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.tile .n { position: absolute; right: 30px; top: 30px; font: 600 28px 'IBM Plex Mono', monospace; color: #8A8378; }
+.tile .glow { position: absolute; inset: 0; border-radius: 28px; box-shadow: inset 0 0 0 6px #DFFF5A; pointer-events: none; }
+.big { position: absolute; z-index: 40; font: 800 112px/0.96 'Playfair Display'; letter-spacing: -0.035em; color: #FAF7EE; text-shadow: 0 6px 40px rgba(0,0,0,.4); }
+.big em { font-style: italic; font-weight: 700; color: #DFFF5A; }
+.pills { position: absolute; z-index: 41; display: flex; flex-wrap: wrap; gap: 16px; }
+.pill { padding: 16px 30px; border-radius: 99px; font: 800 44px 'Archivo'; white-space: nowrap; background: #FAF7EE; color: #1F1F1F; box-shadow: 0 24px 40px -20px rgba(0,0,0,.7); }
+.pill.l { background: #DFFF5A; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .06; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I15 — Why it helps (WHY IT HELPS · 1/1). An evening kitchen table (p04: the side business after the day job) drifts in
+// slow parallax; four big gain cards land on it one by one, each tilting in and settling flat as the narrator names it —
+// time back, no design skills, no stock or warehouse, one place for every store — until the 2×2 grid holds all four.
+// The cards lift away, the evening turns to morning (p09: a parcel on the doorstep) and the opportunity is said plainly:
+// a second income stream in your spare time — your price, your margin. No figures, no promises.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, E = K.ease;
+const BPM = 95.7;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// speech ≈ 0.46–1.39 · 2.08–2.67 | 3.29–4.62 · 5.29–6.05 | 6.29–7.28 | 7.54–9.35 · 10.07–12.23 | 13.03–13.65 | 13.97–14.50
+const VO = [[0.2, 'Here’s what you gain.'], [1.75, 'Time back. No design skills needed.'],
+  [5.0, 'No stock, no warehouse, and one place for every store.'], [9.85, 'Build a second income stream in your spare time. Your price, your margin.']];
+const TT = [2.1, 3.3, 5.3, 7.55];  // tile i lands (on its word)
+const SM = 9.75, END = DUR - 2;    // morning: the opportunity
+
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 380, capFs: 84, grid: [65, 600, 950, 300, 20], tag: [W - 65 - 345, 301],
+      bigY: 560, bigFs: 112, pillsY: 940 }
+  : { chip: [60, 56], capX: 60, capY: 124, capFs: 72, grid: [60, 330, 960, 290, 20], tag: [W - 60 - 345, 67],
+      bigY: 300, bigFs: 104, pillsY: 640 };
+
+const mkPhoto = (src) => { const ph = K.box(0, 0, W, H, { cls: 'photo' }); const img = K.el('img', { parent: ph, src }); return { ph, img }; };
+const night = mkPhoto(K.pub('r09/p04-kitchen-evening.webp'));
+const morning = mkPhoto(K.pub('r09/p09-parcel-doorstep.webp'));
+// photos are 1024×1536 portrait: cover the frame
+const cover = Math.max(W / 1024, H / 1536) * 1.08;
+[night, morning].forEach((p) => { p.img.style.width = 1024 * cover + 'px'; p.img.style.marginLeft = -512 * cover + 'px'; p.img.style.marginTop = -768 * cover + 'px'; });
+const scrim = K.box(0, 0, W, H, { cls: 'scrim' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+const photoTag = K.demoTag('Concept image · AI-generated', L.tag[0], L.tag[1]);
+
+// ---------- four gains ----------
+const ICON = {
+  clock: '<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
+  pen: '<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg>',
+  box: '<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2.4" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg>',
+  store: '<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2.4" stroke-linejoin="round"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9h16v2a3 3 0 0 1-5.3 1.9A3 3 0 0 1 12 14a3 3 0 0 1-2.7-1.1A3 3 0 0 1 4 11z"/><path d="M5 13v7h14v-7"/></svg>',
+};
+const GAINS = [['clock', 'Time<br>back'], ['pen', 'No design<br>skills'], ['box', 'No stock,<br>no warehouse'], ['store', 'One place,<br>every store']];
+const [gx, gy, gw, gh, gg] = L.grid, tw = (gw - gg) / 2;
+const tiles = GAINS.map(([ic, t], i) => {
+  const x = gx + (i % 2) * (tw + gg), y = gy + Math.floor(i / 2) * (gh + gg);
+  const el = K.box(x, y, tw, gh, { cls: 'tile', html: `<div class="ic">${ICON[ic]}</div><div class="tt">${t}</div><div class="n">0${i + 1}</div><div class="glow"></div>` });
+  return { el, glow: el.querySelector('.glow') };
+});
+
+// ---------- morning: the opportunity ----------
+const big = K.box(L.capX, L.bigY, W - 2 * L.capX, null, { cls: 'big', style: { fontSize: L.bigFs + 'px' },
+  html: '<span class="w">A </span><span class="w">second </span><br><span class="w"><em>income </em></span><span class="w"><em>stream</em></span>' });
+const bigW = [...big.querySelectorAll('.w')];
+const pills = K.box(L.capX, L.pillsY, W - 2 * L.capX, null, { cls: 'pills',
+  html: '<div class="pill">In your spare time</div><div class="pill l">Your price</div><div class="pill l">Your margin</div>' });
+const pillEls = [...pills.querySelectorAll('.pill')];
+
+// captions
+const mkCap = (html) => { const c = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html }); return { c, w: [...c.querySelectorAll('.w')] }; };
+const ws = (s) => s.split(' ').map((x) => `<span class="w">${x} </span>`).join('');
+const cap = mkCap(ws('What') + '<span class="w"><em>you gain</em></span>' + '<br>' + ws('from MakeAndList'));
+
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>WHY IT HELPS</b><i>·</i><span>1/1</span>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: start in three steps →' });
+
+function words(wl, T, a, out, st = 0.07) {
+  wl.forEach((w, i) => {
+    const p = K.p(T, a + i * st, a + 0.5 + i * st, E.outExpo);
+    const o = out ? K.p(T, out - 0.3, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+}
+
+K.run({
+  id: 'I15', title: 'Why It Helps', dur: DUR, bpm: BPM, music: 'ov-positive-acoustic-guitar-backgro', mood: 'warm', key: 'G', intro: 0, cover: 8.6,
+  series: 'R09', highlight: 'WHY IT HELPS · 1/1',
+  technique: 'An evening kitchen table (p04) drifts in slow parallax while four big gain cards land on it one by one, each tilting in and settling flat with a lime ring as the narrator names it, until a 2×2 grid holds all four; the cards lift away, evening dissolves into morning (p09, a parcel on the doorstep) and the opportunity is said plainly in big serif type with three pills: in your spare time, your price, your margin',
+  caption: 'Why it helps: time back, no design skills needed, no stock or warehouse, and one place for every store. Build a second income stream in your spare time — your price, your margin. Start free at makeandlist.com',
+  short: 'A second income stream, in your spare time.',
+  vo: VO,
+  beats: ['0–2.1 s: “Here’s what you gain.” — the evening kitchen table, a side business after the day', '2.1–9.7 s: four gain cards land one by one — time back · no design skills · no stock, no warehouse · one place, every store', '9.7–16 s: evening turns to morning, a parcel on the doorstep: “A second income stream” — in your spare time · your price · your margin', '16–18 s: end card — “Next: start in three steps →”'],
+  cues: [[0.1, 'pop'], [TT[0] - 0.1, 'swish'], [TT[0] + 0.25, 'pop'], [TT[1] - 0.1, 'swish'], [TT[1] + 0.25, 'pop'], [TT[2] - 0.1, 'swish'], [TT[2] + 0.25, 'pop'], [TT[3] - 0.1, 'swish'], [TT[3] + 0.25, 'pop'],
+    [SM - 0.2, 'whoosh'], [SM + 0.9, 'sparkle'], [11.6, 'pop'], [13.0, 'pop'], [13.95, 'pop'], [END, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear)); chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`; chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  // photos: slow Ken Burns; evening → morning crossfade at SM
+  const mx = K.p(T, SM - 0.2, SM + 0.9, E.inOutCubic);
+  night.img.style.transform = `translate(${Math.sin(T * 0.2) * 20 - T * 2}px, ${-T * 3}px) scale(${1.02 + T * 0.006})`;
+  morning.img.style.transform = `translate(${T * 2 - 30}px, ${-(T - SM) * 3}px) scale(${1.1 - (T - SM) * 0.006})`;
+  morning.ph.style.opacity = mx; vis(morning.ph, T >= SM - 0.25); vis(night.ph, T < SM + 1);
+  // the scrim deepens while the cards are up, keeping the caption and tiles readable
+  const sd = K.p(T, 1.6, 2.6, E.inOutCubic) * (1 - 0.15 * mx);
+  scrim.style.background = `linear-gradient(180deg, rgba(20,18,16,${0.55 + 0.1 * sd}) 0%, rgba(20,18,16,${0.15 + 0.4 * sd}) ${tall ? 38 : 30}%, rgba(20,18,16,${0.1 + 0.45 * sd}) 70%, rgba(20,18,16,${0.35 + 0.2 * sd}) 100%)`;
+  photoTag.style.opacity = K.p(T, 0.3, 0.7, E.linear) * (1 - K.p(T, END - 0.2, END, E.linear));
+  photoTag.style.zIndex = 45;
+
+  // caption
+  words(cap.w, T, 0.25, SM - 0.1, 0.08);
+  vis(cap.c, T < SM + 0.05);
+
+  // tiles
+  tiles.forEach((t, i) => {
+    const a = TT[i];
+    const p = K.p(T, a - 0.15, a + 0.5, E.outExpo), settle = K.p(T, a - 0.15, a + 1.1, E.outCubic);
+    const out = K.p(T, SM - 0.45 + i * 0.06, SM + 0.05 + i * 0.06, E.inCubic);
+    t.el.style.opacity = Math.min(1, p * 2) * (1 - out);
+    const dir = i % 2 ? 1 : -1;
+    t.el.style.transform = `perspective(1600px) translate(${dir * (1 - p) * 120}px, ${(1 - p) * 180 - out * 160 + Math.sin(T * 0.9 + i * 1.3) * 4}px) rotateX(${(1 - settle) * 10}deg) rotateY(${dir * (1 - settle) * -9}deg) rotateZ(${dir * (1 - settle) * 3}deg) scale(${0.92 + 0.08 * p})`;
+    // the newest card wears the lime ring until the next one lands
+    const nxt = i < 3 ? TT[i + 1] - 0.15 : SM - 0.5;
+    t.glow.style.opacity = K.p(T, a + 0.1, a + 0.35, E.linear) * (1 - K.p(T, nxt, nxt + 0.25, E.linear));
+    vis(t.el, T >= a - 0.2 && T < SM + 0.3);
+  });
+
+  // morning
+  const bs = SM + 0.35;
+  bigW.forEach((w, i) => {
+    const p = K.p(T, bs + i * 0.14, bs + 0.6 + i * 0.14, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.6);
+    w.style.transform = `translateY(${(1 - p) * 70}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 10}px)` : 'none';
+  });
+  big.style.transform = `scale(${1 + 0.008 * Math.max(0, T - SM)})`;
+  vis(big, T >= SM);
+  const PT = [11.6, 13.0, 13.95];
+  pillEls.forEach((pl, i) => {
+    const p = K.p(T, PT[i], PT[i] + 0.4, E.outBack);
+    pl.style.opacity = Math.min(1, p * 2);
+    pl.style.transform = `translateY(${(1 - p) * 40}px) scale(${0.8 + 0.2 * p})`;
+  });
+  vis(pills, T >= PT[0] - 0.05);
+
+  end(T);
+});
+</script></body></html>

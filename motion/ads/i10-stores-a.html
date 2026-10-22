@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I10 · Each Store, Part One</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F6F2E8; }
+/* R09 series chip (the R08 .fchip, unchanged) */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.w { display: inline-block; white-space: pre; }
+.cap { position: absolute; z-index: 40; font: 800 66px/1.03 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.cap em { font-style: italic; font-weight: 700; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / var(--hl, 0%) 100%; }
+.persp { position: absolute; inset: 0; perspective: 1600px; z-index: 30; }
+.row { position: absolute; display: flex; align-items: center; gap: 26px; padding: 0 22px 0 12px; border-radius: 28px; background: #FFFDF8;
+  box-shadow: 0 34px 60px -40px rgba(31,31,31,.6), 0 0 0 1.5px #E2DBCE; will-change: transform, opacity; transform-origin: 0 50%; }
+.row .lg { position: relative; flex: none; border-radius: 20px; background: #FFFDF8; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 0 0 1.5px #E2DBCE, 0 18px 30px -22px rgba(31,31,31,.5); }
+.row .lg.dark { background: #1F1F1F; box-shadow: 0 18px 30px -22px rgba(31,31,31,.7); }
+.row .lg img { display: block; width: auto; flex: none; }
+.row .lg .tx { font: 800 40px/1.05 'Archivo'; letter-spacing: -0.03em; color: #1F1F1F; text-align: center; padding: 0 18px; }
+.row .bd { flex: 1; min-width: 0; }
+.row .nm { font: 800 46px/1.02 'Archivo'; letter-spacing: -0.02em; color: #1F1F1F; white-space: nowrap; }
+.row .nt { display: inline; margin-top: 6px; font: 600 40px/1.12 'Archivo'; letter-spacing: -0.012em; color: #45403A;
+  background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 94%, transparent 94%) no-repeat 0 0 / var(--hl, 0%) 100%; }
+.row .ntw { margin-top: 6px; }
+.row .ring { position: absolute; inset: -8px; border-radius: 34px; border: 5px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; opacity: 0; pointer-events: none; }
+.row .num { position: absolute; right: 22px; top: 14px; font: 600 24px 'IBM Plex Mono', monospace; color: #8A8378; }
+.t9 .row .nt { font-size: 32px; line-height: 1.2; }
+.t9 .row .ntw { margin-top: 10px; }
+.t9 .row .lg { border-radius: 24px; }
+.t9 .row .lg .tx { font-size: 44px; }
+.t9 .row { padding: 0 26px 0 18px; gap: 30px; border-radius: 32px; }
+.t9 .legal { line-height: 1.2; }
+.legal { position: absolute; z-index: 60; font: 500 21px/1.35 'IBM Plex Mono', monospace; color: #6B645A; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I10 — STORES 2/3: what MakeAndList does on WooCommerce, Wix, ikas, Shopware 6 and Gumroad. Five large rows, one per
+// store: the logo tiles drop into a column first, then each row opens as Marian names its store — the card swings in
+// from the left edge with a settling 3D turn, a lime ring holds the store she is naming and a highlighter swipes its
+// note exactly as she says it. Notes are the app's own store-registry wording; logos are the unmodified files.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, E = K.ease;
+const BPM = 83.4, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian (vo.mjs + an RMS pass), speech windows:
+//   L1 0.34–2.35 · L2 WooCommerce 2.69, "a draft first" 3.69–4.37 · L3 Wix 4.80, "hidden until you confirm" ≈ 5.40–7.13
+//   L4 ikas 7.46, "not for sale until you confirm" 8.24–9.65 · L5 Shopware 6 10.10, "reviewed hidden drafts" 10.90–12.43
+//   L6 Gumroad 13.18, "a draft first" 14.41–15.15
+const VO = [[0.1, "Here's what MakeAndList does on each store."], [2.45, 'WooCommerce, a draft first.'], [4.6, 'Wix, hidden until you confirm.'],
+  [7.45, 'ikas, not for sale until you confirm.'], [9.95, 'Shopware 6, reviewed hidden drafts.'], [12.75, 'Gumroad, a draft first.']];
+const RT = [2.69, 4.80, 7.46, 10.10, 13.18];   // she says the store
+const NT = [3.69, 5.40, 8.24, 10.90, 14.41];   // she says its note
+const END = DUR - 2;
+
+const ROWS = [
+  { id: 'woocommerce', n: 'WooCommerce', h: 44, note: 'Draft first' },
+  { id: 'wix', n: 'Wix', h: 44, dark: 1, note: 'Hidden until you confirm' },
+  { id: 'ikas', n: 'ikas', h: 42, note: 'Not for sale until you confirm' },
+  { id: 'shopware', n: 'Shopware 6', h: 38, note: 'Reviewed hidden drafts' },
+  { id: 'gumroad', n: 'Gumroad', h: 62, note: 'Draft first' },
+];
+
+const L = tall
+  ? { chip: [65, 290], x: 65, cw: 950, capY: 370, capFs: 60, rowsY: 470, rH: 194, gap: 22, lgW: 290, lgH: 150, k: 1.45, legalY: 1548, tag: [655, 304] }
+  : { chip: [60, 56], x: 60, cw: 960, capY: 132, capFs: 60, rowsY: 296, rH: 150, gap: 20, lgW: 260, lgH: 116, k: 1.2, legalY: 1150, tag: [660, 214] };
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.2), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(232,96,60,.07), rgba(232,96,60,0) 62%)' } });
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>STORES</b><i>·</i><span>2/3</span>' });
+
+const wrapWords = (html) => html.split(' ').map((w) => `<span class="w">${w} </span>`).join('');
+const cap = K.box(L.x, L.capY, L.cw, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html: wrapWords('What it does') + (tall ? '' : '<br>') + '<span class="w"><em>on each store.</em></span>' });
+const capW = [...cap.querySelectorAll('.w')], capEm = cap.querySelector('em');
+const tag = K.demoTag('Notes from the app’s store list · redrawn', L.tag[0], L.tag[1]);
+tag.style.whiteSpace = 'nowrap'; tag.style.left = 'auto'; tag.style.right = (W - L.x - L.cw) + 'px';
+if (tall) document.body.classList.add('t9');
+
+const persp = K.box(0, 0, W, H, { cls: 'persp' });
+const rows = ROWS.map((r, i) => {
+  const y = L.rowsY + i * (L.rH + L.gap);
+  const logo = `<img src="${K.pub('platforms/' + r.id + '.svg')}" style="height:${Math.round(r.h * L.k)}px">`;
+  const el = K.box(L.x, y, L.cw, L.rH, { cls: 'row', parent: persp,
+    html: `<div class="lg${r.dark ? ' dark' : ''}" style="width:${L.lgW}px;height:${L.lgH}px">${logo}</div>` +
+      `<div class="bd"><div class="nm">${r.n}</div><div class="ntw"><span class="nt">${r.note}</span></div></div><div class="ring"></div>` });
+  return { el, lg: el.querySelector('.lg'), bd: el.querySelector('.bd'), nt: el.querySelector('.nt'), ring: el.querySelector('.ring'), y };
+});
+const legal = K.box(L.x, L.legalY, L.cw, null, { cls: 'legal', html: 'Logos belong to their owners. Shown to identify compatible platforms; no endorsement implied.' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: five more stores →' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+K.run({
+  id: 'I10', title: 'Each Store, Part One', dur: DUR, bpm: BPM, music: 'ov-strolling-stripes', mood: 'calm', key: 'F', intro: 0, cover: 15.3,
+  series: 'R09', highlight: 'STORES · 2/3',
+  technique: 'Five large store rows: the unmodified logo tiles drop into a column first, then each row card swings open from the left edge with a settling 3D turn as the narrator names its store; a lime ring holds the store being named and a highlighter swipes its note (the app’s own registry wording) as she says it',
+  caption: 'What MakeAndList does on each store: WooCommerce — draft first. Wix — hidden until you confirm. ikas — not for sale until you confirm. Shopware 6 — reviewed hidden drafts. Gumroad — draft first. Logos belong to their owners; no endorsement implied. Start free at makeandlist.com',
+  short: 'What it does on each store.',
+  vo: VO,
+  beats: ['0–2.6 s: “What it does on each store.” — five logo tiles drop into a column', '2.6–4.7 s: WooCommerce · Draft first', '4.7–7.4 s: Wix · Hidden until you confirm', '7.4–10 s: ikas · Not for sale until you confirm', '10–13 s: Shopware 6 · Reviewed hidden drafts', '13–16 s: Gumroad · Draft first; all five rows hold', '16–18 s: end card, next: five more stores'],
+  cues: [[0.1, 'pop'], [0.7, 'click'], [0.85, 'click'], [1.0, 'click'], [1.15, 'click'], [1.3, 'click'], ...RT.map((t) => [+(t - 0.2).toFixed(2), 'swish']),
+    ...NT.map((t) => [+(t + 0.05).toFixed(2), 'marker']), [15.4, 'sparkle'], [END, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.7 - 550 + Math.sin(T * 0.4) * 160}px, ${H * 0.3 - 550 + Math.cos(T * 0.35) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.1 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.72 - 450 + Math.sin(T * 0.5) * 100}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear));
+  chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`;
+  chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  capW.forEach((w, i) => {
+    const p = K.p(T, 0.25 + i * 0.1, 0.8 + i * 0.1, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.6);
+    w.style.transform = `translateY(${(1 - p) * 50}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+  capEm.style.setProperty('--hl', K.p(T, 1.6, 2.0, E.outCubic) * 100 + '%');
+  cap.style.transform = `translateY(${Math.sin(T * 0.6) * 3}px)`;
+  tag.style.opacity = K.p(T, 2.6, 3.0, E.linear);
+
+  const fade = 1 - K.p(T, END - 0.3, END, E.linear);
+  // which row is being spoken
+  let cur = -1; RT.forEach((t, i) => { if (T >= t - 0.25) cur = i; });
+  const allOn = K.p(T, 15.25, 15.6, E.linear);
+  rows.forEach((r, i) => {
+    // the logo tile drops into its slot first (a quick cascade)
+    const lp = K.p(T, 0.1 + i * 0.1, 0.6 + i * 0.1, E.outBack);
+    // the row card opens when she names the store
+    const op = K.p(T, RT[i] - 0.3, RT[i] + 0.35, E.outExpo);
+    const tilt = (1 - K.p(T, RT[i] - 0.3, RT[i] + 0.5, E.outCubic)) * 10;
+    const fl = Math.sin(T * 1.2 + i * 1.1) * 2.5;
+    r.el.style.background = `rgba(255,253,248,${op})`;
+    r.el.style.boxShadow = `0 34px 60px -40px rgba(31,31,31,${0.6 * op}), 0 0 0 1.5px rgba(226,219,206,${op})`;
+    r.bd.style.opacity = op;
+    r.bd.style.transform = `translateX(${(1 - op) * 80}px)`;
+    r.lg.style.opacity = Math.min(1, lp * 2);
+    r.lg.style.transform = `translateY(${(1 - lp) * -60}px) scale(${0.7 + 0.3 * lp})`;
+    // the row being spoken is ringed and lifts a touch (tiles are never dimmed: logos stay as their owners made them)
+    const active = i === cur;
+    r.el.style.opacity = fade;
+    r.el.style.transform = `translateY(${fl}px) rotateY(${tilt}deg) scale(${active && allOn < 1 ? 1 + 0.015 * K.p(T, RT[i] - 0.2, RT[i] + 0.3, E.outCubic) : 1})`;
+    r.ring.style.opacity = active ? K.p(T, RT[i] - 0.2, RT[i], E.linear) * (1 - allOn) : 0;
+    r.nt.style.setProperty('--hl', K.p(T, NT[i] - 0.05, NT[i] + 0.55, E.outCubic) * 100 + '%');
+  });
+  legal.style.opacity = K.p(T, 0.8, 1.2, E.linear) * fade;
+  vis(persp, T < END + 0.05); vis(legal, T < END);
+
+  end(T);
+});
+</script></body></html>

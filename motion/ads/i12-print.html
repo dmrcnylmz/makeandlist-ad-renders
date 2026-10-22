@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I12 · Printed Per Order</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F4EFE4; }
+/* R09 series chip (the R08 .fchip, unchanged) */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.w { display: inline-block; white-space: pre; }
+.cap { position: absolute; z-index: 40; font: 800 66px/1.03 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.cap em { font-style: italic; font-weight: 700; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / var(--hl, 0%) 100%; }
+.cap em.red { background-image: linear-gradient(transparent 60%, #F6C6BE 60%, #F6C6BE 92%, transparent 92%); }
+.persp { position: absolute; inset: 0; perspective: 1600px; z-index: 30; }
+.bleed { position: absolute; left: 0; top: 0; z-index: 5; overflow: hidden; background: #DDD5C6; }
+.bleed img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 70%; }
+.fade { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none; }
+.t9 .card { padding: 34px 36px; }
+.t9 .card .k { font-size: 28px; }
+.t9 .card .t { font-size: 50px; }
+.t9 .card .pl { font-size: 30px; }
+.t9 .mr { font-size: 38px; padding: 18px 0; }
+.t9 .mr small { font-size: 28px; }
+.t9 .mr b { font-size: 46px; }
+.t9 .mr.tot b { font-size: 56px; }
+.t9 .btn { height: 96px; font-size: 38px; }
+.card { position: absolute; border-radius: 28px; background: #FFFDF8; padding: 30px 32px; box-shadow: 0 60px 100px -50px rgba(31,31,31,.7), 0 0 0 1.5px #E2DBCE; will-change: transform; }
+.card .k { font: 600 26px 'IBM Plex Mono', monospace; letter-spacing: .04em; color: #6B645A; }
+.card .t { margin-top: 6px; font: 800 46px/1.05 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.card .pl { display: inline-flex; align-items: center; gap: 10px; margin-top: 14px; padding: 8px 18px; border-radius: 99px; font: 700 28px 'Archivo'; white-space: nowrap; }
+.card .pl i { width: 13px; height: 13px; border-radius: 50%; background: currentColor; display: block; }
+.pl.wait { background: #E9EFE3; color: #2F6A3A; box-shadow: inset 0 0 0 1.5px #BFD3B6; }
+.card .pl.loss { margin-top: 26px; }
+.card .btn.ghost { margin-top: 30px; }
+.f45 .card { padding: 40px 40px; }
+.f45 .money { margin-top: 32px; padding: 14px 28px; }
+.f45 .mr { padding: 24px 0; }
+.f45 .btn.go { height: 104px; margin-top: 36px; }
+.pl.loss { background: #F9DEDA; color: #A5281B; box-shadow: inset 0 0 0 1.5px #E7A99F; }
+.money { position: relative; isolation: isolate; margin-top: 22px; border-radius: 20px; background: #F1ECE1; padding: 8px 24px; }
+.mr { position: relative; display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0; font: 600 34px 'Archivo'; color: #1F1F1F; }
+.mr + .mr { border-top: 1.5px solid #DDD5C6; }
+.mr small { display: block; font: 500 26px 'IBM Plex Mono', monospace; color: #6B645A; margin-top: 2px; }
+.mr b { font: 800 40px 'Archivo'; white-space: nowrap; }
+.mr.tot b { font-size: 46px; }
+.mr .hl { position: absolute; left: -14px; right: -14px; top: 4px; bottom: 4px; border-radius: 12px; background: #DFFF5A; z-index: -1; transform-origin: 0 50%; }
+.mr > div, .mr > b { position: relative; z-index: 1; }
+.btn { margin-top: 22px; height: 84px; border-radius: 20px; display: grid; place-items: center; font: 800 34px 'Archivo'; white-space: nowrap; }
+.btn.go { background: #DFFF5A; color: #1F1F1F; box-shadow: 0 0 0 2px #1F1F1F; }
+.btn.ghost { background: #FFFDF8; color: #A5281B; box-shadow: inset 0 0 0 2.5px #E7A99F; }
+.smp { position: absolute; right: 26px; top: 24px; padding: 4px 12px; border-radius: 8px; border: 1.5px dashed #8A8378; font: 600 22px 'IBM Plex Mono', monospace; color: #6B645A; }
+.stamp { position: absolute; z-index: 5; padding: 10px 22px; border: 7px solid #C2321F; border-radius: 14px; color: #C2321F; font: 900 42px/1 'Archivo'; letter-spacing: .04em; text-transform: uppercase; background: rgba(255,248,244,.92); white-space: nowrap; }
+.tapring { position: absolute; z-index: 52; width: 130px; height: 130px; margin: -65px 0 0 -65px; border-radius: 50%; border: 6px solid #1F1F1F; box-shadow: 0 0 0 6px #DFFF5A; pointer-events: none; }
+.finger { position: absolute; z-index: 53; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(31,31,31,.85); box-shadow: 0 0 0 5px rgba(250,247,238,.9); }
+.toast { position: absolute; z-index: 45; display: flex; align-items: center; gap: 14px; padding: 18px 28px; border-radius: 20px; background: #1F1F1F; color: #FAF7EE; font: 700 32px/1.2 'Archivo'; box-shadow: 0 30px 50px -24px rgba(31,31,31,.8); white-space: nowrap; }
+.toast b { color: #DFFF5A; }
+.pay { position: absolute; z-index: 46; display: flex; align-items: center; gap: 14px; padding: 16px 28px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 36px 'Archivo'; white-space: nowrap; box-shadow: 0 0 0 2px #1F1F1F, 0 24px 40px -20px rgba(31,31,31,.7); }
+.pcap { position: absolute; z-index: 44; padding: 14px 26px; border-radius: 20px; background: rgba(31,31,31,.86); color: #FAF7EE; font: 800 52px/1.05 'Playfair Display'; letter-spacing: -0.02em; white-space: nowrap; }
+.pcap em { font-style: italic; color: #DFFF5A; }
+.demoD { position: absolute; z-index: 60; font: 500 19px 'IBM Plex Mono', monospace; color: #E9E2D4; background: rgba(31,31,31,.7); padding: 6px 12px; border-radius: 8px; border: 1px dashed #8A8378; white-space: nowrap; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I12 — PRINT 1/1: physical products without stock. One lemon design on a tee, mug, tote and print opens it; then the
+// Orders panel, redrawn large from the app (Quiet Botanicals #1088, sample figures): it waits for your approval, and the
+// buyer's payment, the partner's cost and your margin light up as Marian names them. A second order would lose money:
+// stamped, it waits for its own yes. A tap approves the first; the print room prints it and the parcel reaches the door;
+// a lime pill closes it: printing is paid from your own partner account.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, E = K.ease;
+const BPM = 92.3, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian (vo.mjs + an RMS pass), speech windows:
+//   L1 0.43–2.19 · L2 2.60–5.74 ("waits for your approval" ≈ 4.0–5.74)
+//   L3 6.19–9.75 ("what they paid" 6.19 · "the partner's cost" 7.69 · "your margin" 9.06) · L4 10.38–12.39 · L5 12.65–15.86
+const VO = [[0.2, 'Physical products, without stock.'], [2.3, 'A buyer orders, and the order waits for your approval.'],
+  [5.7, "You see what they paid, the partner's cost, your margin."], [9.6, 'A loss needs its own yes.'],
+  [11.75, 'Your print partner prints and ships it, from your own partner account.']];
+const SB = 2.35, T_WAIT = 4.0, T_ROWS = [6.19, 7.69, 9.06], SC = 9.95, T_STAMP = 10.75, T_TAP = 12.15, SD = 12.55, T_SHIP = 14.0, T_PAY = 15.0, END = DUR - 2;
+
+const L = tall
+  ? { chip: [65, 290], x: 65, cw: 950, capY: 378, capFs: 66, bodyY: 548, bodyH: 690, tagY: 1196 }
+  : { chip: [60, 56], x: 60, cw: 960, capY: 132, capFs: 60, bodyY: 300, bodyH: 960, tagY: 1276 };
+
+if (!tall) document.body.classList.add('f45');
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.2), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(232,96,60,.08), rgba(232,96,60,0) 62%)' } });
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>PRINT</b><i>·</i><span>1/1</span>' });
+
+// ---------- captions ----------
+const wrapWords = (t) => t.split(' ').map((w) => `<span class="w">${w} </span>`).join('');
+function cap(l1, em, cls) {
+  const el = K.box(L.x, L.capY, L.cw, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html: wrapWords(l1) + `<br><span class="w"><em class="${cls || ''}">${em}</em></span>` });
+  return { el, ws: [...el.querySelectorAll('.w')], em: el.querySelector('em') };
+}
+const C = [
+  { c: cap('Physical products,', 'no stock.'), a: 0.3, b: SB, hl: 1.7 },
+  { c: cap('A buyer orders.', 'It waits for you.'), a: SB + 0.1, b: 5.95, hl: 4.6 },
+  { c: cap('Paid · cost ·', 'your margin.'), a: 6.0, b: SC, hl: 9.1 },
+  { c: cap('A loss needs', 'its own yes.', 'red'), a: SC + 0.05, b: SD, hl: 11.0 },
+  { c: cap('Your partner', 'prints and ships it.'), a: SD + 0.1, b: END, hl: 13.4 },
+];
+
+// ---------- A: one design, many things (concept image) ----------
+const persp = K.box(0, 0, W, H, { cls: 'persp' });
+// the photo runs full-bleed behind everything (p10, then p08, then p09) under a soft ivory gradient from the top
+if (tall) document.body.classList.add('t9');
+const bleed = K.box(0, 0, W, H, { cls: 'bleed', html: ['p10-one-design', 'p08-print-room', 'p09-parcel-doorstep'].map((n) => `<img src="${K.pub('r09/' + n + '.webp')}">`).join('') });
+const [p10, p8, p9] = [...bleed.querySelectorAll('img')];
+const fadeL = K.box(0, 0, W, H, { cls: 'fade' });
+const tagA = K.box(L.x, tall ? 1540 : 1290, null, null, { cls: 'demoD', style: { width: 'auto', height: 'auto' }, html: 'Concept images · AI-generated' });
+
+// ---------- B: the order waits (Orders panel, redrawn) ----------
+const cardA = K.box(L.x, L.bodyY, L.cw, null, { cls: 'card', parent: persp, style: { height: 'auto' }, html: `<div class="smp">sample</div>
+  <div class="k">#1088 · WooCommerce · ships to DE</div><div class="t">Quiet Botanicals · art print 40 × 50</div>
+  <div class="pl wait"><i></i>Waiting for your approval</div>
+  <div class="money">
+    <div class="mr"><div class="hl"></div><div>Buyer paid</div><b>€48,00</b></div>
+    <div class="mr"><div class="hl"></div><div>Partner’s cost<small>print €18,40 · shipping €4,99</small></div><b>€23,39</b></div>
+    <div class="mr tot"><div class="hl"></div><div>Your margin<small>what the sale leaves</small></div><b>€24,61</b></div>
+  </div>
+  <div class="btn go">Approve and send to the partner</div>` });
+const plA = cardA.querySelector('.pl'), hls = [...cardA.querySelectorAll('.hl')], btnGo = cardA.querySelector('.btn');
+const tagB = K.demoTag('App screen · redrawn, sample data', L.x, L.tagY);
+
+// ---------- C: a loss waits for its own yes ----------
+const cardB = K.box(L.x + 40, L.bodyY + (tall ? 118 : 150), L.cw - 80, null, { cls: 'card', parent: persp, style: { height: 'auto' }, html: `<div class="smp">sample</div>
+  <div class="k">#1090 · WooCommerce · ships to FR</div><div class="t">Quiet Botanicals · art print 30 × 40</div>
+  <div class="pl loss"><i></i>Loss · −€4,39</div>
+  <div class="btn ghost">Also approve 1 at a loss…</div>` });
+const stamp = K.box(0, 0, null, null, { cls: 'stamp', parent: cardB, style: { width: 'auto', height: 'auto' }, html: 'Its own yes' });
+const ring = K.box(0, 0, 130, 130, { cls: 'tapring' });
+const finger = K.box(0, 0, 44, 44, { cls: 'finger' });
+const toast = K.box(0, 0, null, null, { cls: 'toast', style: { width: 'auto', height: 'auto' }, html: '<svg width="34" height="34" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#DFFF5A" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>#1088 approved · sent to your partner<br><b>#1090 waits for its own yes</b></span>' });
+
+// ---------- D: the partner prints and ships (concept images) ----------
+const pcap = K.box(0, 0, null, null, { cls: 'pcap', style: { width: 'auto', height: 'auto' } });
+const pay = K.box(0, 0, null, null, { cls: 'pay', style: { width: 'auto', height: 'auto' }, html: '<svg width="34" height="34" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#1F1F1F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Paid from your partner account' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: what it costs →' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+K.run({
+  id: 'I12', title: 'Printed Per Order', dur: DUR, bpm: BPM, music: 'ov-vanilla-lofi-beat', mood: 'warm', key: 'G', intro: 0, cover: 9.3,
+  series: 'R09', highlight: 'PRINT · 1/1',
+  technique: 'A product film in four cards: one lemon design on a tee, mug, tote and print (concept image) under a slow push-in; the app’s Orders panel redrawn large (sample figures) tilts in flat and waits for approval while the buyer’s payment, the partner’s cost and the margin light up as the narrator names them; a loss order slides over and is stamped “its own yes”; a tap approves the first; the print room wipes to the parcel at the door; a lime pill closes it: paid from your partner account',
+  caption: 'Sell physical products without stock: when a buyer orders, the order waits for your approval with what they paid, your print partner’s cost and your margin — and an order at a loss needs its own yes. Your print partner prints and ships it, paid from your own partner account. Start free at makeandlist.com',
+  short: 'Printed per order. Approved by you.',
+  vo: VO,
+  beats: ['0–2.4 s: “Physical products, no stock.” — one design on a tee, mug, tote and print', '2.4–6 s: a buyer orders; the order card waits for your approval', '6–10 s: buyer paid €48,00 · partner’s cost €23,39 · your margin €24,61 (sample) light up as she names them', '10–12.5 s: a loss order (−€4,39, sample) stamped “its own yes”; a tap approves only #1088', '12.5–16 s: the print room prints it, the parcel reaches the door; paid from your partner account', '16–18 s: end card, next: what it costs'],
+  cues: [[0.1, 'pop'], [SB - 0.05, 'whoosh'], [2.75, 'notify'], [T_WAIT + 0.05, 'pop'], ...T_ROWS.map((t) => [+(t - 0.02).toFixed(2), 'marker']), [SC - 0.05, 'swish'],
+    [T_STAMP, 'stamp'], [T_TAP, 'click'], [T_TAP + 0.15, 'ding'], [SD - 0.05, 'whoosh'], [12.9, 'printer'], [T_SHIP, 'box'], [T_PAY, 'pop'], [END, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.7 - 550 + Math.sin(T * 0.4) * 160}px, ${H * 0.32 - 550 + Math.cos(T * 0.35) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.12 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.75 - 450 + Math.sin(T * 0.5) * 100}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear));
+  chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`;
+  chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  C.forEach(({ c, a, b, hl }) => {
+    const o = K.p(T, b - 0.25, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.07, a + 0.5 + j * 0.07, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+      w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+    });
+    c.em.style.setProperty('--hl', K.p(T, hl, hl + 0.4, E.outCubic) * 100 + '%');
+    vis(c.el, T >= a - 0.05 && T < b + 0.02);
+  });
+
+  // ---------- A ----------
+  const aIn = K.p(T, 0.0, 0.8, E.outExpo), aOut = K.p(T, SB - 0.3, SB + 0.05, E.inCubic);
+  bleed.style.opacity = aIn;
+  // the gradient opens wide for the photo scenes and rises to hold the order card
+  const ga = K.k(T, [[0, 22], [SB - 0.2, 22], [SB + 0.5, 40], [SD - 0.3, 40], [SD + 0.5, 20], [END, 20]]);
+  const gb = K.k(T, [[0, 44], [SB - 0.2, 44], [SB + 0.5, 64], [SD - 0.3, 64], [SD + 0.5, 42], [END, 42]]);
+  fadeL.style.background = `linear-gradient(180deg, #F4EFE4 0%, #F4EFE4 ${ga}%, rgba(244,239,228,.55) ${(ga + gb) / 2 + 2}%, rgba(244,239,228,0) ${gb}%)`;
+  p10.style.transform = `scale(${1.12 - 0.006 * T}) translateY(${-T * 4}px)`;
+  p10.style.opacity = 1 - K.p(T, SD - 0.2, SD + 0.35, E.linear);
+  p8.style.opacity = K.p(T, SD - 0.2, SD + 0.35, E.linear);
+  tagA.style.opacity = K.p(T, 0.5, 0.8, E.linear) * (1 - K.p(T, END - 0.3, END, E.linear)); vis(tagA, T < END);
+
+  // ---------- B ----------
+  const bIn = K.p(T, SB - 0.05, SB + 0.6, E.outExpo), bOut = K.p(T, SD - 0.3, SD, E.inCubic);
+  const tilt = (1 - K.p(T, SB - 0.05, SB + 0.8, E.outCubic)) * 10;
+  // pushed back a little when the loss order slides over it
+  const back = K.p(T, SC - 0.05, SC + 0.5, E.inOutCubic) * (1 - K.p(T, T_TAP + 0.15, T_TAP + 0.5, E.inOutCubic));
+  cardA.style.opacity = Math.min(1, bIn * 2) * (1 - bOut);
+  cardA.style.transform = `translateY(${(1 - bIn) * 160 + Math.sin(T * 1.2) * 3 + back * 20 - bOut * 60}px) rotateX(${tilt}deg) rotateY(${tilt * -0.4}deg) scale(${(0.96 + 0.04 * bIn) * (1 - 0.03 * back)})`;
+  vis(cardA, T >= SB - 0.1 && T < SD + 0.05);
+  const wp = K.p(T, T_WAIT, T_WAIT + 0.35, E.outBack);
+  plA.style.transform = `scale(${0.85 + 0.15 * wp})`;
+  plA.style.boxShadow = `inset 0 0 0 1.5px #BFD3B6, 0 0 0 ${6 * Math.sin(Math.PI * K.p(T, T_WAIT, T_WAIT + 0.6, E.linear))}px rgba(223,255,90,.9)`;
+  hls.forEach((h, i) => {
+    const p = K.p(T, T_ROWS[i] - 0.05, T_ROWS[i] + 0.4, E.outCubic);
+    h.style.transform = `scaleX(${p})`;
+    h.style.opacity = i === 2 ? 1 : 0.55 + 0.45 * (1 - K.p(T, T_ROWS[i] + 1.0, T_ROWS[i] + 1.4, E.linear));
+  });
+  tagB.style.top = L.bodyY + cardA.offsetHeight + 16 + 'px';
+  tagB.style.opacity = bIn * (1 - bOut); vis(tagB, T >= SB && T < SD + 0.05);
+
+  // ---------- C ----------
+  const cIn = K.p(T, SC - 0.05, SC + 0.55, E.outExpo), cOut = K.p(T, T_TAP + 0.1, T_TAP + 0.45, E.inCubic);
+  cardB.style.opacity = Math.min(1, cIn * 2) * (1 - cOut);
+  cardB.style.transform = `translateX(${(1 - cIn) * 700 + cOut * 500}px) rotate(${(1 - cIn) * 6 + 1.5 + Math.sin(T * 1.1) * 0.4}deg)`;
+  vis(cardB, T >= SC - 0.1 && T < T_TAP + 0.5);
+  const st = K.p(T, T_STAMP, T_STAMP + 0.16, E.outCubic);
+  stamp.style.left = (L.cw - 80) * 0.42 + 'px'; stamp.style.top = (tall ? 136 : 146) + 'px';
+  stamp.style.opacity = st; stamp.style.transform = `rotate(-4deg) scale(${K.lerp(1.8, 1, st)})`;
+  // tap: approve the first order (its button sits at the card's foot, visible below the loss card)
+  const bb = btnGo.getBoundingClientRect();
+  const bx = bb.left + bb.width * 0.5, by = bb.top + bb.height * 0.5;
+  const fIn = K.p(T, 11.4, T_TAP, E.inOutCubic);
+  finger.style.left = K.lerp(W * 0.86, bx, fIn) + 'px'; finger.style.top = K.lerp(H * 0.62, by, fIn) + 'px';
+  finger.style.opacity = K.p(T, 11.35, 11.55, E.linear) * (1 - K.p(T, T_TAP + 0.3, T_TAP + 0.5, E.linear));
+  finger.style.transform = `scale(${T >= T_TAP && T < T_TAP + 0.15 ? 0.8 : 1})`;
+  vis(finger, T >= 11.3 && T < T_TAP + 0.55);
+  const rp = K.p(T, T_TAP, T_TAP + 0.5, E.outCubic);
+  ring.style.left = bx + 'px'; ring.style.top = by + 'px';
+  ring.style.opacity = T >= T_TAP ? 1 - rp : 0; ring.style.transform = `scale(${0.4 + 0.9 * rp})`;
+  vis(ring, T >= T_TAP && T < T_TAP + 0.5);
+  btnGo.style.transform = `scale(${T >= T_TAP && T < T_TAP + 0.15 ? 0.97 : 1})`;
+  const tp = K.p(T, T_TAP + 0.15, T_TAP + 0.5, E.outBack);
+  toast.style.left = W / 2 + 'px'; toast.style.top = L.bodyY + (tall ? 230 : 300) + 'px';
+  toast.style.opacity = Math.min(1, tp * 2) * (1 - bOut);
+  toast.style.transform = `translateX(-50%) translateY(${(1 - tp) * 30}px) scale(${0.85 + 0.15 * tp})`;
+  vis(toast, T >= T_TAP + 0.1 && T < SD + 0.05);
+
+  // ---------- D ----------
+  const dIn = K.p(T, SD - 0.05, SD + 0.6, E.outExpo);
+  const dt = (1 - K.p(T, SD - 0.05, SD + 0.8, E.outCubic)) * 9;
+  // p08 pushes in; a wipe from the right reveals p09
+  p8.style.transform = `scale(${1.04 + 0.04 * K.p(T, SD, T_SHIP, E.linear)}) translateY(${K.p(T, SD, T_SHIP, E.linear) * -14}px)`;
+  const wipe = K.p(T, T_SHIP - 0.25, T_SHIP + 0.35, E.inOutCubic);
+  p9.style.clipPath = `inset(0 0 0 ${(1 - wipe) * 100}%)`;
+  p9.style.transform = `scale(${1.1 - 0.05 * K.p(T, T_SHIP - 0.25, END, E.outCubic)})`;
+  pcap.innerHTML = T < T_SHIP ? 'Your partner <em>prints it.</em>' : '…and <em>ships it.</em>';
+  const pc = T < T_SHIP ? K.p(T, 12.9, 13.3, E.outBack) * (1 - K.p(T, T_SHIP - 0.3, T_SHIP - 0.1, E.linear)) : K.p(T, T_SHIP + 0.25, T_SHIP + 0.6, E.outBack);
+  pcap.style.left = L.x + 30 + 'px'; pcap.style.top = (tall ? 760 : 480) + 'px';
+  pcap.style.opacity = Math.min(1, pc * 2) * (1 - K.p(T, END - 0.3, END, E.linear));
+  pcap.style.transform = `translateY(${(1 - pc) * 24}px) scale(${0.9 + 0.1 * pc})`;
+  vis(pcap, T >= 12.85 && T < END);
+  const pp = K.p(T, T_PAY, T_PAY + 0.4, E.outBack);
+  pay.style.left = W / 2 + 'px'; pay.style.top = (tall ? 1440 : 1170) + 'px';
+  pay.style.opacity = Math.min(1, pp * 2) * (1 - K.p(T, END - 0.3, END, E.linear));
+  pay.style.transform = `translateX(-50%) translateY(${(1 - pp) * 30}px) scale(${0.8 + 0.2 * pp})`;
+  vis(pay, T >= T_PAY && T < END);
+
+  end(T);
+});
+</script></body></html>

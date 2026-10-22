@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I14 · Your Control</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F3EEE3; }
+.bg { position: absolute; inset: 0; background: radial-gradient(90% 62% at 50% 42%, #FCF9F2 0%, #F1EBDE 64%, #E4DACA 100%); }
+.wash { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(60px); }
+/* R09 series chip — the R08 .fchip, identical in I01–I16 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; font-weight: 700; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); padding: 0 .04em; }
+.cap em.red { background: linear-gradient(transparent 60%, #F6C6BE 60%, #F6C6BE 92%, transparent 92%); }
+.w { display: inline-block; white-space: pre; }
+.biglock { position: absolute; z-index: 30; }
+.persp { position: absolute; z-index: 30; perspective: 1600px; }
+.card { position: relative; border-radius: 28px; background: #FFFDF8; padding: 36px 44px 40px; transform-origin: 50% 70%;
+  box-shadow: 0 70px 120px -50px rgba(31,31,31,.6), 0 18px 36px -24px rgba(31,31,31,.4), 0 0 0 1px #E2DBCE; }
+.card .k { font: 500 28px 'IBM Plex Mono', monospace; color: #6B645A; letter-spacing: .01em; }
+.card .t { margin-top: 12px; font: 800 48px/1.08 'Archivo'; letter-spacing: -0.015em; color: #1F1F1F; }
+.card .pl { display: inline-flex; align-items: center; gap: 12px; margin-top: 18px; padding: 10px 22px; border-radius: 99px; font: 700 34px 'Archivo'; white-space: nowrap; }
+.card .pl i { width: 14px; height: 14px; border-radius: 50%; background: currentColor; display: block; }
+.pl.draft { background: #F1FBC7; color: #3F5200; box-shadow: inset 0 0 0 2px #C9DE6E; }
+.pl.wait { background: #E9EFE3; color: #2F6A3A; box-shadow: inset 0 0 0 2px #BFD3B6; }
+.pl.loss { background: #F9DEDA; color: #A5281B; box-shadow: inset 0 0 0 2px #E7A99F; }
+.pl.done { background: #1F1F1F; color: #DFFF5A; box-shadow: none; }
+.card .mrow { display: flex; justify-content: space-between; margin-top: 22px; padding-top: 18px; border-top: 2px dashed #D9D3C9; font: 600 40px 'Archivo'; color: #45403A; }
+.card .mrow b { color: #1F1F1F; font-weight: 800; }
+.card .note { margin-top: 18px; font: 500 36px/1.3 'Archivo'; color: #45403A; }
+.card .btn { margin-top: 26px; height: 98px; border-radius: 26px; display: flex; align-items: center; justify-content: center; font: 800 44px 'Archivo'; background: #DFFF5A; color: #1F1F1F; }
+.card .btn.out { background: #FFFDF8; box-shadow: inset 0 0 0 4px #A5281B; color: #A5281B; }
+.card .lk { position: absolute; right: 34px; top: 30px; width: 96px; height: 96px; border-radius: 50%; background: #1F1F1F; display: flex; align-items: center; justify-content: center; }
+.card .lk.on { background: #DFFF5A; box-shadow: 0 0 0 4px #1F1F1F; }
+.finger { position: absolute; z-index: 60; width: 86px; height: 86px; margin: -43px 0 0 -43px; border-radius: 50%; background: rgba(31,31,31,.28); box-shadow: 0 0 0 3px rgba(255,253,248,.9), 0 12px 24px -8px rgba(31,31,31,.5); }
+.ring { position: absolute; z-index: 59; width: 160px; height: 160px; margin: -80px 0 0 -80px; border-radius: 50%; border: 6px solid #1F1F1F; }
+.track { position: absolute; z-index: 35; display: flex; gap: 22px; }
+.slot { flex: 1; height: 100px; border-radius: 26px; background: rgba(255,253,248,.7); box-shadow: 0 0 0 2px #D9D3C9; display: flex; align-items: center; gap: 16px; padding: 0 20px; }
+.slot i { flex: none; width: 70px; height: 70px; border-radius: 50%; background: #E7E1D5; display: flex; align-items: center; justify-content: center; }
+.slot span { font: 800 40px 'Archivo'; color: #8A8378; white-space: nowrap; }
+.slot.on { background: #FFFDF8; box-shadow: 0 0 0 3px #1F1F1F, 0 24px 40px -24px rgba(31,31,31,.6); }
+.slot.on i { background: #DFFF5A; box-shadow: 0 0 0 3px #1F1F1F; }
+.slot.on span { color: #1F1F1F; }
+/* 9:16 (Stories): bigger panels over y 300–1560, a soft photo band below */
+.T9 .card { padding: 44px 52px 48px; }
+.T9 .card .k { font-size: 32px; }
+.T9 .card .t { font-size: 58px; }
+.T9 .card .pl { font-size: 40px; padding: 12px 26px; }
+.T9 .card .mrow { font-size: 46px; }
+.T9 .card .note { font-size: 42px; }
+.T9 .card .btn { height: 120px; font-size: 52px; margin-top: 30px; }
+.T9 .card .lk { width: 116px; height: 116px; }
+.T9 .card .lk svg { width: 72px; height: 72px; }
+.T9 .slot { height: 120px; gap: 18px; }
+.T9 .slot i { width: 92px; height: 92px; }
+.T9 .slot i svg { width: 62px; height: 62px; }
+.T9 .slot span { font-size: 48px; }
+.band { position: absolute; left: 0; right: 0; overflow: hidden; z-index: 1; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 38%); mask-image: linear-gradient(180deg, transparent 0%, #000 38%); }
+.band img { position: absolute; left: 0; width: 100%; display: block; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I14 — Your control (YOUR CONTROL · 1/1). Three locks, and only your tap opens each one. A big padlock stands for the
+// promise; then three app panels (redrawn large from the real Waiting-for-you and Orders boards, sample data) float in one
+// at a time, each wearing a lock: a listing draft ("Draft ready to publish" → Review and publish), a print order
+// ("Waiting for approval" → Approve and send) and an order at a loss ("Loss −€4,39" → its own "Approve at a loss").
+// A fingertip taps, the shackle springs open, and the yes drops into a three-slot tracker below. Voice + effects only.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, E = K.ease;
+const BPM = 90;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// speech ≈ 0.68–2.89 · 3.38–5.97 · 6.73–9.28 · 10.08–12.90 · 13.99–15.74 (vo.mjs + an RMS pass)
+const VO = [[0.0, 'Nothing goes live without your yes.'], [3.0, 'Listings reach your stores as drafts first.'],
+  [6.25, 'Print orders wait for you to approve them.'], [9.6, 'And an order at a loss needs its own yes.'], [13.25, 'You decide, every time.']];
+const S = [3.0, 6.3, 9.65];      // card i floats in
+const Y = [5.4, 8.75, 12.55];    // your tap on card i
+const SE = 13.45, END = DUR - 2; // finale: all three yes
+
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 380, capFs: 84, lock: [540, 960, 440], card: [65, 620, 950], track: [65, 1356, 950], tagY: 574, trackEnd: 640, lockEnd: [540, 1060, 380], band: 1060 }
+  : { chip: [60, 56], capX: 60, capY: 124, capFs: 72, lock: [540, 610, 300], card: [140, 330, 800], track: [140, 950, 800], tagY: 290, trackEnd: 320, lockEnd: [540, 640, 280] };
+
+if (tall) document.getElementById('stage').classList.add('T9');
+K.box(0, 0, W, H, { cls: 'bg' });
+// 9:16: a boutique counter (p03), softly faded in from the top, fills the lower band under the panels
+const band = tall ? K.box(0, L.band, W, H - L.band, { cls: 'band', html: `<img src="${K.pub('r09/p03-boutique-counter.webp')}">` }) : null;
+const bandImg = band && band.querySelector('img');
+const bandTag = tall ? K.demoTag('Concept image · AI-generated', W - 65 - 345, 1546) : null;
+const washes = [0, 1].map((i) => K.box(0, 0, 900, 900, { cls: 'wash', style: { background: ['rgba(255,236,206,.7)', 'rgba(223,255,90,.2)'][i] } }));
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+// a padlock whose shackle can open (the shackle pivots on its right leg)
+const lockSvg = (size, body, stroke, key) => `<svg width="${size}" height="${size}" viewBox="0 0 100 100" style="overflow:visible">
+  <g class="sh"><path d="M30 46 V32 a20 20 0 0 1 40 0 V46" fill="none" stroke="${stroke}" stroke-width="10" stroke-linecap="round"/></g>
+  <rect x="18" y="44" width="64" height="48" rx="12" fill="${body}" stroke="${stroke}" stroke-width="${body === stroke ? 0 : 6}"/>
+  <circle cx="50" cy="64" r="7" fill="${key}"/><rect x="47" y="64" width="6" height="14" rx="3" fill="${key}"/></svg>`;
+const openShackle = (svgParent, p) => { const sh = svgParent.querySelector('.sh'); sh.setAttribute('transform', `translate(0 ${-14 * p}) rotate(${-38 * p} 70 46)`); };
+
+// ---------- hook: the big lock ----------
+const big = K.box(L.lock[0] - L.lock[2] / 2, L.lock[1] - L.lock[2] / 2, L.lock[2], L.lock[2], { cls: 'biglock', html: lockSvg(L.lock[2], '#1F1F1F', '#1F1F1F', '#DFFF5A') });
+
+const openLock = K.box(L.lockEnd[0] - L.lockEnd[2] / 2, L.lockEnd[1] - L.lockEnd[2] / 2, L.lockEnd[2], L.lockEnd[2], { cls: 'biglock', html: lockSvg(L.lockEnd[2], '#DFFF5A', '#1F1F1F', '#1F1F1F') });
+
+// ---------- the three panels ----------
+const CARDS = [
+  { k: 'WooCommerce · 2 h ago', t: 'Christmas Preschool<br>Learning Pack', pl: ['draft', 'Draft ready to publish'], done: 'Published · by you', btn: ['', 'Review and publish'], slot: 'Draft' },
+  { k: 'Order #1088 · ships to DE', t: 'Quiet Botanicals ·<br>art print 40 × 50', pl: ['wait', 'Waiting for approval'], done: 'Approved · sent to print', mrow: ['What the sale leaves', '€24,61'], btn: ['', 'Approve and send'], slot: 'Order' },
+  { k: 'Order #1090 · ships to FR', t: 'Quiet Botanicals ·<br>art print 30 × 40', pl: ['loss', 'Loss −€4,39'], done: 'Approved at a loss · by you', note: 'Left out unless you approve it.', btn: ['out', 'Approve at a loss'], slot: 'Loss' },
+];
+const cards = CARDS.map((c) => {
+  const wrap = K.box(L.card[0], L.card[1], L.card[2], null, { cls: 'persp' });
+  const el = K.el('div', { parent: wrap, cls: 'card', html: `<div class="lk">${lockSvg(58, '#DFFF5A', '#DFFF5A', '#1F1F1F')}</div>
+    <div class="k">${c.k}</div><div class="t">${c.t}</div><div class="pl ${c.pl[0]}"><i></i><span>${c.pl[1]}</span></div>
+    ${c.mrow ? `<div class="mrow"><span>${c.mrow[0]}</span><b>${c.mrow[1]}</b></div>` : ''}${c.note ? `<div class="note">${c.note}</div>` : ''}
+    <div class="btn ${c.btn[0]}">${c.btn[1]}</div>` });
+  return { wrap, el, lk: el.querySelector('.lk'), pl: el.querySelector('.pl'), plText: el.querySelector('.pl span'), btn: el.querySelector('.btn'), c };
+});
+const tag = K.demoTag('App screen · redrawn, sample data', L.card[0], L.tagY);
+const finger = K.box(0, 0, 86, 86, { cls: 'finger' });
+const ring = K.box(0, 0, 160, 160, { cls: 'ring' });
+
+// ---------- the tracker: three yeses ----------
+const track = K.box(L.track[0], L.track[1], L.track[2], tall ? 120 : 100, { cls: 'track',
+  html: CARDS.map((c, i) => `<div class="slot"><i>${lockSvg(54, '#1F1F1F', '#1F1F1F', '#FAF7EE')}</i><span>${c.slot}</span></div>`).join('') });
+const slots = [...track.querySelectorAll('.slot')];
+
+// captions
+const mkCap = (html) => { const c = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html }); return { c, w: [...c.querySelectorAll('.w')] }; };
+const ws = (s) => s.split(' ').map((x) => `<span class="w">${x} </span>`).join('');
+const caps = [
+  mkCap(ws('Nothing goes live') + '<br>' + ws('without') + '<span class="w"><em>your yes.</em></span>'),
+  mkCap(ws('Listings arrive') + '<br>' + ws('as') + '<span class="w"><em>drafts first.</em></span>'),
+  mkCap(ws('Print orders') + '<br>' + '<span class="w"><em>wait for you.</em></span>'),
+  mkCap(ws('A loss needs') + '<br>' + '<span class="w"><em class="red">its own yes.</em></span>'),
+  mkCap(ws('You decide,') + '<br>' + '<span class="w"><em>every time.</em></span>'),
+];
+const capT = [[0.25, S[0]], [S[0] + 0.25, S[1]], [S[1] + 0.25, S[2]], [S[2] + 0.25, SE], [SE + 0.1, END]];
+
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>YOUR CONTROL</b><i>·</i><span>1/1</span>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: why it helps →' });
+
+function words(wl, T, a, out, st = 0.07) {
+  wl.forEach((w, i) => {
+    const p = K.p(T, a + i * st, a + 0.5 + i * st, E.outExpo);
+    const o = out ? K.p(T, out - 0.3, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+}
+
+K.run({
+  id: 'I14', title: 'Your Control', dur: DUR, bpm: BPM, musicMode: 'none', mood: 'calm', key: 'C', intro: 0, cover: 9.4,
+  series: 'R09', highlight: 'YOUR CONTROL · 1/1',
+  technique: 'Three locks that only your tap opens: a big padlock states the promise, then three app panels redrawn large from the real Waiting-for-you and Orders boards float in one at a time with a gentle tilt — a listing draft, a print order waiting for approval, an order at a loss — each wearing a lock; a fingertip taps its button, the shackle springs open and the yes drops into a three-slot tracker',
+  caption: 'Your control: nothing goes live without your yes. Listings reach your stores as drafts first, print orders wait for your approval, and an order at a loss needs its own yes. Start free at makeandlist.com',
+  short: 'Nothing goes live without your yes.',
+  vo: VO,
+  beats: ['0–3 s: “Nothing goes live without your yes.” — a big padlock, locked', '3–6.3 s: yes 1 — a listing arrives as a draft (“Draft ready to publish”); your tap on “Review and publish” opens its lock', '6.3–9.6 s: yes 2 — a print order waits for approval (what the sale leaves); your tap on “Approve and send”', '9.6–13.4 s: yes 3 — an order at a loss is left out until its own “Approve at a loss” tap', '13.4–16 s: “You decide, every time.” — the tracker shows three yeses', '16–18 s: end card — “Next: why it helps →”'],
+  cues: [[0.1, 'pop'], [2.1, 'click'], [S[0], 'swish'], [S[0] + 0.5, 'pop'], [Y[0], 'click'], [Y[0] + 0.12, 'ding'], [Y[0] + 0.7, 'pop'],
+    [S[1], 'swish'], [S[1] + 0.5, 'pop'], [Y[1], 'click'], [Y[1] + 0.12, 'ding'], [Y[1] + 0.7, 'pop'],
+    [S[2], 'swish'], [S[2] + 0.5, 'pop'], [Y[2], 'click'], [Y[2] + 0.12, 'ding'], [Y[2] + 0.7, 'pop'], [SE + 0.3, 'sparkle'], [END, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  washes[0].style.transform = `translate(${W * 0.7 - 450 + Math.sin(T * 0.4) * 140}px, ${H * 0.3 - 450 + Math.cos(T * 0.35) * 90}px)`;
+  washes[1].style.transform = `translate(${W * 0.15 - 450 + Math.cos(T * 0.5) * 110}px, ${H * 0.7 - 450 + Math.sin(T * 0.45) * 90}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear)); chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`; chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  if (band) {
+    band.style.opacity = 0.55 * K.p(T, 0.2, 1.2, E.linear);
+    bandImg.style.top = (-330 - T * 6) + 'px';
+    bandImg.style.transform = `scale(${1.04 + T * 0.003})`;
+    bandTag.style.opacity = K.p(T, 0.6, 1.0, E.linear) * (1 - K.p(T, END - 0.2, END, E.linear));
+  }
+  // ---------- hook lock ----------
+  const bp = K.p(T, 0.3, 1.0, E.outBack), bOut = K.p(T, S[0] - 0.35, S[0] + 0.05, E.inCubic);
+  // it rattles once when tried (no yes yet), then stays shut
+  const rattle = T > 2.05 && T < 2.5 ? Math.sin((T - 2.05) * 60) * 5 * (1 - (T - 2.05) / 0.45) : 0;
+  big.style.opacity = Math.min(1, bp * 2) * (1 - bOut);
+  big.style.transform = `translateY(${(1 - bp) * 80 + Math.sin(T * 1.2) * 6 - bOut * 60}px) rotate(${rattle}deg) scale(${0.8 + 0.2 * bp - 0.2 * bOut})`;
+  vis(big, T < S[0] + 0.1);
+
+  // ---------- cards ----------
+  cards.forEach((cd, i) => {
+    const a = S[i], tap = Y[i], b = i < 2 ? S[i + 1] : SE;
+    const pin = K.p(T, a, a + 0.7, E.outExpo), settle = K.p(T, a, a + 1.4, E.outCubic);
+    // after the yes the card shrinks down into its tracker slot
+    const fly = K.p(T, tap + 0.55, tap + 1.0 + (i === 2 ? 0.2 : 0), E.inCubic);
+    const out = i < 2 ? fly : K.p(T, SE - 0.2, SE + 0.3, E.inCubic);
+    const sl = slots[i].getBoundingClientRect();
+    const cx = L.card[0] + L.card[2] / 2, cy = L.card[1] + cd.wrap.offsetHeight / 2;
+    const dx = (sl.left + sl.width / 2 - cx) * fly, dy = (sl.top + sl.height / 2 - cy) * fly;
+    cd.wrap.style.opacity = Math.min(1, pin * 2) * (1 - out);
+    cd.wrap.style.transform = `translate(${dx}px, ${dy + (1 - pin) * 220}px) scale(${1 - 0.75 * fly})`;
+    cd.el.style.transform = `rotateX(${(1 - settle) * 9 + Math.sin(T * 0.7 + i) * 0.7}deg) rotateY(${(1 - settle) * (i % 2 ? 7 : -7) + Math.sin(T * 0.5 + i) * 1.1}deg)`;
+    vis(cd.wrap, T >= a - 0.05 && T < (i < 2 ? tap + 1.05 : SE + 0.35));
+    // the tap: press the button, the lock opens, the state flips
+    const press = Math.sin(Math.PI * K.p(T, tap - 0.08, tap + 0.16, E.linear));
+    cd.btn.style.transform = `scale(${1 - 0.05 * press})`;
+    const op = K.p(T, tap + 0.05, tap + 0.4, E.outBack);
+    openShackle(cd.lk, op);
+    const lit = T >= tap + 0.05, rects = cd.lk.querySelectorAll('rect');
+    cd.lk.className = 'lk' + (lit ? ' on' : '');
+    rects[0].setAttribute('fill', lit ? '#1F1F1F' : '#DFFF5A');
+    cd.lk.querySelector('path').setAttribute('stroke', lit ? '#1F1F1F' : '#DFFF5A');
+    [cd.lk.querySelector('circle'), rects[1]].forEach((n) => n.setAttribute('fill', lit ? '#DFFF5A' : '#1F1F1F'));
+    cd.lk.style.transform = `scale(${1 + 0.18 * Math.sin(Math.PI * K.p(T, tap + 0.05, tap + 0.45, E.linear))})`;
+    const done = T >= tap + 0.12;
+    cd.pl.className = 'pl ' + (done ? 'done' : cd.c.pl[0]);
+    cd.plText.textContent = done ? cd.c.done : cd.c.pl[1];
+  });
+  // the fingertip: comes in, taps the current card's button, leaves
+  const cur = T < (Y[0] + Y[1]) / 2 + 0.6 ? 0 : T < (Y[1] + Y[2]) / 2 + 0.6 ? 1 : 2;
+  const bt = cards[cur].btn.getBoundingClientRect();
+  const fx = bt.left + bt.width * 0.68, fy = bt.top + bt.height * 0.55;
+  const fin = K.p(T, Y[cur] - 0.7, Y[cur] - 0.1, E.outCubic), fout = K.p(T, Y[cur] + 0.25, Y[cur] + 0.6, E.inCubic);
+  const fpress = Math.sin(Math.PI * K.p(T, Y[cur] - 0.08, Y[cur] + 0.16, E.linear));
+  finger.style.left = fx + (1 - fin) * 160 + fout * 140 + 'px'; finger.style.top = fy + (1 - fin) * 260 + fout * 200 + 'px';
+  finger.style.opacity = fin * (1 - fout);
+  finger.style.transform = `scale(${1 - 0.15 * fpress})`;
+  vis(finger, fin > 0 && fout < 1);
+  const rp = K.p(T, Y[cur], Y[cur] + 0.5, E.outCubic);
+  ring.style.left = fx + 'px'; ring.style.top = fy + 'px';
+  ring.style.opacity = T >= Y[cur] && T < Y[cur] + 0.5 ? 1 - rp : 0;
+  ring.style.transform = `scale(${0.3 + rp})`;
+  tag.style.opacity = K.p(T, S[0] + 0.2, S[0] + 0.6, E.linear) * (1 - K.p(T, SE - 0.2, SE + 0.2, E.linear));
+  vis(tag, T >= S[0] && T < SE + 0.25);
+
+  // ---------- tracker ----------
+  const tp = K.p(T, S[0] + 0.3, S[0] + 0.9, E.outExpo);
+  // finale: the big lock comes back, open, under the three yeses
+  const lp = K.p(T, SE + 0.45, SE + 1.05, E.outBack), lo = K.p(T, SE + 0.9, SE + 1.3, E.outBack);
+  openLock.style.opacity = Math.min(1, lp * 2);
+  openLock.style.transform = `translateY(${(1 - lp) * 80 + Math.sin(T * 1.2) * 6}px) scale(${0.8 + 0.2 * lp})`;
+  openShackle(openLock, lo);
+  vis(openLock, T >= SE + 0.4);
+  track.style.opacity = tp;
+  const fin2 = K.p(T, SE, SE + 0.6, E.inOutCubic);
+  track.style.transform = `translateY(${(1 - tp) * 80 - fin2 * (L.track[1] - L.trackEnd)}px)`;
+  vis(track, T >= S[0] + 0.25);
+  slots.forEach((s, i) => {
+    const on = T >= Y[i] + 0.95 + (i === 2 ? 0.2 : 0);
+    s.className = 'slot' + (on ? ' on' : '');
+    const pop = Math.sin(Math.PI * K.p(T, Y[i] + 0.95 + (i === 2 ? 0.2 : 0), Y[i] + 1.3 + (i === 2 ? 0.2 : 0), E.linear));
+    const fl = K.p(T, SE + 0.3 + i * 0.15, SE + 0.6 + i * 0.15, E.linear);
+    s.style.transform = `scale(${1 + 0.08 * pop + 0.06 * Math.sin(Math.PI * fl)})`;
+    openShackle(s.querySelector('i'), on ? 1 : 0);
+  });
+
+  caps.forEach((c, i) => {
+    const [a, b] = capT[i];
+    words(c.w, T, a, b < END ? b : null, 0.07);
+    vis(c.c, T >= a - 0.05 && T < b + 0.05);
+  });
+
+  end(T);
+});
+</script></body></html>

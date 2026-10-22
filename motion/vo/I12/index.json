@@ -1,0 +1,32 @@
+[
+ {
+  "t": 0.2,
+  "text": "Physical products, without stock.",
+  "file": "01-18f5cc1159.wav",
+  "dur": 2.23
+ },
+ {
+  "t": 2.3,
+  "text": "A buyer orders, and the order waits for your approval.",
+  "file": "02-fcf3d0c547.wav",
+  "dur": 3.58
+ },
+ {
+  "t": 5.7,
+  "text": "You see what they paid, the partner's cost, your margin.",
+  "file": "03-1558f69815.wav",
+  "dur": 4.13
+ },
+ {
+  "t": 9.6,
+  "text": "A loss needs its own yes.",
+  "file": "04-b812129393.wav",
+  "dur": 2.83
+ },
+ {
+  "t": 11.75,
+  "text": "Your print partner prints and ships it, from your own partner account.",
+  "file": "05-9b77005eb0.wav",
+  "dur": 4.32
+ }
+]

@@ -1,0 +1,38 @@
+[
+ {
+  "t": 0,
+  "text": "Starting takes three steps.",
+  "file": "01-d47aecb8c3.wav",
+  "dur": 1.9
+ },
+ {
+  "t": 2,
+  "text": "One: sign up free.",
+  "file": "02-32ea3b2206.wav",
+  "dur": 2.65
+ },
+ {
+  "t": 4.5,
+  "text": "Two: connect your store.",
+  "file": "03-205f749762.wav",
+  "dur": 2.04
+ },
+ {
+  "t": 7,
+  "text": "Three: describe your first product in a sentence.",
+  "file": "04-6fde888a09.wav",
+  "dur": 3.3
+ },
+ {
+  "t": 10.55,
+  "text": "You’ll see the quote before anything is made.",
+  "file": "05-cb8b2877a9.wav",
+  "dur": 3.02
+ },
+ {
+  "t": 15.65,
+  "text": "Start free at makeandlist.com.",
+  "file": "06-309f104ebe.wav",
+  "dur": 2.23
+ }
+]

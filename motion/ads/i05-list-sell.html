@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I05 · List and Sell</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R09 series chip (the R08 .fchip style) — identical in I01–I16 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .06em; }
+.w { display: inline-block; white-space: pre; }
+/* the listing card: the List board's panel redrawn large */
+.lc { position: absolute; z-index: 30; border-radius: 28px; background: #FFFDF8; padding: 34px 38px; box-shadow: 0 60px 110px -50px rgba(31,31,31,.7), 0 0 0 1px #E2DBCE; transform-origin: 50% 40%; }
+.lc .sec { position: relative; border-radius: 18px; padding: 14px 18px; margin: 0 -18px; }
+.lc small { display: block; font: 600 26px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #6B645A; }
+.lc .row1 { display: flex; gap: 26px; align-items: flex-start; }
+.lc .row1 img { width: 168px; height: 217px; border-radius: 12px; flex: none; box-shadow: 0 16px 30px -18px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; object-fit: cover; }
+.lc .tt { margin-top: 8px; font: 700 38px/1.18 'Archivo'; color: #1F1F1F; }
+.lc .ds { margin-top: 8px; font: 400 30px/1.36 'Archivo'; color: #2E2A26; }
+.lc .tags { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.lc .tags span { padding: 9px 18px; border-radius: 99px; background: #EFEADF; font: 500 28px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.lc .tags span.more { background: #1F1F1F; color: #DFFF5A; font-weight: 700; }
+.lc .veil { position: absolute; inset: 0; border-radius: 18px; background: #FFFDF8; pointer-events: none; }
+.lc .ring { position: absolute; inset: -4px; border-radius: 20px; border: 4px solid #1F1F1F; box-shadow: 0 0 0 8px #DFFF5A; pointer-events: none; }
+.hlw { background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 94%, transparent 94%) no-repeat 0 0 / 0% 100%; }
+/* images + video */
+.tile { position: absolute; z-index: 30; border-radius: 28px; overflow: hidden; background: #FFFDF8; box-shadow: 0 50px 90px -44px rgba(31,31,31,.7), 0 0 0 1px #E2DBCE; }
+.tile > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.pill { position: absolute; z-index: 36; white-space: nowrap; padding: 12px 24px; border-radius: 99px; font: 700 32px 'Archivo'; }
+.pill.ink { background: #1F1F1F; color: #FAF7EE; }
+.pill.lime { background: #DFFF5A; color: #1F1F1F; box-shadow: 0 0 0 2px #1F1F1F; }
+.vid .play { position: absolute; left: 50%; top: 46%; width: 132px; height: 132px; margin: -66px 0 0 -66px; border-radius: 50%; background: rgba(31,31,31,.82); display: grid; place-items: center; }
+.vid .bar { position: absolute; left: 30px; right: 30px; bottom: 30px; height: 10px; border-radius: 5px; background: rgba(255,253,248,.7); overflow: hidden; }
+.vid .bar b { display: block; height: 100%; background: #1F1F1F; }
+/* store rows */
+.srow { position: absolute; z-index: 30; display: flex; align-items: center; gap: 26px; padding: 22px 26px; border-radius: 28px; background: #FFFDF8; box-shadow: 0 34px 60px -38px rgba(31,31,31,.65), 0 0 0 1px #E2DBCE; }
+.srow .lg { width: 132px; height: 96px; border-radius: 20px; background: #FFFDF8; box-shadow: 0 0 0 2px #EFEADF; display: grid; place-items: center; flex: none; }
+.srow .lg img { max-width: 96px; max-height: 40px; display: block; }
+.srow .lg img.sq { max-height: 64px; }
+.srow .nm { flex: 1; min-width: 0; }
+.srow .nm b { display: block; font: 700 40px 'Archivo'; color: #1F1F1F; }
+.srow .nm small { display: block; margin-top: 4px; font: 500 28px/1.2 'Archivo'; color: #5E574D; }
+.srow .st { position: relative; flex: none; width: 210px; height: 68px; }
+.srow .st span { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 99px; font: 700 30px 'Archivo'; white-space: nowrap; }
+.srow .st .wait { border: 3px dashed #B9B1A3; color: #8A8378; }
+.srow .st .d { border: 3px dashed #1F1F1F; color: #1F1F1F; background: #FFFDF8; }
+.srow .st .p { background: #1F1F1F; color: #FAF7EE; }
+.srow .st .l { background: #DFFF5A; color: #1F1F1F; box-shadow: 0 0 0 3px #1F1F1F inset; }
+.fly { position: absolute; z-index: 45; width: 96px; height: 124px; border-radius: 10px; overflow: hidden; background: #FFFDF8; box-shadow: 0 18px 30px -14px rgba(31,31,31,.6), 0 0 0 1px #D9D3C9; }
+.fly img { width: 100%; height: 100%; object-fit: cover; }
+.sub { position: absolute; z-index: 40; white-space: nowrap; padding: 12px 26px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 700 40px 'Archivo'; }
+.sub b { color: #DFFF5A; }
+.legal { position: absolute; z-index: 40; font: 500 20px/1.3 'Archivo'; color: #6B645A; white-space: nowrap; }
+.touch { position: absolute; z-index: 60; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; background: rgba(31,31,31,.28); box-shadow: 0 0 0 3px rgba(255,253,248,.9); }
+.tring { position: absolute; z-index: 59; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; border: 6px solid #DFFF5A; }
+/* 9:16 Stories: words may sit down to y 1600, so the card and rows run larger */
+.t9 .lc { padding: 40px 44px; }
+.t9 .lc small { font-size: 28px; }
+.t9 .lc .row1 img { width: 200px; height: 258px; }
+.t9 .lc .tt { font-size: 46px; }
+.t9 .lc .ds { font-size: 36px; }
+.t9 .lc .tags span { font-size: 34px; padding: 11px 22px; }
+.t9 .srow { padding: 26px 30px; gap: 30px; }
+.t9 .srow .lg { width: 168px; height: 118px; border-radius: 24px; }
+.t9 .srow .lg img { max-width: 124px; max-height: 50px; }
+.t9 .srow .lg img.sq { max-height: 84px; }
+.t9 .srow .nm b { font-size: 48px; }
+.t9 .srow .nm small { font-size: 32px; white-space: nowrap; }
+.t9 .srow .st { width: 200px; height: 80px; }
+.t9 .srow .st span { font-size: 36px; }
+.t9 .pill { font-size: 38px; padding: 14px 28px; }
+.t9 .sub { font-size: 46px; }
+.t9 .legal { font-size: 21px; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I05 — How it works 3/3: list and sell. The owner's Christmas Preschool Learning Pack becomes a listing: the List
+// board's card, redrawn large, lights its title, description and tags as Marian names them; listing images fan out
+// behind a short product video; then a paper draft flies into each of three stores, each row landing as "Draft" with
+// what that store really does; last, the seller's own finger taps "Publish" on one store while the others stay drafts.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, END = DUR - 2, E = K.ease;
+if (tall) document.getElementById('stage').classList.add('t9');
+const BPM = 99.4;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows measured from the takes (vo.mjs + an RMS pass):
+//   L1 0.58–2.67 ("Step three:" 0.58–1.35 · "your listing." 1.90–2.67)
+//   L2 3.24–6.10 ("Its title," 3.24–3.81 · "description and tags are written for you." 4.24–6.10)
+//   L3 6.75–9.52 · L4 9.81–12.52 ("…as drafts." ≈ 11.9) · L5 13.25–15.59 ("you publish" ≈ 14.7)
+const S_B = 6.3, S_C = 9.55, S_D = 12.8;
+const T_SEC = [3.25, 4.3, 5.25];          // title, description, tags light up as she names them
+const T_DR = [10.35, 10.75, 11.15], LAND = 0.5; // drafts fly on "goes to your stores as drafts"
+const T_TAP = 14.95;                      // her "you publish" — the seller's tap
+
+const PACK = 'showcase/christmas-preschool-pack/';
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 372, capFs: 88, cardX: 65, cardY: 630, cardW: 950,
+      ownTag: [65, 1548], vidW: 600, vidY: 610, fanY: 730, fanW: 460, pillY: 1520,
+      rowsY: 640, rowH: 182, rowGap: 26, subY: 1330, legalY: 1574, appTag: [65, 580],
+      pagesY: 1250, stackY: 1286, stackW: 200, stackCx: 820 }
+  : { chip: [60, 56], capX: 60, capY: 136, capFs: 76, cardX: 60, cardY: 250, cardW: 960,
+      ownTag: [60, 1270], vidW: 470, vidY: 300, fanY: 370, fanW: 350, pillY: 1010,
+      rowsY: 340, rowH: 150, rowGap: 18, subY: 862, legalY: 1272, appTag: [60, 298],
+      pagesY: 820, stackY: 950, stackW: 210, stackCx: 540 };
+
+// ---------- ambient ----------
+const blobA = K.box(0, 0, 1000, 1000, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.24), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(126,154,126,.15), rgba(126,154,126,0) 62%)' } });
+
+// ---------- series chip ----------
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', html: '<b>HOW IT WORKS</b><i>·</i><span>3/3</span>', style: { width: 'auto', height: '56px' } });
+
+// ---------- captions ----------
+function capEm(parts) { // [[text, em?], ['<br>']]
+  const el = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  el.innerHTML = parts.map(([t, em]) => (t === '<br>' ? '<br>' : t.split(' ').map((w) => (em ? `<span class="w"><em>${w}</em> </span>` : `<span class="w">${w} </span>`)).join(''))).join('');
+  return { el, ws: [...el.querySelectorAll('.w')] };
+}
+const C = [
+  { c: capEm([['Step 3:', 0], ...(tall ? [['<br>']] : []), ['your listing.', 1]]), a: 0.5, b: 3.05 },
+  { c: capEm([['Title,', 0], ['description,', 0], ...(tall ? [['<br>']] : []), ['tags.', 1]]), a: 3.15, b: S_B },
+  { c: capEm([['Images', 0], ['<br>'], ['and', 0], ['a video.', 1]]), a: 6.65, b: S_C },
+  { c: capEm([['Sent to your', 0], ['<br>'], ['stores', 0], ['as drafts.', 1]]), a: 9.75, b: S_D },
+  { c: capEm([['You publish', 0], ['<br>'], ['when', 0], ['ready.', 1]]), a: 13.15, b: END },
+];
+
+// ---------- A: the listing card (List board, redrawn) ----------
+const card = K.box(L.cardX, L.cardY, L.cardW, null, { cls: 'lc', html: `
+  <div class="row1"><img src="${K.pub(PACK + 'cover.webp')}"><div class="sec s0" style="flex:1"><small>Title</small>
+    <div class="tt">Christmas Preschool Learning Pack — Counting, Tracing &amp; Matching, 37 Pages</div></div></div>
+  <div class="sec s1" style="margin-top:14px"><small>Description</small>
+    <div class="ds">A 37-page Christmas learning pack for ages 3–5: count, trace and match…</div></div>
+  <div class="sec s2" style="margin-top:10px"><small>Tags · 13</small>
+    <div class="tags"><span>christmas worksheets</span><span>preschool printable</span><span class="more">+11</span></div></div>` });
+const secs = [0, 1, 2].map((i) => card.querySelector('.s' + i));
+const veils = secs.map((s) => K.el('div', { parent: s, cls: 'veil' }));
+const rings = secs.map((s) => K.el('div', { parent: s, cls: 'ring' }));
+const tagSpans = [...card.querySelectorAll('.tags span')];
+// the pack's real pages fan out under the card (the files behind the listing)
+const PAGES = ['interior-01.webp', 'interior-02.webp', 'interior-03.webp', 'interior-04.webp'];
+const pages = PAGES.map((f) => K.box(0, 0, tall ? 330 : 300, tall ? 427 : 388, { cls: 'tile', html: `<img src="${K.pub(PACK + f)}">`, style: { borderRadius: '14px', zIndex: 22 } }));
+const appTagA = K.demoTag('App screen · redrawn, sample data', 0, 0);
+const ownTag = K.demoTag('Example made with MakeAndList by its owner', 0, 0);
+
+// ---------- B: listing images fan out behind a short video ----------
+const FAN = ['listing-01.webp', 'listing-02.webp', 'listing-03.webp'];
+const fans = FAN.map((f) => K.box(0, 0, L.fanW, L.fanW, { cls: 'tile', html: `<img src="${K.pub(PACK + f)}">` }));
+const vidH = L.vidW * 1.3;
+const vid = K.box((W - L.vidW) / 2, L.vidY + 40, L.vidW, vidH, { cls: 'tile vid', html: `
+  <img class="v0" src="${K.pub(PACK + 'cover.webp')}"><img class="v1" src="${K.pub(PACK + 'interior-01.webp')}"><img class="v2" src="${K.pub(PACK + 'listing-03.webp')}">
+  <div class="play"><svg width="56" height="56" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z" fill="#DFFF5A"/></svg></div><div class="bar"><b></b></div>` });
+const vImgs = [0, 1, 2].map((i) => vid.querySelector('.v' + i));
+const vBar = vid.querySelector('.bar b'), vPlay = vid.querySelector('.play');
+const pillImg = K.box(0, 0, null, null, { cls: 'pill ink', html: 'Listing images', style: { width: 'auto', height: 'auto' } });
+const pillVid = K.box(0, 0, null, null, { cls: 'pill lime', html: '▶ Short video', style: { width: 'auto', height: 'auto' } });
+
+// ---------- C/D: three stores, each gets a draft (Send board wording, redrawn) ----------
+const STORES = [
+  { s: 'gumroad', n: 'Gumroad', note: 'Draft first', sq: 1 },
+  { s: 'woocommerce', n: 'WooCommerce', note: 'Hidden draft in your shop' },
+  { s: 'ikas', n: 'ikas', note: 'Not for sale until you publish' },
+];
+const rowW = W - 2 * L.capX;
+const PADR = tall ? 30 : 26, BW = tall ? 200 : 210; // a row's right padding and badge width
+const rows = STORES.map((r, i) => {
+  const el = K.box(L.capX, L.rowsY + i * (L.rowH + L.rowGap), rowW, L.rowH, { cls: 'srow', html:
+    `<div class="lg"><img class="${r.sq ? 'sq' : ''}" src="${K.pub('platforms/' + r.s + '.svg')}"></div><div class="nm"><b>${r.n}</b><small>${r.note}</small></div>` +
+    '<div class="st"><span class="wait">Waiting</span><span class="d">Draft</span><span class="p">Publish</span><span class="l">✓ Live</span></div>' });
+  return { el, small: el.querySelector('small'), wait: el.querySelector('.wait'), d: el.querySelector('.d'), p: el.querySelector('.p'), l: el.querySelector('.l'), st: el.querySelector('.st') };
+});
+// the product stack the drafts leave from (bottom band: pictures only, no words)
+const stack = [2, 1, 0].map((i) => K.box(0, 0, L.stackW, L.stackW * 1.293, { cls: 'tile', html: `<img src="${K.pub(PACK + (i ? 'interior-0' + i + '.webp' : 'cover.webp'))}">`, style: { borderRadius: '16px', zIndex: 26 + (2 - i) } }));
+const flies = STORES.map(() => K.box(0, 0, 96, 124, { cls: 'fly', html: `<img src="${K.pub(PACK + 'cover.webp')}">` }));
+const sub = K.box(L.capX, L.subY, null, null, { cls: 'sub', html: 'Nothing is <b>public</b> yet.', style: { width: 'auto', height: 'auto' } });
+const legal = K.box(L.capX, L.legalY, W - 2 * L.capX, null, { cls: 'legal', html: 'Logos belong to their owners. Shown to identify compatible platforms; no endorsement implied.' });
+const appTagC = K.demoTag('App screen · redrawn, sample data', L.appTag[0], L.appTag[1]);
+const touch = K.box(0, 0, 84, 84, { cls: 'touch' });
+const tring = K.box(0, 0, 150, 150, { cls: 'tring' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: what you get →' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+K.run({
+  id: 'I05', title: 'List and Sell', dur: DUR, bpm: BPM, music: 'ov-the-lucky-ticket', mood: 'bright', key: 'D', intro: 0, cover: 11.6,
+  series: 'R09', highlight: 'HOW IT WORKS · 3/3',
+  technique: 'Screen cards: the List board’s listing card redrawn large on a floating 3D-tilted card whose title, description and tags un-veil under a lime ring as the narrator names them; listing images fan out behind a playing product video; paper drafts arc into three store rows that land as “Draft”; the seller’s finger taps “Publish” on one store while the others stay drafts',
+  caption: 'How it works, step 3: your listing’s title, description and tags are written for you, with listing images and a short video. It all goes to your stores as drafts — nothing is public until you publish. Start free at makeandlist.com',
+  short: 'Listing ready. Drafts first. You publish.',
+  vo: [[0.2, 'Step three: your listing.'], [2.8, 'Its title, description and tags are written for you.'], [6.2, 'Listing images and a short video come with it.'], [9.3, 'Then it all goes to your stores as drafts.'], [12.75, 'When you are ready, you publish.']],
+  beats: ['0–3.1 s: “Step 3: your listing.” — the owner’s Christmas pack listing card floats in and settles flat', '3.1–6.3 s: title, description and tags light up one by one as she names them', '6.3–9.6 s: listing images fan out behind a short product video that plays', '9.6–12.8 s: a paper draft arcs into Gumroad, WooCommerce and ikas; each lands as “Draft”; nothing is public yet', '12.8–16 s: “You publish when ready.” — the seller taps Publish on ikas; the other two stay drafts', '16–18 s: end card — Next: what you get'],
+  cues: [[0.1, 'pop'], [0.7, 'swish'], [T_SEC[0], 'pop'], [T_SEC[1], 'pop'], [T_SEC[2], 'pop'], [S_B - 0.05, 'swish'], [6.6, 'pageturn'], [7.0, 'pageturn'], [7.9, 'click'],
+    [S_C - 0.05, 'swish'], [+(T_DR[0] + LAND).toFixed(2), 'pop'], [+(T_DR[1] + LAND).toFixed(2), 'pop'], [+(T_DR[2] + LAND).toFixed(2), 'pop'], [12.62, 'sparkle'],
+    [T_TAP, 'click'], [+(T_TAP + 0.12).toFixed(2), 'ding'], [END, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.62 - 500 + Math.sin(T * 0.5) * 150}px, ${H * 0.42 - 500 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.12 - 450 + Math.cos(T * 0.45) * 110}px, ${H * 0.8 - 450 + Math.sin(T * 0.6) * 90}px)`;
+
+  const cp = K.p(T, 0.1, 0.6, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear));
+  chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`;
+  chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  C.forEach(({ c, a, b }) => {
+    const o = b >= END ? 0 : K.p(T, b - 0.2, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.06, a + 0.5 + j * 0.06, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+      w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+    });
+    vis(c.el, T >= a - 0.05 && T < b + 0.02);
+  });
+
+  // ---------- A ----------
+  const aIn = K.p(T, 0.4, 1.3, E.outExpo), aOut = K.p(T, S_B - 0.3, S_B, E.inCubic);
+  const onA = T < S_B + 0.02;
+  const settle = K.p(T, 0.4, 2.2, E.outCubic);
+  card.style.opacity = Math.min(1, aIn * 2) * (1 - aOut);
+  card.style.transform = `perspective(1600px) translateY(${(1 - aIn) * 240 + Math.sin(T * 1.2) * 5 - aOut * 80}px) rotateX(${(1 - settle) * 10 + Math.sin(T * 0.7) * 0.6}deg) rotateY(${(1 - settle) * -9 + Math.cos(T * 0.6) * 0.8}deg) scale(${0.94 + 0.06 * aIn - aOut * 0.04})`;
+  vis(card, onA);
+  // before she names them the sections sit under soft veils; each un-veils and rings as named
+  secs.forEach((s, i) => {
+    const t0 = T_SEC[i];
+    const vp = K.p(T, t0 - 0.05, t0 + 0.35, E.outCubic);
+    veils[i].style.opacity = T < 3.0 ? 0 : 0.72 * (1 - vp);
+    const next = i < 2 ? T_SEC[i + 1] : S_B - 0.4;
+    rings[i].style.opacity = K.p(T, t0, t0 + 0.15, E.linear) * (1 - K.p(T, next - 0.05, next + 0.15, E.linear));
+    rings[i].style.transform = `scale(${1.03 - 0.03 * K.p(T, t0, t0 + 0.4, E.outBack)})`;
+  });
+  tagSpans.forEach((t, i) => {
+    const p = K.p(T, T_SEC[2] + 0.1 + i * 0.08, T_SEC[2] + 0.45 + i * 0.08, E.outBack);
+    t.style.transform = T < T_SEC[2] - 0.1 ? 'none' : `scale(${0.85 + 0.15 * p})`;
+  });
+  pages.forEach((pg, i) => {
+    const p = K.p(T, 1.1 + i * 0.12, 1.9 + i * 0.12, E.outExpo);
+    const x = W / 2 - (tall ? 165 : 150) + (i - 1.5) * (tall ? 220 : 230);
+    pg.style.left = x + 'px'; pg.style.top = L.pagesY + 'px';
+    pg.style.opacity = Math.min(1, p * 2) * (1 - aOut);
+    pg.style.transform = `translateY(${(1 - p) * 220 + Math.sin(T * 0.9 + i) * 8 + Math.abs(i - 1.5) * 26 - aOut * 40}px) rotate(${(i - 1.5) * 7 * p}deg)`;
+    vis(pg, onA && T >= 1.05);
+  });
+  appTagA.style.left = L.capX + 'px'; appTagA.style.top = (tall ? L.appTag[1] : 1226) + 'px';
+  ownTag.style.left = (tall ? L.ownTag[0] : 560) + 'px'; ownTag.style.top = (tall ? L.ownTag[1] : 1226) + 'px';
+  appTagA.style.opacity = aIn * (1 - aOut); vis(appTagA, onA);
+  ownTag.style.opacity = K.p(T, 0.9, 1.2, E.linear) * (1 - aOut); vis(ownTag, onA);
+
+  // ---------- B ----------
+  const bIn = K.p(T, S_B - 0.05, S_B + 0.6, E.outExpo), bOut = K.p(T, S_C - 0.3, S_C, E.inCubic);
+  const onB = T >= S_B - 0.08 && T < S_C + 0.02;
+  const vx = (W - L.vidW) / 2;
+  vid.style.opacity = Math.min(1, bIn * 2) * (1 - bOut);
+  vid.style.transform = `perspective(1600px) translateY(${(1 - bIn) * 260 + Math.sin(T * 1.3) * 6 - bOut * 70}px) rotateY(${(1 - bIn) * 10}deg) scale(${0.9 + 0.1 * bIn})`;
+  vis(vid, onB);
+  // the video plays: three shots cross-fade with a slow push-in, the bar runs
+  const vt = T - 7.75;
+  vImgs.forEach((im, i) => {
+    const a = i * 0.55;
+    im.style.opacity = i === 0 ? 1 : K.p(vt, a - 0.15, a + 0.15, E.linear);
+    im.style.transform = `scale(${1.04 + 0.08 * K.clamp((vt - a + 0.2) / 1.6)})`;
+  });
+  vBar.style.width = `${K.clamp(vt / 1.75) * 100}%`;
+  vPlay.style.opacity = 1 - K.p(T, 7.75, 7.95, E.linear);
+  vPlay.style.transform = `scale(${T >= 7.75 && T < 7.87 ? 0.88 : 1})`;
+  fans.forEach((fn, i) => {
+    const p = K.p(T, 6.7 + i * 0.22, 7.3 + i * 0.22, E.outBack);
+    const side = [-1, 1, 0][i];
+    const cx = W / 2 + side * (tall ? 330 : 330) - L.fanW / 2;
+    const cy = L.fanY + [60, 160, -90][i] + (i === 2 ? 0 : 0);
+    fn.style.left = cx + 'px'; fn.style.top = cy + 'px';
+    fn.style.zIndex = i === 2 ? 28 : 31;
+    fn.style.opacity = Math.min(1, p * 2) * (1 - bOut);
+    const rot = [-9, 8, 0][i];
+    fn.style.transform = `translate(${(1 - p) * -side * 260}px, ${(1 - p) * 120 + Math.sin(T * 1.1 + i) * 6 - bOut * 60}px) rotate(${rot * p}deg) scale(${(i === 2 ? 0.88 : 1) * (0.7 + 0.3 * p)})`;
+    vis(fn, onB && T >= 6.6);
+  });
+  const pp = K.p(T, 7.25, 7.65, E.outBack), pv = K.p(T, 8.3, 8.7, E.outBack);
+  pillImg.style.left = L.capX + 'px'; pillImg.style.top = L.pillY + 'px';
+  pillImg.style.opacity = Math.min(1, pp * 2) * (1 - bOut); pillImg.style.transform = `scale(${0.8 + 0.2 * pp})`;
+  pillVid.style.left = W - L.capX - (tall ? 336 : 290) + 'px'; pillVid.style.top = L.pillY + 'px';
+  pillVid.style.opacity = Math.min(1, pv * 2) * (1 - bOut); pillVid.style.transform = `scale(${0.8 + 0.2 * pv})`;
+  vis(pillImg, onB); vis(pillVid, onB);
+
+  // ---------- C + D: store rows ----------
+  const cIn = K.p(T, S_C - 0.05, S_C + 0.5, E.outExpo);
+  const onC = T >= S_C - 0.08;
+  rows.forEach((r, i) => {
+    const p = K.p(T, S_C + i * 0.1, S_C + 0.6 + i * 0.1, E.outExpo);
+    const tilt = (1 - p) * 10;
+    r.el.style.opacity = Math.min(1, p * 2);
+    r.el.style.transform = `perspective(1600px) translateX(${(1 - p) * 140}px) translateY(${Math.sin(T * 1.1 + i * 1.3) * 4}px) rotateY(${-tilt}deg)`;
+    vis(r.el, onC);
+    const land = T_DR[i] + LAND;
+    const dp = K.p(T, land - 0.02, land + 0.3, E.outBack);
+    r.wait.style.opacity = 1 - Math.min(1, dp * 2);
+    const isPub = i === 2;
+    const hover = isPub ? K.p(T, 13.6, 13.95, E.outCubic) : 0;
+    const live = isPub ? K.p(T, T_TAP + 0.06, T_TAP + 0.36, E.outBack) : 0;
+    r.d.style.opacity = Math.min(1, dp * 2) * (1 - hover);
+    r.d.style.transform = `scale(${0.7 + 0.3 * dp})`;
+    r.p.style.opacity = hover * (1 - Math.min(1, live * 2));
+    r.p.style.transform = `scale(${(T >= T_TAP && T < T_TAP + 0.12 ? 0.9 : 1) * (0.9 + 0.1 * hover)})`;
+    r.l.style.opacity = Math.min(1, live * 2);
+    r.l.style.transform = `scale(${0.7 + 0.3 * live})`;
+    if (isPub) r.small.textContent = T >= T_TAP + 0.06 ? 'Published by you' : STORES[i].note;
+    // after the tap the others dim slightly: they stay drafts, waiting for you
+    r.el.style.filter = !isPub && T > T_TAP + 0.2 ? `saturate(${1 - 0.5 * K.p(T, T_TAP + 0.2, T_TAP + 0.6)})` : 'none';
+  });
+  // drafts arc from the caption area into each row's badge
+  flies.forEach((fl, i) => {
+    const t0 = T_DR[i], p = K.p(T, t0, t0 + LAND, E.inOutCubic);
+    const rx = L.capX + rowW - PADR - BW / 2 - 48, ry = L.rowsY + i * (L.rowH + L.rowGap) + L.rowH / 2 - 62;
+    const sx = L.stackCx - 48, sy = L.stackY + 40;
+    const x = K.lerp(sx, rx, p), y = K.lerp(sy, ry, p) - Math.sin(p * Math.PI) * 160;
+    const land = K.p(T, t0 + LAND, t0 + LAND + 0.2, E.inCubic);
+    fl.style.left = x + 'px'; fl.style.top = y + 'px';
+    fl.style.opacity = 1 - land;
+    fl.style.transform = `rotate(${(1 - p) * 24 - 6 + i * 3}deg) scale(${1 - 0.35 * p - 0.3 * land})`;
+    vis(fl, T >= t0 && T < t0 + LAND + 0.22);
+  });
+  const sp = K.p(T, 12.0, 12.45, E.outBack), sOut = K.p(T, 13.0, 13.25, E.inCubic);
+  sub.style.opacity = Math.min(1, sp * 2) * (1 - sOut);
+  sub.style.transform = `translateY(${(1 - sp) * 30}px) scale(${0.85 + 0.15 * sp})`;
+  vis(sub, T >= 11.95 && T < 13.3);
+  legal.style.opacity = cIn; vis(legal, onC);
+  stack.forEach((st, j) => {
+    const p = K.p(T, S_C + 0.1 + j * 0.08, S_C + 0.7 + j * 0.08, E.outExpo);
+    st.style.left = L.stackCx - L.stackW / 2 + (j - 1) * 46 + 'px'; st.style.top = L.stackY + 'px';
+    st.style.opacity = Math.min(1, p * 2);
+    st.style.transform = `translateY(${(1 - p) * 260 + Math.sin(T * 1.2 + j) * 5 - (T >= T_DR[0] && T < T_DR[2] + 0.3 && j === 2 ? 14 : 0)}px) rotate(${(j - 1) * 6 + Math.sin(T * 0.6) * 0.8}deg)`;
+    vis(st, onC);
+  });
+  appTagC.style.opacity = cIn; vis(appTagC, onC);
+
+  // the seller's finger: in from below, tap on Publish, away
+  const ikY = L.rowsY + 2 * (L.rowH + L.rowGap) + L.rowH / 2;
+  const btnX = L.capX + rowW - PADR - BW / 2;
+  const m1 = K.p(T, 13.9, T_TAP, E.inOutCubic), m2 = K.p(T, T_TAP + 0.3, T_TAP + 0.9, E.inOutCubic);
+  const tx = K.lerp(K.lerp(btnX + 120, btnX + 6, m1), btnX + 160, m2);
+  const ty = K.lerp(K.lerp(ikY + 330, ikY + 4, m1), ikY + 360, m2);
+  const press = T >= T_TAP && T < T_TAP + 0.14;
+  touch.style.left = tx + 'px'; touch.style.top = ty + 'px';
+  touch.style.transform = `scale(${press ? 0.8 : 1})`;
+  touch.style.opacity = K.p(T, 13.9, 14.15, E.linear) * (1 - K.p(T, T_TAP + 0.5, T_TAP + 0.85, E.linear));
+  vis(touch, T >= 13.9 && T < T_TAP + 0.9);
+  const rp = K.p(T, T_TAP, T_TAP + 0.6, E.outCubic);
+  tring.style.left = btnX + 'px'; tring.style.top = ikY + 'px';
+  tring.style.opacity = T >= T_TAP && T < T_TAP + 0.6 ? 1 - rp : 0;
+  tring.style.transform = `scale(${0.3 + 0.9 * rp})`;
+
+  end(T);
+});
+</script></body></html>

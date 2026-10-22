@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I02 · Who It's For</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R09 highlight chip — the R08 .fchip, identical in I01–I16 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.cap { position: absolute; z-index: 40; font: 800 96px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / 0% 100%; padding: 0 .04em; }
+.w { display: inline-block; white-space: pre; }
+.role { position: absolute; z-index: 40; }
+.role .n { font: 800 104px/1 'Playfair Display'; letter-spacing: -0.035em; color: #1F1F1F; white-space: nowrap; }
+.role .n em { font-style: italic; }
+.role .s { margin-top: 14px; display: inline-flex; align-items: center; gap: 14px; font: 600 42px/1.1 'Archivo'; color: #45403A; white-space: nowrap; }
+.role .s i { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 3px #1F1F1F; }
+.pc { position: absolute; z-index: 20; border-radius: 28px; overflow: hidden; background: #E9E3D7; box-shadow: 0 60px 110px -50px rgba(31,31,31,.7), 0 0 0 1px rgba(31,31,31,.08); transform-origin: 50% 50%; }
+.pc img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: 50% 45%; }
+.pc .veil { position: absolute; inset: 0; background: #1F1F1F; opacity: 0; }
+.pc .demo { position: absolute; left: 22px; top: 22px; }
+.num { position: absolute; z-index: 41; font: 600 26px 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #6B645A; white-space: nowrap; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I02 — What is it (2/2): who it's for. Five places, no faces, dealt like a hand of photographs: the hand opens
+// on "who is it for?", the teacher's desk grows to fill the frame, and each next place is dealt over the last one
+// (illustrator's studio, a small shop's counter, the kids' table, a kitchen after hours) with its name set large above
+// it as she says it. On "if you have an idea" the five gather back into the hand.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, E = K.ease;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian, speech windows measured from the takes (vo.mjs + an RMS pass):
+//   L1 0.26–2.02 · L2 2.32–4.52 · L3 4.95–7.57 · L4 8.01–9.87 · L5 10.2–13.05 ("Parents," ≈ 10.2–10.85) · L6 13.5–15.6
+const VO = [[0.1, 'Who is MakeAndList for?'], [1.75, 'Teachers, with a worksheet in mind.'], [4.2, 'Illustrators, with drawings in a drawer.'],
+  [7.25, 'Small shops that want their own products.'], [10.0, 'Parents, and anyone starting on the side.'], [13.0, 'If you have an idea, you can sell it.']];
+const END = DUR - 2;
+// each place takes the frame from its start (dealt in the breath before her line)
+const START = [2.0, 4.6, 7.7, 10.0, 11.05], S_F = 13.35;
+const PLACES = [
+  ['p01-teacher-desk', 'Teachers', 'worksheets and class packs'],
+  ['p02-illustrator-studio', 'Illustrators', 'prints, cards and patterns'],
+  ['p03-boutique-counter', 'Small shops', 'products of their own'],
+  ['p05-kids-table', 'Parents', 'activity packs for kids'],
+  ['p04-kitchen-evening', 'Anyone', 'starting on the side'],
+];
+
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 380, full: { x: 65, y: 600, w: 950, h: 1060 }, fan: { cx: 540, cy: 1000, w: 440, h: 660, dx: 138 } }
+  : { chip: [60, 56], capX: 60, capY: 140, full: { x: 60, y: 350, w: 960, h: 940 }, fan: { cx: 540, cy: 720, w: 320, h: 480, dx: 165 } };
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.22), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(232,96,60,.10), rgba(232,96,60,0) 62%)' } });
+
+function mkCap(text) {
+  const c = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap' });
+  c.innerHTML = text.split('\n').map((line) => line.split(' ').map((t) => t.startsWith('*')
+    ? `<span class="w"><em>${t.replace(/\*/g, '')}</em> </span>` : `<span class="w">${t} </span>`).join('')).join('<br>');
+  return { c, w: [...c.querySelectorAll('.w')], em: [...c.querySelectorAll('em')] };
+}
+function drawCap(cp, T, a, out, hl) {
+  cp.w.forEach((w, i) => {
+    const p = K.p(T, a + i * 0.06, a + 0.5 + i * 0.06, E.outExpo);
+    const o = out ? K.p(T, out - 0.25, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+  cp.em.forEach((e, i) => { e.style.backgroundSize = `${K.p(T, hl + i * 0.12, hl + 0.4 + i * 0.12, E.outCubic) * 100}% 100%`; });
+  cp.c.style.visibility = T >= a && (!out || T < out + 0.05) ? 'visible' : 'hidden';
+}
+const capA = mkCap('Who is it *for?*');
+const capF = mkCap(tall ? 'Have an idea?\nYou can *sell* *it.*' : 'Have an idea?\nYou can *sell* *it.*');
+
+// the places
+const cards = PLACES.map(([img], i) => {
+  const c = K.box(0, 0, 10, 10, { cls: 'pc', html: `<img src="${K.pub('r09/' + img + '.webp')}"><div class="veil"></div><div class="demo">Concept image · AI-generated</div>` });
+  return { c, img: c.querySelector('img'), veil: c.querySelector('.veil'), tag: c.querySelector('.demo') };
+});
+// names above each place
+const roles = PLACES.map(([, n, s], i) => {
+  const r = K.box(L.capX, L.capY - 6, W - 2 * L.capX, null, { cls: 'role', html: `<div class="n">${n === 'Anyone' ? '<em>Anyone</em>' : n}</div><div class="s"><i></i>${s}</div>` });
+  return { r, n: r.querySelector('.n'), s: r.querySelector('.s') };
+});
+const nums = PLACES.map((_, i) => K.box(0, L.capY + 8, null, null, { cls: 'num', style: { width: 'auto', height: 'auto' }, html: `0${i + 1} / 05` }));
+
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>WHAT IS IT</b><i>·</i><span>2/2</span>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: how it works →' });
+
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+const fanPos = (i) => {
+  const F = L.fan, k = i - 2;
+  return { x: F.cx + k * F.dx - F.w / 2, y: F.cy + Math.abs(k) * 26 - F.h / 2, w: F.w, h: F.h, r: k * 7 };
+};
+const full = () => ({ x: L.full.x, y: L.full.y, w: L.full.w, h: L.full.h, r: 0 });
+const mix = (a, b, p) => ({ x: K.lerp(a.x, b.x, p), y: K.lerp(a.y, b.y, p), w: K.lerp(a.w, b.w, p), h: K.lerp(a.h, b.h, p), r: K.lerp(a.r, b.r, p) });
+
+K.run({
+  id: 'I02', title: 'Who It’s For', dur: DUR, bpm: 90, musicMode: 'none', mood: 'calm', key: 'C', intro: 0, cover: 5.6,
+  series: 'R09', highlight: 'WHAT IS IT · 2/2',
+  technique: 'A hand of five photographs of places (no faces): the hand opens on “who is it for?”, the teacher’s desk grows to fill the frame, and each next place is dealt over the last with a 3D swing while the one beneath sinks back and dims; each place’s name is set large above it as she says it; on “if you have an idea” the five gather back into the hand',
+  caption: 'Who is MakeAndList for? Teachers, illustrators, small shops, parents — and anyone starting something on the side. If you have an idea, you can make it into a product and sell it. Start free at makeandlist.com',
+  short: 'Anyone with an idea can sell it.',
+  vo: VO,
+  beats: ['0–2 s: “Who is it for?” — five places fanned like a hand of photographs', '2–4.6 s: Teachers — the teacher’s desk fills the frame',
+    '4.6–7.7 s: Illustrators — the studio is dealt over it', '7.7–10 s: Small shops — the shop counter',
+    '10–13.3 s: Parents (the kids’ table), then anyone starting on the side (a kitchen after hours)',
+    '13.3–16 s: the five gather back into the hand — “Have an idea? You can sell it.”', '16–18 s: end card · Next: how it works'],
+  cues: [[0.1, 'pop'], [0.35, 'paper'], [START[0] - 0.1, 'swish'], [START[1] - 0.1, 'swish'], [START[2] - 0.1, 'swish'], [START[3] - 0.1, 'swish'], [START[4] - 0.1, 'swish'],
+    [S_F - 0.05, 'pageturn'], [15.7, 'sparkle'], [END, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.7 - 550 + Math.sin(T * 0.5) * 160}px, ${H * 0.3 - 550 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.15 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.8 - 450 + Math.sin(T * 0.6) * 100}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear)); chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`; chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  drawCap(capA, T, 0.2, START[0] + 0.05, 1.3);
+  drawCap(capF, T, S_F + 0.2, END, 15.3);
+
+  // the hand of five: opens at the start, gathers again at the end
+  const open = K.p(T, 0.2, 1.0, E.outExpo);
+  const gather = K.p(T, S_F, S_F + 0.9, E.inOutCubic);
+  cards.forEach((C, i) => {
+    const s = START[i], e = i < 4 ? START[i + 1] : S_F;
+    const fp = fanPos(i);
+    let g, z = 20 + i, veil = 0, dx = 0, ry = 0, scl = 1, op = 1, show = true;
+    if (T < s) {
+      // waiting in the hand (intro), or off-frame until dealt
+      if (i === 0 || T < START[0] + 0.6) {
+        const lead = i === 0 ? K.p(T, s - 0.05, s + 0.75, E.inOutCubic) : 0;
+        const away = i === 0 ? 0 : K.p(T, START[0] - 0.05, START[0] + 0.5, E.inCubic);
+        g = mix(fp, full(), lead);
+        const dropIn = K.p(T, 0.15 + i * 0.07, 0.75 + i * 0.07, E.outExpo);
+        g.y += (1 - dropIn) * 300 + away * 900;
+        g.r = g.r * open + (1 - dropIn) * (i - 2) * 6;
+        g.x = K.lerp(L.fan.cx - fp.w / 2, g.x, i === 0 ? 1 : open);
+        op = Math.min(1, dropIn * 2) * (1 - away);
+        z = i === 0 ? 30 : 20 + i;
+      } else { show = false; g = full(); }
+    } else {
+      g = full();
+      // dealt in: swings in from the right and settles flat
+      const pin = i === 0 ? 1 : K.p(T, s - 0.15, s + 0.6, E.outExpo);
+      dx = (1 - pin) * W * 0.95;
+      ry = (1 - pin) * -16;
+      g.r = (1 - pin) * 7;
+      // pushed back by the next place
+      const back = T >= e ? K.p(T, e - 0.15, e + 0.55, E.inOutCubic) : 0;
+      scl = 1 - 0.07 * back;
+      veil = 0.45 * back;
+      g.y -= 30 * back;
+      if (i < 4 && T > e + 0.6 && T < S_F) show = false;
+      z = 30 + i;
+    }
+    // the gather: every place flies back into the hand
+    if (T >= S_F) {
+      show = true; veil = 0; scl = 1; dx = 0; ry = 0; op = 1;
+      const gp = K.p(T, S_F + i * 0.06, S_F + 0.85 + i * 0.06, E.inOutCubic);
+      const from = full(); from.y = i === 4 ? from.y : from.y - 30; from.r = 0;
+      g = mix(from, fp, gp);
+      g.y += Math.sin(T * 1.3 + i) * 6 * gp;
+      g.r += Math.sin(T * 0.9 + i * 1.4) * 1.2 * gp;
+      z = 30 + i;
+    }
+    const c = C.c;
+    c.style.left = g.x + 'px'; c.style.top = g.y + 'px'; c.style.width = g.w + 'px'; c.style.height = g.h + 'px';
+    c.style.zIndex = z;
+    c.style.opacity = op;
+    c.style.transform = `perspective(1600px) translateX(${dx}px) rotateY(${ry}deg) rotate(${g.r}deg) scale(${scl})`;
+    C.veil.style.opacity = veil;
+    // slow push-in while held (Ken Burns), a parallax against the card's own move
+    const held = K.p(T, s, (i < 4 ? START[i + 1] : S_F) + 0.6, E.linear);
+    C.img.style.transform = `scale(${1.06 + 0.07 * held}) translate(${(i % 2 ? 1 : -1) * 14 * held - dx * 0.04}px, ${-10 * held}px)`;
+    const big = (g.w - L.fan.w) / (L.full.w - L.fan.w);
+    C.tag.style.opacity = K.clamp((big - 0.6) / 0.4);
+    vis(c, show);
+  });
+
+  // the names, as she says them
+  roles.forEach((R, i) => {
+    const s = START[i] + 0.1, e = i < 4 ? START[i + 1] : S_F;
+    const p = K.p(T, s, s + 0.55, E.outExpo), o = K.p(T, e - 0.3, e, E.inCubic);
+    R.n.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    R.n.style.transform = `translateY(${(1 - p) * 70 - o * 40}px)`;
+    R.n.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+    const q = K.p(T, s + 0.2, s + 0.75, E.outExpo);
+    R.s.style.opacity = Math.min(1, q * 1.6) * (1 - o);
+    R.s.style.transform = `translateX(${(1 - q) * -40}px)`;
+    vis(R.r, T >= s && T < e);
+    const N = nums[i];
+    N.style.left = W - (tall ? 65 : 60) - N.offsetWidth + 'px';
+    N.style.opacity = p * (1 - o);
+    vis(N, T >= s && T < e);
+  });
+
+  end(T);
+});
+</script></body></html>

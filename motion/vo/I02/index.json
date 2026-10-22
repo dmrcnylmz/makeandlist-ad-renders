@@ -1,0 +1,38 @@
+[
+ {
+  "t": 0.1,
+  "text": "Who is MakeAndList for?",
+  "file": "01-66fde70e52.wav",
+  "dur": 2
+ },
+ {
+  "t": 1.75,
+  "text": "Teachers, with a worksheet in mind.",
+  "file": "02-16924a847e.wav",
+  "dur": 2.88
+ },
+ {
+  "t": 4.2,
+  "text": "Illustrators, with drawings in a drawer.",
+  "file": "03-2730728b80.wav",
+  "dur": 3.48
+ },
+ {
+  "t": 7.25,
+  "text": "Small shops that want their own products.",
+  "file": "04-b9362deec8.wav",
+  "dur": 2.97
+ },
+ {
+  "t": 10,
+  "text": "Parents, and anyone starting on the side.",
+  "file": "05-ff8b79aa38.wav",
+  "dur": 3.53
+ },
+ {
+  "t": 13,
+  "text": "If you have an idea, you can sell it.",
+  "file": "06-b1cda74246.wav",
+  "dur": 2.93
+ }
+]

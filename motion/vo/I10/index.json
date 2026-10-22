@@ -1,0 +1,38 @@
+[
+ {
+  "t": 0.1,
+  "text": "Here's what MakeAndList does on each store.",
+  "file": "01-19b0fefe5a.wav",
+  "dur": 2.37
+ },
+ {
+  "t": 2.45,
+  "text": "WooCommerce, a draft first.",
+  "file": "02-f5c090024a.wav",
+  "dur": 2.04
+ },
+ {
+  "t": 4.6,
+  "text": "Wix, hidden until you confirm.",
+  "file": "03-6d3d2ae06c.wav",
+  "dur": 2.55
+ },
+ {
+  "t": 7.45,
+  "text": "ikas, not for sale until you confirm.",
+  "file": "04-d44f9390a5.wav",
+  "dur": 2.28
+ },
+ {
+  "t": 9.95,
+  "text": "Shopware 6, reviewed hidden drafts.",
+  "file": "05-c96c0fc1b6.wav",
+  "dur": 2.55
+ },
+ {
+  "t": 12.75,
+  "text": "Gumroad, a draft first.",
+  "file": "06-8d07b9c091.wav",
+  "dur": 2.46
+ }
+]

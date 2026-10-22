@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I01 · What Is It</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R09 highlight chip — the R08 .fchip, identical in I01–I16 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.cap { position: absolute; z-index: 40; font: 800 88px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / 0% 100%; padding: 0 .04em; }
+.w { display: inline-block; white-space: pre; }
+.card { position: absolute; z-index: 30; border-radius: 28px; background: #FFFDF8; box-shadow: 0 60px 110px -50px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; transform-origin: 50% 60%; }
+.lbl { font: 600 26px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #6B645A; }
+.field { margin-top: 20px; padding: 26px 30px; min-height: 236px; border-radius: 20px; border: 2.5px solid #1F1F1F; background: #FFFDF8; font: 500 48px/1.22 'Archivo'; color: #1F1F1F; }
+.caret { display: inline-block; width: 4px; height: 52px; margin-left: 4px; vertical-align: -8px; background: #1F1F1F; }
+.foot { display: flex; align-items: center; gap: 22px; margin-top: 26px; }
+.btn { display: inline-flex; align-items: center; gap: 12px; height: 84px; padding: 0 40px; border-radius: 20px; background: #DFFF5A; font: 800 40px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.nb { font: 500 28px/1.25 'Archivo'; color: #45403A; }
+.prod { position: absolute; z-index: 20; }
+.prod img { width: 100%; display: block; }
+.shadow { position: absolute; z-index: 19; border-radius: 50%; background: radial-gradient(closest-side, rgba(31,31,31,.3), rgba(31,31,31,0)); }
+.tile { position: absolute; z-index: 32; width: 290px; padding: 24px 24px 22px; border-radius: 26px; background: #FFFDF8; box-shadow: 0 40px 70px -36px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; }
+.tile .ic { width: 64px; height: 64px; border-radius: 16px; background: #1F1F1F; display: grid; place-items: center; }
+.tile .ic svg { width: 36px; height: 36px; }
+.tile b { display: block; margin-top: 16px; font: 800 40px/1.02 'Archivo'; color: #1F1F1F; letter-spacing: -0.01em; }
+.tile small { display: block; margin-top: 8px; font: 500 26px/1.25 'IBM Plex Mono', monospace; color: #6B645A; }
+.st { position: absolute; z-index: 30; border-radius: 28px; background: #FFFDF8; overflow: hidden; box-shadow: 0 60px 110px -50px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; transform-origin: 50% 70%; }
+.st .bar { display: flex; align-items: center; gap: 20px; height: 112px; padding: 0 30px; background: #F4F1EA; border-bottom: 1px solid #E2DBCE; }
+.st .logo { width: 168px; height: 72px; border-radius: 16px; background: #FFFDF8; display: grid; place-items: center; box-shadow: 0 0 0 1px #E2DBCE; flex: none; }
+.st .logo img { width: 118px; height: auto; display: block; }
+.st .bar b { font: 800 40px 'Archivo'; color: #1F1F1F; }
+.st .bar small { margin-left: auto; font: 600 26px 'IBM Plex Mono', monospace; color: #6B645A; letter-spacing: .04em; }
+.st .body { position: relative; display: flex; gap: 30px; padding: 30px; }
+.st .ph { position: relative; flex: none; border-radius: 20px; overflow: hidden; }
+.st .ph img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.st .info { flex: 1; min-width: 0; }
+.st .t { font: 800 50px/1.02 'Playfair Display'; letter-spacing: -0.02em; color: #1F1F1F; }
+.st .s { margin-top: 12px; font: 500 28px/1.25 'Archivo'; color: #45403A; }
+.st .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.st .tags span { padding: 8px 16px; border-radius: 99px; background: #F4F1EA; font: 600 26px 'IBM Plex Mono', monospace; color: #45403A; }
+.st .pr { margin-top: 18px; font: 700 30px 'Archivo'; color: #1F1F1F; }
+.st .pr i { font-style: normal; font-weight: 500; color: #6B645A; }
+.st .act { display: flex; align-items: center; gap: 18px; padding: 0 30px 30px; }
+.badge { position: relative; height: 72px; flex: 1; }
+.badge span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 12px; border-radius: 99px; font: 800 34px 'Archivo'; white-space: nowrap; }
+.badge .d { border: 3px dashed #8A8378; color: #45403A; }
+.badge .l { background: #DFFF5A; color: #1F1F1F; box-shadow: inset 0 0 0 3px #1F1F1F; }
+.pub { flex: none; height: 72px; padding: 0 36px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 800 34px/72px 'Archivo'; white-space: nowrap; }
+.ring { position: absolute; z-index: 60; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; border: 6px solid #DFFF5A; box-shadow: 0 0 0 4px rgba(31,31,31,.25); pointer-events: none; }
+.band { position: absolute; left: 0; right: 0; z-index: 1; overflow: hidden; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 34%); mask-image: linear-gradient(180deg, transparent 0%, #000 34%); }
+.band img { position: absolute; left: 0; width: 100%; display: block; }
+.dot { position: absolute; z-index: 61; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: rgba(31,31,31,.28); box-shadow: 0 0 0 4px rgba(255,253,248,.9); pointer-events: none; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I01 — What is it (1/2). MakeAndList in one breath, as one continuous object: a sentence is typed into the redrawn
+// Describe field while the planner it describes rises beneath it; the planner moves centre stage and the four parts of
+// the finished product (files, listing copy, images, video) clip onto it as she names them; then the listing lands in
+// your own store as a dashed "Draft", and only a tap on Publish turns it live.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, E = K.ease;
+const BPM = 95.7, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian, speech windows measured from the takes (vo.mjs + an RMS pass):
+//   L1 0.68–3.24 · L2 3.88–5.96 · L3 6.34–11.11 ("files" ≈ 7.2, "listing copy" ≈ 8.3, pause 8.91–9.34, "images" ≈ 9.7,
+//   "short video" ≈ 10.6) · L4 11.49–15.12 ("…your own store," → 13.09, "as a draft," 13.42–13.98, "until you say yes" 14.16–15.12)
+const VO = [[0.2, 'MakeAndList turns an idea into a finished product.'], [2.9, 'Say you want a weekly planner.'],
+  [5.85, 'You get the files, the listing copy, the images and a short video.'], [11.2, 'Then it goes to your own store, as a draft, until you say yes.']];
+const S_B = 6.2, S_C = 11.25, END = DUR - 2;
+const T_TILE = [7.15, 8.3, 9.6, 10.5];
+const T_DRAFT = 13.4, T_TAP = 14.75;
+const SENT = 'A weekly planner with a botanical cover, A4 and US Letter';
+const T_TYPE = [1.0, 5.3];
+
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 380, capFs: 88, cardY: 610, cardW: 950,
+      pA: { cx: 540, y: 1070, w: 460 }, pB: { cx: 540, y: 690, w: 620 },
+      tiles: [[65, 650], [725, 650], [65, 1080], [725, 1080]], ctag: [65, 1520],
+      stY: 600, stW: 950, phW: 380, phH: 500 }
+  : { chip: [60, 56], capX: 60, capY: 140, capFs: 76, cardY: 330, cardW: 960,
+      pA: { cx: 540, y: 790, w: 400 }, pB: { cx: 540, y: 380, w: 500 },
+      tiles: [[60, 360], [730, 360], [60, 690], [730, 690]], ctag: [60, 1290],
+      stY: 340, stW: 960, phW: 360, phH: 420 };
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.26), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(126,154,126,.18), rgba(126,154,126,0) 62%)' } });
+
+// a desk under the story (in 9:16 the part Instagram's reply bar covers stays a picture, never words)
+const BT = tall ? 1240 : 960;
+const band = K.box(0, BT, W, H - BT, { cls: 'band', html: `<img src="${K.pub('r09/p06-planner-flatlay.webp')}">` });
+const bandImg = band.querySelector('img');
+
+// ---------- captions ----------
+function mkCap(text, fs) {
+  const c = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: (fs || L.capFs) + 'px' } });
+  c.innerHTML = text.split('\n').map((line) => line.split(' ').map((t) => t.startsWith('*')
+    ? `<span class="w"><em>${t.replace(/\*/g, '')}</em> </span>` : `<span class="w">${t} </span>`).join('')).join('<br>');
+  return { c, w: [...c.querySelectorAll('.w')], em: [...c.querySelectorAll('em')] };
+}
+function drawCap(cp, T, a, out, hl) {
+  cp.w.forEach((w, i) => {
+    const p = K.p(T, a + i * 0.06, a + 0.5 + i * 0.06, E.outExpo);
+    const o = out ? K.p(T, out - 0.25, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+  cp.em.forEach((e, i) => { e.style.backgroundSize = `${K.p(T, hl + i * 0.12, hl + 0.4 + i * 0.12, E.outCubic) * 100}% 100%`; });
+  cp.c.style.visibility = T >= a && (!out || T < out + 0.05) ? 'visible' : 'hidden';
+}
+const capA1 = mkCap(tall ? 'An idea becomes\na *finished* *product.*' : 'An idea becomes a\n*finished* *product.*');
+const capA2 = mkCap('Say it in\n*one* *sentence.*');
+const capB = mkCap('Files, listing copy,\nimages and *video.*');
+const capC1 = mkCap('In your own store,\nas a *draft.*');
+const capC2 = mkCap('Live only\non your *yes.*');
+
+// ---------- A: the sentence (Describe field, redrawn larger) ----------
+const card = K.box(L.capX, L.cardY, L.cardW, null, { cls: 'card', style: { padding: '30px 34px 32px' },
+  html: `<div class="lbl">Describe it in your own words</div><div class="field"><span class="tx"></span><span class="caret"></span></div>
+    <div class="foot"><div class="btn">Plan it →</div><div class="nb">Nothing is made or charged<br>until you approve the quote.</div></div>` });
+const tx = card.querySelector('.tx'), caret = card.querySelector('.caret'), planBtn = card.querySelector('.btn');
+const redrawTag = K.demoTag('App screen · redrawn, sample data', 0, 0);
+
+// ---------- the planner (one object across A and B) ----------
+const shadow = K.box(0, 0, 10, 10, { cls: 'shadow' });
+const planner = K.box(0, 0, 10, null, { cls: 'prod', html: `<img src="${K.pub('r09/k18-planner-stack.webp')}">` });
+const conceptTag = K.demoTag('Concept product and image · AI-generated', 0, 0);
+
+// ---------- B: the four parts of the finished product ----------
+const ICON = {
+  file: '<svg viewBox="0 0 24 24"><path d="M6 2.5h8l4.5 4.5v14.5H6z M14 2.5V7h4.5" fill="none" stroke="#DFFF5A" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  copy: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 11h16M4 16h10" fill="none" stroke="#DFFF5A" stroke-width="2" stroke-linecap="round"/></svg>',
+  img: '<svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5" fill="none" stroke="#DFFF5A" stroke-width="1.8"/><path d="M4 17l5-5 4 4 3-3 4 4" fill="none" stroke="#DFFF5A" stroke-width="1.8" stroke-linejoin="round"/><circle cx="16" cy="9" r="1.6" fill="#DFFF5A"/></svg>',
+  vid: '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="#DFFF5A"/></svg>',
+};
+const TILES = [['file', 'Files', 'Printable PDF<br>A4 + US Letter'], ['copy', 'Listing copy', 'Title, description,<br>tags'],
+  ['img', 'Images', 'Listing images<br>of the pages'], ['vid', 'Video', 'A short<br>product video']];
+const tiles = TILES.map(([ic, b, s], i) => K.box(L.tiles[i][0], L.tiles[i][1], 290, null, { cls: 'tile',
+  html: `<div class="ic">${ICON[ic]}</div><b>${b}</b><small>${s}</small>` }));
+
+// ---------- C: your own store, the listing as a draft ----------
+const st = K.box(L.capX, L.stY, L.stW, null, { cls: 'st',
+  html: `<div class="bar"><div class="logo"><img src="${K.pub('platforms/woocommerce.svg')}" alt="WooCommerce"></div><b>Your store</b><small>WooCommerce</small></div>
+  <div class="body"><div class="ph" style="width:${L.phW}px;height:${L.phH}px"><img src="${K.pub('r09/p06-planner-flatlay.webp')}"></div>
+    <div class="info"><div class="t">Botanical Weekly Planner</div><div class="s">Printable · A4 and US Letter</div>
+      <div class="tags"><span>planner</span><span>weekly</span><span>botanical</span></div><div class="pr">Price <i>· you set it</i></div></div></div>
+  <div class="act"><div class="badge"><span class="d">Draft · not for sale</span><span class="l">✓ Live in your store</span></div><div class="pub">Publish</div></div>` });
+const phImg = st.querySelector('.ph img'), bD = st.querySelector('.badge .d'), bL = st.querySelector('.badge .l'), pub = st.querySelector('.pub');
+const ring = K.box(0, 0, 150, 150, { cls: 'ring' }), dot = K.box(0, 0, 64, 64, { cls: 'dot' });
+
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>WHAT IS IT</b><i>·</i><span>1/2</span>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: who it’s for →' });
+
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+// a floating card: enters tilted in 3D and settles flat, drifts while held, leaves upward
+function float(el, T, a, b, o = {}) {
+  const pi = K.p(T, a, a + (o.din || 0.65), E.outExpo), po = b ? K.p(T, b - 0.35, b, E.inCubic) : 0;
+  const ph = o.ph || 0;
+  el.style.opacity = Math.min(1, pi * 1.8) * (1 - po);
+  el.style.transform = `perspective(1600px) translateY(${(1 - pi) * (o.dy ?? 180) - po * 90 + Math.sin(T * 0.8 + ph) * 5}px) `
+    + `rotateX(${(1 - pi) * 9 + Math.sin(T * 0.6 + ph) * 0.8}deg) rotateY(${(1 - pi) * (o.ry ?? -7) + Math.cos(T * 0.5 + ph) * 1.1}deg) `
+    + `scale(${0.93 + 0.07 * pi + 0.003 * Math.max(0, T - a)})`;
+  vis(el, T >= a && (!b || T < b + 0.02));
+}
+
+K.run({
+  id: 'I01', title: 'What Is It', dur: DUR, bpm: BPM, music: 'ov-positive-acoustic-guitar-backgro', mood: 'bright', key: 'D', intro: 0, cover: 9.9,
+  series: 'R09', highlight: 'WHAT IS IT · 1/2',
+  technique: 'One continuous object: a sentence is typed into the redrawn Describe field while the planner it describes rises beneath it; the planner glides centre stage and the four parts of the finished product (files, listing copy, images, video) clip onto it as floating cards as she names them; the listing then lands in your own WooCommerce store as a dashed Draft, and a tap on Publish turns it live',
+  caption: 'What is MakeAndList? Describe an idea in a sentence and it becomes a finished product — the files, the listing copy, images and a short video — sent to your own store as a draft until you say yes. Start free at makeandlist.com',
+  short: 'An idea, made into a product you sell.',
+  vo: VO,
+  beats: ['0–3.6 s: “An idea becomes a finished product.” — the Describe field (redrawn) starts typing; the planner rises beneath it',
+    '3.6–6.2 s: “Say it in one sentence.” — the sentence completes; Plan it is tapped',
+    '6.2–11.2 s: the planner centre stage; Files, Listing copy, Images and Video clip on as she names them',
+    '11.2–16 s: the listing in your own store (WooCommerce) as a draft; a tap on Publish turns it live — only on your yes',
+    '16–18 s: end card · Next: who it’s for'],
+  cues: [[0.1, 'pop'], [0.95, 'type'], [3.0, 'type'], [5.85, 'click'], [6.12, 'swish'], [T_TILE[0], 'pop'], [T_TILE[1], 'pop'], [9.15, 'pop'], [T_TILE[3], 'pop'],
+    [11.15, 'whoosh'], [T_DRAFT, 'paper'], [T_TAP, 'click'], [T_TAP + 0.12, 'ding'], [END, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.66 - 550 + Math.sin(T * 0.5) * 160}px, ${H * 0.36 - 550 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.14 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.78 - 450 + Math.sin(T * 0.6) * 100}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear)); chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`; chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  // captions, timed to her lines
+  drawCap(capA1, T, 0.3, 3.55, 2.3);
+  drawCap(capA2, T, 3.75, S_B, 5.0);
+  drawCap(capB, T, S_B + 0.1, S_C - 0.05, 10.5);
+  drawCap(capC1, T, S_C + 0.15, 13.95, 13.45);
+  drawCap(capC2, T, 14.05, END, 14.9);
+
+  {
+    const bo = tall ? K.p(T, END - 0.2, END, E.linear) : K.p(T, S_C - 0.4, S_C + 0.2, E.inCubic);
+    band.style.opacity = K.p(T, 0.2, 1.2, E.linear) * (1 - bo) * 0.95;
+    bandImg.style.top = (tall ? -260 : -420) - 120 * K.p(T, 0, S_C, E.linear) - (tall ? 90 * K.p(T, S_C, END, E.inOutCubic) : 0) + 'px';
+    bandImg.style.transform = `scale(${1.05 + 0.03 * K.p(T, 0, S_C, E.linear)})`;
+    vis(band, T < (tall ? END + 0.05 : S_C + 0.25));
+  }
+
+  // ---------- A ----------
+  float(card, T, 0.35, S_B, { ph: 0.4 });
+  const n = Math.round(SENT.length * K.p(T, T_TYPE[0], T_TYPE[1], E.linear));
+  tx.textContent = SENT.slice(0, n);
+  caret.style.opacity = (T > T_TYPE[0] && T < T_TYPE[1]) || Math.floor(T * 2.4) % 2 === 0 ? 1 : 0;
+  const tap = K.p(T, 5.8, 5.95, E.outCubic) * (1 - K.p(T, 5.95, 6.15, E.outCubic));
+  planBtn.style.transform = `scale(${1 - 0.06 * tap})`;
+  redrawTag.style.left = L.capX + L.cardW - redrawTag.offsetWidth + 'px'; redrawTag.style.top = L.ctag[1] + 'px'; redrawTag.style.zIndex = 61;
+  redrawTag.style.opacity = K.p(T, 0.8, 1.1, E.linear) * (1 - K.p(T, S_B - 0.3, S_B, E.linear));
+  vis(redrawTag, T < S_B);
+
+  // ---------- the planner: rises under the sentence, glides to centre, steps back for the store ----------
+  const rise = K.p(T, 1.7, 2.6, E.outExpo);
+  const mv = K.p(T, S_B - 0.25, S_B + 0.55, E.inOutCubic);
+  const pw = K.lerp(L.pA.w, L.pB.w, mv), pcx = K.lerp(L.pA.cx, L.pB.cx, mv);
+  const py = K.lerp(L.pA.y + (1 - rise) * 260, L.pB.y, mv);
+  const pOut = K.p(T, S_C - 0.35, S_C + 0.1, E.inCubic);
+  const ph = pw * 889 / 841;
+  planner.style.width = pw + 'px'; planner.style.left = pcx - pw / 2 + 'px'; planner.style.top = py + 'px';
+  planner.style.opacity = Math.min(1, rise * 1.6) * (1 - pOut);
+  planner.style.transform = `translateY(${Math.sin(T * 1.1) * 8 - pOut * 120}px) rotate(${-3 + Math.sin(T * 0.7) * 1.2 + mv * 2}deg) scale(${1 - pOut * 0.15})`;
+  shadow.style.width = pw * 0.9 + 'px'; shadow.style.height = pw * 0.14 + 'px';
+  shadow.style.left = pcx - pw * 0.45 + 'px'; shadow.style.top = py + ph * 0.93 + 'px';
+  shadow.style.opacity = planner.style.opacity * 0.9;
+  vis(planner, T >= 1.7 && T < S_C + 0.1); vis(shadow, T >= 1.7 && T < S_C + 0.1);
+  conceptTag.style.left = L.ctag[0] + 'px'; conceptTag.style.top = L.ctag[1] + 'px';
+  conceptTag.style.opacity = K.p(T, 2.2, 2.5, E.linear) * (tall ? 1 - K.p(T, END - 0.2, END, E.linear) : 1 - pOut); conceptTag.style.zIndex = 61;
+  vis(conceptTag, T >= 2.2 && T < (tall ? END + 0.05 : S_C + 0.1));
+
+  // ---------- B: the four parts clip on ----------
+  tiles.forEach((t, i) => {
+    const a = T_TILE[i];
+    const p = K.p(T, a, a + 0.55, E.outBack);
+    const o = K.p(T, S_C - 0.4 + i * 0.04, S_C - 0.05 + i * 0.04, E.inCubic);
+    const side = i % 2 === 0 ? -1 : 1;
+    t.style.opacity = Math.min(1, p * 2) * (1 - o);
+    t.style.transform = `perspective(1600px) translate(${side * (1 - p) * 120}px, ${(1 - p) * 40 + Math.sin(T * 1.2 + i * 1.7) * 6 - o * 80}px) `
+      + `rotateY(${side * (1 - p) * -10}deg) rotate(${side * (1 - p) * 4 + Math.sin(T * 0.8 + i) * 0.6}deg) scale(${0.8 + 0.2 * p})`;
+    vis(t, T >= a && T < S_C + 0.2);
+  });
+
+  // ---------- C: the store ----------
+  float(st, T, S_C, END + 0.4, { ph: 1.3, ry: 8 });
+  phImg.style.transform = `scale(${1.08 + 0.04 * K.p(T, S_C, END, E.linear)}) translateY(${-8 * K.p(T, S_C, END, E.linear)}px)`;
+  const dp = K.p(T, T_DRAFT, T_DRAFT + 0.4, E.outBack);
+  const lp = K.p(T, T_TAP + 0.08, T_TAP + 0.45, E.outBack);
+  bD.style.opacity = Math.min(1, dp * 2) * (1 - K.p(T, T_TAP + 0.05, T_TAP + 0.2, E.linear));
+  bD.style.transform = `scale(${0.8 + 0.2 * dp})`;
+  bL.style.opacity = Math.min(1, lp * 2); bL.style.transform = `scale(${0.8 + 0.2 * lp})`;
+  const pt = K.p(T, T_TAP - 0.1, T_TAP, E.outCubic) * (1 - K.p(T, T_TAP, T_TAP + 0.2, E.outCubic));
+  pub.style.transform = `scale(${1 - 0.08 * pt})`;
+  pub.style.opacity = 1 - 0.5 * K.p(T, T_TAP + 0.3, T_TAP + 0.6, E.linear);
+  // the finger: arrives, taps Publish, lifts away
+  const r = pub.getBoundingClientRect();
+  const bx = r.left + r.width / 2, by = r.top + r.height / 2;
+  const fin = K.p(T, 14.15, 14.7, E.inOutCubic), fout = K.p(T, 15.3, 15.7, E.inCubic);
+  dot.style.left = K.lerp(bx + 140, bx, fin) + 'px'; dot.style.top = K.lerp(by + 260, by, fin) + fout * 200 + 'px';
+  dot.style.opacity = K.p(T, 14.15, 14.35, E.linear) * (1 - fout);
+  dot.style.transform = `scale(${1 - 0.18 * pt})`;
+  vis(dot, T >= 14.15 && T < 15.7);
+  const rp = K.p(T, T_TAP, T_TAP + 0.6, E.outCubic);
+  ring.style.left = bx + 'px'; ring.style.top = by + 'px';
+  ring.style.opacity = T >= T_TAP ? 1 - rp : 0; ring.style.transform = `scale(${0.35 + 0.9 * rp})`;
+  redrawTag.style.visibility = T < S_B ? 'visible' : 'hidden';
+  if (T >= S_C) {
+    redrawTag.style.visibility = 'visible';
+    redrawTag.style.left = L.capX + 42 + 'px'; redrawTag.style.top = L.stY + 112 + 30 + L.phH - 50 + 'px';
+    redrawTag.style.opacity = K.p(T, S_C + 0.4, S_C + 0.7, E.linear) * (1 - K.p(T, END - 0.1, END + 0.2, E.linear));
+  }
+
+  end(T);
+});
+</script></body></html>

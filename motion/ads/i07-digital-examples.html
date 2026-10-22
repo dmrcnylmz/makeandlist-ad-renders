@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I07 · Digital Products</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R09 series chip (the R08 .fchip style) — identical in I01–I16 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.cap { position: absolute; z-index: 40; font: 800 96px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; white-space: nowrap; }
+.cap em { font-style: italic; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .06em; }
+.cap .n { display: inline-block; vertical-align: top; margin: 14px 18px 0 0; font: 600 30px 'IBM Plex Mono', monospace; letter-spacing: .02em; color: #8A8378; }
+.sub { position: absolute; z-index: 40; font: 600 42px 'Archivo'; color: #45403A; white-space: nowrap; }
+.sub b { display: inline-block; margin-right: 14px; padding: 4px 16px; border-radius: 99px; background: #1F1F1F; color: #DFFF5A; font: 700 30px 'IBM Plex Mono', monospace; vertical-align: 4px; }
+.w { display: inline-block; white-space: pre; }
+.card { position: absolute; z-index: 30; border-radius: 28px; overflow: hidden; background: #EFE6D6; box-shadow: 0 60px 110px -50px rgba(31,31,31,.75), 0 0 0 1px #E2DBCE; transform-origin: 50% 50%; }
+.card > img { position: absolute; display: block; }
+.card .shade { position: absolute; inset: 0; background: #FAF7EE; pointer-events: none; }
+.card .glare { position: absolute; inset: -40%; background: linear-gradient(105deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.28) 50%, rgba(255,255,255,0) 60%); pointer-events: none; }
+.dots { position: absolute; z-index: 40; display: flex; gap: 14px; }
+.dots i { display: block; width: 16px; height: 16px; border-radius: 8px; background: #D3CBBE; }
+.dl { position: absolute; z-index: 40; display: flex; align-items: center; gap: 16px; padding: 18px 30px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 700 42px 'Archivo'; white-space: nowrap; box-shadow: 0 30px 50px -28px rgba(31,31,31,.8); }
+.dl svg { flex: none; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I07 — What you get 2/3: digital products you can make. A deck of five concept images fans out and becomes a swipe
+// carousel (coverflow: the card in front flat and lit, neighbours turned away in depth, motion blur while it swipes) —
+// planners, kids' worksheets, wall art, greeting cards, digital planners — each swipe landing as Marian names it, a big
+// name and its index above. At the end the five gather into one hand of cards: buyers download them, nothing to ship.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, END = DUR - 2, E = K.ease;
+const BPM = 92.3;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows measured from the takes (vo.mjs + an RMS pass):
+//   L1 0.41–3.32 · L2 "Printable planners," 3.64–4.56 · "and worksheets for kids." 5.05–6.69
+//   L3 "Wall art," 7.13–7.70 · "and greeting cards." 8.09–9.02 · L4 9.51–11.56 · L5 "Buyers download them." 12.18–13.29 · "Nothing to ship." 14.24–15.10
+const T_ITEM = [3.55, 5.0, 7.05, 8.0, 9.45];  // each card lands in front as she names it
+const S_FAN = 3.0, S_HAND = 11.75;
+
+const ITEMS = [
+  { n: 'Planners', s: 'Printable · PDF', src: 'r09/p06-planner-flatlay.webp' },
+  { n: 'Kids’ worksheets', s: 'Printable · PDF', src: 'r09/k19-worksheets.webp', cut: 1 },
+  { n: 'Wall art', s: 'Print at home', src: 'r09/p07-wall-art-room.webp' },
+  { n: 'Greeting cards', s: 'Print at home', src: 'r09/p12-card-shelf.webp' },
+  { n: 'Digital planners', s: 'For tablet apps', src: 'r09/p11-digital-planner.webp' },
+];
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 380, subY: 500, cw: 640, ch: 880, cy: 600, gap: 60, dotsY: 1530, tag: [65, 566],
+      handY: 700, handS: 0.62, dlY: 560, deckS: 0.88 }
+  : { chip: [60, 56], capX: 60, capY: 136, subY: 236, cw: 560, ch: 760, cy: 316, gap: 50, dotsY: 1100, tag: [60, 1290],
+      handY: 440, handS: 0.46, dlY: 262, deckS: 0.7 };
+
+// ---------- ambient ----------
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.22), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(126,154,126,.18), rgba(126,154,126,0) 62%)' } });
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', html: '<b>WHAT YOU GET</b><i>·</i><span>2/3</span>', style: { width: 'auto', height: '56px' } });
+
+// ---------- captions ----------
+function cap(html, y, fs) {
+  const el = K.box(L.capX, y ?? L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: (fs || (tall ? 96 : 80)) + 'px' } });
+  el.innerHTML = html;
+  return { el, ws: [...el.querySelectorAll('.w, .n')] };
+}
+const wsp = (t, em) => t.split(' ').map((w) => (em ? `<span class="w"><em>${w}</em> </span>` : `<span class="w">${w} </span>`)).join('');
+const CAPS = [
+  { c: cap(wsp('What can', 0) + wsp('you make?', 1)), s: 'Digital downloads', a: 0.35, b: S_FAN + 0.45 },
+  ...ITEMS.map((it, i) => ({ c: cap(`<span class="n">0${i + 1}/05</span>` + wsp(it.n, 1)), s: it.s,
+    a: T_ITEM[i] - 0.05, b: i < 4 ? T_ITEM[i + 1] - 0.1 : S_HAND })),
+  { c: cap(wsp('Buyers', 0) + wsp('download.', 1), L.capY), s: null, a: S_HAND + 0.4, b: END },
+];
+CAPS.forEach((k) => { if (k.s) k.sub = K.box(L.capX, L.subY, null, null, { cls: 'sub', html: `<b>⤓</b>${k.s}`, style: { width: 'auto', height: 'auto' } }); });
+
+// ---------- cards ----------
+const cards = ITEMS.map((it, i) => {
+  const el = K.box((W - L.cw) / 2, L.cy, L.cw, L.ch, { cls: 'card' });
+  const img = K.el('img', { src: K.pub(it.src), parent: el });
+  if (it.cut) { el.style.background = 'radial-gradient(circle at 50% 45%, #FFFDF8, #EFE6D6 75%)'; Object.assign(img.style, { left: '6%', top: '22%', width: '88%' }); }
+  else Object.assign(img.style, { left: '0', top: '50%', width: '100%', height: 'auto', transform: 'translateY(-50%)' });
+  const shade = K.el('div', { cls: 'shade', parent: el });
+  const glare = K.el('div', { cls: 'glare', parent: el });
+  return { el, img, shade, glare, cut: !!it.cut };
+});
+const dots = K.box(0, L.dotsY, 5 * 30, 16, { cls: 'dots', html: '<i></i><i></i><i></i><i></i><i></i>' });
+const dotEls = [...dots.querySelectorAll('i')];
+const cTag = K.demoTag('Concept images · AI-generated', L.tag[0], L.tag[1]);
+const cTag2 = K.demoTag('Concept images · AI-generated', L.capX, tall ? 660 : 1290);
+const dl = K.box(0, L.dlY, null, null, { cls: 'dl', style: { width: 'auto', height: 'auto' },
+  html: '<svg width="44" height="44" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16" fill="none" stroke="#DFFF5A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Nothing to ship.' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: physical products →' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+// carousel position: plateaus on each item, quick eased swipes between them
+const POS = [[3.45, 0], [4.8, 0], [5.08, 1], [6.82, 1], [7.1, 2], [7.78, 2], [8.06, 3], [9.22, 3], [9.5, 4]];
+const posAt = (t) => K.k(t, POS, E.inOutCubic);
+
+K.run({
+  id: 'I07', title: 'Digital Products', dur: DUR, bpm: BPM, music: 'ov-vanilla-lofi-beat', mood: 'bright', key: 'F', intro: 0, cover: 5.6,
+  series: 'R09', highlight: 'WHAT YOU GET · 2/3',
+  technique: 'A deck of five concept images fans out into a coverflow swipe carousel — the front card flat and lit with a glare sweep, neighbours turned away in depth, motion blur while it swipes — each swipe landing as the narrator names it with a big indexed name above; at the end the five gather into one hand of cards over a “Nothing to ship” pill',
+  caption: 'What you can make to sell as digital downloads: printable planners, kids’ worksheets, wall art, greeting cards and digital planners. Buyers download them — nothing to ship. Start free at makeandlist.com',
+  short: 'Planners, worksheets, wall art, cards — digital.',
+  vo: [[0.2, 'Here is what you can make to sell as digital downloads.'], [3.5, 'Printable planners, and worksheets for kids.'], [7.0, 'Wall art, and greeting cards.'], [8.7, 'Even digital planners for tablets.'], [11.75, 'Buyers download them. Nothing to ship.']],
+  beats: ['0–3.5 s: “What can you make?” — a deck of five concept images, digital downloads', '3.5–7 s: the deck fans into a swipe carousel: 01 Planners, 02 Kids’ worksheets', '7–9.4 s: 03 Wall art, 04 Greeting cards', '9.4–11.7 s: 05 Digital planners, for tablet apps', '11.7–16 s: the five gather into one hand: buyers download; nothing to ship', '16–18 s: end card — Next: physical products'],
+  cues: [[0.15, 'pop'], [S_FAN, 'swish'], [T_ITEM[1] - 0.1, 'swish'], [T_ITEM[2] - 0.1, 'swish'], [T_ITEM[3] - 0.1, 'swish'], [T_ITEM[4] - 0.1, 'swish'], [S_HAND, 'pageturn'], [13.6, 'pop'], [15.2, 'sparkle'], [END, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.55 - 550 + Math.sin(T * 0.5) * 150}px, ${H * 0.55 - 550 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.15 - 450 + Math.cos(T * 0.45) * 110}px, ${H * 0.25 - 450 + Math.sin(T * 0.6) * 90}px)`;
+  const cp = K.p(T, 0.1, 0.6, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear));
+  chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`;
+  chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  CAPS.forEach(({ c, sub, a, b }) => {
+    const o = b >= END ? 0 : K.p(T, b - 0.18, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.05, a + 0.45 + j * 0.05, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+      w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+    });
+    vis(c.el, T >= a - 0.05 && T < b + 0.02);
+    if (sub) {
+      const p = K.p(T, a + 0.15, a + 0.6, E.outExpo);
+      sub.style.opacity = p * (1 - o); sub.style.transform = `translateY(${(1 - p) * 24}px)`;
+      vis(sub, T >= a && T < b + 0.02);
+    }
+  });
+
+  // ---------- cards: deck → carousel → hand ----------
+  const intro = K.p(T, 0.2, 1.1, E.outExpo);
+  const fan = K.p(T, S_FAN, S_FAN + 0.6, E.inOutCubic);
+  const hand = K.p(T, S_HAND, S_HAND + 0.8, E.inOutCubic);
+  const pos = posAt(T), vel = Math.abs(pos - posAt(T - 1 / 30));
+  const step = L.cw + L.gap;
+  cards.forEach((c, i) => {
+    // deck: stacked, fanned a little, the first card on top
+    const dx = (i - 2) * (tall ? 56 : 46), dy = (tall ? 70 : 80) + Math.abs(i - 2) * 14 + (1 - intro) * 300, dr = (i - 2) * 5 + Math.sin(T * 0.8 + i) * 0.6, ds = L.deckS;
+    // carousel
+    const o = i - pos;
+    const cx = o * step * 0.78, cr = 0, cs = 1 - Math.min(1, Math.abs(o)) * 0.16;
+    const ry = -Math.max(-1, Math.min(1, o)) * 28;
+    // hand: five small cards in an arc
+    const hx = (i - 2) * (tall ? 112 : 130), hy = (tall ? L.handY - L.cy : L.handY - L.cy) + Math.abs(i - 2) * 26 + Math.sin(T * 1.2 + i) * 5, hr = (i - 2) * 8, hs = L.handS;
+    let x = K.lerp(dx, cx, fan), y = K.lerp(dy, 0, fan), r = K.lerp(dr, cr, fan), s = K.lerp(ds, cs, fan), rY = ry * fan;
+    x = K.lerp(x, hx, hand); y = K.lerp(y, hy, hand); r = K.lerp(r, hr, hand); s = K.lerp(s, hs, hand); rY = K.lerp(rY, 0, hand);
+    const breathe = Math.sin(T * 1.1) * 4;
+    c.el.style.transform = `perspective(1600px) translate(${x}px, ${y + breathe}px) rotate(${r}deg) rotateY(${rY}deg) scale(${s})`;
+    c.el.style.zIndex = String(hand > 0.5 ? 30 + i : fan > 0.5 ? 40 - Math.round(Math.abs(o) * 2) : 40 - i);
+    c.el.style.opacity = Math.min(1, intro * 1.5);
+    c.shade.style.opacity = (fan * (1 - hand)) * Math.min(1, Math.abs(o)) * 0.45;
+    c.el.style.filter = vel > 0.004 && fan > 0.9 && hand < 0.1 ? `blur(${Math.min(10, vel * 160)}px)` : 'none';
+    // a glare sweeps the card as it lands in front
+    const gl = i < 5 ? K.p(T, T_ITEM[i] + 0.1, T_ITEM[i] + 0.9, E.inOutCubic) : 0;
+    c.glare.style.transform = `translateX(${-60 + gl * 120}%)`;
+    c.glare.style.opacity = gl > 0 && gl < 1 ? 1 : 0;
+    // slow push-in on the photo while it is the front card
+    if (!c.cut) c.img.style.transform = `translateY(-50%) scale(${1.04 + 0.04 * Math.sin(T * 0.3 + i)})`;
+  });
+  dots.style.left = W / 2 - 75 + 'px';
+  dots.style.opacity = fan * (1 - hand);
+  dotEls.forEach((d, i) => { const a = Math.max(0, 1 - Math.abs(i - pos)); d.style.width = 16 + 26 * a + 'px'; d.style.background = a > 0.5 ? '#1F1F1F' : '#D3CBBE'; });
+  const tagSwap = K.p(T, S_HAND + 0.2, S_HAND + 0.35, E.linear), tagBack = K.p(T, S_HAND + 0.75, S_HAND + 1.0, E.linear);
+  cTag.style.opacity = K.p(T, 0.8, 1.1, E.linear) * (tall ? 1 - tagSwap : 1);
+  cTag2.style.opacity = tall ? tagBack : 0;
+  const dp = K.p(T, 14.15, 14.6, E.outBack);
+  dl.style.left = L.capX + 'px';
+  dl.style.opacity = Math.min(1, dp * 2); dl.style.transform = `translateY(${(1 - dp) * 40}px) scale(${0.8 + 0.2 * dp})`;
+  vis(dl, T >= 14.1);
+
+  end(T);
+});
+</script></body></html>

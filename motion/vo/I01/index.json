@@ -1,0 +1,26 @@
+[
+ {
+  "t": 0.3,
+  "text": "MakeAndList turns an idea into a finished product.",
+  "file": "01-674d26144a.wav",
+  "dur": 3.3
+ },
+ {
+  "t": 3.5,
+  "text": "Say you want a weekly planner.",
+  "file": "02-404b025cf8.wav",
+  "dur": 3.16
+ },
+ {
+  "t": 5.5,
+  "text": "You get the files, the listing copy, the images and a short video.",
+  "file": "03-314359cd8e.wav",
+  "dur": 5.34
+ },
+ {
+  "t": 9.5,
+  "text": "Then it goes to your own store, as a draft, until you say yes.",
+  "file": "04-d71f09648a.wav",
+  "dur": 4.04
+ }
+]

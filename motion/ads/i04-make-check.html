@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I04 · Make and Check</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R09 highlight chip — the R08 .fchip, identical in I01–I16 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.cap { position: absolute; z-index: 40; font: 800 88px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; white-space: nowrap; }
+.cap em { font-style: italic; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / 0% 100%; padding: 0 .04em; }
+.w { display: inline-block; white-space: pre; }
+.card { position: absolute; z-index: 30; border-radius: 28px; background: #FFFDF8; box-shadow: 0 60px 110px -50px rgba(31,31,31,.6), 0 0 0 1px #E2DBCE; transform-origin: 50% 60%; padding: 30px 34px 26px; }
+.card h3 { margin: 0; display: flex; align-items: center; justify-content: space-between; font: 800 38px 'Archivo'; color: #1F1F1F; letter-spacing: -0.01em; }
+.card h3 small { font: 600 26px 'IBM Plex Mono', monospace; color: #6B645A; letter-spacing: .04em; }
+.pr { position: relative; display: flex; align-items: center; gap: 18px; height: 94px; border-top: 1.5px solid #E7E1D5; }
+.pr .no { flex: none; width: 104px; font: 500 30px 'IBM Plex Mono', monospace; color: #6B645A; }
+.pr .t { flex: 1; min-width: 0; font: 700 38px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.pr .bd { flex: none; padding: 8px 18px; border-radius: 99px; font: 700 27px 'Archivo'; white-space: nowrap; }
+.bd.new { background: #1F1F1F; color: #FAF7EE; }
+.bd.re { background: #EFEADF; color: #1F1F1F; }
+.bd.code { box-shadow: inset 0 0 0 2px #CFC8BA; color: #1F1F1F; }
+.bar { height: 16px; border-radius: 99px; background: #EFEADF; overflow: hidden; margin: 22px 0 8px; }
+.bar b { display: block; height: 100%; border-radius: 99px; background: repeating-linear-gradient(-45deg, #1F1F1F 0 14px, #3A3835 14px 28px); }
+.sr { display: flex; align-items: center; gap: 22px; height: 94px; border-top: 1.5px solid #E7E1D5; }
+.sr .ck { flex: none; position: relative; width: 56px; height: 56px; border-radius: 50%; box-shadow: inset 0 0 0 2.5px #CFC8BA; }
+.sr .ck svg { position: absolute; inset: 0; width: 56px; height: 56px; }
+.sr .ck .on { position: absolute; inset: 0; border-radius: 50%; background: #1F1F1F; }
+.sr .ck .now { position: absolute; inset: -6px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 8px rgba(223,255,90,.35); }
+.sr .tx b { display: block; font: 700 38px 'Archivo'; color: #1F1F1F; }
+.sr .tx small { display: block; margin-top: 4px; font: 500 27px 'Archivo'; color: #6B645A; }
+.nb { padding: 10px 20px; border-radius: 99px; background: #1F1F1F; color: #DFFF5A; font: 700 28px 'Archivo'; white-space: nowrap; }
+.cr { display: flex; align-items: center; gap: 22px; padding: 22px 0; border-top: 1.5px solid #E7E1D5; }
+.cr .ck { flex: none; width: 60px; height: 60px; border-radius: 50%; background: #DFFF5A; box-shadow: inset 0 0 0 3px #1F1F1F; display: grid; place-items: center; }
+.cr .ck svg { width: 34px; height: 34px; }
+.cr span { font: 700 40px/1.12 'Archivo'; color: #1F1F1F; }
+.pile { position: absolute; z-index: 10; }
+.pg { position: absolute; background: #FFFDF8; box-shadow: 0 30px 50px -26px rgba(31,31,31,.55), 0 0 0 1px #E2DBCE; overflow: hidden; border-radius: 6px; }
+.pg img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.tabs { position: absolute; z-index: 34; display: flex; gap: 8px; padding: 8px; border-radius: 22px; background: #EFEADF; box-shadow: 0 20px 40px -26px rgba(31,31,31,.5); }
+.tabs div { padding: 12px 20px; border-radius: 16px; font: 700 30px 'Archivo'; color: #45403A; white-space: nowrap; }
+.tabs div small { font: 600 24px 'IBM Plex Mono', monospace; color: #6B645A; margin-left: 4px; }
+.tabs div.on { background: #FFFDF8; color: #1F1F1F; box-shadow: 0 6px 14px -8px rgba(31,31,31,.5); }
+.fs { position: absolute; z-index: 30; border-radius: 10px; overflow: hidden; background: #FFFDF8; box-shadow: 0 60px 100px -46px rgba(31,31,31,.7), 0 0 0 1px #E2DBCE; transform-origin: 50% 50%; }
+.fs img { width: 100%; height: 100%; display: block; }
+.pl { position: absolute; z-index: 36; padding: 10px 22px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 700 32px 'Archivo'; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.8); }
+.go { position: absolute; z-index: 38; display: flex; align-items: center; gap: 24px; padding: 18px 18px 18px 32px; border-radius: 26px; background: #1F1F1F; color: #FAF7EE; font: 600 32px 'Archivo'; white-space: nowrap; box-shadow: 0 40px 70px -30px rgba(31,31,31,.85); }
+.go b { padding: 16px 26px; border-radius: 18px; background: #DFFF5A; color: #1F1F1F; font: 800 32px 'Archivo'; }
+/* 9:16 (Stories): the panels fill the taller room */
+.tall .card { padding: 36px 40px 30px; }
+.tall .card h3 { font-size: 42px; }
+.tall .pr { height: 112px; }
+.tall .pr .no { width: 112px; font-size: 34px; }
+.tall .pr .t { font-size: 42px; }
+.tall .pr .bd { font-size: 28px; padding: 10px 18px; }
+.tall .sr { height: 118px; }
+.tall .sr .tx b { font-size: 44px; }
+.tall .sr .tx small { font-size: 30px; }
+.tall .bar { height: 20px; margin: 26px 0 10px; }
+.tall .cr { padding: 30px 0; }
+.tall .cr span { font-size: 46px; }
+.tall .cr .ck { width: 68px; height: 68px; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I04 — How it works (2/3): Step 2, it makes and checks. Three redrawn panels from the app, large, each a floating card:
+// the Plan's page list cascades in row by row; the Making panel ticks its stages while the owner's real pages land on a
+// pile beneath it; the Review room's checks tick as she names paper sizes, margins and answer keys. Then the real files
+// run past as a filmstrip, page by page, ending on "Looks right? Next, the listing."
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, E = K.ease;
+if (tall) document.body.classList.add('tall');
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian, speech windows measured from the takes (vo.mjs + an RMS pass):
+//   L1 0.84–3.39 ("Step two:" → 1.62, "it plans every page" 2.22–3.39) · L2 3.73–4.90
+//   L3 5.95–10.19 ("And it checks them:" → 6.94, "paper sizes" 7.51–8.42, "margins" 8.65–9.1, "answer keys" 9.25–10.19)
+//   L4 10.61–15.72 ("You review the real files," → 13.28, "page by page," 13.88–14.67, "before anything is listed" 15.06–15.72)
+const VO = [[0, 'Step two: it plans every page.'], [3.3, 'Then it makes the files.'], [5.5, 'And it checks them: paper sizes, margins, answer keys.'],
+  [9.7, 'You review the real files, page by page, before anything is listed.']];
+const S_B = 3.55, S_C = 5.9, S_D = 10.45, END = DUR - 2;
+const T_PLAN = [0.35, 0.47, 0.59, 0.71, 0.83, 0.95];
+const T_STAGE = [3.9, 4.3, 4.7, 5.15];
+const T_CHECK = [7.5, 8.05, 8.65, 9.3], T_OK = 9.95;
+const T_PAGE = [10.7, 11.75, 12.8, 13.9, 14.7];
+const T_GO = 15.05;
+
+const PAGES = [['cover', 'Cover'], ['interior-01', 'Snowy path'], ['interior-02', 'Trace the word'], ['interior-03', 'Color the snowman'], ['interior-04', 'Answer key']];
+const pageSrc = (n) => K.pub(`showcase/christmas-preschool-pack/${n}.webp`);
+
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 380, cardY: 590, cardW: 950, pileY: 1330, fsY: 690, fsW: 640, tabsY: 590, goY: 1410, ex: [65, 1556], tagR: 1556 }
+  : { chip: [60, 56], capX: 60, capY: 140, cardY: 340, cardW: 960, pileY: 1060, fsY: 430, fsW: 520, tabsY: 330, goY: 1128, ex: [60, 1250], tagR: 1250 };
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.24), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(126,154,126,.18), rgba(126,154,126,0) 62%)' } });
+
+function mkCap(text, fs) {
+  const c = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: (fs || (tall ? 88 : 76)) + 'px' } });
+  c.innerHTML = text.split('\n').map((line) => line.split(' ').map((t) => t.startsWith('*')
+    ? `<span class="w"><em>${t.replace(/\*/g, '')}</em> </span>` : `<span class="w">${t} </span>`).join('')).join('<br>');
+  return { c, w: [...c.querySelectorAll('.w')], em: [...c.querySelectorAll('em')] };
+}
+function drawCap(cp, T, a, out, hl) {
+  cp.w.forEach((w, i) => {
+    const p = K.p(T, a + i * 0.06, a + 0.5 + i * 0.06, E.outExpo);
+    const o = out ? K.p(T, out - 0.25, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+  cp.em.forEach((e, i) => { e.style.backgroundSize = `${K.p(T, hl + i * 0.12, hl + 0.4 + i * 0.12, E.outCubic) * 100}% 100%`; });
+  cp.c.style.visibility = T >= a && (!out || T < out + 0.05) ? 'visible' : 'hidden';
+}
+const capA = mkCap('Step 2: it plans\n*every* *page.*');
+const capB = mkCap('It makes\nthe *files.*');
+const capC = mkCap('Then it *checks*\nevery file.');
+const capD = mkCap('You review\nthe *real* *files.*');
+
+// ---------- the pile: the owner's real pages land as they are made ----------
+const pile = K.box(0, L.pileY, W, H - L.pileY, { cls: 'pile' });
+const PILE = [[-250, 40, -11], [220, 10, 9], [-40, 70, -3], [-330, 140, 6], [300, 120, -7]];
+const PW = tall ? 400 : 340;
+const pileEls = PAGES.map(([n], i) => K.el('div', { parent: pile, cls: 'pg', style: { width: PW + 'px', height: PW * 1164 / 900 + 'px', left: W / 2 - PW / 2 + PILE[i][0] + 'px', top: PILE[i][1] + 'px' },
+  html: `<img src="${pageSrc(n)}">` }));
+const T_LAND = [3.95, 4.35, 4.75, 5.2, 5.6];
+
+// ---------- A: the page plan (Plan, redrawn larger) ----------
+const PLAN = [['1', 'Cover', 'New picture', 'new'], ['3–8', 'Count the ornaments', 'Reuses 3 pictures', 're'], ['9–14', 'Trace the letters', 'Drawn in code', 'code'],
+  ['15–20', 'Match the pairs', 'Reuses 4 pictures', 're'], ['21–26', 'Colour by number', '6 new pictures', 'new'], ['28–37', 'Answer keys', 'Drawn in code', 'code']];
+const planC = K.box(L.capX, L.cardY, L.cardW, null, { cls: 'card',
+  html: `<h3>37 pages, and what each one needs</h3><div style="height:18px"></div>${PLAN.map(([n, t, b, k]) => `<div class="pr"><div class="no">${n}</div><div class="t">${t}</div><div class="bd ${k}">${b}</div></div>`).join('')}` });
+const planRows = [...planC.querySelectorAll('.pr')];
+
+// ---------- B: making, live (Making, redrawn larger) ----------
+const TICK = '<svg viewBox="0 0 56 56"><path d="M17 29l7.5 7.5L40 21" fill="none" stroke="#DFFF5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const STAGES = [['Planning the pages', '37 pages from your words'], ['Drawing the pictures', '7 new illustrations · Smart engine'], ['Laying out every page', 'Counting, tracing, matching'],
+  ['Solving the answer keys', '10 pages, drawn over the puzzles'], ['Checking the files', 'Fonts, margins, both paper sizes']];
+const makeC = K.box(L.capX, L.cardY, L.cardW, null, { cls: 'card',
+  html: `<h3>What is happening <small class="cnt">0 / 37 pages</small></h3><div class="bar"><b></b></div>${STAGES.map(([b, s]) => `<div class="sr"><div class="ck"><div class="now"></div><div class="on"></div>${TICK}</div><div class="tx"><b>${b}</b><small>${s}</small></div></div>`).join('')}` });
+const sRows = [...makeC.querySelectorAll('.sr')], cnt = makeC.querySelector('.cnt'), barB = makeC.querySelector('.bar b');
+
+// ---------- C: the checks (Review room, redrawn larger) ----------
+const CK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#1F1F1F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CHECKS = ['Both paper sizes, fonts embedded', 'Home-printer margins', '10 answer keys match their puzzles', '37 pages counted in the files'];
+const checkC = K.box(L.capX, L.cardY, L.cardW, null, { cls: 'card', style: { padding: '34px 36px 16px' },
+  html: `<h3>Checks <span class="nb">Nothing blocking</span></h3><div style="height:20px"></div>${CHECKS.map((c) => `<div class="cr"><div class="ck">${CK}</div><span>${c}</span></div>`).join('')}` });
+const cRows = [...checkC.querySelectorAll('.cr')], okB = checkC.querySelector('.nb');
+
+// ---------- D: the real files, page by page ----------
+const tabs = K.box(L.capX, L.tabsY, null, null, { cls: 'tabs', style: { width: 'auto', height: 'auto' },
+  html: '<div class="on">Pages<small>37</small></div><div>Listing images<small>10</small></div><div>Video<small>1</small></div><div>Files<small>2</small></div>' });
+const fsH = L.fsW * 1164 / 900;
+const strip = PAGES.map(([n]) => K.box(0, L.fsY, L.fsW, fsH, { cls: 'fs', html: `<img src="${pageSrc(n)}">` }));
+const pLabel = K.box(0, 0, null, null, { cls: 'pl', style: { width: 'auto', height: 'auto' } });
+const go = K.box(0, L.goY, null, null, { cls: 'go', style: { width: 'auto', height: 'auto' }, html: 'Looks right? Next, the listing. <b>Write the listing →</b>' });
+
+const redrawTag = K.demoTag('App screen · redrawn, sample data', 0, 0);
+const exTag = K.demoTag('Example made with MakeAndList by its owner', L.ex[0], L.ex[1]);
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>HOW IT WORKS</b><i>·</i><span>2/3</span>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: list it in your stores →' });
+
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+function float(el, T, a, b, o = {}) {
+  const pi = K.p(T, a, a + (o.din || 0.6), E.outExpo), po = b ? K.p(T, b - 0.35, b, E.inCubic) : 0;
+  const ph = o.ph || 0;
+  el.style.opacity = Math.min(1, pi * 1.8) * (1 - po);
+  el.style.transform = `perspective(1600px) translate(${(1 - pi) * (o.dx ?? 0) + po * (o.ox ?? 0)}px, ${(1 - pi) * (o.dy ?? 160) - po * (o.oy ?? 60) + Math.sin(T * 0.8 + ph) * 5}px) `
+    + `rotateX(${(1 - pi) * 8 + Math.sin(T * 0.6 + ph) * 0.8}deg) rotateY(${(1 - pi) * (o.ry ?? -7) + po * (o.ory ?? 0) + Math.cos(T * 0.5 + ph) * 1.1}deg) `
+    + `scale(${0.93 + 0.07 * pi - po * 0.05 + 0.003 * Math.max(0, T - a)})`;
+  vis(el, T >= a && (!b || T < b + 0.02));
+}
+
+K.run({
+  id: 'I04', title: 'Make and Check', dur: DUR, bpm: 90, musicMode: 'none', mood: 'calm', key: 'C', intro: 0, cover: 8.8,
+  series: 'R09', highlight: 'HOW IT WORKS · 2/3',
+  technique: 'Three app panels redrawn large as floating cards that hand over with a 3D swing: the Plan’s page list cascades in row by row; the Making panel ticks its stages while the owner’s real pages land on a pile beneath it; the Review room’s checks tick as she names paper sizes, margins and answer keys; then the real pages run past as a filmstrip, page by page, ending on “Looks right? Next, the listing.”',
+  caption: 'How MakeAndList works, step 2: it plans every page, makes the files and checks them — paper sizes, margins, answer keys. Then you review the real files, page by page, before anything is listed. Start free at makeandlist.com',
+  short: 'It makes and checks. You review.',
+  vo: VO,
+  beats: ['0–3.5 s: “Step 2: it plans every page.” — the page plan (redrawn) cascades in: cover, counting, tracing, colouring, answer keys',
+    '3.5–5.9 s: “It makes the files.” — stages tick while the real pages land on a pile', '5.9–10.4 s: the checks tick — paper sizes and fonts, margins, answer keys; nothing blocking',
+    '10.4–16 s: “You review the real files.” — the real pages run past one by one; “Looks right? Next, the listing.”', '16–18 s: end card · Next: list it in your stores'],
+  cues: [[0.05, 'pop'], [T_PLAN[0], 'pop'], [T_PLAN[2], 'pop'], [T_PLAN[4], 'pop'], [S_B - 0.05, 'swish'], [T_STAGE[0], 'click'], [T_LAND[1], 'paper'], [T_STAGE[2], 'click'], [T_LAND[4], 'paper'],
+    [S_C - 0.05, 'swish'], [T_CHECK[0], 'pop'], [T_CHECK[1], 'pop'], [T_CHECK[2], 'pop'], [T_CHECK[3], 'pop'], [T_OK, 'ding'],
+    [S_D - 0.05, 'whoosh'], [T_PAGE[1] - 0.1, 'pageturn'], [T_PAGE[2] - 0.1, 'pageturn'], [T_PAGE[3] - 0.1, 'pageturn'], [T_PAGE[4] - 0.1, 'pageturn'], [T_GO, 'pop'], [END, 'swish']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.66 - 550 + Math.sin(T * 0.5) * 160}px, ${H * 0.36 - 550 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.14 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.78 - 450 + Math.sin(T * 0.6) * 100}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear)); chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`; chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  drawCap(capA, T, 0.2, S_B, 2.5);
+  drawCap(capB, T, S_B + 0.1, S_C, 4.4);
+  drawCap(capC, T, S_C + 0.1, S_D, 6.6);
+  drawCap(capD, T, S_D + 0.1, END, 12.3);
+
+  // ---------- A: the plan ----------
+  float(planC, T, 0.3, S_B, { ph: 0.3, ox: -260, ory: 14, oy: 20 });
+  planRows.forEach((r, i) => {
+    const p = K.p(T, T_PLAN[i], T_PLAN[i] + 0.5, E.outExpo);
+    r.style.opacity = Math.min(1, p * 1.7);
+    r.style.transform = `translateY(${(1 - p) * 34}px)`;
+    const bd = r.querySelector('.bd'), q = K.p(T, T_PLAN[i] + 0.15, T_PLAN[i] + 0.5, E.outBack);
+    bd.style.transform = `scale(${0.6 + 0.4 * q})`; bd.style.opacity = Math.min(1, q * 2);
+  });
+
+  // ---------- B: making, live ----------
+  float(makeC, T, S_B - 0.05, S_C, { ph: 1.0, dx: 300, ry: -14, dy: 40, ox: -260, ory: 14, oy: 20 });
+  sRows.forEach((r, i) => {
+    const t = T_STAGE[i];
+    const done = i < 4 && T >= t;
+    const nowOn = (i === 0 ? T >= S_B : T >= T_STAGE[i - 1]) && !done;
+    const ck = r.querySelector('.ck');
+    const p = done ? K.p(T, t, t + 0.3, E.outBack) : 0;
+    ck.querySelector('.on').style.opacity = done ? 1 : 0;
+    ck.querySelector('svg').style.opacity = done ? 1 : 0;
+    ck.style.transform = `scale(${done ? 0.7 + 0.3 * p : 1})`;
+    ck.querySelector('.now').style.opacity = nowOn ? 0.75 + 0.25 * Math.sin(T * 8) : 0;
+    r.style.opacity = done || nowOn ? 1 : 0.42;
+  });
+  const prog = K.p(T, S_B, S_C - 0.2, E.linear);
+  barB.style.width = (8 + 84 * prog) + '%';
+  cnt.textContent = `${Math.round(37 * K.p(T, S_B + 0.2, S_C - 0.4, E.inOutCubic))} / 37 pages`;
+
+  // the pile under the panels: pages land as the stages tick
+  const pOut = K.p(T, S_D - 0.4, S_D + 0.1, E.inCubic);
+  pileEls.forEach((pg, i) => {
+    const a = T_LAND[i], p = K.p(T, a, a + 0.5, E.outCubic);
+    const [, , r] = PILE[i];
+    pg.style.opacity = Math.min(1, p * 2) * (1 - pOut);
+    pg.style.transform = `translate(${(1 - p) * (i % 2 ? 160 : -160)}px, ${(1 - p) * -260 + pOut * 200 + Math.sin(T * 0.9 + i) * 3}px) rotate(${r + (1 - p) * (i % 2 ? 18 : -18)}deg) scale(${1.1 - 0.1 * p})`;
+    vis(pg, T >= a && T < S_D + 0.1);
+  });
+
+  // ---------- C: the checks ----------
+  float(checkC, T, S_C - 0.05, S_D, { ph: 2.0, dx: 300, ry: -14, dy: 40, oy: 140 });
+  cRows.forEach((r, i) => {
+    const t = T_CHECK[i];
+    const p = K.p(T, t - 0.05, t + 0.35, E.outBack);
+    const ck = r.querySelector('.ck');
+    ck.style.transform = `scale(${T >= t - 0.05 ? 0.6 + 0.4 * p : 1})`;
+    ck.style.background = T >= t - 0.05 ? '#DFFF5A' : '#FFFDF8';
+    ck.style.boxShadow = T >= t - 0.05 ? 'inset 0 0 0 3px #1F1F1F' : 'inset 0 0 0 3px #CFC8BA';
+    ck.querySelector('svg').style.opacity = T >= t - 0.05 ? 1 : 0;
+    r.style.opacity = T >= t - 0.05 ? 1 : 0.4;
+    r.style.transform = `translateX(${(T >= t - 0.05 ? 1 - p : 0) * 14}px)`;
+  });
+  const ok = K.p(T, T_OK, T_OK + 0.4, E.outBack);
+  okB.style.opacity = Math.min(1, ok * 2); okB.style.transform = `scale(${0.7 + 0.3 * ok})`;
+
+  // ---------- D: the real files, page by page ----------
+  const dIn = K.p(T, S_D - 0.05, S_D + 0.6, E.outExpo);
+  tabs.style.opacity = dIn; tabs.style.transform = `translateY(${(1 - dIn) * 40}px)`;
+  vis(tabs, T >= S_D - 0.05);
+  // the strip position: page k centred from T_PAGE[k]
+  let pos = 0;
+  for (let k = 1; k < T_PAGE.length; k++) pos += K.p(T, T_PAGE[k] - 0.3, T_PAGE[k] + 0.25, E.inOutCubic);
+  const gap = L.fsW * 0.86;
+  strip.forEach((s, i) => {
+    const d = i - pos;
+    const enter = K.p(T, S_D + i * 0.06, S_D + 0.7 + i * 0.06, E.outExpo);
+    const sc = 1 - Math.min(1, Math.abs(d)) * 0.2;
+    s.style.left = W / 2 - L.fsW / 2 + d * gap + 'px';
+    s.style.opacity = Math.min(1, enter * 1.5) * (Math.abs(d) < 1.6 ? 1 : 0);
+    s.style.zIndex = 33 - Math.round(Math.abs(d) * 2);
+    s.style.transform = `perspective(1600px) translateY(${(1 - enter) * 220 + Math.sin(T * 0.8 + i) * 4}px) rotateY(${K.clamp(d, -1, 1) * -18}deg) scale(${sc})`;
+    s.style.filter = Math.abs(d) > 0.5 ? `brightness(${1 - 0.12 * Math.min(1, Math.abs(d))})` : 'none';
+    vis(s, T >= S_D - 0.05);
+  });
+  const cur = Math.min(PAGES.length - 1, Math.round(pos));
+  pLabel.textContent = PAGES[cur][1];
+  const lp = K.p(T, S_D + 0.4, S_D + 0.8, E.outExpo);
+  const blink = Math.abs(pos - Math.round(pos)) * 2;
+  pLabel.style.left = W / 2 - L.fsW / 2 + 22 + 'px';
+  pLabel.style.top = L.fsY + 22 + 'px';
+  pLabel.style.opacity = lp * (1 - blink);
+  vis(pLabel, T >= S_D + 0.4);
+  const gp = K.p(T, T_GO, T_GO + 0.5, E.outBack);
+  go.style.left = W / 2 + 'px';
+  go.style.opacity = Math.min(1, gp * 2); go.style.transform = `translateX(-50%) translateY(${(1 - gp) * 40}px) scale(${0.85 + 0.15 * gp})`;
+  vis(go, T >= T_GO);
+
+  // tags: redrawn panels (A–C, right), the owner's real pages (left, once they appear)
+  redrawTag.style.left = L.capX + L.cardW - redrawTag.offsetWidth + 'px';
+  redrawTag.style.top = L.tagR + 'px'; redrawTag.style.zIndex = 61;
+  redrawTag.style.opacity = K.p(T, 0.6, 0.9, E.linear) * (1 - K.p(T, S_D - 0.3, S_D, E.linear));
+  vis(redrawTag, T < S_D);
+  exTag.style.zIndex = 61;
+  if (T >= S_D) { exTag.style.left = L.capX + 'px'; exTag.style.top = (tall ? L.ex[1] : L.ex[1]) + 'px'; }
+  exTag.style.opacity = K.p(T, T_LAND[0], T_LAND[0] + 0.3, E.linear) * (1 - K.p(T, END - 0.1, END + 0.2, E.linear));
+  vis(exTag, T >= T_LAND[0]);
+
+  end(T);
+});
+</script></body></html>

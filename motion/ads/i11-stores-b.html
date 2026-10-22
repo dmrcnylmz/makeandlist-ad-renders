@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I11 · Each Store, Part Two</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F6F2E8; }
+/* R09 series chip (the R08 .fchip, unchanged) */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.w { display: inline-block; white-space: pre; }
+.cap { position: absolute; z-index: 40; font: 800 66px/1.03 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.cap em { font-style: italic; font-weight: 700; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / var(--hl, 0%) 100%; }
+.persp { position: absolute; inset: 0; perspective: 1600px; z-index: 30; }
+.row { position: absolute; display: flex; align-items: center; gap: 26px; padding: 0 22px 0 12px; border-radius: 28px; background: #FFFDF8;
+  box-shadow: 0 34px 60px -40px rgba(31,31,31,.6), 0 0 0 1.5px #E2DBCE; will-change: transform, opacity; transform-origin: 0 50%; }
+.row .lg { position: relative; flex: none; border-radius: 20px; background: #FFFDF8; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 0 0 1.5px #E2DBCE, 0 18px 30px -22px rgba(31,31,31,.5); }
+.row .lg.dark { background: #1F1F1F; box-shadow: 0 18px 30px -22px rgba(31,31,31,.7); }
+.row .lg img { display: block; width: auto; flex: none; }
+.row .lg .tx { font: 800 40px/1.05 'Archivo'; letter-spacing: -0.04em; word-spacing: 0.02em; color: #1F1F1F; text-align: center; padding: 0 10px; white-space: nowrap; }
+.row .bd { flex: 1; min-width: 0; }
+.row .nm { font: 800 46px/1.02 'Archivo'; letter-spacing: -0.02em; color: #1F1F1F; white-space: nowrap; }
+.row .nt { display: inline; margin-top: 6px; font: 600 40px/1.12 'Archivo'; letter-spacing: -0.012em; color: #45403A;
+  background: linear-gradient(transparent 58%, #DFFF5A 58%, #DFFF5A 94%, transparent 94%) no-repeat 0 0 / var(--hl, 0%) 100%; }
+.row .ntw { margin-top: 6px; }
+.row .ring { position: absolute; inset: -8px; border-radius: 34px; border: 5px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; opacity: 0; pointer-events: none; }
+.row .num { position: absolute; right: 22px; top: 14px; font: 600 24px 'IBM Plex Mono', monospace; color: #8A8378; }
+.frame { position: absolute; z-index: 29; border-radius: 40px; border: 5px solid #1F1F1F; box-shadow: 0 0 0 7px #DFFF5A; pointer-events: none; }
+.hub { position: absolute; z-index: 46; display: flex; align-items: center; gap: 14px; padding: 10px 26px 10px 12px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE;
+  font: 700 30px 'Archivo'; white-space: nowrap; box-shadow: 0 0 0 6px #FAF7EE, 0 24px 40px -20px rgba(31,31,31,.7); }
+.hub img { height: 46px; width: 46px; border-radius: 50%; background: #FAF7EE; padding: 6px; }
+.t9 .row .nt { font-size: 32px; line-height: 1.2; }
+.t9 .row .ntw { margin-top: 10px; }
+.t9 .row .lg { border-radius: 24px; }
+.t9 .row .lg .tx { font-size: 44px; }
+.t9 .row { padding: 0 26px 0 18px; gap: 30px; border-radius: 32px; }
+.t9 .legal { line-height: 1.2; }
+.legal { position: absolute; z-index: 60; font: 500 20px/1.32 'IBM Plex Mono', monospace; color: #6B645A; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I11 — STORES 3/3: what MakeAndList does on Whop, SHOPLINE, Salla, Magento Open Source / Adobe Commerce and Shoplazza.
+// The same five-row layout as I10 (voice and effects only, no music): logo tiles drop into a column, each row opens as
+// Marian names the store, a lime ring holds it and a highlighter swipes its note as she says it. Magento / Adobe Commerce
+// and Shoplazza appear by name, as text tiles (their brand rules need written permission for logo use). The last line
+// draws one frame round all five: one place for all your stores.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, E = K.ease;
+const BPM = 83.4, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian (vo.mjs + an RMS pass), speech windows:
+//   L1 Whop 0.84, "a separate publishing authorization" ≈ 1.55–3.52 · L2 Shopline 3.78, Salla ≈ 4.50, "a connection only" 5.28–6.17
+//   L3 Magento Open Source and Adobe Commerce 6.42–8.9, "compatible, with hidden drafts" 9.16–10.75
+//   L4 Shoplazza 11.15, "compatible, approval pending" 12.26–13.76 · L5 "One place for all your stores." 14.13–15.53
+const VO = [[0, 'Whop needs a separate publishing authorization.', 1.05], [3.2, 'Shopline and Salla, a connection only.'],
+  [6.0, 'Magento Open Source and Adobe Commerce, compatible, with hidden drafts.', 1.1], [10.95, 'Shoplazza, compatible, approval pending.', 1.1],
+  [14.0, 'One place for all your stores.', 1.05]];
+const RT = [0.84, 3.78, 4.50, 6.42, 11.15];   // she says the store
+const NT = [1.55, 5.28, 5.45, 9.16, 12.26];   // she says its note
+const T_ONE = 14.0;
+const END = DUR - 2;
+
+const ROWS = [
+  { id: 'whop', n: 'Whop', h: 37, note: 'Separate publishing authorization' },
+  { id: 'shopline', n: 'SHOPLINE', h: 26, note: 'Connection only' },
+  { id: 'salla', n: 'Salla', h: 64, note: 'Connection only' },                    // 64 × k px high: 152 px wide or more (min 88 px)
+  { id: null, n: 'Magento Open Source /<br>Adobe Commerce', wide: 1, note: 'Compatible with · hidden drafts' },
+  { id: null, n: 'Shoplazza', note: 'Compatible with · approval pending' },
+];
+
+const L = tall
+  ? { chip: [65, 290], x: 65, cw: 950, capY: 370, capFs: 60, rowsY: 470, rH: 194, gap: 22, lgW: 290, wideW: 520, lgH: 150, k: 1.45, legalY: 1548, tag: [655, 304] }
+  : { chip: [60, 56], x: 60, cw: 960, capY: 132, capFs: 60, rowsY: 296, rH: 150, gap: 20, lgW: 260, wideW: 470, lgH: 116, k: 1.2, legalY: 1150, tag: [660, 214] };
+
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.2), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(232,96,60,.07), rgba(232,96,60,0) 62%)' } });
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>STORES</b><i>·</i><span>3/3</span>' });
+
+const wrapWords = (html) => html.split(' ').map((w) => `<span class="w">${w} </span>`).join('');
+const cap = K.box(L.x, L.capY, L.cw, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html: wrapWords('Five more') + (tall ? '' : '<br>') + '<span class="w"><em>stores.</em></span>' });
+const capW = [...cap.querySelectorAll('.w')], capEm = cap.querySelector('em');
+const cap2 = K.box(L.x, L.capY, L.cw, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html: wrapWords('One place for') + (tall ? '' : '<br>') + '<span class="w"><em>all your stores.</em></span>' });
+const cap2W = [...cap2.querySelectorAll('.w')], cap2Em = cap2.querySelector('em');
+const tag = K.demoTag('Notes from the app’s store list · redrawn', L.tag[0], L.tag[1]);
+tag.style.whiteSpace = 'nowrap'; tag.style.left = 'auto'; tag.style.right = (W - L.x - L.cw) + 'px';
+if (tall) document.body.classList.add('t9');
+
+const persp = K.box(0, 0, W, H, { cls: 'persp' });
+const rows = ROWS.map((r, i) => {
+  const y = L.rowsY + i * (L.rH + L.gap);
+  // name-only stores: the tile is the name, set as text; the row then carries the note alone
+  const logo = r.id ? `<img src="${K.pub('platforms/' + r.id + '.svg')}" style="height:${Math.round(r.h * L.k)}px">` : `<div class="tx">${r.n}</div>`;
+  const el = K.box(L.x, y, L.cw, L.rH, { cls: 'row', parent: persp,
+    html: `<div class="lg" style="width:${r.wide ? L.wideW : L.lgW}px;height:${L.lgH}px">${logo}</div>` +
+      `<div class="bd">${r.id ? `<div class="nm">${r.n}</div>` : ''}<div class="ntw"><span class="nt">${r.note}</span></div></div><div class="ring"></div>` });
+  return { el, lg: el.querySelector('.lg'), bd: el.querySelector('.bd'), nt: el.querySelector('.nt'), ring: el.querySelector('.ring'), y };
+});
+const rowsH = 5 * L.rH + 4 * L.gap;
+const frame = K.box(L.x - 10, L.rowsY - 10, L.cw + 20, rowsH + 20, { cls: 'frame' });
+const hub = K.box(0, 0, null, null, { cls: 'hub', style: { width: 'auto', height: 'auto' }, html: `<img src="${K.brand('makeandlist-icon.svg')}">MakeAndList` });
+const legal = K.box(L.x, L.legalY, L.cw, null, { cls: 'legal', html: 'Logos belong to their owners. Shown to identify compatible platforms; no endorsement implied.' });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: printed per order →' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+K.run({
+  id: 'I11', title: 'Each Store, Part Two', dur: DUR, bpm: BPM, musicMode: 'none', mood: 'calm', key: 'F', intro: 0, cover: 15.2,
+  series: 'R09', highlight: 'STORES · 3/3',
+  technique: 'The I10 row layout, voice and effects only: unmodified logo tiles (name-only text tiles for Magento / Adobe Commerce and Shoplazza) drop into a column, each row card swings open with a settling 3D turn as the narrator names the store, a lime ring holds it and a highlighter swipes its note as she says it; the last line draws one ink-and-lime frame round all five with a MakeAndList pin',
+  caption: 'Five more stores and what MakeAndList does on each: Whop — separate publishing authorization. SHOPLINE and Salla — connection only. Magento Open Source / Adobe Commerce — compatible with, hidden drafts. Shoplazza — compatible with, approval pending. One place for all your stores. Logos belong to their owners; no endorsement implied. Start free at makeandlist.com',
+  short: 'Five more stores, plainly.',
+  vo: VO,
+  beats: ['0–3.6 s: “Five more stores.” — five tiles drop in; Whop · Separate publishing authorization', '3.6–6.3 s: SHOPLINE and Salla · Connection only', '6.3–10.9 s: Magento Open Source / Adobe Commerce (by name) · Compatible with · hidden drafts', '10.9–13.9 s: Shoplazza (by name) · Compatible with · approval pending', '13.9–16 s: one frame round all five — one place for all your stores', '16–18 s: end card, next: printed per order'],
+  cues: [[0.1, 'pop'], [0.35, 'click'], [0.5, 'click'], [0.65, 'click'], [0.8, 'click'], [0.95, 'click'], ...RT.map((t) => [+(t - 0.2).toFixed(2), 'swish']),
+    [NT[0] + 0.05, 'marker'], [NT[1] + 0.05, 'marker'], [NT[3] + 0.05, 'marker'], [NT[4] + 0.05, 'marker'], [T_ONE - 0.1, 'swish'], [15.0, 'sparkle'], [END, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.7 - 550 + Math.sin(T * 0.4) * 160}px, ${H * 0.3 - 550 + Math.cos(T * 0.35) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.1 - 450 + Math.cos(T * 0.45) * 120}px, ${H * 0.72 - 450 + Math.sin(T * 0.5) * 100}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear));
+  chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`;
+  chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  capW.forEach((w, i) => {
+    const p = K.p(T, 0.25 + i * 0.1, 0.8 + i * 0.1, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.6);
+    w.style.transform = `translateY(${(1 - p) * 50}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+  const c1Out = K.p(T, T_ONE - 0.3, T_ONE, E.inCubic);
+  capW.forEach((w) => { w.style.opacity = +w.style.opacity * (1 - c1Out); });
+  capEm.style.setProperty('--hl', K.p(T, 0.9, 1.3, E.outCubic) * 100 + '%');
+  vis(cap, T < T_ONE + 0.05);
+  cap2W.forEach((w, i) => {
+    const p = K.p(T, T_ONE + 0.05 + i * 0.08, T_ONE + 0.55 + i * 0.08, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.6);
+    w.style.transform = `translateY(${(1 - p) * 50}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+  cap2Em.style.setProperty('--hl', K.p(T, 14.9, 15.3, E.outCubic) * 100 + '%');
+  vis(cap2, T >= T_ONE);
+  const fp = K.p(T, T_ONE + 0.3, T_ONE + 0.9, E.outBack);
+  frame.style.opacity = Math.min(1, fp * 2) * (1 - K.p(T, END - 0.3, END, E.linear));
+  frame.style.transform = `scale(${1.04 - 0.04 * fp})`;
+  vis(frame, T >= T_ONE + 0.3 && T < END);
+  const hp = K.p(T, T_ONE + 0.7, T_ONE + 1.1, E.outBack);
+  hub.style.left = L.x + L.cw - 300 + 'px'; hub.style.top = L.rowsY - (tall ? 34 : 50) + 'px';
+  hub.style.opacity = Math.min(1, hp * 2) * (1 - K.p(T, END - 0.3, END, E.linear));
+  hub.style.transform = `scale(${0.7 + 0.3 * hp})`;
+  vis(hub, T >= T_ONE + 0.7 && T < END);
+  cap.style.transform = `translateY(${Math.sin(T * 0.6) * 3}px)`;
+  tag.style.opacity = K.p(T, 1.0, 1.4, E.linear) * (1 - K.p(T, T_ONE, T_ONE + 0.3, E.linear));
+
+  const fade = 1 - K.p(T, END - 0.3, END, E.linear);
+  // which row is being spoken
+  let cur = -1; RT.forEach((t, i) => { if (T >= t - 0.25) cur = i; });
+  const allOn = K.p(T, T_ONE - 0.2, T_ONE + 0.1, E.linear);
+  rows.forEach((r, i) => {
+    // the logo tile drops into its slot first (a quick cascade)
+    const lp = K.p(T, 0.1 + i * 0.1, 0.6 + i * 0.1, E.outBack);
+    // the row card opens when she names the store
+    const op = K.p(T, RT[i] - 0.3, RT[i] + 0.35, E.outExpo);
+    const tilt = (1 - K.p(T, RT[i] - 0.3, RT[i] + 0.5, E.outCubic)) * 10;
+    const fl = Math.sin(T * 1.2 + i * 1.1) * 2.5;
+    r.el.style.background = `rgba(255,253,248,${op})`;
+    r.el.style.boxShadow = `0 34px 60px -40px rgba(31,31,31,${0.6 * op}), 0 0 0 1.5px rgba(226,219,206,${op})`;
+    r.bd.style.opacity = op;
+    r.bd.style.transform = `translateX(${(1 - op) * 80}px)`;
+    r.lg.style.opacity = Math.min(1, lp * 2);
+    r.lg.style.transform = `translateY(${(1 - lp) * -60}px) scale(${0.7 + 0.3 * lp})`;
+    // the row being spoken is ringed and lifts a touch (tiles are never dimmed: logos stay as their owners made them)
+    const active = i === cur;
+    r.el.style.opacity = fade;
+    r.el.style.transform = `translateY(${fl}px) rotateY(${tilt}deg) scale(${active && allOn < 1 ? 1 + 0.015 * K.p(T, RT[i] - 0.2, RT[i] + 0.3, E.outCubic) : 1})`;
+    r.ring.style.opacity = active ? K.p(T, RT[i] - 0.2, RT[i], E.linear) * (1 - allOn) : 0;
+    r.nt.style.setProperty('--hl', K.p(T, NT[i] - 0.05, NT[i] + 0.55, E.outCubic) * 100 + '%');
+  });
+  legal.style.opacity = K.p(T, 0.8, 1.2, E.linear) * fade;
+  vis(persp, T < END + 0.05); vis(legal, T < END);
+
+  end(T);
+});
+</script></body></html>

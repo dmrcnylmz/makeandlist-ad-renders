@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I09 · Ten Store Platforms</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R09 series chip (the R08 .fchip, unchanged) */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.w { display: inline-block; white-space: pre; }
+.hook { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.ten { position: absolute; z-index: 41; font: 900 440px/0.8 'Playfair Display'; letter-spacing: -0.06em; color: #1F1F1F; transform-origin: 0 0; white-space: nowrap; }
+.ten small { display: inline-block; vertical-align: top; margin-left: 26px; margin-top: 60px; font: 800 96px/0.98 'Playfair Display'; letter-spacing: -0.03em; }
+.ten small em { font-style: italic; font-weight: 700; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / var(--hl, 0%) 100%; }
+.cap { position: absolute; z-index: 40; font: 800 64px/1.04 'Playfair Display'; letter-spacing: -0.025em; color: #1F1F1F; }
+.cap em { font-style: italic; font-weight: 700; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%) no-repeat 0 0 / var(--hl, 0%) 100%; }
+.persp { position: absolute; inset: 0; perspective: 1600px; z-index: 30; }
+.tile { position: absolute; border-radius: 26px; background: #FFFDF8; display: flex; align-items: center; justify-content: center; gap: 18px;
+  box-shadow: 0 34px 60px -38px rgba(31,31,31,.55), 0 0 0 1.5px #E2DBCE; will-change: transform, opacity; }
+.tile.dark { background: #1F1F1F; box-shadow: 0 34px 60px -38px rgba(31,31,31,.7); }
+.tile img { display: block; width: auto; flex: none; }
+.tile .nm { font: 800 44px/1 'Archivo'; letter-spacing: -0.02em; color: #1F1F1F; white-space: nowrap; }
+.tile .tx { font: 800 40px/1.06 'Archivo'; letter-spacing: -0.045em; word-spacing: 0.02em; color: #1F1F1F; text-align: center; }
+.tile .ring { position: absolute; inset: -9px; border-radius: 33px; border: 5px solid #DFFF5A; box-shadow: 0 0 0 2px #1F1F1F; opacity: 0; pointer-events: none; }
+.tile .bdg { position: absolute; right: 18px; top: -30px; padding: 6px 16px 6px 12px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 700 28px/1.1 'Archivo';
+  box-shadow: 0 0 0 2px #1F1F1F, 0 10px 18px -10px rgba(31,31,31,.6); white-space: nowrap; display: flex; align-items: center; gap: 6px; opacity: 0; }
+.tile .bdg svg { width: 26px; height: 26px; }
+.legal { position: absolute; z-index: 60; font: 500 21px/1.35 'IBM Plex Mono', monospace; color: #6B645A; }
+.pcard { position: absolute; z-index: 45; display: flex; align-items: center; gap: 24px; padding: 12px 28px 12px 12px; border-radius: 28px; background: #FFFDF8;
+  box-shadow: 0 50px 90px -40px rgba(31,31,31,.7), 0 0 0 1.5px #E2DBCE; }
+.pcard .th { flex: none; border-radius: 18px; background: #EFEADF; overflow: hidden; display: grid; place-items: center; }
+.pcard .th img { width: 92%; display: block; }
+.pcard .k { font: 600 26px 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase; color: #6B645A; }
+.pcard .t { margin-top: 4px; font: 800 42px/1.05 'Archivo'; letter-spacing: -0.02em; color: #1F1F1F; white-space: nowrap; }
+.pcard .pl { display: inline-flex; margin-top: 10px; padding: 6px 16px; border-radius: 99px; background: #1F1F1F; color: #DFFF5A; font: 700 28px 'Archivo'; white-space: nowrap; }
+.paper { position: absolute; z-index: 50; width: 92px; height: 116px; border-radius: 10px; background: #FFFDF8; overflow: hidden; box-shadow: 0 20px 34px -16px rgba(31,31,31,.55), 0 0 0 1.5px #D9D3C9; }
+.paper img { position: absolute; left: 6px; top: 6px; width: 80px; }
+.paper i { position: absolute; left: 0; right: 0; bottom: 0; height: 28px; background: #1F1F1F; color: #DFFF5A; font: 700 15px/28px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-align: center; font-style: normal; }
+svg.frame { position: absolute; z-index: 29; overflow: visible; pointer-events: none; }
+.hub { position: absolute; z-index: 46; display: flex; align-items: center; gap: 14px; padding: 10px 26px 10px 12px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE;
+  font: 700 30px 'Archivo'; white-space: nowrap; box-shadow: 0 0 0 6px #FAF7EE, 0 24px 40px -20px rgba(31,31,31,.7); }
+.hub img { height: 46px; width: 46px; border-radius: 50%; background: #FAF7EE; padding: 6px; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I09 — STORES 1/3: ten store platforms, clearly. A giant "10" lands under "Works with your own store on"; it lifts into
+// a headline while the ten real logo tiles rise into a 2 × 5 grid, each named one landing as Marian says it. A MakeAndList
+// product card then sends paper drafts to the stores that take drafts (a "Draft" sticker lands on each); the last line
+// draws one lime frame round all ten: one place for all your stores. Logos are the unmodified files, only their tiles move.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, E = K.ease;
+const BPM = 99.4, BEAT = 60 / BPM;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Marian (vo.mjs + an RMS pass), speech windows:
+//   L1 0.49–5.16 ("MakeAndList works with your own store," 0.49–2.65 · "on ten store platforms." 3.07–5.16, "ten" ≈ 3.66)
+//   L2 5.13–9.13 (WooCommerce 5.13 · Wix 6.17 · ikas 6.60 · Shopware 7.12 · Gumroad 7.88 · "and five more" 8.48)
+//   L3 9.47–13.05 ("Make a product once," 9.47–10.49 · "and send drafts where your store supports them." 10.74–13.05)
+//   L4 13.50–15.16 ("One place for all your stores.")
+const VO = [[0.2, 'MakeAndList works with your own store, on ten store platforms.'], [5.1, 'WooCommerce, Wix, ikas, Shopware, Gumroad, and five more.'],
+  [9.2, 'Make a product once, and send drafts where your store supports them.'], [13.1, 'One place for all your stores.']];
+const T_TEN = 3.62, S2 = 4.75, S3 = 9.3, S4 = 13.25, END = DUR - 2;
+const T_NAMED = [5.13, 6.17, 6.6, 7.12, 7.88];            // WooCommerce, Wix, ikas, Shopware 6, Gumroad
+const T_MORE = [8.5, 8.62, 8.74, 8.86, 8.98];              // the five more
+const T_LAND = [...T_NAMED, ...T_MORE];
+const T_SEND = 10.85, DRAFT_TO = [0, 1, 2, 3, 4, 8];        // tiles that take drafts / hidden products
+const T_FRAME = 13.55;
+
+// The ten, in the brief's order. h = logo height in px (width follows the file's own ratio).
+const STORES = [
+  { id: 'woocommerce', n: 'WooCommerce', h: 50 },
+  { id: 'wix', n: 'Wix', h: 50, dark: 1 },
+  { id: 'ikas', n: 'ikas', h: 50 },
+  { id: 'shopware', n: 'Shopware 6', h: 50 },
+  { id: 'gumroad', n: 'Gumroad', h: 62, name: 1 },
+  { id: 'whop', n: 'Whop', h: 50 },
+  { id: 'shopline', n: 'SHOPLINE', h: 36 },
+  { id: 'salla', n: 'Salla', h: 74 },                       // 74 px high = 176 px wide (min 88 px)
+  { id: null, n: 'Magento Open Source /<br>Adobe Commerce' },
+  { id: null, n: 'Shoplazza', big: 1 },
+];
+
+const L = tall
+  ? { chip: [65, 290], x: 65, cw: 950, topY: 380, capFs: 64, gridY: 556, tH: 170, gap: 18, rowGap: 18, legalY: 1498,
+      hookY: 520, hookFs: 88, tenX: 65, tenY: 740, tenFs: 440, lk: 1.3, k18: [540, 1100, 450] }
+  : { chip: [60, 56], x: 60, cw: 960, topY: 132, capFs: 58, gridY: 308, tH: 144, gap: 18, rowGap: 16, legalY: 1150,
+      hookY: 170, hookFs: 80, tenX: 60, tenY: 410, tenFs: 400, lk: 1.12, k18: [640, 800, 340] };
+const tW = (L.cw - L.gap) / 2;
+const slot = (i) => [L.x + (i % 2) * (tW + L.gap), L.gridY + Math.floor(i / 2) * (L.tH + L.rowGap)];
+const gridH = 5 * L.tH + 4 * L.rowGap;
+
+// ---------- ambient ----------
+const blobA = K.box(0, 0, 1100, 1100, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.22), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(126,154,126,.15), rgba(126,154,126,0) 62%)' } });
+
+// ---------- chip ----------
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>STORES</b><i>·</i><span>1/3</span>' });
+
+// ---------- A: the hook ----------
+const wrapWords = (html) => html.split(' ').map((w) => `<span class="w">${w} </span>`).join('');
+const hook = K.box(L.x, L.hookY, L.cw, null, { cls: 'hook', style: { fontSize: L.hookFs + 'px' }, html: wrapWords('Works with') + '<br>' + wrapWords('your own store on') });
+const hookW = [...hook.querySelectorAll('.w')];
+// a slow-drifting product in the lower band while the hook speaks (concept product)
+const k18 = K.box(L.k18[0], L.k18[1], L.k18[2], L.k18[2] * 889 / 841, { style: { zIndex: 20 }, html: `<img src="${K.pub('r09/k18-planner-stack.webp')}" style="width:100%;display:block;filter:drop-shadow(0 40px 40px rgba(31,31,31,.28))">` });
+const k18Tag = K.demoTag('Concept product · AI-generated', L.x, 0);
+const ten = K.box(L.tenX, L.tenY, null, null, { cls: 'ten', style: { width: 'auto', height: 'auto', fontSize: L.tenFs + 'px' }, html: '10<small>store<br><em>platforms</em></small>' });
+const tenEm = ten.querySelector('em');
+
+// ---------- headline over the grid ----------
+const capA = K.box(L.x, L.topY, L.cw, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html: wrapWords('Works with your own store') + '<br>' + wrapWords('on') + '<span class="w"><em>10 store platforms.</em></span>' });
+const capAW = [...capA.querySelectorAll('.w')], capAEm = capA.querySelector('em');
+const capC = K.box(L.x, L.topY, L.cw, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html: wrapWords('One place for') + '<br><span class="w"><em>all your stores.</em></span>' });
+const capCW = [...capC.querySelectorAll('.w')], capCEm = capC.querySelector('em');
+
+// ---------- the ten tiles ----------
+const persp = K.box(0, 0, W, H, { cls: 'persp' });
+const tiles = STORES.map((s, i) => {
+  const [x, y] = slot(i);
+  let inner;
+  if (!s.id) inner = s.big ? `<div class="nm" style="font-size:${tall ? 60 : 52}px">${s.n}</div>` : `<div class="tx"${tall ? ' style="font-size:42px"' : ''}>${s.n}</div>`;
+  else inner = `<img src="${K.pub('platforms/' + s.id + '.svg')}" style="height:${Math.round(s.h * L.lk)}px">` + (s.name ? `<div class="nm"${tall ? ' style="font-size:52px"' : ''}>${s.n}</div>` : '');
+  const el = K.box(x, y, tW, L.tH, { cls: 'tile' + (s.dark ? ' dark' : ''), parent: persp,
+    html: inner + '<div class="ring"></div><div class="bdg"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#1F1F1F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Draft</div>' });
+  return { el, ring: el.querySelector('.ring'), bdg: el.querySelector('.bdg'), x, y };
+});
+const legal = K.box(L.x, L.legalY, L.cw, null, { cls: 'legal', html: 'Logos belong to their owners. Shown to identify compatible platforms; no endorsement implied.' });
+
+// ---------- B: the product card sends drafts ----------
+const thH = tall ? 108 : 100;
+const pcard = K.box(L.x, L.topY - 6, null, null, { cls: 'pcard', style: { width: 'auto', height: 'auto' },
+  html: `<div class="th" style="width:${thH * 1.2}px;height:${thH}px"><img src="${K.pub('r07/k13-wedding-planner.webp')}"></div><div><div class="k">MakeAndList · made once</div><div class="t">Botanical Wedding Planner</div><div class="pl">Send drafts →</div></div>` });
+const conceptTag = K.demoTag('Concept product · AI-generated', 0, 0);
+const papers = DRAFT_TO.map(() => K.box(0, 0, 92, 116, { cls: 'paper', html: `<img src="${K.pub('r07/k13-wedding-planner.webp')}"><i>DRAFT</i>` }));
+
+// ---------- C: one place ----------
+const NS = 'http://www.w3.org/2000/svg';
+const fr = document.createElementNS(NS, 'svg'); fr.setAttribute('class', 'frame');
+const PAD = 16, frX = L.x - PAD, frY = L.gridY - PAD, frW = L.cw + 2 * PAD, frH = gridH + 2 * PAD;
+Object.assign(fr.style, { left: frX + 'px', top: frY + 'px', width: frW + 'px', height: frH + 'px' });
+fr.setAttribute('viewBox', `0 0 ${frW} ${frH}`);
+const rect = document.createElementNS(NS, 'rect');
+Object.entries({ x: 3, y: 3, width: frW - 6, height: frH - 6, rx: 38, fill: 'none', stroke: '#1F1F1F', 'stroke-width': 6 }).forEach(([k, v]) => rect.setAttribute(k, v));
+const rect2 = rect.cloneNode(); rect2.setAttribute('stroke', '#DFFF5A'); rect2.setAttribute('stroke-width', 16);
+fr.appendChild(rect2); fr.appendChild(rect);
+document.getElementById('stage').appendChild(fr);
+const PER = 2 * (frW - 6 + frH - 6);
+const hub = K.box(0, 0, null, null, { cls: 'hub', style: { width: 'auto', height: 'auto' }, html: `<img src="${K.brand('makeandlist-icon.svg')}">MakeAndList` });
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: what each store gets →' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+function words(ws, T, a, out, st = 0.06) {
+  ws.forEach((w, i) => {
+    const p = K.p(T, a + i * st, a + 0.5 + i * st, E.outExpo);
+    const o = out ? K.p(T, out - 0.25, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+}
+
+K.run({
+  id: 'I09', title: 'Ten Store Platforms', dur: DUR, bpm: BPM, music: 'ov-good-morning-heaven', mood: 'bright', key: 'D', intro: 0, cover: 8.6,
+  series: 'R09', highlight: 'STORES · 1/3',
+  technique: 'A giant “10” lands under “Works with your own store on” and lifts into the headline while the ten unmodified logo tiles rise into a 2 × 5 grid with a settling 3D tilt, each named store ringed as the narrator says it; a MakeAndList product card throws paper drafts to the six stores that take drafts or hidden products (a “Draft” sticker lands on each); a lime frame draws round all ten for “one place for all your stores”',
+  caption: 'MakeAndList works with your own store on 10 store platforms: WooCommerce, Wix, ikas, Shopware 6, Gumroad, Whop, SHOPLINE, Salla, Magento Open Source / Adobe Commerce and Shoplazza. Make a product once and send drafts where your store supports them. Logos belong to their owners; no endorsement implied. Start free at makeandlist.com',
+  short: 'Your own store, on 10 platforms.',
+  vo: VO,
+  beats: ['0–4.8 s: “Works with your own store on” — a giant 10, “store platforms”', '4.8–9.3 s: the ten logo tiles rise into a 2 × 5 grid; WooCommerce, Wix, ikas, Shopware 6 and Gumroad ringed as she names them, then five more', '9.3–13.3 s: a MakeAndList product card sends paper drafts to the stores that take drafts; “Draft” stickers land', '13.3–16 s: one lime frame round all ten — one place for all your stores', '16–18 s: end card, next: what each store gets'],
+  cues: [[0.1, 'pop'], [T_TEN - 0.05, 'pop'], [S2 - 0.05, 'swish'], ...T_NAMED.map((t) => [+(t - 0.04).toFixed(2), 'pop']), [T_MORE[0], 'click'], [T_MORE[2], 'click'], [T_MORE[4], 'click'],
+    [S3 - 0.1, 'whoosh'], [T_SEND, 'paper'], [T_SEND + 0.55, 'pop'], [T_SEND + 0.85, 'pop'], [S4 - 0.1, 'swish'], [T_FRAME + 0.7, 'sparkle'], [END, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.66 - 550 + Math.sin(T * 0.45) * 160}px, ${H * 0.36 - 550 + Math.cos(T * 0.38) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.14 - 450 + Math.cos(T * 0.42) * 120}px, ${H * 0.78 - 450 + Math.sin(T * 0.55) * 100}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear));
+  chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`;
+  chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  // ---------- A: hook ----------
+  const aOut = K.p(T, S2 - 0.3, S2 + 0.05, E.inCubic);
+  hookW.forEach((w, i) => {
+    const p = K.p(T, 0.25 + i * 0.12, 0.8 + i * 0.12, E.outExpo);
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - aOut);
+    w.style.transform = `translateY(${(1 - p) * 60 - aOut * 40}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 10}px)` : 'none';
+  });
+  hook.style.transform = `scale(${1 + 0.01 * T})`;
+  vis(hook, T < S2 + 0.1);
+  const tp = K.p(T, T_TEN - 0.15, T_TEN + 0.45, E.outBack);
+  ten.style.opacity = Math.min(1, tp * 2) * (1 - aOut);
+  ten.style.transform = `translateY(${(1 - tp) * 120 - aOut * 120}px) scale(${(0.7 + 0.3 * tp) * (1 + 0.012 * (T - T_TEN)) * (1 - 0.25 * aOut)}) rotate(${(1 - tp) * -4}deg)`;
+  ten.style.setProperty('--hl', K.p(T, 4.35, 4.7, E.outCubic) * 100 + '%');
+  vis(ten, T >= T_TEN - 0.2 && T < S2 + 0.1);
+  const kp = K.p(T, 0.5, 1.6, E.outExpo);
+  k18.style.opacity = kp * (1 - aOut);
+  k18.style.transform = `translate(${(1 - kp) * 120 + Math.sin(T * 0.7) * 14}px, ${(1 - kp) * 80 + Math.sin(T * 1.1) * 10 + aOut * 120}px) rotate(${6 - 2 * kp + Math.sin(T * 0.6) * 1.5}deg)`;
+  vis(k18, T < S2 + 0.1);
+  k18Tag.style.top = (tall ? 1530 : L.k18[1] + L.k18[2] * 889 / 841 + 10) + 'px';
+  if (!tall) k18Tag.style.left = L.k18[0] + 'px';
+  k18Tag.style.opacity = K.p(T, 1.0, 1.3, E.linear) * (1 - aOut); vis(k18Tag, T < S2 + 0.1);
+
+  // ---------- headline A (grid on) ----------
+  words(capAW, T, S2 + 0.05, S3, 0.05);
+  capAEm.style.setProperty('--hl', K.p(T, S2 + 0.6, S2 + 1.0, E.outCubic) * 100 + '%');
+  vis(capA, T >= S2 && T < S3 + 0.05);
+
+  // ---------- tiles ----------
+  const fade = 1 - K.p(T, END - 0.3, END, E.linear);
+  tiles.forEach((t, i) => {
+    const t0 = T_LAND[i] - 0.35;
+    const p = K.p(T, t0, t0 + 0.6, E.outExpo);
+    const tilt = (1 - K.p(T, t0, t0 + 0.75, E.outCubic)) * 10;
+    const fl = Math.sin(T * 1.3 + i * 0.9) * 3;
+    const breathe = T > S4 ? 1 + 0.01 * Math.sin((T - S4) * 2.2) : 1;
+    // the grid shifts a hair under the card while drafts land, then settles
+    t.el.style.opacity = Math.min(1, p * 1.8) * fade;
+    t.el.style.transform = `translateY(${(1 - p) * 220 + fl}px) rotateX(${tilt}deg) rotateY(${(i % 2 ? -1 : 1) * tilt * 0.4}deg) scale(${(1.12 - 0.12 * p) * breathe})`;
+    t.el.style.filter = p < 0.98 ? `blur(${(1 - p) * 10}px)` : 'none';
+    vis(t.el, T >= t0);
+    // name ring while she says it (named five), a quick ring for the five more
+    const rA = T_LAND[i] - 0.05, rB = i < 5 ? (i < 4 ? T_NAMED[i + 1] : 8.4) : T_LAND[i] + 0.45;
+    const rp = K.p(T, rA, rA + 0.18, E.linear) * (1 - K.p(T, rB - 0.1, rB + 0.15, E.linear));
+    t.ring.style.opacity = rp;
+    t.ring.style.transform = `scale(${1.05 - 0.05 * K.p(T, rA, rA + 0.35, E.outBack)})`;
+    // draft stickers
+    const di = DRAFT_TO.indexOf(i);
+    if (di >= 0) {
+      const at = T_SEND + 0.42 + di * 0.09;
+      const bp = K.p(T, at, at + 0.35, E.outBack);
+      t.bdg.style.opacity = Math.min(1, bp * 2) * (1 - K.p(T, S4, S4 + 0.3, E.linear));
+      t.bdg.style.transform = `scale(${0.5 + 0.5 * bp}) rotate(${(1 - bp) * 12 + 3}deg)`;
+    }
+  });
+  vis(persp, T < END + 0.05);
+  legal.style.opacity = K.p(T, 5.0, 5.5, E.linear) * fade;
+  vis(legal, T >= 5.0 && T < END);
+
+  // ---------- B: product card ----------
+  const bIn = K.p(T, S3 - 0.05, S3 + 0.55, E.outExpo), bOut = K.p(T, S4 - 0.3, S4, E.inCubic);
+  pcard.style.opacity = bIn * (1 - bOut);
+  pcard.style.transform = `perspective(1600px) translateY(${(1 - bIn) * -60 - bOut * 40}px) rotateX(${(1 - bIn) * -10}deg) scale(${0.94 + 0.06 * bIn + Math.sin(T * 1.4) * 0.004})`;
+  vis(pcard, T >= S3 - 0.1 && T < S4 + 0.05);
+  const pl = pcard.querySelector('.pl');
+  pl.style.transform = `scale(${T >= T_SEND - 0.12 && T < T_SEND ? 0.92 : 1})`;
+  pl.style.background = T >= T_SEND - 0.12 ? '#DFFF5A' : '#1F1F1F'; pl.style.color = T >= T_SEND - 0.12 ? '#1F1F1F' : '#DFFF5A';
+  const pr = pcard.getBoundingClientRect();
+  conceptTag.style.left = (tall ? L.x + L.cw - 380 : L.x + L.cw - 380) + 'px'; conceptTag.style.top = (L.topY - 44) + 'px';
+  conceptTag.style.opacity = bIn * (1 - bOut); vis(conceptTag, T >= S3 && T < S4 + 0.05);
+  papers.forEach((pp, j) => {
+    const i = DRAFT_TO[j], t0 = T_SEND + j * 0.09, p = K.p(T, t0, t0 + 0.42, E.inOutCubic);
+    const sx = L.x + 20, sy = L.topY + 6;
+    const tx = tiles[i].x + tW - 130, ty = tiles[i].y - 30;
+    const x = K.lerp(sx, tx, p), y = K.lerp(sy, ty, p) - Math.sin(p * Math.PI) * 120;
+    const land = K.p(T, t0 + 0.42, t0 + 0.6, E.inCubic);
+    pp.style.left = x + 'px'; pp.style.top = y + 'px';
+    pp.style.opacity = (T >= t0 ? 1 : 0) * (1 - land);
+    pp.style.transform = `rotate(${(1 - p) * -14 + 6 - j * 2}deg) scale(${1 - 0.35 * p - land * 0.3})`;
+    vis(pp, T >= t0 && T < t0 + 0.62);
+  });
+
+  // ---------- C: one place ----------
+  words(capCW, T, S4 + 0.05, null, 0.07);
+  capCEm.style.setProperty('--hl', K.p(T, 14.6, 15.0, E.outCubic) * 100 + '%');
+  vis(capC, T >= S4);
+  const fp = K.p(T, T_FRAME, T_FRAME + 0.9, E.inOutCubic);
+  [rect, rect2].forEach((r) => { r.setAttribute('stroke-dasharray', `${PER * fp} ${PER}`); r.setAttribute('stroke-dashoffset', '0'); });
+  rect2.style.opacity = 0.9;
+  fr.style.opacity = fade; vis(fr, T >= T_FRAME);
+  const hp = K.p(T, T_FRAME + 0.6, T_FRAME + 1.0, E.outBack);
+  const hubW = 300;
+  hub.style.left = frX + frW - hubW - 36 + 'px'; hub.style.top = frY - 34 + 'px';
+  hub.style.opacity = Math.min(1, hp * 2) * fade;
+  hub.style.transform = `scale(${0.7 + 0.3 * hp})`;
+  vis(hub, T >= T_FRAME + 0.6);
+
+  end(T);
+});
+</script></body></html>

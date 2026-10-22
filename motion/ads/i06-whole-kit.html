@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I06 · The Whole Kit</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R09 series chip (the R08 .fchip style) — identical in I01–I16 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .06em; }
+.w { display: inline-block; white-space: pre; }
+.prod { position: absolute; z-index: 20; }
+.prod img { width: 100%; display: block; }
+.shadow { position: absolute; z-index: 19; border-radius: 50%; background: radial-gradient(closest-side, rgba(31,31,31,.3), rgba(31,31,31,0)); }
+.plinth { position: absolute; z-index: 18; border-radius: 50%; background: radial-gradient(closest-side, rgba(223,255,90,.55), rgba(223,255,90,0)); }
+#lines { position: absolute; left: 0; top: 0; z-index: 21; overflow: visible; pointer-events: none; }
+/* a kit part: a floating card, label on top, its picture below */
+.part { position: absolute; z-index: 30; border-radius: 28px; background: #FFFDF8; padding: 22px 24px; box-shadow: 0 46px 80px -44px rgba(31,31,31,.7), 0 0 0 1px #E2DBCE; overflow: hidden; }
+.part .hd { display: flex; align-items: center; gap: 14px; font: 700 40px/1.05 'Archivo'; color: #1F1F1F; letter-spacing: -0.01em; white-space: nowrap; }
+.part .hd i { flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #1F1F1F; color: #DFFF5A; font: 700 24px 'IBM Plex Mono', monospace; font-style: normal; }
+.part .vz { position: absolute; left: 24px; right: 24px; bottom: 22px; }
+.part .ring { position: absolute; inset: 0; border-radius: 28px; border: 5px solid #1F1F1F; box-shadow: inset 0 0 0 9px #DFFF5A; pointer-events: none; }
+/* files */
+.sheet { position: absolute; bottom: 0; width: 120px; height: 156px; border-radius: 8px; background: #FFFDF8; box-shadow: 0 14px 24px -14px rgba(31,31,31,.55), 0 0 0 1px #D9D3C9; overflow: hidden; }
+.sheet .h { height: 22px; background: #A9BBA5; }
+.sheet .ln { margin: 10px 12px 0; height: 8px; border-radius: 4px; background: #E3DED3; }
+.sheet .gd { position: absolute; left: 12px; right: 12px; bottom: 12px; height: 58px; background-image: linear-gradient(#E3DED3 2px, transparent 2px), linear-gradient(90deg, #E3DED3 2px, transparent 2px); background-size: 24px 19px; }
+.pdf { position: absolute; right: 0; bottom: 8px; padding: 8px 18px; border-radius: 12px; background: #1F1F1F; color: #DFFF5A; font: 700 28px 'IBM Plex Mono', monospace; }
+/* copy */
+.cp .t { font: 700 30px/1.15 'Archivo'; color: #1F1F1F; }
+.cp .l { height: 12px; border-radius: 6px; background: #E3DED3; margin-top: 12px; }
+.cp .tg { display: flex; gap: 10px; margin-top: 14px; }
+.cp .tg span { padding: 6px 14px; border-radius: 99px; background: #EFEADF; font: 600 26px 'Archivo'; white-space: nowrap; }
+/* images */
+.ims { display: flex; gap: 14px; }
+.ims div { position: relative; flex: 1; border-radius: 16px; overflow: hidden; }
+.ims img { position: absolute; display: block; }
+/* video */
+.vf { position: relative; border-radius: 16px; overflow: hidden; background: #DCE3D6; }
+.vf img { position: absolute; display: block; }
+.vf .pl { position: absolute; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 50%; background: rgba(31,31,31,.82); display: grid; place-items: center; }
+.vf .bar { position: absolute; left: 14px; right: 14px; bottom: 12px; height: 8px; border-radius: 4px; background: rgba(255,253,248,.75); overflow: hidden; }
+.vf .bar b { display: block; height: 100%; background: #1F1F1F; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I06 — What you get 1/3: one idea, the whole kit. An exploded view: a botanical planner stack (concept product) stands
+// on a lime plinth; as Marian names each part it lifts off the product on a leader line and lands as a floating card —
+// print-ready files, the title + description + tags, listing images, a short video — until the whole kit hangs in the
+// air around the one product, slowly turning in depth. Voice and effects only (musicMode 'none'): an explanatory film.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, END = DUR - 2, E = K.ease;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows measured from the takes (vo.mjs + an RMS pass):
+//   L1 0.50–2.00 · L2 2.96–4.38 · L3 5.34–7.66 ("A title," 5.34–5.85 · "a description and tags." 6.20–7.66)
+//   L4 8.50–10.29 ("Listing images," ≈ 8.5 · "a short video" ≈ 9.6) · L5 11.43–14.21 ("…and all yours to review." 12.77–14.21)
+const T_PART = [2.95, 5.3, 8.45, 9.6];   // each part lifts off as she names it
+const S_EXP = 2.45;                       // the product settles onto its plinth, the explosion starts
+
+const PL = K.pub('r09/k18-planner-stack.webp'), FL = K.pub('r09/p06-planner-flatlay.webp');
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 372, capFs: 88, gx: 65, gy: 592, pw: 460, ph: 290, gap: 30,
+      heroW: 600, heroCy: 930, prodW: 400, prodCy: 1446, cTag: [65, 1212], iTag: [649, 1212] }
+  : { chip: [60, 56], capX: 60, capY: 134, capFs: 76, gx: 60, gy: 244, pw: 465, ph: 262, gap: 30,
+      heroW: 520, heroCy: 720, prodW: 380, prodCy: 1050, cTag: [60, 1290], iTag: [600, 1290] };
+
+// ---------- ambient ----------
+const blobA = K.box(0, 0, 1000, 1000, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.22), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(126,154,126,.16), rgba(126,154,126,0) 62%)' } });
+
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', html: '<b>WHAT YOU GET</b><i>·</i><span>1/3</span>', style: { width: 'auto', height: '56px' } });
+
+function capEm(parts) {
+  const el = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  el.innerHTML = parts.map(([t, em]) => (t === '<br>' ? '<br>' : t.split(' ').map((w) => (em ? `<span class="w"><em>${w}</em> </span>` : `<span class="w">${w} </span>`)).join(''))).join('');
+  return { el, ws: [...el.querySelectorAll('.w')] };
+}
+const BR = tall ? [['<br>']] : [];
+const C = [
+  { c: capEm([['One idea.', 0], ...BR, ['The whole kit.', 1]]), a: 0.4, b: 2.8 },
+  { c: capEm([['Print-ready', 0], ...BR, ['files.', 1]]), a: 2.9, b: 5.15 },
+  { c: capEm([['Title, description,', 0], ...BR, ['tags.', 1]]), a: 5.25, b: 8.3 },
+  { c: capEm([['Images and', 0], ...BR, ['a short video.', 1]]), a: 8.4, b: 11.2 },
+  { c: capEm([['From one sentence.', 0], ...BR, ['Yours to review.', 1]]), a: 11.4, b: END },
+];
+if (!tall) C[4].c.el.style.fontSize = '56px';
+
+// ---------- the product on its plinth ----------
+const ph = (w) => w * 889 / 841;
+const plinth = K.box(0, 0, 640, 170, { cls: 'plinth' });
+const shadow = K.box(0, 0, 400, 70, { cls: 'shadow' });
+const prod = K.box(0, 0, 100, 100, { cls: 'prod', html: `<img src="${PL}">` });
+const cTag = K.demoTag('Concept product · AI-generated', L.cTag[0], L.cTag[1]);
+const iTag = K.demoTag('Illustration · sample listing', L.iTag[0], L.iTag[1]);
+
+// ---------- the four parts ----------
+const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+svg.id = 'lines'; svg.setAttribute('width', W); svg.setAttribute('height', H); document.getElementById('stage').appendChild(svg);
+const VZH = L.ph - 22 - 46 - 18 - 22; // picture height under the label
+const PARTS = [
+  { n: 'Print-ready files', html: `<div class="vz" style="height:${VZH}px">${[0, 1, 2].map((i) => `<div class="sheet" style="left:${i * 70}px;transform:rotate(${(i - 1) * 6}deg);z-index:${3 - i}"><div class="h"></div><div class="ln"></div><div class="ln" style="width:60%"></div><div class="gd"></div></div>`).join('')}<div class="pdf">PDF</div></div>` },
+  { n: 'Listing copy', html: `<div class="vz cp" style="height:${VZH}px"><div class="t">Botanical Weekly Planner</div><div class="l"></div><div class="l" style="width:70%"></div><div class="tg"><span>planner</span><span>printable</span></div></div>` },
+  { n: 'Listing images', html: `<div class="vz ims" style="height:${VZH}px"><div style="background:#A9BBA5"><img src="${PL}" style="left:8%;top:8%;width:84%"></div><div><img src="${FL}" style="left:-60%;top:-40%;width:240%"></div><div style="background:#E9C7B4"><img src="${PL}" style="left:-10%;top:4%;width:120%;transform:rotate(-8deg)"></div></div>` },
+  { n: 'A short video', html: `<div class="vz vf" style="height:${VZH}px"><img class="kb" src="${FL}" style="left:-10%;top:-30%;width:120%"><div class="pl"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z" fill="#DFFF5A"/></svg></div><div class="bar"><b></b></div></div>` },
+];
+const parts = PARTS.map((pt, i) => {
+  const el = K.box(0, 0, L.pw, L.ph, { cls: 'part', html: `<div class="hd"><i>${i + 1}</i>${pt.n}</div>${pt.html}<div class="ring"></div>` });
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  line.setAttribute('fill', 'none'); line.setAttribute('stroke', '#1F1F1F'); line.setAttribute('stroke-width', '3'); line.setAttribute('stroke-dasharray', '2 10'); line.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(line);
+  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  dot.setAttribute('r', '9'); dot.setAttribute('fill', '#DFFF5A'); dot.setAttribute('stroke', '#1F1F1F'); dot.setAttribute('stroke-width', '3');
+  svg.appendChild(dot);
+  return { el, ring: el.querySelector('.ring'), line, dot, sheets: [...el.querySelectorAll('.sheet')], tags: [...el.querySelectorAll('.tg span')], ims: [...el.querySelectorAll('.ims div')], kb: el.querySelector('.kb'), bar: el.querySelector('.bar b'), pl: el.querySelector('.pl') };
+});
+const slot = (i) => [L.gx + (i % 2) * (L.pw + L.gap), L.gy + Math.floor(i / 2) * (L.ph + L.gap)];
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: digital products →' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+K.run({
+  id: 'I06', title: 'The Whole Kit', dur: DUR, bpm: 90, musicMode: 'none', mood: 'calm', key: 'C', intro: 0, cover: 13.2,
+  series: 'R09', highlight: 'WHAT YOU GET · 1/3',
+  technique: 'An exploded view: one planner stack (concept product) stands on a lime plinth and, as the narrator names each part, a numbered card lifts off it on a dotted leader line — print-ready files, listing copy, listing images, a playing short video — until the whole kit hangs around the one product, turning slowly in depth',
+  caption: 'What you get from one idea: print-ready files, a title, description and tags, listing images and a short video — the whole kit, all yours to review. Start free at makeandlist.com',
+  short: 'One idea. The whole kit.',
+  vo: [[0.3, 'One idea gives you the whole kit.'], [2.4, 'Print-ready files to sell.'], [4.4, 'A title, a description and tags.'], [7.9, 'Listing images, and a short video.'], [11.2, 'All from one sentence, and all yours to review.']],
+  beats: ['0–2.5 s: “One idea. The whole kit.” — a botanical planner stack (concept product) turns in close-up', '2.5–5.2 s: it settles on a lime plinth; part 1, print-ready files (PDF), lifts off on a leader line', '5.2–8.3 s: part 2, listing copy: a title, a description and tags', '8.3–11.2 s: parts 3 and 4: listing images, then a short video that plays', '11.2–16 s: the whole kit around the one product, turning in depth: from one sentence, yours to review', '16–18 s: end card — Next: digital products'],
+  cues: [[0.15, 'pop'], [S_EXP, 'swish'], [T_PART[0] + 0.1, 'pop'], [T_PART[1] + 0.1, 'pop'], [T_PART[2] + 0.1, 'pop'], [T_PART[3] + 0.1, 'pop'], [10.0, 'click'], [12.6, 'sparkle'], [END, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.6 - 500 + Math.sin(T * 0.5) * 150}px, ${H * 0.5 - 500 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.15 - 450 + Math.cos(T * 0.45) * 110}px, ${H * 0.3 - 450 + Math.sin(T * 0.6) * 90}px)`;
+  const cp = K.p(T, 0.1, 0.6, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear));
+  chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`;
+  chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  C.forEach(({ c, a, b }) => {
+    const o = b >= END ? 0 : K.p(T, b - 0.2, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.06, a + 0.5 + j * 0.06, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+      w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+    });
+    vis(c.el, T >= a - 0.05 && T < b + 0.02);
+  });
+
+  // ---------- product: hero, then down onto the plinth ----------
+  const pin = K.p(T, 0.0, 0.9, E.outExpo);
+  const mv = K.p(T, S_EXP - 0.1, S_EXP + 0.55, E.inOutCubic);
+  const pw = K.lerp(L.heroW, L.prodW, mv), pcy = K.lerp(L.heroCy, L.prodCy, mv);
+  // each lift-off gives the product a small kick
+  const kick = T_PART.reduce((a, t0) => a + Math.sin(K.clamp((T - t0) / 0.35) * Math.PI) * 14, 0);
+  const bob = Math.sin(T * 1.4) * 7;
+  prod.style.width = pw + 'px';
+  prod.style.left = W / 2 - pw / 2 + 'px'; prod.style.top = pcy - ph(pw) / 2 + 'px';
+  prod.style.opacity = Math.min(1, pin * 2);
+  prod.style.transform = `perspective(1600px) translateY(${(1 - pin) * 160 + bob + kick}px) rotateY(${(1 - pin) * -10 + Math.sin(T * 0.5) * 6}deg) rotate(${-2 + Math.sin(T * 0.7) * 1}deg) scale(${1 + 0.012 * T * (1 - mv)})`;
+  shadow.style.width = pw * 0.8 + 'px'; shadow.style.left = W / 2 - pw * 0.4 + 'px'; shadow.style.top = pcy + ph(pw) * 0.44 + 'px';
+  shadow.style.opacity = pin * (0.9 - bob / 40);
+  plinth.style.left = W / 2 - 320 + 'px'; plinth.style.top = L.prodCy + ph(L.prodW) * 0.32 + 'px';
+  plinth.style.opacity = mv * (0.8 + 0.2 * Math.sin(T * 2));
+  cTag.style.opacity = K.p(T, 0.8, 1.1, E.linear);
+  iTag.style.opacity = K.p(T, T_PART[0] + 0.2, T_PART[0] + 0.5, E.linear);
+
+  // ---------- parts: lift off, land in their slot, settle; the whole kit turns in depth ----------
+  const top = [W / 2, L.prodCy - ph(L.prodW) * 0.42];
+  const orbit = Math.sin((T - 11) * 0.6) * K.p(T, 11.2, 12.2, E.inOutCubic);
+  parts.forEach((pt, i) => {
+    const t0 = T_PART[i];
+    const p = K.p(T, t0, t0 + 0.75, E.outExpo);
+    const [sx, sy] = slot(i);
+    const fromX = top[0] - L.pw / 2, fromY = top[1] - L.ph / 2;
+    const x = K.lerp(fromX, sx, p), y = K.lerp(fromY, sy, p) - Math.sin(p * Math.PI) * 60;
+    const side = i % 2 ? 1 : -1;
+    const depth = Math.floor(i / 2) ? 1 : -1;
+    pt.el.style.left = x + 'px'; pt.el.style.top = y + 'px';
+    pt.el.style.opacity = Math.min(1, p * 2.5);
+    const focus = K.p(T, t0 + 0.2, t0 + 0.6, E.outBack) * (1 - K.p(T, (T_PART[i + 1] ?? 11.2) - 0.1, (T_PART[i + 1] ?? 11.2) + 0.3, E.inOutCubic));
+    pt.el.style.transform = `perspective(1600px) translateY(${Math.sin(T * 1.1 + i * 1.7) * 5}px) rotateY(${(1 - p) * side * -10 + orbit * side * 3}deg) rotateX(${(1 - p) * 8 + orbit * depth * 2}deg) scale(${0.35 + 0.65 * p + focus * 0.03})`;
+    pt.el.style.zIndex = 30 + (T >= t0 && T < (T_PART[i + 1] ?? 99) ? 5 : 0);
+    pt.ring.style.opacity = focus;
+    vis(pt.el, T >= t0);
+    // dotted leader from the product's top to the card's bottom centre
+    const ex = sx + L.pw / 2, ey = sy + L.ph;
+    const lp = K.p(T, t0 + 0.3, t0 + 0.9, E.outCubic);
+    const cx = (top[0] + ex) / 2, cy = Math.max(top[1], ey) + 40;
+    pt.line.setAttribute('d', `M ${top[0]} ${top[1]} Q ${cx} ${cy} ${ex} ${ey}`);
+    const len = 900;
+    pt.line.setAttribute('stroke-dasharray', `2 10`);
+    pt.line.style.opacity = lp * 0.75;
+    pt.line.style.strokeDashoffset = (1 - lp) * len;
+    pt.dot.setAttribute('cx', ex); pt.dot.setAttribute('cy', ey);
+    pt.dot.style.opacity = lp;
+    // inner motion per part
+    if (i === 0) pt.sheets.forEach((s, j) => { const q = K.p(T, t0 + 0.35 + j * 0.1, t0 + 0.8 + j * 0.1, E.outBack); s.style.transform = `translateY(${(1 - q) * 60}px) rotate(${(j - 1) * 6 * q + Math.sin(T + j) * 1}deg)`; });
+    if (i === 1) pt.tags.forEach((s, j) => { const q = K.p(T, 6.3 + j * 0.25, 6.7 + j * 0.25, E.outBack); s.style.transform = `scale(${q})`; s.style.opacity = Math.min(1, q * 2); });
+    if (i === 2) pt.ims.forEach((s, j) => { const q = K.p(T, t0 + 0.3 + j * 0.12, t0 + 0.75 + j * 0.12, E.outBack); s.style.transform = `translateY(${(1 - q) * 50}px) scale(${0.8 + 0.2 * q})`; s.style.opacity = Math.min(1, q * 2); });
+    if (i === 3) {
+      const vt = K.clamp((T - 10.0) / 6);
+      pt.kb.style.transform = `translateY(${-vt * 8}%) scale(${1 + vt * 0.18})`;
+      pt.bar.style.width = vt * 100 + '%';
+      pt.pl.style.opacity = 1 - K.p(T, 10.0, 10.2, E.linear);
+      pt.pl.style.transform = `scale(${T >= 10.0 && T < 10.12 ? 0.86 : 1})`;
+    }
+  });
+
+  end(T);
+});
+</script></body></html>

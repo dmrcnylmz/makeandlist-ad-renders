@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I08 · Physical Products</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #FAF7EE; }
+/* R09 series chip (the R08 .fchip style) — identical in I01–I16 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.blob { position: absolute; border-radius: 50%; pointer-events: none; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; background: linear-gradient(transparent 62%, #DFFF5A 62%, #DFFF5A 92%, transparent 92%); padding: 0 .06em; }
+.w { display: inline-block; white-space: pre; }
+.photo { position: absolute; z-index: 30; border-radius: 28px; overflow: hidden; box-shadow: 0 60px 110px -50px rgba(31,31,31,.75), 0 0 0 1px #E2DBCE; }
+.photo > img { position: absolute; left: 0; top: 0; display: block; transform-origin: 50% 30%; }
+.photo .spot { position: absolute; inset: 0; pointer-events: none; }
+.photo .rg { position: absolute; border-radius: 50%; border: 5px solid #DFFF5A; box-shadow: 0 0 0 3px rgba(31,31,31,.35); pointer-events: none; }
+.pl { position: absolute; z-index: 36; white-space: nowrap; padding: 10px 24px; border-radius: 99px; background: #1F1F1F; color: #FAF7EE; font: 700 40px 'Archivo'; box-shadow: 0 20px 34px -18px rgba(31,31,31,.8); }
+.pl b { color: #DFFF5A; font: 600 26px 'IBM Plex Mono', monospace; margin-right: 10px; vertical-align: 4px; }
+.tt { position: absolute; z-index: 25; }
+.tt img { width: 100%; display: block; }
+.disc { position: absolute; z-index: 20; border-radius: 50%; background: radial-gradient(closest-side, rgba(223,255,90,.6), rgba(223,255,90,.18) 70%, rgba(223,255,90,0)); }
+.disc2 { position: absolute; z-index: 21; border-radius: 50%; border: 3px dashed rgba(31,31,31,.22); }
+.nm { position: absolute; z-index: 40; white-space: nowrap; padding: 12px 30px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font: 800 52px 'Archivo'; box-shadow: 0 0 0 3px #1F1F1F; }
+.flow { position: absolute; z-index: 35; border-radius: 28px; background: #FFFDF8; padding: 14px 34px; box-shadow: 0 60px 110px -50px rgba(31,31,31,.7), 0 0 0 1px #E2DBCE; }
+.flow .r { display: flex; align-items: center; gap: 24px; padding: 22px 0; border-bottom: 2px solid #EFEADF; font: 700 42px/1.12 'Archivo'; color: #1F1F1F; }
+.flow .r:last-child { border-bottom: 0; }
+.flow .r i { flex: none; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; background: #EFEADF; font-style: normal; }
+.flow .r i svg { opacity: 0; }
+.flow .r.on i { background: #1F1F1F; }
+.flow .r.on i svg { opacity: 1; }
+.flow .r small { display: block; margin-top: 4px; font: 500 28px 'Archivo'; color: #6B645A; }
+.pay { position: absolute; z-index: 35; border-radius: 28px; background: #FFFDF8; padding: 30px 34px; box-shadow: 0 60px 110px -50px rgba(31,31,31,.7), 0 0 0 1px #E2DBCE; }
+.pay h4 { margin: 0 0 18px; font: 600 26px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #6B645A; }
+.pay .r { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 24px; margin-top: 14px; border-radius: 20px; background: #F4F1EA; }
+.pay .r b { font: 700 40px 'Archivo'; color: #1F1F1F; white-space: nowrap; }
+.pay .r span { padding: 10px 20px; border-radius: 99px; font: 700 32px 'Archivo'; white-space: nowrap; }
+.pay .r .y { background: #DFFF5A; color: #1F1F1F; box-shadow: 0 0 0 3px #1F1F1F; }
+.pay .r .n { border: 3px dashed #8A8378; color: #45403A; }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I08 — What you get 3/3: physical products, printed per order. One lemon design on a tee, a mug, a tote and a poster
+// (p10) — a spotlight walks from product to product as Marian names them; the photo lifts away and six cut-outs ride a
+// turntable (tee, mug, tote, canvas, cushion, phone case), the front one named as it comes round. The turntable keeps
+// turning below while two redrawn cards say how it works: printed per order by your own partner after your yes, no
+// stock; printing is paid from your partner account, not from Credits.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, END = DUR - 2, E = K.ease;
+const BPM = 99.4;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// Voice (Marian), speech windows measured from the takes (vo.mjs + an RMS pass):
+//   L1 0.75–4.93 ("…become a tee," ends 2.59 · "a mug," 2.86 · "a tote" 3.61 · "and a poster" 4.34)
+//   L2 "Canvas," 5.17–5.68 · "cushions and phone cases too." 6.19–8.07 (cushions ≈ 6.2 · phone cases ≈ 7.2)
+//   L3 "Each order is printed by your own partner," 8.64–10.61 · "after your yes." 10.78–11.49 · "No stock." 11.93–12.29
+//   L4 13.22–15.17
+const T_SPOT = [2.15, 2.86, 3.61, 4.34];            // tee, mug, tote, poster
+const S_B = 4.95, S_C = 8.35, S_D = 12.55;
+const T_ROW = [8.65, 9.75, 10.8, 11.93];            // flow rows tick as she says them
+
+// p10 product centres and spot radii (natural px of the 1024×1536 image)
+const SPOT = [[365, 375, 300], [800, 440, 175], [290, 1010, 330], [800, 1030, 300]];
+const PILLS = [[110, 140, 'Tee'], [610, 255, 'Mug'], [60, 700, 'Tote'], [610, 720, 'Poster']];
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 372, capFs: 88, phX: 90, phY: 580, phW: 900, phH: 1110, phOff: 40, pTag: [65, 1212],
+      ttCy: 1150, ttRx: 300, ttRy: 150, ttS: 1.32, ttH: 400, nmY: 590, ttCy2: 1430, ttS2: 0.86,
+      flowY: 600, payY: 760, iTag: [65, 1586] }
+  : { chip: [60, 56], capX: 60, capY: 136, capFs: 76, phX: 140, phY: 250, phW: 800, phH: 990, phOff: 70, pTag: [60, 1290],
+      ttCy: 840, ttRx: 300, ttRy: 110, ttS: 1.1, ttH: 380, nmY: 240, ttCy2: 1200, ttS2: 0.64,
+      flowY: 250, payY: 300, iTag: [60, 1290] };
+
+// ---------- ambient ----------
+const blobA = K.box(0, 0, 1000, 1000, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(223,255,90,.22), rgba(223,255,90,0) 62%)' } });
+const blobB = K.box(0, 0, 900, 900, { cls: 'blob', style: { background: 'radial-gradient(circle, rgba(232,96,60,.10), rgba(232,96,60,0) 62%)' } });
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', html: '<b>WHAT YOU GET</b><i>·</i><span>3/3</span>', style: { width: 'auto', height: '56px' } });
+
+function capEm(parts) {
+  const el = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' } });
+  el.innerHTML = parts.map(([t, em]) => (t === '<br>' ? '<br>' : t.split(' ').map((w) => (em ? `<span class="w"><em>${w}</em> </span>` : `<span class="w">${w} </span>`)).join(''))).join('');
+  return { el, ws: [...el.querySelectorAll('.w')] };
+}
+const BR = tall ? [['<br>']] : [];
+const C = [
+  { c: capEm([['One design.', 0], ...BR, ['Four products.', 1]]), a: 0.45, b: S_B },
+  { c: capEm([['Canvas, cushions,', 0], ...BR, ['phone cases.', 1]]), a: 5.05, b: S_C },
+  { c: capEm([['Printed', 0], ['per order.', 1]]), a: 8.5, b: S_D },
+  { c: capEm([['Paid from', 0], ...BR, ['your partner account.', 1]]), a: 12.95, b: END },
+];
+if (!tall) { C[1].c.el.style.fontSize = '62px'; C[3].c.el.style.fontSize = '64px'; }
+
+// ---------- A: one design, four products (p10) ----------
+const k = L.phW / 1024;
+const photo = K.box(L.phX, L.phY, L.phW, L.phH, { cls: 'photo', html: `<img src="${K.pub('r09/p10-one-design.webp')}" style="width:${L.phW}px;top:${-L.phOff}px"><div class="spot"></div><div class="rg"></div>` });
+const pImg = photo.querySelector('img'), spot = photo.querySelector('.spot'), ring = photo.querySelector('.rg');
+const toCard = ([x, y]) => [x * k, y * k - L.phOff];
+const pills = PILLS.map(([x, y, n], i) => K.box(0, 0, null, null, { cls: 'pl', html: `<b>0${i + 1}</b>${n}`, style: { width: 'auto', height: 'auto' } }));
+const pTag = K.demoTag('Concept image · AI-generated', L.pTag[0], L.pTag[1]);
+
+// ---------- B: the turntable ----------
+const TT = [
+  { n: 'Tee', src: 'r07/k03-tee.webp', h: 330, ar: 977 / 901 },
+  { n: 'Mug', src: 'r07/k01-mug.webp', h: 290, ar: 852 / 804 },
+  { n: 'Tote', src: 'r07/k05-tote.webp', h: 420, ar: 595 / 961 },
+  { n: 'Canvas', src: 'r09/k15-canvas.webp', h: 380, ar: 665 / 882 },
+  { n: 'Cushion', src: 'r09/k16-cushion.webp', h: 360, ar: 819 / 883 },
+  { n: 'Phone case', src: 'r09/k17-phone-case.webp', h: 400, ar: 412 / 928 },
+];
+const disc = K.box(0, 0, 10, 10, { cls: 'disc' });
+const disc2 = K.box(0, 0, 10, 10, { cls: 'disc2' });
+const tts = TT.map((t) => K.box(0, 0, t.h * t.ar, t.h, { cls: 'tt', html: `<img src="${K.pub(t.src)}">` }));
+const nms = TT.map((t) => K.box(0, L.nmY, null, null, { cls: 'nm', html: t.n, style: { width: 'auto', height: 'auto' } }));
+const kTag = K.demoTag('Concept products · AI-generated', 0, 0);
+
+// ---------- C: printed per order ----------
+const TICK = '<svg width="34" height="34" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#DFFF5A" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ROWS = [['Printed per order', 'only when someone buys'], ['By your own print partner', 'your partner account'], ['After your yes', 'each order waits for you'], ['No stock to hold', 'no warehouse, no boxes']];
+const flow = K.box(L.capX, L.flowY, W - 2 * L.capX, null, { cls: 'flow', html: ROWS.map(([a, b]) => `<div class="r"><i>${TICK}</i><div>${a}<small>${b}</small></div></div>`).join('') });
+const fRows = [...flow.querySelectorAll('.r')];
+const iTag = K.demoTag('Illustration', L.iTag[0], L.iTag[1]);
+
+// ---------- D: who pays for printing ----------
+const pay = K.box(L.capX, L.payY, W - 2 * L.capX, null, { cls: 'pay', html: '<h4>Who pays for printing?</h4>' +
+  '<div class="r r0"><b>Print + shipping</b><span class="y">Your partner account</span></div>' +
+  '<div class="r r1"><b>Credits</b><span class="n">Not used for prints</span></div>' });
+const payRows = [pay.querySelector('.r0'), pay.querySelector('.r1')];
+
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'Next: the stores it works with →' });
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+
+// turntable angle: plateaus with canvas, cushion, phone case in front as she names them, then a slow spin
+const ANG = [[4.95, -110], [5.3, -180], [5.85, -180], [6.2, -240], [6.85, -240], [7.2, -300], [8.2, -300]];
+const angAt = (t) => (t <= 8.2 ? K.k(t, ANG, E.inOutCubic) : -300 - (t - 8.2) * 24);
+
+K.run({
+  id: 'I08', title: 'Physical Products', dur: DUR, bpm: BPM, music: 'ov-good-morning-heaven', mood: 'bright', key: 'G', intro: 0, cover: 6.2,
+  series: 'R09', highlight: 'WHAT YOU GET · 3/3',
+  technique: 'A spotlight walks across one lemon design on a tee, mug, tote and poster as the narrator names them; the photo lifts away and six cut-outs ride a 3D turntable, the front one named as it comes round; the turntable keeps turning in the lower band while redrawn cards tick how printing works (per order, your partner, after your yes, no stock) and who pays (your partner account, not Credits)',
+  caption: 'Physical products without stock: one design on tees, mugs, totes, posters, canvas, cushions and phone cases. Each order is printed by your own print partner after your yes, and printing is paid from your partner account. Start free at makeandlist.com',
+  short: 'Printed per order. No stock.',
+  vo: [[0.2, 'One design can become a tee, a mug, a tote and a poster.'], [5.1, 'Canvas, cushions and phone cases too.'], [8.3, 'Each order is printed by your own partner, after your yes. No stock.'], [12.4, 'Printing is paid from your partner account.']],
+  beats: ['0–5 s: “One design. Four products.” — a spotlight walks the lemon design on a tee, mug, tote and poster (concept image)', '5–8.4 s: six cut-outs on a turntable; canvas, cushion and phone case come round to the front as she names them', '8.4–12.6 s: “Printed per order.” — per order, by your own print partner, after your yes, no stock to hold', '12.6–16 s: “Paid from your partner account.” — print and shipping on your partner account; Credits are not used for prints', '16–18 s: end card — Next: the stores it works with'],
+  cues: [[0.15, 'pop'], [T_SPOT[0], 'pop'], [T_SPOT[1], 'pop'], [T_SPOT[2], 'pop'], [T_SPOT[3], 'pop'], [S_B - 0.05, 'swish'], [5.3, 'click'], [6.2, 'click'], [7.2, 'click'],
+    [S_C - 0.05, 'swish'], [T_ROW[0], 'ding'], [T_ROW[1], 'ding'], [T_ROW[2], 'ding'], [T_ROW[3], 'ding'], [S_D - 0.05, 'swish'], [13.3, 'pop'], [14.3, 'pop'], [END, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  blobA.style.transform = `translate(${W * 0.6 - 500 + Math.sin(T * 0.5) * 150}px, ${H * 0.55 - 500 + Math.cos(T * 0.4) * 120}px)`;
+  blobB.style.transform = `translate(${W * 0.15 - 450 + Math.cos(T * 0.45) * 110}px, ${H * 0.3 - 450 + Math.sin(T * 0.6) * 90}px)`;
+  const cp = K.p(T, 0.1, 0.6, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear));
+  chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`;
+  chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+
+  C.forEach(({ c, a, b }) => {
+    const o = b >= END ? 0 : K.p(T, b - 0.2, b, E.inCubic);
+    c.ws.forEach((w, j) => {
+      const p = K.p(T, a + j * 0.06, a + 0.5 + j * 0.06, E.outExpo);
+      w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+      w.style.transform = `translateY(${(1 - p) * 50 - o * 30}px)`;
+      w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+    });
+    vis(c.el, T >= a - 0.05 && T < b + 0.02);
+  });
+
+  // ---------- A ----------
+  const aIn = K.p(T, 0.2, 1.1, E.outExpo), aOut = K.p(T, S_B - 0.35, S_B + 0.05, E.inCubic);
+  const onA = T < S_B + 0.06;
+  const settle = K.p(T, 0.2, 1.9, E.outCubic);
+  photo.style.opacity = Math.min(1, aIn * 2) * (1 - aOut);
+  photo.style.transform = `perspective(1600px) translateY(${(1 - aIn) * 260 - aOut * 160}px) rotateX(${(1 - settle) * 9}deg) rotateY(${(1 - settle) * 7 + Math.sin(T * 0.6) * 1}deg) scale(${0.94 + 0.06 * aIn - aOut * 0.1})`;
+  pImg.style.transform = `scale(${1 + 0.02 * T})`;
+  vis(photo, onA);
+  // the spotlight glides from product to product; before the first it is off
+  let si = 0; for (let i = 0; i < 4; i++) if (T >= T_SPOT[i] - 0.25) si = i;
+  const prev = SPOT[Math.max(0, si - 1)], cur = SPOT[si];
+  const mv = si === 0 ? 1 : K.p(T, T_SPOT[si] - 0.25, T_SPOT[si] + 0.1, E.inOutCubic);
+  const sx = K.lerp(prev[0], cur[0], mv), sy = K.lerp(prev[1], cur[1], mv), sr = K.lerp(prev[2], cur[2], mv);
+  const [cx, cy] = toCard([sx, sy]), r = sr * k;
+  const son = K.p(T, T_SPOT[0] - 0.3, T_SPOT[0], E.outCubic);
+  spot.style.background = `radial-gradient(circle at ${cx}px ${cy}px, rgba(31,31,31,0) ${r}px, rgba(31,31,31,.55) ${r + 50}px)`;
+  spot.style.opacity = son;
+  ring.style.left = cx - r + 'px'; ring.style.top = cy - r + 'px'; ring.style.width = 2 * r + 'px'; ring.style.height = 2 * r + 'px';
+  ring.style.opacity = son * (0.6 + 0.4 * Math.sin(T * 6));
+  pills.forEach((pl, i) => {
+    const [px, py] = toCard(PILLS[i]);
+    const p = K.p(T, T_SPOT[i], T_SPOT[i] + 0.35, E.outBack);
+    pl.style.left = L.phX + px + 'px'; pl.style.top = L.phY + py + 'px';
+    pl.style.opacity = Math.min(1, p * 2) * (1 - aOut);
+    pl.style.transform = `translateY(${(1 - p) * 26 - aOut * 120}px) scale(${0.75 + 0.25 * p})`;
+    vis(pl, onA && T >= T_SPOT[i]);
+  });
+  pTag.style.opacity = K.p(T, 0.8, 1.1, E.linear) * (1 - aOut); vis(pTag, onA);
+
+  // ---------- B → C/D: the turntable ----------
+  const bIn = K.p(T, S_B - 0.1, S_B + 0.6, E.outExpo);
+  const down = K.p(T, S_C - 0.2, S_C + 0.6, E.inOutCubic);
+  const onB = T >= S_B - 0.1;
+  const tcy = K.lerp(L.ttCy, L.ttCy2, down), ts = K.lerp(L.ttS, L.ttS2, down);
+  const ang = angAt(T);
+  disc.style.width = (L.ttRx * 2 + 300) * ts + 'px'; disc.style.height = (L.ttRy * 2 + 120) * ts + 'px';
+  disc.style.left = W / 2 - (L.ttRx + 150) * ts + 'px'; disc.style.top = tcy - (L.ttRy + 60) * ts + 'px';
+  disc2.style.width = L.ttRx * 2 * ts + 'px'; disc2.style.height = L.ttRy * 2 * ts + 'px';
+  disc2.style.left = W / 2 - L.ttRx * ts + 'px'; disc2.style.top = tcy - L.ttRy * ts + 'px';
+  disc2.style.transform = `rotate(${ang * 0.05}deg)`;
+  [disc, disc2].forEach((d) => { d.style.opacity = bIn; vis(d, onB); });
+  let front = 0, fd = -2;
+  tts.forEach((el, i) => {
+    const a = (ang + i * 60) * Math.PI / 180;
+    const depth = Math.cos(a);                    // 1 = front
+    const sc = (0.5 + 0.5 * (depth + 1) / 2) * ts;
+    const x = W / 2 + Math.sin(a) * L.ttRx * ts, y = tcy + depth * L.ttRy * ts;
+    const t = TT[i];
+    const w = t.h * t.ar;
+    const rise = K.p(T, S_B + i * 0.05, S_B + 0.6 + i * 0.05, E.outBack);
+    el.style.left = x - w / 2 + 'px'; el.style.top = y - t.h * 0.9 + 'px';
+    el.style.transform = `translateY(${(1 - rise) * 200 + Math.sin(T * 1.5 + i) * 4 * ts}px) scale(${sc * (0.6 + 0.4 * rise)})`;
+    el.style.transformOrigin = '50% 90%';
+    el.style.opacity = Math.min(1, rise * 2) * (0.55 + 0.45 * (depth + 1) / 2);
+    el.style.zIndex = String(25 + Math.round((depth + 1) * 10));
+    el.style.filter = depth < 0 ? `blur(${-depth * 2}px)` : 'none';
+    vis(el, onB);
+    if (depth > fd) { fd = depth; front = i; }
+  });
+  nms.forEach((n, i) => {
+    const show = i === front && fd > 0.94 && T >= S_B + 0.3 && T < S_C - 0.1;
+    n.style.left = W / 2 - n.offsetWidth / 2 + 'px';
+    n.style.opacity = show ? 1 : 0;
+    n.style.transform = `scale(${show ? 1 : 0.8})`;
+  });
+  kTag.style.left = (tall ? 65 : 60) + 'px'; kTag.style.top = (tall ? 1212 : 1290) + 'px';
+  kTag.style.opacity = bIn * (1 - down); vis(kTag, onB && T < S_C + 0.6);
+
+  // ---------- C ----------
+  const cIn = K.p(T, S_C - 0.05, S_C + 0.55, E.outExpo), cOut = K.p(T, S_D - 0.3, S_D, E.inCubic);
+  const onC = T >= S_C - 0.08 && T < S_D + 0.02;
+  flow.style.opacity = Math.min(1, cIn * 2) * (1 - cOut);
+  flow.style.transform = `perspective(1600px) translateY(${(1 - cIn) * 200 + Math.sin(T * 1.1) * 5 - cOut * 60}px) rotateX(${(1 - cIn) * 10}deg)`;
+  vis(flow, onC);
+  fRows.forEach((r, i) => {
+    const on = T >= T_ROW[i];
+    r.className = 'r' + (on ? ' on' : '');
+    const p = K.p(T, T_ROW[i], T_ROW[i] + 0.35, E.outBack);
+    r.querySelector('i').style.transform = `scale(${on ? 0.8 + 0.2 * p : 1})`;
+    r.style.opacity = 0.42 + 0.58 * K.p(T, T_ROW[i] - 0.1, T_ROW[i] + 0.2, E.linear);
+  });
+  iTag.style.opacity = Math.max(cIn * (1 - cOut), K.p(T, S_D, S_D + 0.4, E.linear)); vis(iTag, T >= S_C);
+
+  // ---------- D ----------
+  const dIn = K.p(T, S_D - 0.05, S_D + 0.55, E.outExpo);
+  pay.style.opacity = Math.min(1, dIn * 2);
+  pay.style.transform = `perspective(1600px) translateY(${(1 - dIn) * 200 + Math.sin(T * 1.1) * 5}px) rotateX(${(1 - dIn) * 10}deg)`;
+  vis(pay, T >= S_D - 0.08);
+  [13.3, 14.3].forEach((t0, i) => {
+    const p = K.p(T, t0, t0 + 0.4, E.outBack);
+    payRows[i].style.opacity = Math.min(1, p * 2);
+    payRows[i].style.transform = `translateX(${(1 - p) * 60}px)`;
+  });
+
+  end(T);
+});
+</script></body></html>

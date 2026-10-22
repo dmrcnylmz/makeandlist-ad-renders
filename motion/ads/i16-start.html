@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>I16 · Start</title><link rel="stylesheet" href="kit.css">
+<style>
+#stage { background: #F5F0E6; }
+.bg { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 40%, #FCF9F2 0%, #F2ECE0 64%, #E6DDCD 100%); }
+.wash { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(60px); }
+/* R09 series chip — the R08 .fchip, identical in I01–I16 */
+.fchip { position: absolute; z-index: 80; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 24px 0 10px; border-radius: 99px;
+  background: #1F1F1F; color: #FAF7EE; font: 600 22px 'IBM Plex Mono', monospace; letter-spacing: .04em; white-space: nowrap; box-shadow: 0 16px 30px -18px rgba(31,31,31,.7); }
+.fchip b { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 99px; background: #DFFF5A; color: #1F1F1F; font-weight: 600; }
+.fchip i { font-style: normal; color: #8A8378; }
+.fchip span { font: 700 25px 'Archivo'; letter-spacing: 0; }
+.cap { position: absolute; z-index: 40; font: 800 84px/1.0 'Playfair Display'; letter-spacing: -0.03em; color: #1F1F1F; }
+.cap em { font-style: italic; font-weight: 700; background: linear-gradient(transparent 60%, #DFFF5A 60%, #DFFF5A 92%, transparent 92%); padding: 0 .04em; }
+.w { display: inline-block; white-space: pre; }
+.step { position: absolute; z-index: 30; border-radius: 28px; background: #FFFDF8; overflow: hidden; transform-origin: 50% 0;
+  box-shadow: 0 0 0 2px #E2DBCE; }
+.step.open { box-shadow: 0 60px 110px -50px rgba(31,31,31,.6), 0 16px 34px -22px rgba(31,31,31,.35), 0 0 0 3px #1F1F1F; }
+.step .hd { display: flex; align-items: center; gap: 22px; height: 84px; padding: 0 26px; }
+.step .num { flex: none; width: 60px; height: 60px; border-radius: 50%; background: #E7E1D5; color: #6B645A; display: flex; align-items: center; justify-content: center; font: 800 34px 'Archivo'; }
+.step.open .num, .step.done .num { background: #DFFF5A; color: #1F1F1F; box-shadow: 0 0 0 3px #1F1F1F; }
+.step .ti { flex: 1; font: 800 44px 'Archivo'; letter-spacing: -0.01em; color: #8A8378; white-space: nowrap; }
+.step.open .ti, .step.done .ti { color: #1F1F1F; }
+.step .ok { flex: none; width: 52px; height: 52px; border-radius: 50%; background: #1F1F1F; display: flex; align-items: center; justify-content: center; }
+.step .bd { position: absolute; left: 34px; right: 34px; top: 104px; }
+.acc { display: flex; align-items: center; gap: 22px; padding: 22px 26px; border-radius: 22px; background: #F2ECE0; }
+.acc i { flex: none; width: 64px; height: 64px; border-radius: 50%; background: #1F1F1F; display: flex; align-items: center; justify-content: center; }
+.acc b { display: block; font: 800 40px 'Archivo'; color: #1F1F1F; }
+.acc span { display: block; margin-top: 4px; font: 500 32px 'Archivo'; color: #45403A; }
+.big-btn { margin-top: 26px; height: 104px; border-radius: 26px; background: #DFFF5A; color: #1F1F1F; display: flex; align-items: center; justify-content: center; font: 800 46px 'Archivo'; box-shadow: inset 0 0 0 3px #1F1F1F; }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.lt { position: relative; height: 104px; border-radius: 20px; background: #FFFDF8; box-shadow: 0 0 0 2px #D9D3C9; display: flex; align-items: center; justify-content: center; gap: 12px; }
+.lt.dark { background: #1F1F1F; box-shadow: none; }
+.lt img { display: block; }
+.lt .gn { font: 800 36px 'Archivo'; color: #1F1F1F; }
+.lt .more { font: 800 36px 'Archivo'; color: #45403A; }
+.lt .ck { position: absolute; right: -10px; top: -10px; width: 44px; height: 44px; border-radius: 50%; background: #DFFF5A; box-shadow: 0 0 0 3px #1F1F1F; display: flex; align-items: center; justify-content: center; }
+.legal { margin-top: 14px; font: 500 20px/1.3 'IBM Plex Mono', monospace; color: #6B645A; }
+.idea { border-radius: 22px; background: #FFFDF8; box-shadow: inset 0 0 0 3px #1F1F1F; padding: 22px 26px; min-height: 170px; }
+.idea small { display: block; font: 600 28px 'Archivo'; color: #6B645A; }
+.idea .tx { margin-top: 8px; font: 600 40px/1.25 'Archivo'; color: #1F1F1F; }
+.idea .car { display: inline-block; width: 4px; height: 44px; margin-left: 3px; vertical-align: -8px; background: #1F1F1F; }
+.row3 { display: flex; align-items: center; gap: 22px; margin-top: 20px; }
+.plan { flex: none; height: 92px; padding: 0 40px; border-radius: 24px; background: #DFFF5A; display: flex; align-items: center; font: 800 42px 'Archivo'; color: #1F1F1F; box-shadow: inset 0 0 0 3px #1F1F1F; }
+.row3 span { font: 500 30px/1.25 'Archivo'; color: #45403A; }
+.finger { position: absolute; z-index: 60; width: 86px; height: 86px; margin: -43px 0 0 -43px; border-radius: 50%; background: rgba(31,31,31,.28); box-shadow: 0 0 0 3px rgba(255,253,248,.9), 0 12px 24px -8px rgba(31,31,31,.5); }
+.ring { position: absolute; z-index: 59; width: 160px; height: 160px; margin: -80px 0 0 -80px; border-radius: 50%; border: 6px solid #1F1F1F; }
+.prod { position: absolute; z-index: 92; }
+.prod img { width: 100%; display: block; filter: drop-shadow(0 30px 26px rgba(31,31,31,.3)); }
+.halo { position: absolute; z-index: 0; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, rgba(223,255,90,.55), rgba(223,255,90,0) 65%); }
+/* 9:16 (Stories): bigger steps over y 300–1560, a soft photo band below */
+.T9 .step .hd { height: 130px; padding: 0 34px; gap: 26px; }
+.T9 .step .num { width: 80px; height: 80px; font-size: 44px; }
+.T9 .step .ti { font-size: 50px; }
+.T9 .step .ok { width: 68px; height: 68px; }
+.T9 .step .ok svg { width: 40px; height: 40px; }
+.T9 .step .bd { top: 150px; left: 36px; right: 36px; }
+.T9 .acc { padding: 26px 30px; }
+.T9 .acc i { width: 80px; height: 80px; }
+.T9 .acc b { font-size: 48px; }
+.T9 .acc span { font-size: 38px; }
+.T9 .big-btn { height: 120px; font-size: 54px; margin-top: 30px; }
+.T9 .tiles { gap: 16px; }
+.T9 .lt { height: 124px; }
+.T9 .lt .gn { font-size: 37px; }
+.T9 .lt .more { font-size: 42px; }
+.T9 .lt .ck { width: 54px; height: 54px; }
+.T9 .legal { font-size: 22px; }
+.T9 .idea { padding: 26px 30px; }
+.T9 .idea small { font-size: 34px; }
+.T9 .idea .tx { font-size: 46px; }
+.T9 .idea .car { height: 52px; }
+.T9 .plan { height: 112px; font-size: 50px; padding: 0 48px; }
+.T9 .row3 span { font-size: 34px; }
+.band { position: absolute; left: 0; right: 0; overflow: hidden; z-index: 1; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 40%); mask-image: linear-gradient(180deg, transparent 0%, #000 40%); }
+.band img { position: absolute; left: 0; width: 100%; display: block; }
+.gr { position: absolute; inset: -60px; pointer-events: none; z-index: 95; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+</style></head>
+<body><div id="stage"></div>
+<script src="kit.js"></script>
+<script>
+// I16 — Start (START · 1/1), the last highlight. The app's real "Your setup" checklist (44-start: Create your account ·
+// Connect your store · Make your first product) redrawn large as a three-step accordion. Each step opens as the narrator
+// names it and a fingertip completes it: "Start free" → the account is made; a few of the 10 store tiles (real, unfiltered
+// logos; Wix on a dark tile) → WooCommerce connected; the real composer's sentence types itself into "Describe your idea"
+// → "Plan it", with the real line "Nothing is made or charged until you approve a quote." Each finished step folds into a
+// ticked row. The end card is the most inviting of the series: a lime halo and concept products floating round the logo.
+const W = K.W, H = K.H, tall = K.F === '9x16', DUR = 18, E = K.ease;
+const BPM = 99.4;
+const seed = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// speech ≈ 0.39–1.82 · 2.64–3.05 | 3.78–4.54 · 4.99–5.28 | 5.65–6.46 · 7.42–7.71 | 8.14–10.19 · 10.97–13.45 · 15.84–17.76
+const VO = [[0.0, 'Starting takes three steps.'], [2.0, 'One: sign up free.'], [4.5, 'Two: connect your store.'],
+  [7.0, 'Three: describe your first product in a sentence.'], [10.55, 'You’ll see the quote before anything is made.'], [15.65, 'Start free at makeandlist.com.']];
+const OPEN = [2.55, 4.9, 7.35];    // step i opens (on its number)
+const DONE = [4.3, 6.55, 13.6];    // step i completes (your tap)
+const END = DUR - 2;
+const SENT = 'A 30-page ocean colouring book for 6\u2060–\u20608 year olds'; // word joiners keep 6–8 together
+const TYPE = [8.1, 10.1];          // the sentence types itself
+
+const L = tall
+  ? { chip: [65, 290], capX: 65, capY: 380, capFs: 84, acc: [65, 620, 950], closed: 130, gap: 16, open: [490, 545, 530], band: 1120,
+      prods: [[40, 420, 210, 'r07/k01-mug.webp', -8], [835, 500, 215, 'r09/k18-planner-stack.webp', 7], [40, 1030, 175, 'r07/k08-greeting-card.webp', -5], [870, 1020, 175, 'r07/k05-tote.webp', 6]], ptag: [345, 1212] }
+  : { chip: [60, 56], capX: 60, capY: 124, capFs: 72, acc: [140, 370, 800], closed: 84, gap: 14, open: [430, 440, 450],
+      prods: [[30, 380, 200, 'r07/k01-mug.webp', -8], [850, 420, 200, 'r09/k18-planner-stack.webp', 7], [40, 1020, 165, 'r07/k08-greeting-card.webp', -5], [875, 1010, 165, 'r07/k05-tote.webp', 6]], ptag: [345, 1250] };
+
+if (tall) document.getElementById('stage').classList.add('T9');
+K.box(0, 0, W, H, { cls: 'bg' });
+// 9:16: the evening kitchen table (p04), softly faded in from the top, fills the lower band under the steps
+const band = tall ? K.box(0, L.band, W, H - L.band, { cls: 'band', html: `<img src="${K.pub('r09/p04-kitchen-evening.webp')}">` }) : null;
+const bandImg = band && band.querySelector('img');
+const bandTag = tall ? K.demoTag('Concept image · AI-generated', W - 65 - 345, 1546) : null;
+const washes = [0, 1].map((i) => K.box(0, 0, 900, 900, { cls: 'wash', style: { background: ['rgba(255,236,206,.7)', 'rgba(223,255,90,.22)'][i] } }));
+const vis = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+const CHECK = (s, c) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="${c}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+// ---------- the three steps ----------
+const LS = tall ? 1.3 : 1; // logo tiles are larger in 9:16 (≥ 280 × 124)
+const logo = (f, h) => `<img src="${K.pub('platforms/' + f + '.svg')}" style="height:${Math.round(h * LS)}px">`;
+const BODY = [
+  `<div class="acc"><i class="a1">${CHECK(36, '#DFFF5A')}</i><div><b>Create your account</b><span class="s1">Free to start</span></div></div>
+   <div class="big-btn">Start free</div>`,
+  `<div class="tiles">
+     <div class="lt" data-k="woo">${logo('woocommerce', 40)}<div class="ck">${CHECK(26, '#1F1F1F')}</div></div>
+     <div class="lt dark">${logo('wix', 44)}</div>
+     <div class="lt">${logo('ikas', 36)}</div>
+     <div class="lt">${logo('shopware', 40)}</div>
+     <div class="lt">${logo('gumroad', 50)}<span class="gn">Gumroad</span></div>
+     <div class="lt"><span class="more">+ 5 more</span></div>
+   </div>
+   <div class="legal">Works with your own store on 10 store platforms. Logos belong to their owners. Shown to identify compatible platforms; no endorsement implied.</div>`,
+  `<div class="idea"><small>Describe your idea</small><div class="tx"><span class="typed"></span><span class="car"></span></div></div>
+   <div class="row3"><div class="plan">Plan it</div><span>Nothing is made or charged until you approve a quote.</span></div>`,
+];
+const TITLES = ['Sign up free', 'Connect your store', 'Describe your first product'];
+const steps = TITLES.map((t, i) => {
+  const el = K.box(L.acc[0], 0, L.acc[2], L.closed, { cls: 'step', html: `<div class="hd"><div class="num">${i + 1}</div><div class="ti">${t}</div><div class="ok">${CHECK(30, '#DFFF5A')}</div></div><div class="bd">${BODY[i]}</div>` });
+  return { el, bd: el.querySelector('.bd'), ok: el.querySelector('.ok') };
+});
+const s1sub = steps[0].el.querySelector('.s1');
+const s1btn = steps[0].el.querySelector('.big-btn');
+const ltiles = [...steps[1].el.querySelectorAll('.lt')];
+const wooCk = steps[1].el.querySelector('.ck');
+const typed = steps[2].el.querySelector('.typed');
+const caret = steps[2].el.querySelector('.car');
+const planBtn = steps[2].el.querySelector('.plan');
+const tag = K.demoTag('App screen · redrawn, sample data', L.acc[0], L.acc[1] - 46);
+const finger = K.box(0, 0, 86, 86, { cls: 'finger' });
+const ring = K.box(0, 0, 160, 160, { cls: 'ring' });
+
+// captions
+const mkCap = (html) => { const c = K.box(L.capX, L.capY, W - 2 * L.capX, null, { cls: 'cap', style: { fontSize: L.capFs + 'px' }, html }); return { c, w: [...c.querySelectorAll('.w')] }; };
+const ws = (s) => s.split(' ').map((x) => `<span class="w">${x} </span>`).join('');
+const cap = mkCap(ws('Start in') + '<br>' + '<span class="w"><em>three steps.</em></span>');
+
+const chip = K.box(L.chip[0], L.chip[1], null, null, { cls: 'fchip', style: { width: 'auto', height: '56px' }, html: '<b>START</b><i>·</i><span>1/1</span>' });
+const grain = K.box(0, 0, W, H, { cls: 'gr' });
+const end = K.endCard(END, { lift: tall ? 160 : 0, line: 'One sentence is enough to start.' });
+// the end card's welcome: a lime halo and concept products floating round the logo
+const ecTop = H * 0.3 - (tall ? 160 : 0), logoW = Math.min(W * 0.52, 560);
+const halo = K.box(W / 2 - 520, ecTop + logoW * 0.41 - 520, 1040, 1040, { cls: 'halo' });
+// the halo lives inside the end card, behind its logo (never over it)
+const ecBg = [...document.querySelectorAll('#stage > .abs')].find((e) => e.style.zIndex === '90');
+ecBg.insertBefore(halo, ecBg.firstChild);
+const prods = L.prods.map(([x, y, w, src, r]) => ({ el: K.box(x, y, w, null, { cls: 'prod', html: `<img src="${K.pub(src)}">` }), r }));
+const ptag = K.demoTag('Concept products · AI-generated', L.ptag[0], L.ptag[1]);
+ptag.style.zIndex = 93;
+
+function words(wl, T, a, out, st = 0.07) {
+  wl.forEach((w, i) => {
+    const p = K.p(T, a + i * st, a + 0.5 + i * st, E.outExpo);
+    const o = out ? K.p(T, out - 0.3, out, E.inCubic) : 0;
+    w.style.opacity = Math.min(1, p * 1.6) * (1 - o);
+    w.style.transform = `translateY(${(1 - p) * 60 - o * 30}px)`;
+    w.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  });
+}
+// the open amount of step i at T (0 closed … 1 open)
+const openness = (i, T) => K.p(T, OPEN[i], OPEN[i] + 0.6, E.inOutCubic) * (1 - (i < 2 ? K.p(T, OPEN[i + 1] - 0.05, OPEN[i + 1] + 0.55, E.inOutCubic) : 0));
+// where the fingertip taps for step i (an element inside the step)
+const target = (i) => (i === 0 ? s1btn : i === 1 ? ltiles[0] : planBtn);
+
+K.run({
+  id: 'I16', title: 'Start', dur: DUR, bpm: BPM, music: 'ov-good-morning-heaven', mood: 'bright', key: 'D', intro: 0, cover: 9.6,
+  series: 'R09', highlight: 'START · 1/1',
+  technique: 'The app’s real “Your setup” checklist redrawn large as a three-step accordion: each step opens as the narrator names it and a fingertip completes it — “Start free” makes the account, a few of the 10 store tiles appear with real unfiltered logos and WooCommerce connects, the real composer sentence types itself into “Describe your idea” beside “Plan it” — and each folds into a ticked row; the most inviting end card of the series, a lime halo with concept products floating round the logo',
+  caption: 'Start in three steps: sign up free, connect your store, and describe your first product in a sentence — you’ll see the quote before anything is made. Start free at makeandlist.com',
+  short: 'Sign up, connect, describe. Start free.',
+  vo: VO,
+  beats: ['0–2.5 s: “Start in three steps.” — three numbered rows (the real setup checklist, redrawn)', '2.5–4.9 s: 1 · sign up free — “Create your account”, a tap on “Start free”, ticked', '4.9–7.3 s: 2 · connect your store — WooCommerce, Wix, ikas, Shopware, Gumroad + 5 more (10 platforms); WooCommerce connects', '7.3–14.3 s: 3 · describe your first product — the sentence types into “Describe your idea”; “Nothing is made or charged until you approve a quote”; a tap on “Plan it”', '14.3–16 s: all three ticked, the composer still open', '16–18 s: end card — “Start free · makeandlist.com”, lime halo, concept products floating'],
+  cues: [[0.1, 'pop'], [0.6, 'pop'], [0.75, 'pop'], [0.9, 'pop'], [OPEN[0], 'swish'], [DONE[0], 'click'], [DONE[0] + 0.1, 'ding'], [OPEN[1], 'swish'], [5.25, 'pop'], [5.6, 'pop'], [DONE[1], 'click'], [DONE[1] + 0.1, 'ding'],
+    [OPEN[2], 'swish'], [TYPE[0], 'type'], [DONE[2], 'click'], [DONE[2] + 0.1, 'ding'], [14.9, 'sparkle'], [END, 'swish'], [END + 1.0, 'chime']],
+}, (T) => {
+  const f = Math.floor(T * 30);
+  grain.style.transform = `translate(${(seed(f) - 0.5) * 60}px, ${(seed(f + 7) - 0.5) * 60}px)`;
+  washes[0].style.transform = `translate(${W * 0.72 - 450 + Math.sin(T * 0.4) * 140}px, ${H * 0.28 - 450 + Math.cos(T * 0.35) * 90}px)`;
+  washes[1].style.transform = `translate(${W * 0.15 - 450 + Math.cos(T * 0.5) * 110}px, ${H * 0.72 - 450 + Math.sin(T * 0.45) * 90}px)`;
+  const cp = K.p(T, 0.05, 0.55, E.outExpo);
+  chip.style.opacity = cp * (1 - K.p(T, END - 0.15, END, E.linear)); chip.style.clipPath = `inset(0 ${(1 - cp) * 100}% 0 0 round 99px)`; chip.style.transform = `translateX(${(1 - cp) * -30}px)`;
+  words(cap.w, T, 0.25, null, 0.08);
+  if (band) {
+    band.style.opacity = 0.6 * K.p(T, 0.2, 1.2, E.linear);
+    bandImg.style.top = (-640 - T * 6) + 'px';
+    bandImg.style.transform = `scale(${1.04 + T * 0.003})`;
+    bandTag.style.opacity = K.p(T, 0.6, 1.0, E.linear) * (1 - K.p(T, END - 0.2, END, E.linear));
+  }
+
+  // ---------- accordion ----------
+  let y = L.acc[1];
+  steps.forEach((s, i) => {
+    const o = openness(i, T);
+    const h = K.lerp(L.closed, L.open[i], o);
+    const pin = K.p(T, 0.5 + i * 0.15, 1.1 + i * 0.15, E.outExpo);
+    s.el.style.top = y + 'px'; s.el.style.height = h + 'px';
+    s.el.style.opacity = Math.min(1, pin * 2);
+    s.el.style.transform = `perspective(1600px) translateY(${(1 - pin) * 120 + Math.sin(T * 0.8 + i) * 3}px) rotateX(${(1 - pin) * 12}deg) scale(${1 + 0.015 * o})`;
+    const done = T >= DONE[i] + 0.1;
+    s.el.className = 'abs step' + (o > 0.5 ? ' open' : '') + (done ? ' done' : '');
+    s.el.style.zIndex = 30 + (o > 0.5 ? 2 : 0);
+    s.bd.style.opacity = K.p(T, OPEN[i] + 0.3, OPEN[i] + 0.7, E.linear) * Math.min(1, o * 1.4);
+    s.bd.style.transform = `translateY(${(1 - o) * 30}px)`;
+    const okp = K.p(T, DONE[i] + 0.1, DONE[i] + 0.45, E.outBack);
+    s.ok.style.opacity = Math.min(1, okp * 2); s.ok.style.transform = `scale(${0.4 + 0.6 * okp})`;
+    y += h + L.gap;
+  });
+  // step 1: the account is made
+  const a1 = steps[0].el.querySelector('.a1'), a1on = T >= DONE[0] + 0.1;
+  a1.style.background = a1on ? '#1F1F1F' : 'transparent'; a1.style.boxShadow = a1on ? 'none' : 'inset 0 0 0 4px #B9B1A3';
+  a1.firstChild.style.opacity = a1on ? 1 : 0;
+  s1sub.textContent = T >= DONE[0] + 0.1 ? 'Done — this is your workspace.' : 'Free to start';
+  const p1 = Math.sin(Math.PI * K.p(T, DONE[0] - 0.08, DONE[0] + 0.16, E.linear));
+  s1btn.style.transform = `scale(${1 - 0.05 * p1})`;
+  // step 2: tiles land one by one; WooCommerce connects
+  ltiles.forEach((t, i) => {
+    const p = K.p(T, OPEN[1] + 0.35 + i * 0.12, OPEN[1] + 0.8 + i * 0.12, E.outBack);
+    t.style.opacity = Math.min(1, p * 2); t.style.transform = `translateY(${(1 - p) * 30}px) scale(${0.85 + 0.15 * p})`;
+  });
+  const wk = K.p(T, DONE[1] + 0.05, DONE[1] + 0.4, E.outBack);
+  wooCk.style.opacity = Math.min(1, wk * 2); wooCk.style.transform = `scale(${0.3 + 0.7 * wk})`;
+  ltiles[0].style.boxShadow = T >= DONE[1] + 0.05 ? '0 0 0 4px #1F1F1F' : '';
+  // step 3: the sentence types, then Plan it
+  const n = Math.round(SENT.length * K.p(T, TYPE[0], TYPE[1], E.linear));
+  typed.textContent = SENT.slice(0, n);
+  caret.style.opacity = (T > TYPE[0] - 0.4 && T < DONE[2] && (n < SENT.length || Math.floor(T * 2.5) % 2 === 0)) ? 1 : 0;
+  const p3 = Math.sin(Math.PI * K.p(T, DONE[2] - 0.08, DONE[2] + 0.16, E.linear));
+  planBtn.style.transform = `scale(${1 - 0.05 * p3})`;
+  tag.style.opacity = K.p(T, 0.6, 1.0, E.linear); vis(tag, T >= 0.5);
+
+  // the fingertip
+  const cur = T < (DONE[0] + DONE[1]) / 2 ? 0 : T < (DONE[1] + DONE[2]) / 2 ? 1 : 2;
+  const r = target(cur).getBoundingClientRect();
+  const fx = r.left + r.width * 0.62, fy = r.top + r.height * 0.58;
+  const fin = K.p(T, DONE[cur] - 0.7, DONE[cur] - 0.1, E.outCubic), fout = K.p(T, DONE[cur] + 0.25, DONE[cur] + 0.6, E.inCubic);
+  const fpress = Math.sin(Math.PI * K.p(T, DONE[cur] - 0.08, DONE[cur] + 0.16, E.linear));
+  finger.style.left = fx + (1 - fin) * 160 + fout * 140 + 'px'; finger.style.top = fy + (1 - fin) * 240 + fout * 200 + 'px';
+  finger.style.opacity = fin * (1 - fout); finger.style.transform = `scale(${1 - 0.15 * fpress})`;
+  vis(finger, fin > 0 && fout < 1);
+  const rp = K.p(T, DONE[cur], DONE[cur] + 0.5, E.outCubic);
+  ring.style.left = fx + 'px'; ring.style.top = fy + 'px';
+  ring.style.opacity = T >= DONE[cur] && T < DONE[cur] + 0.5 ? 1 - rp : 0; ring.style.transform = `scale(${0.3 + rp})`;
+
+  end(T);
+  // ---------- end card welcome ----------
+  const hp = K.p(T, END + 0.2, END + 1.0, E.outCubic);
+  halo.style.opacity = hp * (0.85 + 0.15 * Math.sin(T * 2.2));
+  halo.style.transform = `scale(${0.7 + 0.3 * hp + 0.03 * Math.sin(T * 1.6)})`;
+  vis(halo, T >= END + 0.15);
+  prods.forEach((pr, i) => {
+    const p = K.p(T, END + 0.5 + i * 0.12, END + 1.2 + i * 0.12, E.outBack);
+    pr.el.style.opacity = Math.min(1, p * 2);
+    pr.el.style.transform = `translateY(${(1 - p) * 60 + Math.sin(T * 1.4 + i * 1.7) * 8}px) rotate(${pr.r + Math.sin(T * 1.1 + i) * 2}deg) scale(${0.7 + 0.3 * p})`;
+    vis(pr.el, T >= END + 0.45);
+  });
+  ptag.style.opacity = K.p(T, END + 0.9, END + 1.2, E.linear); vis(ptag, T >= END + 0.85);
+});
+</script></body></html>
